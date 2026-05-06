@@ -7,7 +7,7 @@ export const usersApi = {
     return data;
   },
 
-  getAll: async (params?: { page?: number; limit?: number; search?: string; role?: string }) => {
+  getAll: async (params?: { page?: number; limit?: number; search?: string; role?: string; branchId?: string }) => {
     const { data } = await apiClient.get<PaginatedResponse<UserDetail>>('/users', { params });
     return data;
   },

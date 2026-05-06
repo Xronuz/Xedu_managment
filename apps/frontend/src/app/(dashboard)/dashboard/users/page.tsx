@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Search, Users, Loader2, Eye, EyeOff, UserCheck, GraduationCap, Heart, Ban, RotateCcw, Link2, Upload, FileText, AlertTriangle, BookOpen, Trash2 } from 'lucide-react';
+import { Plus, Search, Users, Loader2, Eye, EyeOff, UserCheck, GraduationCap, Heart, Ban, RotateCcw, Link2, Upload, FileText, AlertTriangle, BookOpen, Trash2, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -77,6 +77,11 @@ export default function UsersPage() {
   const csvInputRef = useRef<HTMLInputElement>(null);
   const [teacherSubjects, setTeacherSubjects] = useState<{ name: string; classId: string }[]>([]);
   const [subjectWarning, setSubjectWarning] = useState<string>('');
+  const [filterRole, setFilterRole] = useState('');
+  const [filterStatus, setFilterStatus] = useState('');
+  const [filterBranch, setFilterBranch] = useState('');
+  const [filterOpen, setFilterOpen] = useState(false);
+  const filterRef = useRef<HTMLDivElement>(null);
 
   // ── React Hook Form ──────────────────────────────────────────────────────────
   const {
@@ -94,11 +99,12 @@ export default function UsersPage() {
   const watchedRole = watch('role');
   const watchedBranchId = watch('branchId');
 
-  // Load branches for admin/director branch selection
+  // Load branches — always (for filter) when eligible role, also used in create modal
+  const canSeeBranches = ['super_admin', 'director', 'vice_principal'].includes(user?.role ?? '');
   const { data: branchesData } = useQuery({
     queryKey: ['branches', user?.schoolId],
     queryFn: () => branchesApi.getAll(),
-    enabled: open && !!user?.schoolId && ['super_admin', 'director', 'vice_principal'].includes(user?.role ?? ''),
+    enabled: !!user?.schoolId && canSeeBranches,
   });
   const branchesList = Array.isArray(branchesData) ? branchesData : (branchesData as any)?.data ?? [];
 
@@ -125,9 +131,19 @@ export default function UsersPage() {
   }, [search]);
 
   const { data, isLoading } = useQuery({
-    queryKey: ['users', page, debouncedSearch, activeBranchId],
-    queryFn: () => usersApi.getAll({ page, limit: 20, search: debouncedSearch || undefined }),
+    queryKey: ['users', page, debouncedSearch, activeBranchId, filterRole, filterStatus, filterBranch],
+    queryFn: () => usersApi.getAll({ page, limit: 20, search: debouncedSearch || undefined, role: filterRole || undefined, branchId: filterBranch || undefined }),
   });
+
+  // close filter dropdown on outside click
+  useEffect(() => {
+    if (!filterOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (filterRef.current && !filterRef.current.contains(e.target as Node)) setFilterOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [filterOpen]);
 
   // Load classes when modal opens
   const { data: classesData } = useQuery({
@@ -243,7 +259,12 @@ export default function UsersPage() {
   // Server-side search — filterlash backend da amalga oshiriladi
   const users = data?.data ?? [];
   const meta = data?.meta;
-  const filtered = users; // client-side filter olib tashlandi
+  const filtered = filterStatus
+    ? users.filter((u: any) => filterStatus === 'active' ? u.isActive : !u.isActive)
+    : users;
+  const activeCount = users.filter((u: any) => u.isActive).length;
+  const blockedCount = users.filter((u: any) => !u.isActive).length;
+  const hasFilter = !!(filterRole || filterStatus || filterBranch);
 
   if (isSuperAdmin) return null;
 
@@ -289,35 +310,153 @@ export default function UsersPage() {
         </Dialog>
       )}
 
-      <PageHeader
-        title="Foydalanuvchilar"
-        subtitle={`Jami: ${meta?.total ?? 0} ta`}
-        actions={
-          <>
-            <input ref={csvInputRef} type="file" accept=".csv,text/csv" className="hidden"
-              onChange={(e) => { const f = e.target.files?.[0]; if (f) { csvMutation.mutate(f); e.target.value = ''; } }} />
-            <Btn variant="secondary" size="sm" icon={csvMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-              onClick={() => csvInputRef.current?.click()} loading={csvMutation.isPending}>
-              CSV
-            </Btn>
-            <Btn variant="secondary" size="sm" icon={<Link2 className="h-4 w-4" />} onClick={() => window.location.href = '/dashboard/users/link-parent'}>
-              Bog&apos;lash
-            </Btn>
-            <Btn variant="secondary" size="sm" icon={<Upload className="h-4 w-4" />} onClick={() => setImportOpen(true)}>
-              Import
-            </Btn>
-            <Btn variant="primary" size="sm" icon={<Plus className="h-4 w-4" />} onClick={() => { setOpen(true); reset(); }}>
-              Qo&apos;shish
-            </Btn>
-          </>
-        }
-      />
+      {/* hidden CSV input */}
+      <input ref={csvInputRef} type="file" accept=".csv,text/csv" className="hidden"
+        onChange={(e) => { const f = e.target.files?.[0]; if (f) { csvMutation.mutate(f); e.target.value = ''; } }} />
 
-      <FilterBar
-        search={search}
-        onSearch={setSearch}
-        searchPlaceholder="Ism, email bo'yicha qidirish..."
-      />
+      {/* ── Stats chips ─────────────────────────────────────────────────────── */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-[12px] font-semibold"
+          style={{ background: '#F7F8F8', border: '1px solid rgba(0,0,0,0.06)', color: '#374151' }}>
+          <Users className="h-3.5 w-3.5 text-slate-400" />
+          Jami: <span style={{ color: DS.primary }}>{meta?.total ?? 0}</span>
+        </div>
+        <div className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-[12px] font-semibold"
+          style={{ background: '#DDF5EA', border: '1px solid rgba(15,123,83,0.15)', color: '#0F7B53' }}>
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
+          Aktiv: {activeCount}
+        </div>
+        <div className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-[12px] font-semibold"
+          style={{ background: '#FEF2F2', border: '1px solid rgba(239,68,68,0.15)', color: '#DC2626' }}>
+          <span className="h-1.5 w-1.5 rounded-full bg-red-400 inline-block" />
+          Bloklangan: {blockedCount}
+        </div>
+      </div>
+
+      {/* ── Toolbar: search + filter + actions ──────────────────────────────── */}
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Search */}
+        <div className="relative flex-1 min-w-[200px] max-w-[340px]">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(1); }}
+            placeholder="Ism, email bo'yicha qidirish..."
+            className="w-full h-[38px] pl-10 pr-4 text-[13px] rounded-[12px] outline-none transition-all"
+            style={{ background: '#F7F8F8', border: '1px solid rgba(0,0,0,0.06)', color: DS.text }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(15,123,83,0.4)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(15,123,83,0.08)'; }}
+            onBlur={e =>  { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';   e.currentTarget.style.boxShadow = 'none'; }}
+          />
+        </div>
+
+        {/* Filter dropdown */}
+        <div className="relative" ref={filterRef}>
+          <button
+            onClick={() => setFilterOpen(v => !v)}
+            className="inline-flex items-center gap-2 h-[38px] px-3.5 text-[12px] font-semibold rounded-[12px] transition-all"
+            style={{
+              background: hasFilter ? DS.primaryLight : '#F7F8F8',
+              border: `1px solid ${hasFilter ? 'rgba(15,123,83,0.25)' : 'rgba(0,0,0,0.06)'}`,
+              color: hasFilter ? DS.primary : '#374151',
+            }}
+          >
+            <SlidersHorizontal className="h-3.5 w-3.5" />
+            Filtr
+            {hasFilter && (
+              <span className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
+                style={{ background: DS.primary, color: '#fff' }}>
+                {(filterRole ? 1 : 0) + (filterStatus ? 1 : 0) + (filterBranch ? 1 : 0)}
+              </span>
+            )}
+            <ChevronDown className={`h-3.5 w-3.5 transition-transform ${filterOpen ? 'rotate-180' : ''}`} />
+          </button>
+
+          {filterOpen && (
+            <div className="absolute left-0 top-[calc(100%+6px)] z-50 w-[220px] rounded-[16px] bg-white p-3 space-y-3"
+              style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 12px 40px rgba(0,0,0,0.10)' }}>
+              {/* Role filter */}
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Rol</p>
+                <div className="space-y-0.5">
+                  {[{ value: '', label: 'Barchasi' }, ...ROLES].map(r => (
+                    <button key={r.value}
+                      onClick={() => { setFilterRole(r.value); setPage(1); }}
+                      className="w-full text-left px-2.5 py-1.5 rounded-[8px] text-[12px] font-medium transition-colors"
+                      style={{
+                        background: filterRole === r.value ? DS.primaryLight : 'transparent',
+                        color: filterRole === r.value ? DS.primary : '#374151',
+                      }}>
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Status filter */}
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Holat</p>
+                <div className="space-y-0.5">
+                  {[{ value: '', label: 'Barchasi' }, { value: 'active', label: 'Aktiv' }, { value: 'blocked', label: 'Bloklangan' }].map(s => (
+                    <button key={s.value}
+                      onClick={() => { setFilterStatus(s.value); setPage(1); }}
+                      className="w-full text-left px-2.5 py-1.5 rounded-[8px] text-[12px] font-medium transition-colors"
+                      style={{
+                        background: filterStatus === s.value ? DS.primaryLight : 'transparent',
+                        color: filterStatus === s.value ? DS.primary : '#374151',
+                      }}>
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {/* Branch filter */}
+              {branchesList.length > 0 && (
+                <div className="space-y-1.5">
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Filial</p>
+                  <div className="space-y-0.5 max-h-[140px] overflow-y-auto">
+                    {[{ id: '', name: 'Barchasi' }, ...branchesList].map((b: any) => (
+                      <button key={b.id}
+                        onClick={() => { setFilterBranch(b.id); setPage(1); }}
+                        className="w-full text-left px-2.5 py-1.5 rounded-[8px] text-[12px] font-medium transition-colors truncate"
+                        style={{
+                          background: filterBranch === b.id ? DS.primaryLight : 'transparent',
+                          color: filterBranch === b.id ? DS.primary : '#374151',
+                        }}>
+                        {b.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {/* Reset */}
+              {hasFilter && (
+                <button onClick={() => { setFilterRole(''); setFilterStatus(''); setFilterBranch(''); setPage(1); }}
+                  className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-[8px] text-[12px] font-semibold text-red-500 hover:bg-red-50 transition-colors">
+                  <X className="h-3.5 w-3.5" /> Tozalash
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Divider */}
+        <div className="h-6 w-px bg-slate-200 mx-0.5" />
+
+        {/* Action buttons */}
+        <Btn variant="secondary" size="sm" icon={csvMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          onClick={() => csvInputRef.current?.click()} loading={csvMutation.isPending}>
+          CSV
+        </Btn>
+        <Btn variant="secondary" size="sm" icon={<Link2 className="h-4 w-4" />} onClick={() => window.location.href = '/dashboard/users/link-parent'}>
+          Bog&apos;lash
+        </Btn>
+        <Btn variant="secondary" size="sm" icon={<Upload className="h-4 w-4" />} onClick={() => setImportOpen(true)}>
+          Import
+        </Btn>
+        <Btn variant="primary" size="sm" icon={<Plus className="h-4 w-4" />} onClick={() => { setOpen(true); reset(); }}>
+          Qo&apos;shish
+        </Btn>
+      </div>
 
       {isLoading ? (
         <div className="space-y-2">{[...Array(6)].map((_, i) => <Skeleton key={i} className="h-16 rounded-2xl" />)}</div>

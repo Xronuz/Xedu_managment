@@ -8,6 +8,7 @@ import {
   BookOpen, BookMarked, ClipboardCheck, Calendar, GraduationCap, ChevronRight,
   Rocket, X, Library, BookCopy, Hourglass, DollarSign, BarChart2, Coins,
   CalendarOff, ShieldAlert, CalendarCheck, Activity, Bell, ArrowUpRight, Server,
+  CalendarDays, Plus, Pencil, Trash2 as Trash2Icon,
 } from 'lucide-react';
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -33,6 +34,7 @@ import { coinsApi } from '@/lib/api/coins';
 import { kpiApi } from '@/lib/api/kpi';
 import { aiAnalyticsApi } from '@/lib/api/ai-analytics';
 import { branchesApi } from '@/lib/api/branches';
+import { academicCalendarApi, type AcademicEventType, type CreateAcademicEventPayload } from '@/lib/api/academic-calendar';
 import { leaveRequestsApi } from '@/lib/api/leave-requests';
 import { disciplineApi } from '@/lib/api/discipline';
 import { financeApi } from '@/lib/api/finance';
@@ -1083,6 +1085,167 @@ function SuperAdminServiceStatus() {
   );
 }
 
+// ── Academic Calendar Widget ───────────────────────────────────────────────────
+const AC_TYPES: { value: AcademicEventType; label: string; color: string }[] = [
+  { value: 'holiday',       label: "Ta'til",             color: '#22c55e' },
+  { value: 'exam_week',     label: 'Imtihon haftasi',    color: '#ef4444' },
+  { value: 'quarter_start', label: 'Chorak boshlanishi', color: '#3b82f6' },
+  { value: 'quarter_end',   label: 'Chorak tugashi',     color: '#8b5cf6' },
+  { value: 'school_event',  label: 'Maktab tadbiri',     color: '#f59e0b' },
+  { value: 'meeting',       label: "Yig'ilish",          color: '#06b6d4' },
+  { value: 'other',         label: 'Boshqa',             color: '#94a3b8' },
+];
+
+function AcademicCalendarWidget({ canEdit = false }: { canEdit?: boolean }) {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+  const [showForm, setShowForm] = useState(false);
+  const [editTarget, setEditTarget] = useState<any>(null);
+  const [form, setForm] = useState<CreateAcademicEventPayload>({
+    title: '', type: 'holiday', startDate: '', endDate: '', color: '#22c55e',
+  });
+
+  const now = new Date();
+  const from = now.toISOString().slice(0, 10);
+  const to   = new Date(now.getFullYear(), now.getMonth() + 2, 0).toISOString().slice(0, 10);
+
+  const { data: eventsRaw, isLoading } = useQuery({
+    queryKey: ['academic-calendar', 'widget', from, to],
+    queryFn: () => academicCalendarApi.getAll({ from, to }),
+    staleTime: 60_000,
+  });
+  const events: any[] = Array.isArray(eventsRaw) ? eventsRaw : (eventsRaw as any)?.data ?? [];
+  const upcoming = [...events]
+    .filter(e => new Date(e.endDate) >= now)
+    .sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
+    .slice(0, 6);
+
+  const createMut = useMutation({
+    mutationFn: () => academicCalendarApi.create(form),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['academic-calendar'] }); setShowForm(false); resetForm(); toast({ title: '✅ Tadbir qo\'shildi' }); },
+    onError: () => toast({ variant: 'destructive', title: 'Xato', description: 'Tadbir qo\'shishda xatolik' }),
+  });
+  const updateMut = useMutation({
+    mutationFn: () => academicCalendarApi.update(editTarget?.id, form),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['academic-calendar'] }); setShowForm(false); setEditTarget(null); toast({ title: '✅ Yangilandi' }); },
+  });
+  const deleteMut = useMutation({
+    mutationFn: (id: string) => academicCalendarApi.remove(id),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['academic-calendar'] }); toast({ title: '🗑️ O\'chirildi' }); },
+  });
+
+  const resetForm = () => setForm({ title: '', type: 'holiday', startDate: '', endDate: '', color: '#22c55e' });
+
+  const openEdit = (ev: any) => {
+    setEditTarget(ev);
+    setForm({ title: ev.title, type: ev.type, startDate: ev.startDate?.slice(0,10), endDate: ev.endDate?.slice(0,10), color: ev.color ?? '#22c55e' });
+    setShowForm(true);
+  };
+
+  const fmtDate = (d: string) => {
+    const dt = new Date(d);
+    return `${dt.getDate()} ${['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'][dt.getMonth()]}`;
+  };
+
+  return (
+    <PCard>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <CalendarDays className="h-4 w-4 text-primary" />
+          <p className="font-bold text-[14px]" style={{ color: C.text }}>Akademik Kalendar</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {canEdit && (
+            <button
+              onClick={() => { resetForm(); setEditTarget(null); setShowForm(true); }}
+              className="flex items-center gap-1 text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+            >
+              <Plus className="h-3.5 w-3.5" /> Qo'shish
+            </button>
+          )}
+          <Link href="/dashboard/education?tab=academic-calendar" className="text-xs font-semibold" style={{ color: C.primary }}>
+            Barchasi →
+          </Link>
+        </div>
+      </div>
+
+      {/* Quick add/edit form */}
+      {showForm && canEdit && (
+        <div className="mb-4 rounded-xl p-3 space-y-2.5 border" style={{ borderColor: C.border, background: C.bg }}>
+          <input
+            value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))}
+            placeholder="Tadbir nomi..."
+            className="w-full text-sm px-3 py-1.5 rounded-lg border outline-none bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+            style={{ borderColor: C.border }}
+          />
+          <div className="grid grid-cols-2 gap-2">
+            <input type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))}
+              className="text-xs px-2 py-1.5 rounded-lg border outline-none bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+              style={{ borderColor: C.border }} />
+            <input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))}
+              className="text-xs px-2 py-1.5 rounded-lg border outline-none bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+              style={{ borderColor: C.border }} />
+          </div>
+          <select value={form.type} onChange={e => {
+            const t = AC_TYPES.find(x => x.value === e.target.value);
+            setForm(f => ({ ...f, type: e.target.value as AcademicEventType, color: t?.color ?? f.color }));
+          }} className="w-full text-xs px-2 py-1.5 rounded-lg border outline-none bg-white dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100"
+            style={{ borderColor: C.border }}>
+            {AC_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+          <div className="flex justify-end gap-2">
+            <button onClick={() => { setShowForm(false); setEditTarget(null); resetForm(); }}
+              className="text-xs px-3 py-1.5 rounded-lg border" style={{ borderColor: C.border, color: C.muted }}>
+              Bekor
+            </button>
+            <button
+              onClick={() => editTarget ? updateMut.mutate() : createMut.mutate()}
+              disabled={!form.title || !form.startDate || !form.endDate || createMut.isPending || updateMut.isPending}
+              className="text-xs px-3 py-1.5 rounded-lg bg-primary text-white disabled:opacity-50"
+            >
+              {editTarget ? 'Saqlash' : 'Qo\'shish'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Events list */}
+      {isLoading ? (
+        <div className="space-y-2">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-8 rounded-lg" />)}</div>
+      ) : upcoming.length === 0 ? (
+        <p className="text-center py-6 text-xs" style={{ color: C.muted }}>Yaqin tadbirlar yo'q</p>
+      ) : (
+        <div className="space-y-1.5">
+          {upcoming.map((ev: any) => {
+            const tc = AC_TYPES.find(t => t.value === ev.type);
+            const color = ev.color ?? tc?.color ?? '#94a3b8';
+            return (
+              <div key={ev.id} className="group flex items-center gap-2.5 rounded-lg px-2.5 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: color }} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium truncate" style={{ color: C.text }}>{ev.title}</p>
+                  <p className="text-[11px]" style={{ color: C.muted }}>{fmtDate(ev.startDate)}{ev.startDate !== ev.endDate ? ` – ${fmtDate(ev.endDate)}` : ''}</p>
+                </div>
+                {canEdit && (
+                  <div className="hidden group-hover:flex items-center gap-1 shrink-0">
+                    <button onClick={() => openEdit(ev)} className="p-1 rounded hover:bg-slate-100 dark:hover:bg-slate-600 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                      <Pencil className="h-3 w-3" />
+                    </button>
+                    <button onClick={() => deleteMut.mutate(ev.id)} className="p-1 rounded hover:bg-red-50 dark:hover:bg-red-900/30 text-slate-400 hover:text-red-500">
+                      <Trash2Icon className="h-3 w-3" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </PCard>
+  );
+}
+
 function SuperAdminDashboard() {
   const { data: stats, isLoading }          = useQuery({ queryKey: ['super-admin', 'stats'],   queryFn: superAdminApi.getStats });
   const { data: schools, isLoading: schoolsLoading } = useQuery({ queryKey: ['super-admin', 'schools'], queryFn: () => superAdminApi.getSchools({ limit: 5 }) });
@@ -1246,6 +1409,9 @@ function LibrarianDashboard() {
           </div>
         )}
       </PCard>
+
+      {/* Akademik Kalendar — readonly ota-onalar uchun */}
+      <AcademicCalendarWidget canEdit={false} />
     </div>
   );
 }
@@ -1282,6 +1448,7 @@ function SchoolDashboard() {
   const subjectsCount = Array.isArray(subjectsData) ? subjectsData.length : 0;
 
   const dayLabel = new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' });
+  const calendarCanEdit = ['director', 'vice_principal', 'branch_admin'].includes(user?.role ?? '');
 
   return (
     <div className="space-y-6">
@@ -1445,6 +1612,9 @@ function SchoolDashboard() {
           )}
         </PCard>
       </div>
+
+      {/* Akademik Kalendar — rol asosida CRUD yoki readonly */}
+      <AcademicCalendarWidget canEdit={calendarCanEdit} />
     </div>
   );
 }
@@ -1729,7 +1899,8 @@ function DirectorDashboard() {
         </a>
       </div>
 
-      {/* ── Filiallar bo'yicha statistika (faqat Director) ── */}
+      {/* ── Filiallar + Akademik Kalendar (2 kolonna) ── */}
+      <div className="grid gap-4 md:grid-cols-2">
       <PCard>
         <div className="flex items-center justify-between mb-5">
           <div>
@@ -1789,6 +1960,10 @@ function DirectorDashboard() {
           </div>
         )}
       </PCard>
+
+      {/* Akademik Kalendar widget — direktor CRUD bilan */}
+      <AcademicCalendarWidget canEdit={true} />
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Leave approval */}
@@ -1932,6 +2107,7 @@ function DirectorDashboard() {
           ]} />
         </PCard>
       </div>
+
     </div>
   );
 }

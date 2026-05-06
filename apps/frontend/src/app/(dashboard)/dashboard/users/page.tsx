@@ -314,29 +314,10 @@ export default function UsersPage() {
       <input ref={csvInputRef} type="file" accept=".csv,text/csv" className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) { csvMutation.mutate(f); e.target.value = ''; } }} />
 
-      {/* ── Stats chips ─────────────────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 flex-wrap">
-        <div className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-[12px] font-semibold"
-          style={{ background: '#F7F8F8', border: '1px solid rgba(0,0,0,0.06)', color: '#374151' }}>
-          <Users className="h-3.5 w-3.5 text-slate-400" />
-          Jami: <span style={{ color: DS.primary }}>{meta?.total ?? 0}</span>
-        </div>
-        <div className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-[12px] font-semibold"
-          style={{ background: '#DDF5EA', border: '1px solid rgba(15,123,83,0.15)', color: '#0F7B53' }}>
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
-          Aktiv: {activeCount}
-        </div>
-        <div className="flex items-center gap-1.5 rounded-[10px] px-3 py-1.5 text-[12px] font-semibold"
-          style={{ background: '#FEF2F2', border: '1px solid rgba(239,68,68,0.15)', color: '#DC2626' }}>
-          <span className="h-1.5 w-1.5 rounded-full bg-red-400 inline-block" />
-          Bloklangan: {blockedCount}
-        </div>
-      </div>
-
-      {/* ── Toolbar: search + filter + actions ──────────────────────────────── */}
+      {/* ── Toolbar: search + filter + stats + actions — one row ────────────── */}
       <div className="flex items-center gap-2 flex-wrap">
         {/* Search */}
-        <div className="relative flex-1 min-w-[200px] max-w-[340px]">
+        <div className="relative min-w-[160px] max-w-[272px] w-[272px]">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
           <input
             type="text"
@@ -439,23 +420,36 @@ export default function UsersPage() {
           )}
         </div>
 
-        {/* Divider */}
-        <div className="h-6 w-px bg-slate-200 mx-0.5" />
+        {/* Stats — compact single chip */}
+        <div className="flex items-center gap-2 rounded-[10px] px-3 py-1.5 text-[12px] font-semibold shrink-0"
+          style={{ background: '#F7F8F8', border: '1px solid rgba(0,0,0,0.06)', color: '#374151' }}>
+          <Users className="h-3.5 w-3.5 text-slate-400" />
+          <span style={{ color: DS.primary }}>{meta?.total ?? 0}</span>
+          <span className="text-slate-300">·</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
+          <span style={{ color: '#0F7B53' }}>{activeCount}</span>
+          <span className="text-slate-300">·</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-red-400 inline-block" />
+          <span style={{ color: '#DC2626' }}>{blockedCount}</span>
+        </div>
 
-        {/* Action buttons */}
-        <Btn variant="secondary" size="sm" icon={csvMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
-          onClick={() => csvInputRef.current?.click()} loading={csvMutation.isPending}>
-          CSV
-        </Btn>
-        <Btn variant="secondary" size="sm" icon={<Link2 className="h-4 w-4" />} onClick={() => window.location.href = '/dashboard/users/link-parent'}>
-          Bog&apos;lash
-        </Btn>
-        <Btn variant="secondary" size="sm" icon={<Upload className="h-4 w-4" />} onClick={() => setImportOpen(true)}>
-          Import
-        </Btn>
-        <Btn variant="primary" size="sm" icon={<Plus className="h-4 w-4" />} onClick={() => { setOpen(true); reset(); }}>
-          Qo&apos;shish
-        </Btn>
+        {/* Actions pushed to right */}
+        <div className="ml-auto flex items-center gap-2 shrink-0">
+          <div className="h-6 w-px bg-slate-200" />
+          <Btn variant="secondary" size="sm" icon={csvMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            onClick={() => csvInputRef.current?.click()} loading={csvMutation.isPending}>
+            CSV
+          </Btn>
+          <Btn variant="secondary" size="sm" icon={<Link2 className="h-4 w-4" />} onClick={() => window.location.href = '/dashboard/users/link-parent'}>
+            Bog&apos;lash
+          </Btn>
+          <Btn variant="secondary" size="sm" icon={<Upload className="h-4 w-4" />} onClick={() => setImportOpen(true)}>
+            Import
+          </Btn>
+          <Btn variant="primary" size="sm" icon={<Plus className="h-4 w-4" />} onClick={() => { setOpen(true); reset(); }}>
+            Qo&apos;shish
+          </Btn>
+        </div>
       </div>
 
       {isLoading ? (

@@ -3,9 +3,9 @@
   "configurations": [
     {
       "name": "frontend",
-      "runtimeExecutable": "/Users/xronuz/.nvm/versions/node/v22.21.0/bin/node",
-      "runtimeArgs": ["node_modules/next/dist/bin/next", "dev", "--port", "3000"],
-      "cwd": "/Users/xronuz/Desktop/XEDU-platform/School-managementSYS/apps/frontend",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "apps/frontend",
       "port": 3000,
       "autoPort": false
     }

@@ -34,11 +34,11 @@ const SECTION_MAP: Record<string, string> = {
 
   // Staff
   '/dashboard/staff':             '/dashboard/staff',
-  '/dashboard/users':             '/dashboard/staff',
-  '/dashboard/branches':          '/dashboard/staff',
+  '/dashboard/users':             '/dashboard/users',
+  '/dashboard/branches':          '/dashboard/branches',
   '/dashboard/crm':               '/dashboard/staff',
-  '/dashboard/leave-requests':    '/dashboard/staff',
-  '/dashboard/discipline':        '/dashboard/staff',
+  '/dashboard/leave-requests':    '/dashboard/leave-requests',
+  '/dashboard/discipline':        '/dashboard/discipline',
   '/dashboard/meetings':          '/dashboard/staff',
 
   // Finance
@@ -313,7 +313,7 @@ function getActiveSection(pathname: string): string {
   for (const route of sorted) {
     if (pathname === route || pathname.startsWith(route + '/')) return SECTION_MAP[route];
   }
-  return '/dashboard';
+  return '';
 }
 
 function NavLink({ item, active, expanded }: { item: NavItem; active: boolean; expanded: boolean }) {
@@ -324,14 +324,18 @@ function NavLink({ item, active, expanded }: { item: NavItem; active: boolean; e
       title={!expanded ? item.label : undefined}
       className={cn(
         'relative flex items-center gap-3 rounded-xl transition-all duration-150',
-        expanded ? 'h-[42px] w-full px-3' : 'h-[42px] w-[42px] justify-center',
+        expanded ? 'h-[42px] w-full px-3' : 'h-[44px] w-[44px] justify-center',
         active
           ? 'bg-emerald-50 dark:bg-emerald-900/25 text-emerald-700 dark:text-emerald-400 shadow-sm'
           : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-slate-700 dark:hover:text-slate-200',
       )}
     >
+      {/* collapsed active indicator — left pill */}
+      {!expanded && active && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-emerald-500" />
+      )}
       <Icon
-        style={{ width: 18, height: 18 }}
+        style={{ width: 19, height: 19 }}
         className={cn('shrink-0', active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500')}
       />
       {expanded && (
@@ -381,7 +385,7 @@ export function Sidebar() {
       className={cn(
         'flex h-full shrink-0 flex-col transition-all duration-300 ease-in-out',
         'bg-white dark:bg-slate-900',
-        expanded ? 'w-[208px]' : 'w-[52px]',
+        expanded ? 'w-[208px]' : 'w-[60px]',
       )}
     >
       {/* Logo row */}
@@ -432,7 +436,9 @@ export function Sidebar() {
             <SectionLabel label="Asosiy" expanded={expanded} />
             <div className="flex flex-col gap-0.5">
               {MAIN_ITEMS.map((item) => {
-                const active = item.exact ? pathname === item.href : activeSection === item.href;
+                const active = item.exact
+                  ? pathname === item.href
+                  : activeSection === item.href || pathname.startsWith(item.href + '/');
                 return <NavLink key={item.href} item={item} active={active} expanded={expanded} />;
               })}
             </div>
@@ -445,7 +451,9 @@ export function Sidebar() {
             <SectionLabel label="Mening bo'limim" expanded={expanded} />
             <div className="flex flex-col gap-0.5">
               {PORTAL_ITEMS.map((item) => {
-                const active = item.exact ? pathname === item.href : activeSection === item.href;
+                const active = item.exact
+                  ? pathname === item.href
+                  : activeSection === item.href || pathname.startsWith(item.href + '/');
                 return <NavLink key={item.href} item={item} active={active} expanded={expanded} />;
               })}
             </div>
@@ -458,7 +466,9 @@ export function Sidebar() {
             <SectionLabel label="Tizim" expanded={expanded} />
             <div className="flex flex-col gap-0.5">
               {SYSTEM_ITEMS.map((item) => {
-                const active = item.exact ? pathname === item.href : activeSection === item.href;
+                const active = item.exact
+                  ? pathname === item.href
+                  : activeSection === item.href || pathname.startsWith(item.href + '/');
                 return <NavLink key={item.href} item={item} active={active} expanded={expanded} />;
               })}
             </div>

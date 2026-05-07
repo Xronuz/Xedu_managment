@@ -42,11 +42,11 @@ export function PageHeader({ title, subtitle, actions, className }: PageHeaderPr
   return (
     <div className={cn('flex items-center justify-between gap-4', className)}>
       <div className="min-w-0">
-        <h1 className="text-[26px] font-bold tracking-tight leading-tight truncate" style={{ color: DS.text }}>
+        <h1 className="text-[26px] font-bold tracking-tight leading-tight truncate text-slate-900 dark:text-slate-100">
           {title}
         </h1>
         {subtitle && (
-          <p className="text-[13px] mt-0.5 font-medium" style={{ color: DS.muted }}>
+          <p className="text-[13px] mt-0.5 font-medium text-slate-500 dark:text-slate-400">
             {subtitle}
           </p>
         )}

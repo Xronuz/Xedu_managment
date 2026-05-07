@@ -37,13 +37,7 @@ export function SectionTabs({ tabs, defaultTab }: SectionTabsProps) {
   };
 
   return (
-    <div
-      className="mb-6 inline-flex items-center gap-1 overflow-x-auto no-scrollbar rounded-[18px] p-1.5"
-      style={{
-        background: 'rgba(0,0,0,0.04)',
-        boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)',
-      }}
-    >
+    <div className="mb-6 inline-flex items-center gap-1 overflow-x-auto no-scrollbar rounded-[18px] p-1.5 bg-black/[0.04] dark:bg-white/[0.06] shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1px_3px_rgba(0,0,0,0.30)]">
       {visibleTabs.map((tab) => {
         const active = tab.id === activeTab;
         return (
@@ -54,10 +48,9 @@ export function SectionTabs({ tabs, defaultTab }: SectionTabsProps) {
               'whitespace-nowrap rounded-[14px] px-5 py-2',
               'text-[13px] font-semibold transition-all duration-200',
               active
-                ? 'bg-white text-slate-800 shadow-sm'
-                : 'text-slate-500 hover:text-slate-700 hover:bg-white/40',
+                ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-[0_1px_4px_rgba(0,0,0,0.10)] dark:shadow-[0_1px_4px_rgba(0,0,0,0.40)]'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/40 dark:hover:bg-white/10',
             )}
-            style={active ? { boxShadow: '0 1px 4px rgba(0,0,0,0.10)' } : undefined}
           >
             {tab.label}
           </button>

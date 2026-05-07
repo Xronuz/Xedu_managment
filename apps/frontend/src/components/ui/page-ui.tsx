@@ -76,7 +76,7 @@ export function PCard({ children, className, style, padding = 'md', hoverable, o
     <div
       onClick={onClick}
       className={cn(
-        'rounded-[24px] bg-white',
+        'rounded-[24px] bg-white dark:bg-slate-800/50',
         pad,
         hoverable && 'cursor-pointer transition-all duration-200 hover:-translate-y-[2px] hover:shadow-[0_20px_48px_rgba(0,0,0,0.08)]',
         className,
@@ -141,10 +141,10 @@ export function Btn({
   const sizes = { sm: 'h-8 px-3 text-[12px]', md: 'h-[42px] px-4 text-[13px]', lg: 'h-12 px-6 text-[14px]' };
   const variants: Record<BtnVariant, string> = {
     primary:   'bg-[#0F7B53] text-white hover:bg-[#0d6b48] active:scale-[0.98] shadow-sm',
-    secondary: 'bg-white text-slate-700 border border-[rgba(0,0,0,0.08)] hover:bg-slate-50 hover:border-[rgba(0,0,0,0.12)]',
-    ghost:     'bg-transparent text-slate-600 hover:bg-slate-100',
-    danger:    'bg-red-50 text-red-600 border border-red-200 hover:bg-red-100',
-    soft:      'bg-[#DDF5EA] text-[#0F7B53] hover:bg-[#c8f0dc]',
+    secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-black/[0.08] dark:border-white/[0.08] hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-black/[0.12] dark:hover:border-white/[0.12]',
+    ghost:     'bg-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
+    danger:    'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30',
+    soft:      'bg-[#DDF5EA] dark:bg-emerald-900/30 text-[#0F7B53] dark:text-emerald-400 hover:bg-[#c8f0dc] dark:hover:bg-emerald-900/50',
   };
   return (
     <button
@@ -162,13 +162,13 @@ export function Btn({
 
 // ─── StatusBadge ─────────────────────────────────────────────────────────────
 type StatusVariant = 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'violet';
-const STATUS_STYLES: Record<StatusVariant, { bg: string; text: string }> = {
-  success: { bg: '#DDF5EA', text: '#0F7B53' },
-  warning: { bg: '#FEF3C7', text: '#D97706' },
-  danger:  { bg: '#FEE2E2', text: '#DC2626' },
-  info:    { bg: '#DBEAFE', text: '#2563EB' },
-  neutral: { bg: '#F3F4F6', text: '#6B7280' },
-  violet:  { bg: '#EDE9FE', text: '#7C3AED' },
+const STATUS_CLASSES: Record<StatusVariant, string> = {
+  success: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+  warning: 'bg-amber-50  dark:bg-amber-900/30  text-amber-700  dark:text-amber-400',
+  danger:  'bg-red-50    dark:bg-red-900/30    text-red-600    dark:text-red-400',
+  info:    'bg-blue-50   dark:bg-blue-900/30   text-blue-700   dark:text-blue-400',
+  neutral: 'bg-slate-100 dark:bg-slate-700     text-slate-600  dark:text-slate-300',
+  violet:  'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400',
 };
 interface StatusBadgeProps {
   variant?: StatusVariant;
@@ -176,12 +176,8 @@ interface StatusBadgeProps {
   className?: string;
 }
 export function StatusBadge({ variant = 'neutral', children, className }: StatusBadgeProps) {
-  const s = STATUS_STYLES[variant];
   return (
-    <span
-      className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide', className)}
-      style={{ background: s.bg, color: s.text }}
-    >
+    <span className={cn('inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide', STATUS_CLASSES[variant], className)}>
       {children}
     </span>
   );
@@ -204,10 +200,7 @@ export function TableShell({ children, className }: { children: React.ReactNode;
 export function THead({ children }: { children: React.ReactNode }) {
   return (
     <thead>
-      <tr
-        className="border-b"
-        style={{ borderColor: 'rgba(0,0,0,0.05)', background: '#FAFAFA' }}
-      >
+      <tr className="border-b border-black/[0.05] dark:border-white/[0.06] bg-slate-50 dark:bg-slate-800/60">
         {children}
       </tr>
     </thead>
@@ -216,10 +209,7 @@ export function THead({ children }: { children: React.ReactNode }) {
 
 export function TH({ children, className }: { children?: React.ReactNode; className?: string }) {
   return (
-    <th
-      className={cn('px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.1em] whitespace-nowrap', className)}
-      style={{ color: DS.muted }}
-    >
+    <th className={cn('px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.1em] whitespace-nowrap text-slate-500 dark:text-slate-400', className)}>
       {children}
     </th>
   );
@@ -234,13 +224,10 @@ export function TR({ children, onClick, className }: { children: React.ReactNode
     <tr
       onClick={onClick}
       className={cn(
-        'border-b transition-colors duration-100',
-        onClick && 'cursor-pointer',
+        'border-b border-black/[0.04] dark:border-white/[0.05] transition-colors duration-100',
+        onClick && 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/40',
         className,
       )}
-      style={{ borderColor: 'rgba(0,0,0,0.04)' }}
-      onMouseEnter={e => { if (onClick) (e.currentTarget as HTMLElement).style.background = '#FAFBFA'; }}
-      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = ''; }}
     >
       {children}
     </tr>
@@ -249,7 +236,7 @@ export function TR({ children, onClick, className }: { children: React.ReactNode
 
 export function TD({ children, className }: { children?: React.ReactNode; className?: string }) {
   return (
-    <td className={cn('px-5 py-3.5 align-middle', className)} style={{ color: DS.text }}>
+    <td className={cn('px-5 py-3.5 align-middle text-slate-900 dark:text-slate-100', className)}>
       {children}
     </td>
   );
@@ -273,8 +260,8 @@ export function AvatarCell({ name, subtitle, size = 36 }: { name: string; subtit
         {initials}
       </div>
       <div className="min-w-0">
-        <p className="font-semibold truncate text-[13px]" style={{ color: DS.text }}>{name}</p>
-        {subtitle && <p className="text-[11px] truncate mt-0.5" style={{ color: DS.muted }}>{subtitle}</p>}
+        <p className="font-semibold truncate text-[13px] text-slate-900 dark:text-slate-100">{name}</p>
+        {subtitle && <p className="text-[11px] truncate mt-0.5 text-slate-500 dark:text-slate-400">{subtitle}</p>}
       </div>
     </div>
   );
@@ -291,13 +278,13 @@ export function EmptyCard({ icon, title, description, action }: EmptyCardProps) 
   return (
     <PCard className="flex flex-col items-center justify-center py-16 text-center gap-3">
       {icon
-        ? <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-1" style={{ background: DS.primaryLight }}>
-            <span style={{ color: DS.primary }}>{icon}</span>
+        ? <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-1 bg-emerald-50 dark:bg-emerald-900/30">
+            <span className="text-emerald-600 dark:text-emerald-400">{icon}</span>
           </div>
         : <Inbox className="h-10 w-10 opacity-25 mb-1" />
       }
-      <p className="font-semibold text-[15px]" style={{ color: DS.text }}>{title}</p>
-      {description && <p className="text-[13px] max-w-xs" style={{ color: DS.muted }}>{description}</p>}
+      <p className="font-semibold text-[15px] text-slate-800 dark:text-slate-200">{title}</p>
+      {description && <p className="text-[13px] max-w-xs text-slate-500 dark:text-slate-400">{description}</p>}
       {action && <div className="mt-2">{action}</div>}
     </PCard>
   );

@@ -21,7 +21,7 @@ import { branchesApi } from '@/lib/api/branches';
 import { subjectsApi } from '@/lib/api/subjects';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth.store';
-import { getInitials, getRoleLabel } from '@/lib/utils';
+import { getInitials, getRoleLabel, cn } from '@/lib/utils';
 import { ImportDialog } from '@/components/import/import-dialog';
 
 // ── Zod schema ────────────────────────────────────────────────────────────────
@@ -324,10 +324,12 @@ export default function UsersPage() {
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="Ism, email bo'yicha qidirish..."
-            className="w-full h-9 pl-10 pr-4 text-[12px] rounded-[12px] outline-none transition-all"
-            style={{ background: '#F7F8F8', border: '1px solid rgba(0,0,0,0.06)', color: DS.text }}
-            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(15,123,83,0.4)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(15,123,83,0.08)'; }}
-            onBlur={e =>  { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';   e.currentTarget.style.boxShadow = 'none'; }}
+            className="w-full h-9 pl-10 pr-4 text-[12px] rounded-[12px] outline-none transition-all
+              bg-slate-50 dark:bg-slate-800
+              border border-black/[0.06] dark:border-white/[0.08]
+              text-slate-900 dark:text-slate-100
+              placeholder:text-slate-400 dark:placeholder:text-slate-500
+              focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/10"
           />
         </div>
 
@@ -335,12 +337,12 @@ export default function UsersPage() {
         <div className="relative" ref={filterRef}>
           <button
             onClick={() => setFilterOpen(v => !v)}
-            className="inline-flex items-center gap-2 h-9 px-3.5 text-[12px] font-semibold rounded-[12px] transition-all"
-            style={{
-              background: hasFilter ? DS.primaryLight : '#F7F8F8',
-              border: `1px solid ${hasFilter ? 'rgba(15,123,83,0.25)' : 'rgba(0,0,0,0.06)'}`,
-              color: hasFilter ? DS.primary : '#374151',
-            }}
+            className={cn(
+              'inline-flex items-center gap-2 h-9 px-3.5 text-[12px] font-semibold rounded-[12px] transition-all border',
+              hasFilter
+                ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500/25 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-400'
+                : 'bg-slate-50 dark:bg-slate-800 border-black/[0.06] dark:border-white/[0.08] text-slate-700 dark:text-slate-200'
+            )}
           >
             <SlidersHorizontal className="h-3.5 w-3.5" />
             Filtr
@@ -354,11 +356,10 @@ export default function UsersPage() {
           </button>
 
           {filterOpen && (
-            <div className="absolute left-0 top-[calc(100%+6px)] z-50 w-[220px] rounded-[16px] bg-white p-3 space-y-3"
-              style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 12px 40px rgba(0,0,0,0.10)' }}>
+            <div className="absolute left-0 top-[calc(100%+6px)] z-50 w-[220px] rounded-[16px] bg-white dark:bg-slate-800 p-3 space-y-3 border border-black/[0.07] dark:border-white/[0.08] shadow-[0_12px_40px_rgba(0,0,0,0.10)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.40)]">
               {/* Role filter */}
               <div className="space-y-1.5">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Rol</p>
+                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Rol</p>
                 <div className="space-y-0.5">
                   {[{ value: '', label: 'Barchasi' }, ...ROLES].map(r => (
                     <button key={r.value}
@@ -375,7 +376,7 @@ export default function UsersPage() {
               </div>
               {/* Status filter */}
               <div className="space-y-1.5">
-                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Holat</p>
+                <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Holat</p>
                 <div className="space-y-0.5">
                   {[{ value: '', label: 'Barchasi' }, { value: 'active', label: 'Aktiv' }, { value: 'blocked', label: 'Bloklangan' }].map(s => (
                     <button key={s.value}
@@ -393,7 +394,7 @@ export default function UsersPage() {
               {/* Branch filter */}
               {branchesList.length > 0 && (
                 <div className="space-y-1.5">
-                  <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Filial</p>
+                  <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Filial</p>
                   <div className="space-y-0.5 max-h-[140px] overflow-y-auto">
                     {[{ id: '', name: 'Barchasi' }, ...branchesList].map((b: any) => (
                       <button key={b.id}
@@ -421,21 +422,20 @@ export default function UsersPage() {
         </div>
 
         {/* Stats — compact single chip */}
-        <div className="flex items-center gap-2 rounded-[12px] px-3 h-9 text-[12px] font-semibold shrink-0"
-          style={{ background: '#F7F8F8', border: '1px solid rgba(0,0,0,0.06)', color: '#374151' }}>
-          <Users className="h-3.5 w-3.5 text-slate-400" />
-          <span style={{ color: DS.primary }}>{meta?.total ?? 0}</span>
-          <span className="text-slate-300">·</span>
+        <div className="flex items-center gap-2 rounded-[12px] px-3 h-9 text-[12px] font-semibold shrink-0 bg-slate-50 dark:bg-slate-800 border border-black/[0.06] dark:border-white/[0.08] text-slate-700 dark:text-slate-200">
+          <Users className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
+          <span className="text-emerald-600 dark:text-emerald-400">{meta?.total ?? 0}</span>
+          <span className="text-slate-300 dark:text-slate-600">·</span>
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
-          <span style={{ color: '#0F7B53' }}>{activeCount}</span>
-          <span className="text-slate-300">·</span>
+          <span className="text-emerald-600 dark:text-emerald-400">{activeCount}</span>
+          <span className="text-slate-300 dark:text-slate-600">·</span>
           <span className="h-1.5 w-1.5 rounded-full bg-red-400 inline-block" />
-          <span style={{ color: '#DC2626' }}>{blockedCount}</span>
+          <span className="text-red-600 dark:text-red-400">{blockedCount}</span>
         </div>
 
         {/* Actions pushed to right */}
         <div className="ml-auto flex items-center gap-2 shrink-0">
-          <div className="h-9 w-px bg-slate-200" />
+          <div className="h-9 w-px bg-slate-200 dark:bg-slate-700" />
           <Btn variant="secondary" size="sm" className="h-9 rounded-[12px]" icon={csvMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
             onClick={() => csvInputRef.current?.click()} loading={csvMutation.isPending}>
             CSV

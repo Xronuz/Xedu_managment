@@ -36,7 +36,7 @@ function RiskDistributionCard({ label, count, total, color }: { label: string; c
         <span className="text-muted-foreground">{label}</span>
         <span className="font-semibold">{count} ({pct}%)</span>
       </div>
-      <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
+      <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
         <div className={cn('h-full rounded-full transition-all', color)} style={{ width: `${pct}%` }} />
       </div>
     </div>

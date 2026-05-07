@@ -279,15 +279,17 @@ export default function AttendancePage() {
   const headerActions = (
     <div className="flex items-center gap-2 flex-wrap">
       {/* View toggle pill */}
-      <div className="inline-flex items-center gap-1 rounded-[14px] p-1" style={{ background: 'rgba(0,0,0,0.05)' }}>
+      <div className="inline-flex items-center gap-1 rounded-[14px] p-1 bg-black/[0.05] dark:bg-white/[0.06] shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1px_3px_rgba(0,0,0,0.30)]">
         {(['mark', 'history'] as const).map(v => (
           <button
             key={v}
             onClick={() => setView(v)}
-            className="whitespace-nowrap rounded-[10px] px-4 py-1.5 text-[13px] font-semibold transition-all duration-200"
-            style={view === v
-              ? { background: '#fff', color: DS.text, boxShadow: '0 1px 4px rgba(0,0,0,0.10)' }
-              : { color: DS.muted }}
+            className={cn(
+              'whitespace-nowrap rounded-[10px] px-4 py-1.5 text-[13px] font-semibold transition-all duration-200',
+              view === v
+                ? 'bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 shadow-[0_1px_4px_rgba(0,0,0,0.10)] dark:shadow-[0_1px_4px_rgba(0,0,0,0.40)]'
+                : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/50 dark:hover:bg-white/10',
+            )}
           >
             {v === 'mark' ? 'Belgilash' : 'Tarix'}
           </button>

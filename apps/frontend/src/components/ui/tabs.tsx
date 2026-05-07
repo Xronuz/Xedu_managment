@@ -18,8 +18,8 @@ const TabsList = React.forwardRef<
     ref={ref}
     className={cn(
       'inline-flex h-11 items-center justify-center gap-1 p-1',
-      'rounded-2xl bg-white dark:bg-slate-900',
-      'shadow-pill',
+      'rounded-2xl bg-black/[0.04] dark:bg-white/[0.06]',
+      'shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1px_3px_rgba(0,0,0,0.30)]',
       'text-slate-500 dark:text-slate-400',
       className,
     )}
@@ -45,11 +45,12 @@ const TabsTrigger = React.forwardRef<
       'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-0',
       'disabled:pointer-events-none disabled:opacity-50',
       // Passive
-      'hover:text-slate-900 dark:hover:text-white',
-      // Active — dark pill (Phase 15 emphasis)
-      'data-[state=active]:bg-slate-900 data-[state=active]:text-white',
-      'data-[state=active]:shadow-sm data-[state=active]:font-semibold',
-      'dark:data-[state=active]:bg-white dark:data-[state=active]:text-slate-900',
+      'hover:text-slate-700 dark:hover:text-slate-200 hover:bg-white/60 dark:hover:bg-white/10',
+      // Active
+      'data-[state=active]:bg-white dark:data-[state=active]:bg-slate-700',
+      'data-[state=active]:text-slate-800 dark:data-[state=active]:text-slate-100',
+      'data-[state=active]:shadow-[0_1px_4px_rgba(0,0,0,0.10)] dark:data-[state=active]:shadow-[0_1px_4px_rgba(0,0,0,0.40)]',
+      'data-[state=active]:font-semibold',
       className,
     )}
     {...props}

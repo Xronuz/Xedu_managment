@@ -18,7 +18,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
-import { ROUTE_PERMISSIONS } from '@/config/permissions';
+import { ROUTE_PERMISSIONS, SIDEBAR_PERMISSIONS } from '@/config/permissions';
 
 interface NavItem {
   label: string;
@@ -98,8 +98,76 @@ const navGroups: NavGroup[] = [
 const adminItems: NavItem[] = [
   { label: 'Maktablar', href: '/dashboard/schools', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/schools'] },
   { label: 'Filiallar', href: '/dashboard/branches', icon: Building2, roles: ROUTE_PERMISSIONS['/dashboard/branches'] },
-  { label: 'Audit log', href: '/dashboard/audit-log', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/audit-log'] },
+  { label: 'Audit log', href: '/dashboard/audit-log', icon: Shield, roles: SIDEBAR_PERMISSIONS['Audit log'] },
   { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
+];
+
+// Director-only mobile nav grouping
+const DIRECTOR_MOBILE_GROUPS: NavGroup[] = [
+  {
+    title: 'Global',
+    items: [
+      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ALL_SCHOOL },
+      { label: 'Filiallar', href: '/dashboard/branches', icon: Building2, roles: ROUTE_PERMISSIONS['/dashboard/branches'] },
+      { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
+    ],
+  },
+  {
+    title: 'Moliya',
+    items: [
+      { label: 'Moliya', href: '/dashboard/finance', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/finance'] },
+      { label: "To'lovlar", href: '/dashboard/payments', icon: CreditCard, roles: ROUTE_PERMISSIONS['/dashboard/payments'] },
+      { label: 'Tariflar', href: '/dashboard/fee-structures', icon: Wallet, roles: ROUTE_PERMISSIONS['/dashboard/fee-structures'] },
+      { label: 'Ish haqi', href: '/dashboard/payroll', icon: Award, roles: ROUTE_PERMISSIONS['/dashboard/payroll'] },
+    ],
+  },
+  {
+    title: 'Boshqaruv',
+    items: [
+      { label: "O'quvchilar", href: '/dashboard/students', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/students'] },
+      { label: 'Xodimlar', href: '/dashboard/staff', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/staff'] },
+      { label: 'Foydalanuvchilar', href: '/dashboard/users', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/users'] },
+    ],
+  },
+  {
+    title: "Ta'lim",
+    items: [
+      { label: "Ta'lim", href: '/dashboard/education', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/education'] },
+      { label: 'Dars jadvali', href: '/dashboard/schedule', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/schedule'] },
+      { label: 'Baholar', href: '/dashboard/grades', icon: BarChart2, roles: ROUTE_PERMISSIONS['/dashboard/grades'] },
+      { label: 'Imtihonlar', href: '/dashboard/exams', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/exams'] },
+    ],
+  },
+  {
+    title: 'Nazorat',
+    items: [
+      { label: 'Davomat', href: '/dashboard/attendance', icon: ClipboardCheck, roles: ROUTE_PERMISSIONS['/dashboard/attendance'] },
+      { label: 'Intizom', href: '/dashboard/discipline', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
+      { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: CalendarOff, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
+    ],
+  },
+  {
+    title: 'Resurslar',
+    items: [
+      { label: 'Resurslar', href: '/dashboard/resources', icon: Package, roles: ROUTE_PERMISSIONS['/dashboard/resources'] },
+      { label: 'Kutubxona', href: '/dashboard/library', icon: Library, roles: ROUTE_PERMISSIONS['/dashboard/library'] },
+      { label: 'Transport', href: '/dashboard/transport', icon: Bus, roles: ROUTE_PERMISSIONS['/dashboard/transport'] },
+    ],
+  },
+  {
+    title: 'Analitika',
+    items: [
+      { label: 'KPI Dashboard', href: '/dashboard/kpi', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/kpi'] },
+      { label: 'AI Analytics', href: '/dashboard/ai-analytics', icon: Brain, roles: ROUTE_PERMISSIONS['/dashboard/ai-analytics'] },
+    ],
+  },
+  {
+    title: 'Tizim',
+    items: [
+      { label: 'Kommunikatsiya', href: '/dashboard/comms', icon: MessageSquare, roles: ROUTE_PERMISSIONS['/dashboard/comms'] },
+      { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
+    ],
+  },
 ];
 
 export function MobileNav() {
@@ -113,11 +181,15 @@ export function MobileNav() {
     return item.roles.includes(user.role);
   };
 
-  const visibleGroups = navGroups
+  const isDirector = user?.role === 'director';
+  const activeGroups = isDirector ? DIRECTOR_MOBILE_GROUPS : navGroups;
+  const activeAdmin = isDirector ? [] : adminItems;
+
+  const visibleGroups = activeGroups
     .map(g => ({ ...g, items: g.items.filter(canSee) }))
     .filter(g => g.items.length > 0);
 
-  const visibleAdmin = adminItems.filter(canSee);
+  const visibleAdmin = activeAdmin.filter(canSee);
 
   return (
     <>

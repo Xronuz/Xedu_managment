@@ -315,7 +315,7 @@ export default function UsersPage() {
         onChange={(e) => { const f = e.target.files?.[0]; if (f) { csvMutation.mutate(f); e.target.value = ''; } }} />
 
       {/* ── Toolbar: search + filter + stats + actions — one row ────────────── */}
-      <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex items-center gap-2 flex-nowrap">
         {/* Search */}
         <div className="relative min-w-[160px] max-w-[272px] w-[272px]">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
@@ -324,7 +324,7 @@ export default function UsersPage() {
             value={search}
             onChange={e => { setSearch(e.target.value); setPage(1); }}
             placeholder="Ism, email bo'yicha qidirish..."
-            className="w-full h-[38px] pl-10 pr-4 text-[13px] rounded-[12px] outline-none transition-all"
+            className="w-full h-9 pl-10 pr-4 text-[12px] rounded-[12px] outline-none transition-all"
             style={{ background: '#F7F8F8', border: '1px solid rgba(0,0,0,0.06)', color: DS.text }}
             onFocus={e => { e.currentTarget.style.borderColor = 'rgba(15,123,83,0.4)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(15,123,83,0.08)'; }}
             onBlur={e =>  { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';   e.currentTarget.style.boxShadow = 'none'; }}
@@ -335,7 +335,7 @@ export default function UsersPage() {
         <div className="relative" ref={filterRef}>
           <button
             onClick={() => setFilterOpen(v => !v)}
-            className="inline-flex items-center gap-2 h-[38px] px-3.5 text-[12px] font-semibold rounded-[12px] transition-all"
+            className="inline-flex items-center gap-2 h-9 px-3.5 text-[12px] font-semibold rounded-[12px] transition-all"
             style={{
               background: hasFilter ? DS.primaryLight : '#F7F8F8',
               border: `1px solid ${hasFilter ? 'rgba(15,123,83,0.25)' : 'rgba(0,0,0,0.06)'}`,
@@ -421,7 +421,7 @@ export default function UsersPage() {
         </div>
 
         {/* Stats — compact single chip */}
-        <div className="flex items-center gap-2 rounded-[10px] px-3 py-1.5 text-[12px] font-semibold shrink-0"
+        <div className="flex items-center gap-2 rounded-[12px] px-3 h-9 text-[12px] font-semibold shrink-0"
           style={{ background: '#F7F8F8', border: '1px solid rgba(0,0,0,0.06)', color: '#374151' }}>
           <Users className="h-3.5 w-3.5 text-slate-400" />
           <span style={{ color: DS.primary }}>{meta?.total ?? 0}</span>
@@ -435,18 +435,18 @@ export default function UsersPage() {
 
         {/* Actions pushed to right */}
         <div className="ml-auto flex items-center gap-2 shrink-0">
-          <div className="h-6 w-px bg-slate-200" />
-          <Btn variant="secondary" size="sm" icon={csvMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          <div className="h-9 w-px bg-slate-200" />
+          <Btn variant="secondary" size="sm" className="h-9 rounded-[12px]" icon={csvMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
             onClick={() => csvInputRef.current?.click()} loading={csvMutation.isPending}>
             CSV
           </Btn>
-          <Btn variant="secondary" size="sm" icon={<Link2 className="h-4 w-4" />} onClick={() => window.location.href = '/dashboard/users/link-parent'}>
+          <Btn variant="secondary" size="sm" className="h-9 rounded-[12px]" icon={<Link2 className="h-4 w-4" />} onClick={() => window.location.href = '/dashboard/users/link-parent'}>
             Bog&apos;lash
           </Btn>
-          <Btn variant="secondary" size="sm" icon={<Upload className="h-4 w-4" />} onClick={() => setImportOpen(true)}>
+          <Btn variant="secondary" size="sm" className="h-9 rounded-[12px]" icon={<Upload className="h-4 w-4" />} onClick={() => setImportOpen(true)}>
             Import
           </Btn>
-          <Btn variant="primary" size="sm" icon={<Plus className="h-4 w-4" />} onClick={() => { setOpen(true); reset(); }}>
+          <Btn variant="primary" size="sm" className="h-9 rounded-[12px]" icon={<Plus className="h-4 w-4" />} onClick={() => { setOpen(true); reset(); }}>
             Qo&apos;shish
           </Btn>
         </div>

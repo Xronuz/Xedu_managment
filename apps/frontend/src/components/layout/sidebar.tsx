@@ -17,7 +17,7 @@ import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/ui.store';
 import { useAuthStore } from '@/store/auth.store';
-import { ROUTE_PERMISSIONS } from '@/config/permissions';
+import { ROUTE_PERMISSIONS, SIDEBAR_PERMISSIONS } from '@/config/permissions';
 
 // ── Section map: child route → parent nav item ────────────────────────────────
 const SECTION_MAP: Record<string, string> = {
@@ -123,7 +123,7 @@ const NAV: NavItem[] = [
   {
     label: 'Audit log', href: '/dashboard/audit-log',
     icon: Shield, section: 'main',
-    roles: ROUTE_PERMISSIONS['/dashboard/audit-log'],
+    roles: SIDEBAR_PERMISSIONS['Audit log'],
   },
   {
     label: 'Filiallar', href: '/dashboard/branches',
@@ -295,6 +295,33 @@ const NAV: NavItem[] = [
   },
 ];
 
+// ── Director sidebar grouping ─────────────────────────────────────────────────
+const DIRECTOR_SIDEBAR_GROUPS: { title: string; labels: string[] }[] = [
+  { title: 'Global', labels: ['Dashboard', 'Filiallar', 'Hisobotlar'] },
+  { title: 'Moliya', labels: ['Moliya', "To'lovlar", 'Tariflar', 'Ish haqi'] },
+  { title: 'Boshqaruv', labels: ["O'quvchilar", 'Xodimlar', 'Foydalanuvchilar'] },
+  { title: "Ta'lim", labels: ["Ta'lim", 'Dars jadvali', 'Baholar', 'Imtihonlar'] },
+  { title: 'Nazorat', labels: ['Davomat', 'Intizom', "Ta'til so'rovlar"] },
+  { title: 'Resurslar', labels: ['Resurslar'] },
+  { title: 'Analitika', labels: ['KPI Dashboard', 'AI Analytics'] },
+  { title: 'Tizim', labels: ['Kommunikatsiya', 'Sozlamalar'] },
+];
+
+function buildDirectorGroups(nav: NavItem[]) {
+  const EXCLUDED = new Set([
+    'Uy vazifalari', 'Marketing',
+    "O'quvchi portal", "Do'kon", 'EduCoin',
+    'Farzand', "O'quvchi to'lovlari", 'Mening sinfim',
+  ]);
+  const filtered = nav.filter(item => !EXCLUDED.has(item.label));
+  return DIRECTOR_SIDEBAR_GROUPS.map(group => ({
+    title: group.title,
+    items: group.labels
+      .map(label => filtered.find(item => item.label === label))
+      .filter(Boolean) as NavItem[],
+  })).filter(group => group.items.length > 0);
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function XeduMark({ size = 22 }: { size?: number }) {
   return (
@@ -376,9 +403,12 @@ export function Sidebar() {
     !item.roles || item.roles.includes(userRole),
   );
 
-  const MAIN_ITEMS   = visibleNav.filter(n => n.section === 'main');
-  const PORTAL_ITEMS = visibleNav.filter(n => n.section === 'portal');
-  const SYSTEM_ITEMS = visibleNav.filter(n => n.section === 'system');
+  const isDirector = userRole === 'director';
+  const directorGroups = isDirector ? buildDirectorGroups(visibleNav) : null;
+
+  const MAIN_ITEMS   = !isDirector ? visibleNav.filter(n => n.section === 'main') : [];
+  const PORTAL_ITEMS = !isDirector ? visibleNav.filter(n => n.section === 'portal') : [];
+  const SYSTEM_ITEMS = !isDirector ? visibleNav.filter(n => n.section === 'system') : [];
 
   return (
     <aside
@@ -430,48 +460,69 @@ export function Sidebar() {
 
       {/* Nav */}
       <nav className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden px-2.5 pb-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700 scrollbar-track-transparent">
-        {/* Main section */}
-        {MAIN_ITEMS.length > 0 && (
+        {isDirector && directorGroups ? (
+          /* Director: domain-grouped sidebar */
+          directorGroups.map(group => (
+            group.items.length > 0 && (
+              <div key={group.title}>
+                <SectionLabel label={group.title} expanded={expanded} />
+                <div className="flex flex-col gap-0.5">
+                  {group.items.map(item => {
+                    const active = item.exact
+                      ? pathname === item.href
+                      : activeSection === item.href || pathname.startsWith(item.href + '/');
+                    return <NavLink key={item.href} item={item} active={active} expanded={expanded} />;
+                  })}
+                </div>
+              </div>
+            )
+          ))
+        ) : (
           <>
-            <SectionLabel label="Asosiy" expanded={expanded} />
-            <div className="flex flex-col gap-0.5">
-              {MAIN_ITEMS.map((item) => {
-                const active = item.exact
-                  ? pathname === item.href
-                  : activeSection === item.href || pathname.startsWith(item.href + '/');
-                return <NavLink key={item.href} item={item} active={active} expanded={expanded} />;
-              })}
-            </div>
-          </>
-        )}
+            {/* Main section */}
+            {MAIN_ITEMS.length > 0 && (
+              <>
+                <SectionLabel label="Asosiy" expanded={expanded} />
+                <div className="flex flex-col gap-0.5">
+                  {MAIN_ITEMS.map((item) => {
+                    const active = item.exact
+                      ? pathname === item.href
+                      : activeSection === item.href || pathname.startsWith(item.href + '/');
+                    return <NavLink key={item.href} item={item} active={active} expanded={expanded} />;
+                  })}
+                </div>
+              </>
+            )}
 
-        {/* Portal section (student / parent) */}
-        {PORTAL_ITEMS.length > 0 && (
-          <>
-            <SectionLabel label="Mening bo'limim" expanded={expanded} />
-            <div className="flex flex-col gap-0.5">
-              {PORTAL_ITEMS.map((item) => {
-                const active = item.exact
-                  ? pathname === item.href
-                  : activeSection === item.href || pathname.startsWith(item.href + '/');
-                return <NavLink key={item.href} item={item} active={active} expanded={expanded} />;
-              })}
-            </div>
-          </>
-        )}
+            {/* Portal section (student / parent) */}
+            {PORTAL_ITEMS.length > 0 && (
+              <>
+                <SectionLabel label="Mening bo'limim" expanded={expanded} />
+                <div className="flex flex-col gap-0.5">
+                  {PORTAL_ITEMS.map((item) => {
+                    const active = item.exact
+                      ? pathname === item.href
+                      : activeSection === item.href || pathname.startsWith(item.href + '/');
+                    return <NavLink key={item.href} item={item} active={active} expanded={expanded} />;
+                  })}
+                </div>
+              </>
+            )}
 
-        {/* System section */}
-        {SYSTEM_ITEMS.length > 0 && (
-          <>
-            <SectionLabel label="Tizim" expanded={expanded} />
-            <div className="flex flex-col gap-0.5">
-              {SYSTEM_ITEMS.map((item) => {
-                const active = item.exact
-                  ? pathname === item.href
-                  : activeSection === item.href || pathname.startsWith(item.href + '/');
-                return <NavLink key={item.href} item={item} active={active} expanded={expanded} />;
-              })}
-            </div>
+            {/* System section */}
+            {SYSTEM_ITEMS.length > 0 && (
+              <>
+                <SectionLabel label="Tizim" expanded={expanded} />
+                <div className="flex flex-col gap-0.5">
+                  {SYSTEM_ITEMS.map((item) => {
+                    const active = item.exact
+                      ? pathname === item.href
+                      : activeSection === item.href || pathname.startsWith(item.href + '/');
+                    return <NavLink key={item.href} item={item} active={active} expanded={expanded} />;
+                  })}
+                </div>
+              </>
+            )}
           </>
         )}
       </nav>

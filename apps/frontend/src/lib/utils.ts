@@ -64,17 +64,17 @@ export function getGradeTypeLabel(type: string): string {
 }
 
 export function getScoreColor(score: number | null | undefined): string {
-  if (score === null || score === undefined) return '#94a3b8';
-  if (score >= 90) return '#22c55e';
+  if (score === null || score === undefined) return 'var(--xedu-slate-400)';
+  if (score >= 90) return 'var(--xedu-primary)';
   if (score >= 70) return '#84cc16';
-  if (score >= 50) return '#f59e0b';
-  return '#ef4444';
+  if (score >= 50) return 'var(--xedu-amber)';
+  return 'var(--xedu-ruby)';
 }
 
 export function getScoreColorClass(score: number | null | undefined): string {
-  if (score === null || score === undefined) return 'text-slate-400';
-  if (score >= 90) return 'text-emerald-500';
+  if (score === null || score === undefined) return 'text-xedu-slate-400';
+  if (score >= 90) return 'text-xedu-primary';
   if (score >= 70) return 'text-lime-500';
-  if (score >= 50) return 'text-amber-500';
-  return 'text-red-500';
+  if (score >= 50) return 'text-xedu-amber';
+  return 'text-xedu-ruby';
 }

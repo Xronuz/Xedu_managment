@@ -130,7 +130,7 @@ export function NotificationDrawer() {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <button
-          className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-slate-900 shadow-pill text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:shadow-md transition-all duration-150"
+          className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-xedu-slate-900 shadow-pill text-xedu-slate-600 dark:text-xedu-slate-300 hover:text-xedu-slate-900 dark:hover:text-white hover:shadow-md transition-all duration-150"
           aria-label="Bildirishnomalar"
         >
           <Bell className="h-4 w-4" />

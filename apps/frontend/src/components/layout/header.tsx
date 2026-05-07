@@ -53,7 +53,7 @@ export function Header() {
     <header
       className={cn(
         'flex h-[60px] shrink-0 items-center justify-between gap-4 px-5',
-        'bg-white dark:bg-slate-900',
+        'bg-white dark:bg-xedu-slate-900',
       )}
     >
       {/* Left: mobile nav + search */}
@@ -64,14 +64,14 @@ export function Header() {
           aria-label="Qidiruv panelini ochish"
           className={cn(
             'hidden md:flex items-center gap-2.5 rounded-full h-[42px] px-4 w-[260px] lg:w-[360px] transition-colors cursor-pointer',
-            'bg-slate-100/80 dark:bg-slate-800/80',
+            'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
             'border border-black/[0.06] dark:border-white/[0.06]',
-            'hover:bg-slate-200/60 dark:hover:bg-slate-700/60',
+            'hover:bg-xedu-slate-200/60 dark:hover:bg-xedu-slate-700/60',
           )}
         >
-          <Search className="h-4 w-4 shrink-0 text-slate-400 dark:text-slate-500" />
-          <span className="flex-1 text-left text-[13px] text-slate-400 dark:text-slate-500">Qidiruv...</span>
-          <kbd className="hidden sm:inline-flex h-5 select-none items-center rounded-md bg-slate-200/80 dark:bg-slate-700/80 px-1.5 font-mono text-[10px] text-slate-500 dark:text-slate-400 tracking-tight">⌘K</kbd>
+          <Search className="h-4 w-4 shrink-0 text-xedu-slate-400 dark:text-xedu-slate-500" />
+          <span className="flex-1 text-left text-[13px] text-xedu-slate-400 dark:text-xedu-slate-500">Qidiruv...</span>
+          <kbd className="hidden sm:inline-flex h-5 select-none items-center rounded-md bg-xedu-slate-200/80 dark:bg-xedu-slate-700/80 px-1.5 font-mono text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400 tracking-tight">⌘K</kbd>
         </button>
       </div>
 
@@ -89,8 +89,8 @@ export function Header() {
           aria-label="Mavzuni o'zgartirish"
           className={cn(
             'relative flex h-[42px] w-[42px] items-center justify-center rounded-full transition-colors',
-            'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200',
-            'bg-slate-100/80 dark:bg-slate-800/80',
+            'text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-slate-700 dark:hover:text-xedu-slate-200',
+            'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
             'border border-black/[0.06] dark:border-white/[0.06]',
           )}
         >
@@ -106,7 +106,7 @@ export function Header() {
               'flex items-center gap-2.5 rounded-full pl-2 pr-4 ml-0.5 h-[52px]',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40',
               'transition-all duration-200 hover:shadow-sm',
-              'bg-slate-100/80 dark:bg-slate-800/80',
+              'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
               'border border-black/[0.06] dark:border-white/[0.06]',
             )}>
               <Avatar className={cn('h-8 w-8 ring-2 ring-offset-1 ring-offset-white dark:ring-offset-slate-900 shrink-0', ringColor)}>
@@ -116,10 +116,10 @@ export function Header() {
                 </AvatarFallback>
               </Avatar>
               <div className="hidden md:flex flex-col items-start">
-                <p className="text-[13px] font-semibold leading-tight text-slate-800 dark:text-slate-100">{user?.firstName} {user?.lastName}</p>
-                <p className="text-[11px] text-slate-400 dark:text-slate-500 leading-tight mt-0.5">{user ? getRoleLabel(user.role) : ''}</p>
+                <p className="text-[13px] font-semibold leading-tight text-xedu-slate-800 dark:text-xedu-slate-100">{user?.firstName} {user?.lastName}</p>
+                <p className="text-[11px] text-xedu-slate-400 dark:text-xedu-slate-500 leading-tight mt-0.5">{user ? getRoleLabel(user.role) : ''}</p>
               </div>
-              <ChevronDown className="hidden md:block h-3.5 w-3.5 text-slate-400 dark:text-slate-500 ml-1 shrink-0" />
+              <ChevronDown className="hidden md:block h-3.5 w-3.5 text-xedu-slate-400 dark:text-xedu-slate-500 ml-1 shrink-0" />
             </button>
           </DropdownMenuTrigger>
 

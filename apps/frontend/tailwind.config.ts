@@ -14,7 +14,21 @@ const config: Config = {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'sans-serif'],
       },
 
-      /* ── Colors (token-based) ── */
+      /* ── Typography scale (Inter Variable, rem-based) ── */
+      fontSize: {
+        '2xs': ['10px', { lineHeight: '14px', letterSpacing: '0.02em' }],
+        'xs':  ['11px', { lineHeight: '15px', letterSpacing: '0.01em' }],
+        'sm':  ['12px', { lineHeight: '16px' }],
+        'base':['13px', { lineHeight: '18px' }],
+        'md':  ['14px', { lineHeight: '20px' }],
+        'lg':  ['15px', { lineHeight: '22px' }],
+        'xl':  ['16px', { lineHeight: '24px' }],
+        '2xl': ['18px', { lineHeight: '26px', letterSpacing: '-0.01em' }],
+        '3xl': ['22px', { lineHeight: '30px', letterSpacing: '-0.015em' }],
+        '4xl': ['26px', { lineHeight: '34px', letterSpacing: '-0.02em' }],
+      },
+
+      /* ── Colors (shadcn + Xedu tokens) ── */
       colors: {
         border:      'hsl(var(--border))',
         input:       'hsl(var(--input))',
@@ -49,34 +63,85 @@ const config: Config = {
           DEFAULT:    'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        /* Xedu brand system */
+        'xedu-primary': {
+          DEFAULT: 'var(--xedu-primary)',
+          hover:   'var(--xedu-primary-hover)',
+          active:  'var(--xedu-primary-active)',
+          light:   'var(--xedu-primary-light)',
+          muted:   'var(--xedu-primary-muted)',
+        },
+        'xedu-slate': {
+          50:  'var(--xedu-slate-50)',
+          100: 'var(--xedu-slate-100)',
+          200: 'var(--xedu-slate-200)',
+          300: 'var(--xedu-slate-300)',
+          400: 'var(--xedu-slate-400)',
+          500: 'var(--xedu-slate-500)',
+          600: 'var(--xedu-slate-600)',
+          700: 'var(--xedu-slate-700)',
+          800: 'var(--xedu-slate-800)',
+          900: 'var(--xedu-slate-900)',
+        },
+        'xedu-gold':   'var(--xedu-gold)',
+        'xedu-ruby':   'var(--xedu-ruby)',
+        'xedu-amber':  'var(--xedu-amber)',
+        'xedu-sky':    'var(--xedu-sky)',
+        'xedu-violet': 'var(--xedu-violet)',
       },
 
-      /* ── Border radius ── */
+      /* ── Border radius (4px step system) ── */
       borderRadius: {
-        lg:   'var(--radius)',                      /* 12px — inputs/small btns */
-        md:   'calc(var(--radius) - 2px)',          /* 10px */
-        sm:   'calc(var(--radius) - 4px)',          /* 8px  */
-        xl:   '1rem',                               /* 16px — mid cards */
-        '2xl':'1.25rem',                            /* 20px — dashboard cards */
+        xs:   '6px',
+        sm:   '8px',
+        md:   '10px',
+        lg:   '12px',
+        xl:   '14px',
+        '2xl':'16px',
+        '3xl':'20px',
+        '4xl':'24px',
       },
 
       /* ── Elevation shadows ── */
       boxShadow: {
-        xs:       'var(--shadow-xs)',
-        sm:       'var(--shadow-sm)',
-        md:       'var(--shadow-md)',
+        xs:       'var(--xedu-shadow-xs)',
+        sm:       'var(--xedu-shadow-sm)',
+        md:       'var(--xedu-shadow-md)',
+        lg:       'var(--xedu-shadow-lg)',
+        xl:       'var(--xedu-shadow-xl)',
         card:     'var(--shadow-card)',
-        elevated: 'var(--shadow-elevated)',
-        dialog:   'var(--shadow-dialog)',
-        /* Premium "floating" card shadow — dual-layer soft blur (SugarCRM style) */
-        floating: '0 4px 6px rgba(0,0,0,0.02), 0 12px 40px rgba(0,0,0,0.08)',
-        /* Pill button shadow — for circular header icons, floating pills */
-        pill:     '0 2px 8px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)',
-        /* Colored glows for KPI cards */
-        'glow-blue':    '0 4px 14px 0 rgba(59,130,246,0.15)',
-        'glow-violet':  '0 4px 14px 0 rgba(139,92,246,0.15)',
-        'glow-emerald': '0 4px 14px 0 rgba(16,185,129,0.15)',
-        'glow-amber':   '0 4px 14px 0 rgba(245,158,11,0.15)',
+        elevated: 'var(--xedu-shadow-lg)',
+        dialog:   'var(--xedu-shadow-dialog)',
+        floating: 'var(--xedu-shadow-floating)',
+        pill:     'var(--xedu-shadow-pill)',
+        'glow-primary': 'var(--xedu-shadow-glow-primary)',
+        'glow-amber':   'var(--xedu-shadow-glow-amber)',
+        'glow-ruby':    'var(--xedu-shadow-glow-ruby)',
+        'glow-sky':     'var(--xedu-shadow-glow-sky)',
+        'glow-violet':  'var(--xedu-shadow-glow-violet)',
+      },
+
+      /* ── Spacing (4px base grid) ── */
+      spacing: {
+        '0.5': '2px',
+        '1':   '4px',
+        '1.5': '6px',
+        '2':   '8px',
+        '2.5': '10px',
+        '3':   '12px',
+        '3.5': '14px',
+        '4':   '16px',
+        '5':   '20px',
+        '6':   '24px',
+        '7':   '28px',
+        '8':   '32px',
+        '9':   '36px',
+        '10':  '40px',
+        '11':  '44px',
+        '12':  '48px',
+        'header': 'var(--header-height, 64px)',
+        'sidebar': 'var(--sidebar-width, 256px)',
+        'sidebar-collapsed': 'var(--sidebar-collapsed, 64px)',
       },
 
       /* ── Animations ── */
@@ -107,19 +172,12 @@ const config: Config = {
         },
       },
       animation: {
-        'fade-in':       'fade-in 0.2s ease-out',
-        'fade-up':       'fade-up 0.25s ease-out',
-        'slide-in-left': 'slide-in-left 0.2s ease-out',
-        'count-up':      'count-up 0.3s ease-out',
-        'accordion-down':'accordion-down 0.2s ease-out',
-        'accordion-up':  'accordion-up 0.2s ease-out',
-      },
-
-      /* ── Spacing for layout shell ── */
-      spacing: {
-        'header': 'var(--header-height, 64px)',
-        'sidebar': 'var(--sidebar-width, 256px)',
-        'sidebar-collapsed': 'var(--sidebar-collapsed, 64px)',
+        'fade-in':       'fade-in 150ms ease-out',
+        'fade-up':       'fade-up 150ms ease-out',
+        'slide-in-left': 'slide-in-left 150ms ease-out',
+        'count-up':      'count-up 150ms ease-out',
+        'accordion-down':'accordion-down 150ms ease-out',
+        'accordion-up':  'accordion-up 150ms ease-out',
       },
     },
   },

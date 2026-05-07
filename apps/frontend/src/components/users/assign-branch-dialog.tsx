@@ -108,11 +108,11 @@ export function AssignBranchDialog({
         <div className="space-y-3 py-1">
           {/* Biriktirilgan filiallar */}
           {uniqueBranches.length > 0 && (
-            <div className="rounded-lg bg-slate-50 dark:bg-slate-800/60 p-2.5 space-y-1">
-              <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Hozirgi filiallar</p>
+            <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5 space-y-1">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-xedu-slate-400">Hozirgi filiallar</p>
               <div className="flex flex-wrap gap-1">
                 {uniqueBranches.map((name, i) => (
-                  <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-full bg-white dark:bg-slate-700 border border-slate-100 dark:border-slate-600 text-[11px] font-medium text-slate-600 dark:text-slate-300">
+                  <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-full bg-white dark:bg-xedu-slate-700 border border-xedu-slate-100 dark:border-xedu-slate-600 text-[11px] font-medium text-xedu-slate-600 dark:text-xedu-slate-300">
                     {name}
                   </span>
                 ))}
@@ -128,7 +128,7 @@ export function AssignBranchDialog({
 
           {/* Role selection */}
           <div className="space-y-1.5">
-            <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">Ushbu filial uchun rol</p>
+            <p className="text-[11px] font-bold uppercase tracking-wide text-xedu-slate-400">Ushbu filial uchun rol</p>
             <Select value={role} onValueChange={setRole}>
               <SelectTrigger>
                 <SelectValue placeholder="Rol tanlang..." />

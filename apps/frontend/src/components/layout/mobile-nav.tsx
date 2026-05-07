@@ -207,7 +207,7 @@ export function MobileNav() {
           <div className="flex flex-col overflow-y-auto h-[calc(100vh-80px)] px-3 py-2">
             {visibleGroups.map(group => (
               <div key={group.title} className="mb-3">
-                <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400">
                   {group.title}
                 </p>
                 <div className="flex flex-col gap-0.5">
@@ -223,7 +223,7 @@ export function MobileNav() {
                           'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                           isActive
                             ? 'bg-emerald-50 text-emerald-700'
-                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                            : 'text-xedu-slate-600 hover:bg-xedu-slate-50 hover:text-xedu-slate-900',
                         )}
                       >
                         <Icon className="h-4 w-4 shrink-0" />
@@ -238,7 +238,7 @@ export function MobileNav() {
 
             {visibleAdmin.length > 0 && (
               <div>
-                <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-slate-400">TIZIM</p>
+                <p className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400">TIZIM</p>
                 <div className="flex flex-col gap-0.5">
                   {visibleAdmin.map(item => {
                     const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
@@ -252,7 +252,7 @@ export function MobileNav() {
                           'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                           isActive
                             ? 'bg-emerald-50 text-emerald-700'
-                            : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900',
+                            : 'text-xedu-slate-600 hover:bg-xedu-slate-50 hover:text-xedu-slate-900',
                         )}
                       >
                         <Icon className="h-4 w-4 shrink-0" />

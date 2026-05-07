@@ -36,7 +36,7 @@ const DialogContent = React.forwardRef<
       className={cn(
         'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 p-6 duration-200',
         // Premium surface — matches Card language
-        'rounded-2xl border-0 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100',
+        'rounded-2xl border-0 bg-white dark:bg-xedu-slate-900 text-xedu-slate-900 dark:text-xedu-slate-100',
         'shadow-dialog',
         // Animations
         'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%]',
@@ -45,7 +45,7 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-900 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-white transition-colors ring-offset-background focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:ring-offset-1 disabled:pointer-events-none">
+      <DialogPrimitive.Close className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-xedu-slate-100 text-xedu-slate-500 hover:bg-xedu-slate-200 hover:text-xedu-slate-900 dark:bg-xedu-slate-800 dark:text-xedu-slate-400 dark:hover:bg-xedu-slate-700 dark:hover:text-white transition-colors ring-offset-background focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:ring-offset-1 disabled:pointer-events-none">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>

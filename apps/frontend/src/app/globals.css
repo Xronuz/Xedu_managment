@@ -7,26 +7,88 @@
 /* ── NProgress ──────────────────────────────────────────────────────────────── */
 #nprogress { pointer-events: none; }
 #nprogress .bar {
-  background: #10b981;
+  background: var(--xedu-primary);
   position: fixed; z-index: 9999; top: 0; left: 0;
   width: 100%; height: 2px;
 }
 #nprogress .peg {
   display: block; position: absolute; right: 0; width: 100px; height: 100%;
-  box-shadow: 0 0 10px #10b981, 0 0 5px #10b981;
+  box-shadow: 0 0 10px var(--xedu-primary), 0 0 5px var(--xedu-primary);
   opacity: 1; transform: rotate(3deg) translate(0, -4px);
 }
 
-/* ── Design Tokens ──────────────────────────────────────────────────────────── */
+/* ── Xedu Design Tokens ─────────────────────────────────────────────────────── */
 @layer base {
   :root {
-    --background:         120 7% 97.6%;   /* #f8faf8 — subtle warm-green tint */
+    /* ── Brand ── */
+    --xedu-primary:         #0F7B53;
+    --xedu-primary-hover:   #0d6b48;
+    --xedu-primary-active:  #0b5c3e;
+    --xedu-primary-light:   #DDF5EA;
+    --xedu-primary-muted:   #E6F5EE;
+
+    /* ── Neutrals (slate) ── */
+    --xedu-slate-50:  #F8FAFC;
+    --xedu-slate-100: #F1F5F9;
+    --xedu-slate-200: #E2E8F0;
+    --xedu-slate-300: #CBD5E1;
+    --xedu-slate-400: #94A3B8;
+    --xedu-slate-500: #64748B;
+    --xedu-slate-600: #475569;
+    --xedu-slate-700: #334155;
+    --xedu-slate-800: #1E293B;
+    --xedu-slate-900: #0F172A;
+
+    /* ── Surface ── */
+    --xedu-bg:          #F7F8F8;
+    --xedu-bg-elevated: #FFFFFF;
+    --xedu-bg-subtle:   #F8FAF8;
+
+    /* ── Text ── */
+    --xedu-text:           #111827;
+    --xedu-text-secondary: #475569;
+    --xedu-text-muted:     #64748B;
+    --xedu-text-inverse:   #FFFFFF;
+
+    /* ── Border ── */
+    --xedu-border:         rgba(0, 0, 0, 0.06);
+    --xedu-border-hover:   rgba(0, 0, 0, 0.10);
+    --xedu-border-strong:  rgba(0, 0, 0, 0.14);
+
+    /* ── Accents (limited palette) ── */
+    --xedu-gold:   #D4A843;
+    --xedu-ruby:   #DC2626;
+    --xedu-amber:  #D97706;
+    --xedu-sky:    #0EA5E9;
+    --xedu-violet: #7C3AED;
+
+    /* ── Shadows (elevation system) ── */
+    --xedu-shadow-xs:          0 1px 2px rgba(0,0,0,0.04);
+    --xedu-shadow-sm:          0 2px 6px rgba(0,0,0,0.06);
+    --xedu-shadow-md:          0 4px 12px rgba(0,0,0,0.08);
+    --xedu-shadow-lg:          0 8px 24px rgba(0,0,0,0.10);
+    --xedu-shadow-xl:          0 20px 48px rgba(0,0,0,0.12);
+    --xedu-shadow-dialog:      0 20px 60px rgba(0,0,0,0.15);
+    --xedu-shadow-floating:    0 4px 6px rgba(0,0,0,0.02), 0 12px 40px rgba(0,0,0,0.08);
+    --xedu-shadow-pill:        0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --xedu-shadow-glow-primary: 0 4px 14px 0 rgba(15,123,83,0.15);
+    --xedu-shadow-glow-amber:   0 4px 14px 0 rgba(217,119,6,0.15);
+    --xedu-shadow-glow-ruby:    0 4px 14px 0 rgba(220,38,38,0.15);
+    --xedu-shadow-glow-sky:     0 4px 14px 0 rgba(14,165,233,0.15);
+    --xedu-shadow-glow-violet:  0 4px 14px 0 rgba(124,58,237,0.15);
+
+    /* ── Motion ── */
+    --xedu-duration: 150ms;
+    --xedu-easing: cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* ── shadcn/ui semantic tokens (aligned to brand) ── */
+    --background:         120 7% 97.6%;
     --foreground:         222 47% 11%;
     --card:               0 0% 100%;
     --card-foreground:    222 47% 11%;
     --popover:            0 0% 100%;
     --popover-foreground: 222 47% 11%;
-    --primary:            160 84% 39%;
+    --primary:            158 79% 28%;
     --primary-foreground: 0 0% 100%;
     --secondary:          210 40% 96%;
     --secondary-foreground: 222 47% 11%;
@@ -38,41 +100,52 @@
     --destructive-foreground: 0 0% 100%;
     --border:             214 32% 91%;
     --input:              214 32% 91%;
-    --ring:               160 84% 39%;
+    --ring:               158 79% 28%;
     --radius:             0.75rem;
 
-    --shadow-xs:       0 1px 2px rgba(0,0,0,0.04);
-    --shadow-sm:       0 2px 6px rgba(0,0,0,0.06);
-    --shadow-md:       0 4px 12px rgba(0,0,0,0.08);
+    --shadow-xs:       var(--xedu-shadow-xs);
+    --shadow-sm:       var(--xedu-shadow-sm);
+    --shadow-md:       var(--xedu-shadow-md);
     --shadow-card:     0 2px 10px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.02);
-    --shadow-elevated: 0 8px 24px rgba(0,0,0,0.08);
-    --shadow-dialog:   0 20px 60px rgba(0,0,0,0.15);
-    --shadow-pill:     0 1px 3px rgba(0,0,0,0.06);
-  }
-
-  /* Dashboard C-token dark overrides */
-  :root {
-    --c-text:   #111827;
-    --c-muted:  #6B7280;
-    --c-border: rgba(0,0,0,0.06);
-    --c-bg:     #F7F8F8;
-    --c-card:   #FFFFFF;
+    --shadow-elevated: var(--xedu-shadow-lg);
+    --shadow-dialog:   var(--xedu-shadow-dialog);
+    --shadow-pill:     var(--xedu-shadow-pill);
   }
 
   .dark {
-    --c-text:   #F1F5F9;
-    --c-muted:  #94A3B8;
-    --c-border: rgba(255,255,255,0.07);
-    --c-bg:     #1E293B;
-    --c-card:   #1e2433;
+    /* ── Xedu dark overrides ── */
+    --xedu-bg:            #0F172A;
+    --xedu-bg-elevated:   #1E293B;
+    --xedu-bg-subtle:     #1a2235;
+    --xedu-text:          #F1F5F9;
+    --xedu-text-secondary:#CBD5E1;
+    --xedu-text-muted:    #94A3B8;
+    --xedu-border:        rgba(255,255,255,0.07);
+    --xedu-border-hover:  rgba(255,255,255,0.10);
+    --xedu-border-strong: rgba(255,255,255,0.14);
 
+    --xedu-shadow-xs:          0 1px 2px rgba(0,0,0,0.12);
+    --xedu-shadow-sm:          0 2px 6px rgba(0,0,0,0.18);
+    --xedu-shadow-md:          0 4px 12px rgba(0,0,0,0.24);
+    --xedu-shadow-lg:          0 8px 24px rgba(0,0,0,0.40);
+    --xedu-shadow-xl:          0 20px 48px rgba(0,0,0,0.50);
+    --xedu-shadow-dialog:      0 20px 60px rgba(0,0,0,0.50);
+    --xedu-shadow-floating:    0 4px 6px rgba(0,0,0,0.15), 0 12px 40px rgba(0,0,0,0.35);
+    --xedu-shadow-pill:        0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.10);
+    --xedu-shadow-glow-primary: 0 4px 14px 0 rgba(15,123,83,0.25);
+    --xedu-shadow-glow-amber:   0 4px 14px 0 rgba(217,119,6,0.25);
+    --xedu-shadow-glow-ruby:    0 4px 14px 0 rgba(220,38,38,0.25);
+    --xedu-shadow-glow-sky:     0 4px 14px 0 rgba(14,165,233,0.25);
+    --xedu-shadow-glow-violet:  0 4px 14px 0 rgba(124,58,237,0.25);
+
+    /* ── shadcn/ui dark overrides ── */
     --background:         222 47% 5%;
     --foreground:         210 40% 96%;
     --card:               222 40% 8%;
     --card-foreground:    210 40% 96%;
     --popover:            222 40% 8%;
     --popover-foreground: 210 40% 96%;
-    --primary:            160 84% 39%;
+    --primary:            158 79% 32%;
     --primary-foreground: 0 0% 100%;
     --secondary:          217 33% 14%;
     --secondary-foreground: 210 40% 96%;
@@ -84,14 +157,15 @@
     --destructive-foreground: 210 40% 98%;
     --border:             217 33% 16%;
     --input:              217 33% 16%;
-    --ring:               160 84% 39%;
+    --ring:               158 79% 32%;
 
-    --shadow-xs:       0 1px 2px rgba(0,0,0,0.12);
-    --shadow-sm:       0 2px 6px rgba(0,0,0,0.18);
-    --shadow-md:       0 4px 12px rgba(0,0,0,0.24);
-    --shadow-card:     0 2px 10px rgba(0,0,0,0.3);
-    --shadow-elevated: 0 8px 24px rgba(0,0,0,0.4);
-    --shadow-dialog:   0 20px 60px rgba(0,0,0,0.5);
+    --shadow-xs:       var(--xedu-shadow-xs);
+    --shadow-sm:       var(--xedu-shadow-sm);
+    --shadow-md:       var(--xedu-shadow-md);
+    --shadow-card:     0 2px 10px rgba(0,0,0,0.30);
+    --shadow-elevated: var(--xedu-shadow-lg);
+    --shadow-dialog:   var(--xedu-shadow-dialog);
+    --shadow-pill:     var(--xedu-shadow-pill);
   }
 }
 
@@ -116,25 +190,25 @@
 /* ── Components ─────────────────────────────────────────────────────────────── */
 @layer components {
 
-  /* ── Bento Card — clean white, soft shadow ─────────────────────────────── */
+  /* ── Bento Card ──────────────────────────────────────────────────────────── */
   .card {
-    background: #ffffff !important;
-    border: 1px solid rgb(241 245 249) !important; /* slate-100 */
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
-    border-radius: 1.25rem !important;  /* rounded-2xl */
-    backdrop-filter: none !important;
-    -webkit-backdrop-filter: none !important;
+    background: var(--xedu-bg-elevated);
+    border: 1px solid var(--xedu-border);
+    box-shadow: var(--xedu-shadow-sm);
+    border-radius: 1.25rem;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
   }
   .dark .card {
-    background: rgb(22 28 40) !important;
-    border: 1px solid rgb(30 41 59) !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25) !important;
+    background: var(--xedu-bg-elevated);
+    border: 1px solid var(--xedu-border);
+    box-shadow: var(--xedu-shadow-xs);
   }
 
   /* ── Empty state ────────────────────────────────────────────────────────── */
   .empty-state {
-    border: 2px dashed rgb(226 232 240);
-    background: rgba(248,250,248,0.8);
+    border: 2px dashed var(--xedu-slate-200);
+    background: var(--xedu-bg-subtle);
     border-radius: 1.25rem;
     display: flex;
     flex-direction: column;
@@ -144,6 +218,10 @@
     text-align: center;
     gap: 0.75rem;
     color: hsl(var(--muted-foreground));
+  }
+  .dark .empty-state {
+    border-color: var(--xedu-slate-700);
+    background: var(--xedu-bg-elevated);
   }
 
   /* ── Tables ──────────────────────────────────────────────────────────────── */
@@ -157,15 +235,20 @@
   }
   .table-cell-dense { padding: 0.5rem 0.75rem !important; }
 
-  /* ── KPI accent borders ──────────────────────────────────────────────────── */
-  .kpi-blue    { border-left: 3px solid hsl(221 83% 53%); }
-  .kpi-violet  { border-left: 3px solid hsl(263 70% 58%); }
-  .kpi-emerald { border-left: 3px solid hsl(160 84% 39%); }
-  .kpi-amber   { border-left: 3px solid hsl(37 91% 55%);  }
-  .kpi-red     { border-left: 3px solid hsl(0 84% 60%);   }
-  .kpi-indigo  { border-left: 3px solid hsl(239 84% 67%); }
-  .kpi-cyan    { border-left: 3px solid hsl(189 94% 43%); }
-  .kpi-rose    { border-left: 3px solid hsl(347 77% 55%); }
+  /* ── KPI accent borders (limited palette) ───────────────────────────────── */
+  .kpi-primary { border-left: 3px solid var(--xedu-primary); }
+  .kpi-violet  { border-left: 3px solid var(--xedu-violet); }
+  .kpi-amber   { border-left: 3px solid var(--xedu-amber); }
+  .kpi-ruby    { border-left: 3px solid var(--xedu-ruby); }
+  .kpi-sky     { border-left: 3px solid var(--xedu-sky); }
+  .kpi-gold    { border-left: 3px solid var(--xedu-gold); }
+  /* Legacy aliases preserved for backward compatibility */
+  .kpi-blue    { border-left: 3px solid var(--xedu-sky); }
+  .kpi-emerald { border-left: 3px solid var(--xedu-primary); }
+  .kpi-red     { border-left: 3px solid var(--xedu-ruby); }
+  .kpi-indigo  { border-left: 3px solid var(--xedu-violet); }
+  .kpi-cyan    { border-left: 3px solid var(--xedu-sky); }
+  .kpi-rose    { border-left: 3px solid var(--xedu-ruby); }
 }
 
 /* ── Utilities ──────────────────────────────────────────────────────────────── */
@@ -173,23 +256,24 @@
 
   .scrollbar-sidebar::-webkit-scrollbar { width: 3px; }
   .scrollbar-sidebar::-webkit-scrollbar-track { background: transparent; }
-  .scrollbar-sidebar::-webkit-scrollbar-thumb { background: rgb(203 213 225); border-radius: 999px; }
+  .scrollbar-sidebar::-webkit-scrollbar-thumb { background: var(--xedu-slate-300); border-radius: 999px; }
+  .dark .scrollbar-sidebar::-webkit-scrollbar-thumb { background: var(--xedu-slate-600); }
 
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
   .btn-press:active { transform: scale(0.97); }
 
-  .card-lift { transition: transform 0.15s ease, box-shadow 0.15s ease; }
-  .card-lift:hover { transform: translateY(-1px); box-shadow: var(--shadow-elevated); }
+  .card-lift { transition: transform var(--xedu-duration) var(--xedu-easing), box-shadow var(--xedu-duration) var(--xedu-easing); }
+  .card-lift:hover { transform: translateY(-1px); box-shadow: var(--xedu-shadow-lg); }
 
   .text-gradient {
-    background: linear-gradient(135deg, #059669, #10b981);
+    background: linear-gradient(135deg, var(--xedu-primary), var(--xedu-primary-hover));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  .shadow-pill     { box-shadow: var(--shadow-pill); }
-  .shadow-elevated { box-shadow: var(--shadow-elevated); }
+  .shadow-pill     { box-shadow: var(--xedu-shadow-pill); }
+  .shadow-elevated { box-shadow: var(--xedu-shadow-lg); }
 }

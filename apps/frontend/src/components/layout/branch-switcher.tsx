@@ -98,7 +98,7 @@ export function BranchSwitcher() {
   const isBranchAdmin = user.role === 'branch_admin';
   if (isBranchAdmin && activeBranches.length <= 1) {
     return (
-      <div className="hidden md:flex items-center gap-2 h-10 px-4 rounded-full bg-white dark:bg-slate-900 shadow-pill text-sm font-medium text-slate-700 dark:text-slate-200">
+      <div className="hidden md:flex items-center gap-2 h-10 px-4 rounded-full bg-white dark:bg-xedu-slate-900 shadow-pill text-sm font-medium text-xedu-slate-700 dark:text-xedu-slate-200">
         <Building2 className="h-3.5 w-3.5 shrink-0" />
         <span className="max-w-[140px] truncate">
           {activeBranchMeta?.name ?? currentLabel}
@@ -116,8 +116,8 @@ export function BranchSwitcher() {
           className={cn(
             // Header pill — matches search/theme/bell/avatar system
             'hidden md:flex items-center gap-2 h-10 px-4 max-w-[220px]',
-            'rounded-full bg-white dark:bg-slate-900 shadow-pill',
-            'text-sm font-medium text-slate-700 dark:text-slate-200',
+            'rounded-full bg-white dark:bg-xedu-slate-900 shadow-pill',
+            'text-sm font-medium text-xedu-slate-700 dark:text-xedu-slate-200',
             'hover:shadow-md transition-all duration-150',
             'disabled:opacity-60 disabled:cursor-not-allowed',
             'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30',

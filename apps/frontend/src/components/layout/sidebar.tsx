@@ -354,7 +354,7 @@ function NavLink({ item, active, expanded }: { item: NavItem; active: boolean; e
         expanded ? 'h-[42px] w-full px-3' : 'h-[44px] w-[44px] justify-center',
         active
           ? 'bg-emerald-50 dark:bg-emerald-900/25 text-emerald-700 dark:text-emerald-400 shadow-sm'
-          : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100/80 dark:hover:bg-slate-800/60 hover:text-slate-700 dark:hover:text-slate-200',
+          : 'text-xedu-slate-500 dark:text-xedu-slate-400 hover:bg-xedu-slate-100/80 dark:hover:bg-xedu-slate-800/60 hover:text-xedu-slate-700 dark:hover:text-xedu-slate-200',
       )}
     >
       {/* collapsed active indicator — left pill */}
@@ -363,12 +363,12 @@ function NavLink({ item, active, expanded }: { item: NavItem; active: boolean; e
       )}
       <Icon
         style={{ width: 19, height: 19 }}
-        className={cn('shrink-0', active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500')}
+        className={cn('shrink-0', active ? 'text-emerald-600 dark:text-emerald-400' : 'text-xedu-slate-400 dark:text-xedu-slate-500')}
       />
       {expanded && (
         <span className={cn(
           'text-[13px] font-semibold truncate',
-          active ? 'text-emerald-700 dark:text-emerald-400' : 'text-slate-600 dark:text-slate-300',
+          active ? 'text-emerald-700 dark:text-emerald-400' : 'text-xedu-slate-600 dark:text-xedu-slate-300',
         )}>
           {item.label}
         </span>
@@ -381,9 +381,9 @@ function NavLink({ item, active, expanded }: { item: NavItem; active: boolean; e
 }
 
 function SectionLabel({ label, expanded }: { label: string; expanded: boolean }) {
-  if (!expanded) return <div className="h-px w-8 my-1.5 mx-auto bg-slate-100 dark:bg-slate-700 rounded-full" />;
+  if (!expanded) return <div className="h-px w-8 my-1.5 mx-auto bg-xedu-slate-100 dark:bg-xedu-slate-700 rounded-full" />;
   return (
-    <p className="mt-3 mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400 select-none">
+    <p className="mt-3 mb-1 px-3 text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-400 select-none">
       {label}
     </p>
   );
@@ -414,7 +414,7 @@ export function Sidebar() {
     <aside
       className={cn(
         'flex h-full shrink-0 flex-col transition-all duration-300 ease-in-out',
-        'bg-white dark:bg-slate-900',
+        'bg-white dark:bg-xedu-slate-900',
         expanded ? 'w-[208px]' : 'w-[60px]',
       )}
     >
@@ -452,7 +452,7 @@ export function Sidebar() {
         <button
           onClick={toggleSidebar}
           title={expanded ? 'Yopish' : 'Kengaytirish'}
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-xedu-slate-400 hover:text-xedu-slate-600 dark:hover:text-xedu-slate-200 hover:bg-xedu-slate-100 dark:hover:bg-xedu-slate-800 transition-colors"
         >
           {expanded ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
@@ -534,11 +534,11 @@ export function Sidebar() {
       )}>
         {expanded ? (
           <div className="flex items-center justify-between">
-            <p className="text-[11px] text-slate-400 dark:text-slate-500 font-medium">Xedu Platform</p>
-            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-semibold bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full">v1.0</span>
+            <p className="text-[11px] text-xedu-slate-400 dark:text-xedu-slate-500 font-medium">Xedu Platform</p>
+            <span className="text-[10px] text-xedu-slate-400 dark:text-xedu-slate-500 font-semibold bg-xedu-slate-100 dark:bg-xedu-slate-800 px-2 py-0.5 rounded-full">v1.0</span>
           </div>
         ) : (
-          <p className="text-[10px] text-slate-400 dark:text-slate-500 text-center font-semibold">v1</p>
+          <p className="text-[10px] text-xedu-slate-400 dark:text-xedu-slate-500 text-center font-semibold">v1</p>
         )}
       </div>
     </aside>

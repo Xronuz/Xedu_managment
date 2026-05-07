@@ -17,17 +17,17 @@ const buttonVariants = cva(
       variant: {
         /* Primary CTA — emerald pill with glass glow */
         default:
-          'bg-emerald-600 text-white shadow-md shadow-emerald-600/20 hover:bg-emerald-500 hover:shadow-lg hover:shadow-emerald-600/25',
+          'bg-xedu-primary text-white shadow-sm shadow-xedu-primary/20 hover:bg-xedu-primary-hover hover:shadow-md hover:shadow-xedu-primary/25',
         destructive:
           'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
         outline:
-          'bg-white text-slate-700 border border-slate-200 shadow-xs hover:bg-slate-50 hover:border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700',
+          'bg-xedu-bg-elevated text-xedu-slate-700 border border-xedu-slate-200 shadow-xs hover:bg-xedu-slate-50 hover:border-xedu-slate-300 dark:bg-xedu-slate-800 dark:text-xedu-slate-200 dark:border-xedu-slate-700 dark:hover:bg-xedu-slate-700',
         secondary:
-          'bg-slate-100 text-slate-900 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700',
+          'bg-xedu-slate-100 text-xedu-slate-900 hover:bg-xedu-slate-200 dark:bg-xedu-slate-800 dark:text-xedu-slate-100 dark:hover:bg-xedu-slate-700',
         ghost:
-          'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white',
+          'text-xedu-slate-600 hover:bg-xedu-slate-100 hover:text-xedu-slate-900 dark:text-xedu-slate-300 dark:hover:bg-xedu-slate-800 dark:hover:text-white',
         link:
-          'text-emerald-600 underline-offset-4 hover:underline p-0 h-auto',
+          'text-xedu-primary underline-offset-4 hover:underline p-0 h-auto',
       },
       size: {
         default: 'h-9 px-5 py-2',

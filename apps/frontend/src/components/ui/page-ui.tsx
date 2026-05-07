@@ -12,13 +12,13 @@ import { Search, ChevronLeft, ChevronRight, Inbox } from 'lucide-react';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 export const DS = {
-  primary:      '#0F7B53',
-  primaryLight: '#DDF5EA',
-  text:         '#111827',
-  muted:        '#6B7280',
-  border:       'rgba(0,0,0,0.05)',
-  shadow:       '0 10px 30px rgba(0,0,0,0.04)',
-  bg:           '#F7F8F8',
+  primary:      'var(--xedu-primary)',
+  primaryLight: 'var(--xedu-primary-light)',
+  text:         'var(--xedu-text)',
+  muted:        'var(--xedu-text-muted)',
+  border:       'var(--xedu-border)',
+  shadow:       'var(--xedu-shadow-floating)',
+  bg:           'var(--xedu-bg)',
 } as const;
 
 // ─── PageShell ────────────────────────────────────────────────────────────────
@@ -42,11 +42,11 @@ export function PageHeader({ title, subtitle, actions, className }: PageHeaderPr
   return (
     <div className={cn('flex items-center justify-between gap-4', className)}>
       <div className="min-w-0">
-        <h1 className="text-[26px] font-bold tracking-tight leading-tight truncate text-slate-900 dark:text-slate-100">
+        <h1 className="text-[26px] font-bold tracking-tight leading-tight truncate text-xedu-slate-900 dark:text-xedu-slate-100">
           {title}
         </h1>
         {subtitle && (
-          <p className="text-[13px] mt-0.5 font-medium text-slate-500 dark:text-slate-400">
+          <p className="text-[13px] mt-0.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
             {subtitle}
           </p>
         )}
@@ -76,12 +76,12 @@ export function PCard({ children, className, style, padding = 'md', hoverable, o
     <div
       onClick={onClick}
       className={cn(
-        'rounded-[24px] bg-white dark:bg-slate-800/50',
+        'rounded-[24px] bg-xedu-bg-elevated dark:bg-xedu-slate-800/50',
         pad,
-        hoverable && 'cursor-pointer transition-all duration-200 hover:-translate-y-[2px] hover:shadow-[0_20px_48px_rgba(0,0,0,0.08)]',
+        hoverable && 'cursor-pointer transition-all duration-150 hover:-translate-y-[2px] hover:shadow-xl',
         className,
       )}
-      style={{ border: '1px solid rgba(0,0,0,0.04)', boxShadow: DS.shadow, ...style }}
+      style={{ border: '1px solid var(--xedu-border)', boxShadow: DS.shadow, ...style }}
     >
       {children}
     </div>
@@ -102,20 +102,18 @@ export function FilterBar({ search, onSearch, searchPlaceholder = 'Qidiruv...', 
     <div className={cn('flex flex-wrap items-center gap-2', className)}>
       {onSearch !== undefined && (
         <div className="relative flex-1 min-w-[200px] max-w-[360px]">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-400 pointer-events-none" />
           <input
             type="text"
             value={search ?? ''}
             onChange={e => onSearch(e.target.value)}
             placeholder={searchPlaceholder}
-            className="w-full h-[42px] pl-10 pr-4 text-[13px] rounded-[14px] outline-none transition-all"
+            className="w-full h-[42px] pl-10 pr-4 text-[13px] rounded-[14px] outline-none transition-all bg-xedu-bg text-xedu-text"
             style={{
-              background: '#F7F8F8',
-              border: '1px solid rgba(0,0,0,0.06)',
-              color: DS.text,
+              border: '1px solid var(--xedu-border)',
             }}
-            onFocus={e => { e.currentTarget.style.borderColor = 'rgba(15,123,83,0.4)'; e.currentTarget.style.boxShadow = '0 0 0 3px rgba(15,123,83,0.08)'; }}
-            onBlur={e =>  { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.06)';   e.currentTarget.style.boxShadow = 'none'; }}
+            onFocus={e => { e.currentTarget.style.borderColor = 'var(--xedu-primary)'; e.currentTarget.style.boxShadow = 'var(--xedu-shadow-glow-primary)'; }}
+            onBlur={e =>  { e.currentTarget.style.borderColor = 'var(--xedu-border)';   e.currentTarget.style.boxShadow = 'none'; }}
           />
         </div>
       )}
@@ -140,11 +138,11 @@ export function Btn({
   const base = 'inline-flex items-center justify-center gap-2 font-semibold rounded-[14px] transition-all duration-150 select-none';
   const sizes = { sm: 'h-8 px-3 text-[12px]', md: 'h-[42px] px-4 text-[13px]', lg: 'h-12 px-6 text-[14px]' };
   const variants: Record<BtnVariant, string> = {
-    primary:   'bg-[#0F7B53] text-white hover:bg-[#0d6b48] active:scale-[0.98] shadow-sm',
-    secondary: 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-black/[0.08] dark:border-white/[0.08] hover:bg-slate-50 dark:hover:bg-slate-700 hover:border-black/[0.12] dark:hover:border-white/[0.12]',
-    ghost:     'bg-transparent text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800',
+    primary:   'bg-xedu-primary text-white hover:bg-xedu-primary-hover active:scale-[0.98] shadow-sm',
+    secondary: 'bg-xedu-bg-elevated dark:bg-xedu-slate-800 text-xedu-slate-700 dark:text-xedu-slate-200 border border-xedu-border dark:border-white/[0.08] hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-700 hover:border-xedu-border-hover dark:hover:border-white/[0.12]',
+    ghost:     'bg-transparent text-xedu-slate-600 dark:text-xedu-slate-300 hover:bg-xedu-slate-100 dark:hover:bg-xedu-slate-800',
     danger:    'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30',
-    soft:      'bg-[#DDF5EA] dark:bg-emerald-900/30 text-[#0F7B53] dark:text-emerald-400 hover:bg-[#c8f0dc] dark:hover:bg-emerald-900/50',
+    soft:      'bg-xedu-primary-light dark:bg-emerald-900/30 text-xedu-primary dark:text-emerald-400 hover:bg-xedu-primary-muted dark:hover:bg-emerald-900/50',
   };
   return (
     <button
@@ -166,8 +164,8 @@ const STATUS_CLASSES: Record<StatusVariant, string> = {
   success: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
   warning: 'bg-amber-50  dark:bg-amber-900/30  text-amber-700  dark:text-amber-400',
   danger:  'bg-red-50    dark:bg-red-900/30    text-red-600    dark:text-red-400',
-  info:    'bg-blue-50   dark:bg-blue-900/30   text-blue-700   dark:text-blue-400',
-  neutral: 'bg-slate-100 dark:bg-slate-700     text-slate-600  dark:text-slate-300',
+  info:    'bg-sky-50    dark:bg-sky-900/30    text-sky-700    dark:text-sky-400',
+  neutral: 'bg-xedu-slate-100 dark:bg-xedu-slate-700 text-xedu-slate-600 dark:text-xedu-slate-300',
   violet:  'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400',
 };
 interface StatusBadgeProps {
@@ -200,7 +198,7 @@ export function TableShell({ children, className }: { children: React.ReactNode;
 export function THead({ children }: { children: React.ReactNode }) {
   return (
     <thead>
-      <tr className="border-b border-black/[0.05] dark:border-white/[0.06] bg-slate-50 dark:bg-slate-800/60">
+      <tr className="border-b border-xedu-border dark:border-white/[0.06] bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
         {children}
       </tr>
     </thead>
@@ -209,7 +207,7 @@ export function THead({ children }: { children: React.ReactNode }) {
 
 export function TH({ children, className }: { children?: React.ReactNode; className?: string }) {
   return (
-    <th className={cn('px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.1em] whitespace-nowrap text-slate-500 dark:text-slate-400', className)}>
+    <th className={cn('px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.1em] whitespace-nowrap text-xedu-slate-500 dark:text-xedu-slate-400', className)}>
       {children}
     </th>
   );
@@ -225,7 +223,7 @@ export function TR({ children, onClick, className }: { children: React.ReactNode
       onClick={onClick}
       className={cn(
         'border-b border-black/[0.04] dark:border-white/[0.05] transition-colors duration-100',
-        onClick && 'cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/40',
+        onClick && 'cursor-pointer hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-700/40',
         className,
       )}
     >
@@ -236,7 +234,7 @@ export function TR({ children, onClick, className }: { children: React.ReactNode
 
 export function TD({ children, className }: { children?: React.ReactNode; className?: string }) {
   return (
-    <td className={cn('px-5 py-3.5 align-middle text-slate-900 dark:text-slate-100', className)}>
+    <td className={cn('px-5 py-3.5 align-middle text-xedu-slate-900 dark:text-xedu-slate-100', className)}>
       {children}
     </td>
   );
@@ -260,8 +258,8 @@ export function AvatarCell({ name, subtitle, size = 36 }: { name: string; subtit
         {initials}
       </div>
       <div className="min-w-0">
-        <p className="font-semibold truncate text-[13px] text-slate-900 dark:text-slate-100">{name}</p>
-        {subtitle && <p className="text-[11px] truncate mt-0.5 text-slate-500 dark:text-slate-400">{subtitle}</p>}
+        <p className="font-semibold truncate text-[13px] text-xedu-slate-900 dark:text-xedu-slate-100">{name}</p>
+        {subtitle && <p className="text-[11px] truncate mt-0.5 text-xedu-slate-500 dark:text-xedu-slate-400">{subtitle}</p>}
       </div>
     </div>
   );
@@ -278,13 +276,13 @@ export function EmptyCard({ icon, title, description, action }: EmptyCardProps) 
   return (
     <PCard className="flex flex-col items-center justify-center py-16 text-center gap-3">
       {icon
-        ? <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-1 bg-emerald-50 dark:bg-emerald-900/30">
-            <span className="text-emerald-600 dark:text-emerald-400">{icon}</span>
+        ? <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-1 bg-xedu-primary-light dark:bg-emerald-900/30">
+            <span className="text-xedu-primary dark:text-emerald-400">{icon}</span>
           </div>
         : <Inbox className="h-10 w-10 opacity-25 mb-1" />
       }
-      <p className="font-semibold text-[15px] text-slate-800 dark:text-slate-200">{title}</p>
-      {description && <p className="text-[13px] max-w-xs text-slate-500 dark:text-slate-400">{description}</p>}
+      <p className="font-semibold text-[15px] text-xedu-slate-800 dark:text-xedu-slate-200">{title}</p>
+      {description && <p className="text-[13px] max-w-xs text-xedu-slate-500 dark:text-xedu-slate-400">{description}</p>}
       {action && <div className="mt-2">{action}</div>}
     </PCard>
   );
@@ -303,17 +301,17 @@ export function Pagination({ page, total, perPage, onPage }: PaginationProps) {
   const from = (page - 1) * perPage + 1;
   const to   = Math.min(page * perPage, total);
   return (
-    <div className="flex items-center justify-between px-5 py-3.5 border-t" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
-      <p className="text-[12px] font-medium" style={{ color: DS.muted }}>
+    <div className="flex items-center justify-between px-5 py-3.5 border-t border-xedu-border">
+      <p className="text-[12px] font-medium text-xedu-text-muted">
         {from}–{to} / {total} ta
       </p>
       <div className="flex items-center gap-1">
         <button
           onClick={() => onPage(page - 1)}
           disabled={page <= 1}
-          className="h-8 w-8 rounded-xl flex items-center justify-center transition-colors hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="h-8 w-8 rounded-xl flex items-center justify-center transition-colors hover:bg-xedu-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          <ChevronLeft className="h-4 w-4" style={{ color: DS.muted }} />
+          <ChevronLeft className="h-4 w-4 text-xedu-text-muted" />
         </button>
         {Array.from({ length: Math.min(pages, 7) }, (_, i) => {
           const p = pages <= 7 ? i + 1 : i < 3 ? i + 1 : i === 3 ? page : i === 4 ? pages - 2 : i === 5 ? pages - 1 : pages;
@@ -321,11 +319,12 @@ export function Pagination({ page, total, perPage, onPage }: PaginationProps) {
             <button
               key={p}
               onClick={() => onPage(p)}
-              className="h-8 min-w-[32px] px-2 rounded-xl text-[12px] font-semibold transition-colors"
-              style={p === page
-                ? { background: DS.primaryLight, color: DS.primary }
-                : { color: DS.muted, background: 'transparent' }
-              }
+              className={cn(
+                'h-8 min-w-[32px] px-2 rounded-xl text-[12px] font-semibold transition-colors',
+                p === page
+                  ? 'bg-xedu-primary-light text-xedu-primary'
+                  : 'text-xedu-text-muted bg-transparent hover:bg-xedu-slate-100'
+              )}
             >
               {p}
             </button>
@@ -334,9 +333,9 @@ export function Pagination({ page, total, perPage, onPage }: PaginationProps) {
         <button
           onClick={() => onPage(page + 1)}
           disabled={page >= pages}
-          className="h-8 w-8 rounded-xl flex items-center justify-center transition-colors hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="h-8 w-8 rounded-xl flex items-center justify-center transition-colors hover:bg-xedu-slate-100 disabled:opacity-30 disabled:cursor-not-allowed"
         >
-          <ChevronRight className="h-4 w-4" style={{ color: DS.muted }} />
+          <ChevronRight className="h-4 w-4 text-xedu-text-muted" />
         </button>
       </div>
     </div>
@@ -355,7 +354,7 @@ interface SectionCardProps {
 export function SectionCard({ title, subtitle, action, children, className }: SectionCardProps) {
   return (
     <PCard padding="none" className={className}>
-      <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: 'rgba(0,0,0,0.05)' }}>
+      <div className="flex items-center justify-between px-6 py-4 border-b border-xedu-border">
         <div>
           <p className="font-bold text-[14px]" style={{ color: DS.text }}>{title}</p>
           {subtitle && <p className="text-[12px] mt-0.5" style={{ color: DS.muted }}>{subtitle}</p>}
@@ -369,11 +368,11 @@ export function SectionCard({ title, subtitle, action, children, className }: Se
 
 // ─── StatMini ────────────────────────────────────────────────────────────────
 interface StatMiniProps { label: string; value: string | number; color?: string; bg?: string }
-export function StatMini({ label, value, color = DS.text, bg = '#F7F8F8' }: StatMiniProps) {
+export function StatMini({ label, value, color = 'var(--xedu-text)', bg = 'var(--xedu-bg)' }: StatMiniProps) {
   return (
     <div className="rounded-2xl px-4 py-3 text-center" style={{ background: bg }}>
       <p className="text-[22px] font-black leading-none tracking-tight" style={{ color }}>{value}</p>
-      <p className="text-[11px] font-semibold mt-1 uppercase tracking-wide" style={{ color: DS.muted }}>{label}</p>
+      <p className="text-[11px] font-semibold mt-1 uppercase tracking-wide text-xedu-text-muted">{label}</p>
     </div>
   );
 }

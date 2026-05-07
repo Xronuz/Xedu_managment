@@ -14,7 +14,7 @@ const badgeVariants = cva(
         destructive:
           'border-transparent bg-destructive/15 text-destructive border-destructive/20 dark:bg-destructive/25',
         outline:
-          'border-slate-200 text-slate-700 bg-white dark:border-slate-700 dark:text-slate-200 dark:bg-slate-900',
+          'border-xedu-slate-200 text-xedu-slate-700 bg-white dark:border-xedu-slate-700 dark:text-xedu-slate-200 dark:bg-xedu-slate-900',
 
         /* ── Semantic status variants ── */
         success:

@@ -107,7 +107,14 @@ export class UsersService {
         where,
         skip,
         take: limit,
-        select: this.userSelectFields(),
+        select: {
+          ...this.userSelectFields(),
+          branch: { select: { id: true, name: true } },
+          branchAssignments: {
+            where: { isActive: true },
+            select: { branch: { select: { id: true, name: true } } },
+          },
+        },
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.user.count({ where }),
@@ -139,8 +146,24 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto, currentUser: JwtPayload) {
-    const existing = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (existing) throw new ConflictException('Bu email allaqachon ro\'yxatdan o\'tgan');
+    const existing = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+      select: { id: true, schoolId: true, role: true, firstName: true, lastName: true },
+    });
+    if (existing) {
+      if (existing.schoolId === currentUser.schoolId) {
+        // Frontend bu xatoni "assign-branch dialog" tarzida ko'rsatadi
+        throw new ConflictException({
+          code: 'USER_EXISTS_IN_SCHOOL',
+          message: 'Bu email allaqachon mavjud',
+          existingUserId: existing.id,
+          existingRole: existing.role,
+          existingName: `${existing.firstName} ${existing.lastName}`,
+        });
+      }
+      // Boshqa maktab → bir xil neutral xato
+      throw new ConflictException("Bu email allaqachon ro'yxatdan o'tgan");
+    }
 
     // 1. Role authorization check
     this.validateRoleCreation(currentUser.role as UserRole, dto.role);
@@ -200,6 +223,109 @@ export class UsersService {
     });
 
     return user;
+  }
+
+  async assignBranch(
+    id: string,
+    dto: { branchId: string; role: UserRole },
+    currentUser: JwtPayload,
+  ) {
+    // 1. Target user mavjud va o'z maktabida
+    const targetUser = await this.prisma.user.findFirst({
+      where: { id, schoolId: currentUser.schoolId! },
+      include: {
+        branchAssignments: {
+          where: { isActive: true },
+          select: { branchId: true },
+        },
+      },
+    });
+    if (!targetUser) throw new NotFoundException('Foydalanuvchi topilmadi');
+
+    // 2. Target branch mavjud va o'z maktabida + isActive
+    const branch = await this.prisma.branch.findFirst({
+      where: { id: dto.branchId, schoolId: currentUser.schoolId!, isActive: true },
+      select: { id: true, name: true },
+    });
+    if (!branch) throw new NotFoundException('Filial topilmadi');
+
+    // 3. Actor target rolni boshqara olishi shart
+    assertCanManage(currentUser, dto.role);
+
+    // 4. Branch admin → faqat o'z filialiga
+    if (currentUser.role === UserRole.BRANCH_ADMIN && dto.branchId !== currentUser.branchId) {
+      throw new ForbiddenException("Faqat o'z filialingizga biriktirish mumkin");
+    }
+
+    // 5. Idempotent upsert
+    await this.prisma.userBranchAssignment.upsert({
+      where: { userId_branchId: { userId: id, branchId: dto.branchId } },
+      update: { role: dto.role, isActive: true },
+      create: {
+        userId: id,
+        branchId: dto.branchId,
+        role: dto.role,
+        isActive: true,
+      },
+    });
+
+    // 6. Audit log
+    await this.auditService.log({
+      userId: currentUser.sub,
+      schoolId: currentUser.schoolId ?? undefined,
+      action: 'assign_branch',
+      entity: 'UserBranchAssignment',
+      entityId: id,
+      newData: { branchId: dto.branchId, branchName: branch.name, role: dto.role, targetUserEmail: targetUser.email },
+    });
+
+    return { message: "Foydalanuvchi filialga biriktirildi" };
+  }
+
+  async removeBranchAssignment(
+    id: string,
+    branchId: string,
+    currentUser: JwtPayload,
+  ) {
+    // 1. Target user mavjud va o'z maktabida
+    const targetUser = await this.prisma.user.findFirst({
+      where: { id, schoolId: currentUser.schoolId! },
+      select: { id: true, email: true, branchId: true },
+    });
+    if (!targetUser) throw new NotFoundException('Foydalanuvchi topilmadi');
+
+    // 2. Asosiy filialni olib tashlab bo'lmasligini tekshirish
+    if (targetUser.branchId === branchId) {
+      throw new BadRequestException("Asosiy filialni o'zgartirish uchun foydalanuvchini tahrir qiling");
+    }
+
+    // 3. Branch admin → faqat o'z filiali
+    if (currentUser.role === UserRole.BRANCH_ADMIN && branchId !== currentUser.branchId) {
+      throw new ForbiddenException("Faqat o'z filialingizdagi biriktirmani olib tashlashingiz mumkin");
+    }
+
+    // 4. Soft delete: isActive=false
+    const assignment = await this.prisma.userBranchAssignment.findUnique({
+      where: { userId_branchId: { userId: id, branchId } },
+    });
+    if (!assignment) throw new NotFoundException('Biriktirish topilmadi');
+
+    await this.prisma.userBranchAssignment.update({
+      where: { userId_branchId: { userId: id, branchId } },
+      data: { isActive: false },
+    });
+
+    // 5. Audit log
+    await this.auditService.log({
+      userId: currentUser.sub,
+      schoolId: currentUser.schoolId ?? undefined,
+      action: 'unassign_branch',
+      entity: 'UserBranchAssignment',
+      entityId: id,
+      oldData: { branchId, role: assignment.role, targetUserEmail: targetUser.email },
+    });
+
+    return { message: "Foydalanuvchi filialdan olib tashlandi" };
   }
 
   async update(id: string, dto: UpdateUserDto, currentUser: JwtPayload) {
@@ -336,6 +462,40 @@ export class UsersService {
     });
     if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
     return user;
+  }
+
+  async checkEmail(email: string, currentUser: JwtPayload) {
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+      include: {
+        branch: { select: { id: true, name: true } },
+        branchAssignments: {
+          where: { isActive: true },
+          include: { branch: { select: { id: true, name: true } } },
+        },
+      },
+    });
+
+    // Privacy: faqat o'z maktab — boshqa maktab email'ini ochib bermaslik
+    if (!user || user.schoolId !== currentUser.schoolId) {
+      return { exists: false };
+    }
+
+    return {
+      exists: true,
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        primaryBranchId: user.branchId,
+        primaryBranchName: user.branch?.name ?? null,
+        assignedBranches: user.branchAssignments.map(a => ({
+          id: a.branch.id,
+          name: a.branch.name,
+        })),
+      },
+    };
   }
 
   async linkParentStudent(parentId: string, studentId: string, currentUser: JwtPayload) {

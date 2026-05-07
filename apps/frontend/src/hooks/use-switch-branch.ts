@@ -95,12 +95,13 @@ export function useSwitchBranch() {
         // 4. Branch-specific barcha query'larni bekor qilish.
         //    exact: false — ['attendance', 'today-summary'], ['attendance', branchId]
         //    kabi BARCHA nested key'larni ham qamrab oladi.
-        //    Bu hozirgi statik invalidatsiyaning asosiy kamchiligi edi.
         await Promise.all(
           BRANCH_QUERY_ROOTS.map(key =>
             queryClient.invalidateQueries({ queryKey: [key], exact: false }),
           ),
         );
+        // 5. Kuchli cache reset — yangi branchId bilan eski ma'lumotlar aralashmasin
+        queryClient.clear();
 
         toast({
           title: `✅ Filial almashtirildi: ${branchMeta?.name ?? branchId}`,

@@ -117,6 +117,8 @@ export enum AuditAction {
   LOGIN = 'login',
   LOGOUT = 'logout',
   EXPORT = 'export',
+  ASSIGN_BRANCH = 'assign_branch',
+  UNASSIGN_BRANCH = 'unassign_branch',
 }
 
 export enum Language {

@@ -23,6 +23,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth.store';
 import { getInitials, getRoleLabel, cn } from '@/lib/utils';
 import { ImportDialog } from '@/components/import/import-dialog';
+import { AssignBranchDialog } from '@/components/users/assign-branch-dialog';
 
 // ── Zod schema ────────────────────────────────────────────────────────────────
 const userSchema = z.object({
@@ -82,6 +83,8 @@ export default function UsersPage() {
   const [filterBranch, setFilterBranch] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
   const filterRef = useRef<HTMLDivElement>(null);
+  const [checkEmailResult, setCheckEmailResult] = useState<any>(null);
+  const [checkingEmail, setCheckingEmail] = useState(false);
 
   // ── React Hook Form ──────────────────────────────────────────────────────────
   const {
@@ -251,7 +254,20 @@ export default function UsersPage() {
       setOpen(false);
       reset();
     } catch (err: any) {
-      const msg = err?.response?.data?.message;
+      const response = err?.response?.data;
+      // Structured error from backend: USER_EXISTS_IN_SCHOOL
+      if (response?.code === 'USER_EXISTS_IN_SCHOOL') {
+        setCheckEmailResult({
+          id: response.existingUserId,
+          firstName: response.existingName?.split(' ')[0] ?? '',
+          lastName: response.existingName?.split(' ').slice(1).join(' ') ?? '',
+          role: response.existingRole,
+          primaryBranchName: null,
+          assignedBranches: [],
+        });
+        return;
+      }
+      const msg = response?.message;
       toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik yuz berdi' });
     }
   };
@@ -462,6 +478,7 @@ export default function UsersPage() {
             <TH>Foydalanuvchi</TH>
             <TH>Rol</TH>
             <TH>Telefon</TH>
+            <TH>Filial</TH>
             <TH>Holat</TH>
             <TH className="text-right">Amal</TH>
           </THead>
@@ -474,6 +491,20 @@ export default function UsersPage() {
                 <TD><AvatarCell name={`${u.firstName} ${u.lastName}`} subtitle={u.email} /></TD>
                 <TD><span className="text-[12px] font-semibold" style={{ color: DS.muted }}>{getRoleLabel(u.role)}</span></TD>
                 <TD><span className="text-[13px]" style={{ color: DS.muted }}>{u.phone || '—'}</span></TD>
+                <TD>
+                  <div className="flex flex-wrap gap-1 max-w-[140px]">
+                    {u.branch?.name && (
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                        {u.branch.name}
+                      </span>
+                    )}
+                    {u.branchAssignments?.map((a: any, i: number) => (
+                      <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                        {a.branch?.name}
+                      </span>
+                    ))}
+                  </div>
+                </TD>
                 <TD>
                   <StatusBadge variant={u.isActive ? 'success' : 'danger'}>
                     {u.isActive ? 'Aktiv' : 'Bloklangan'}
@@ -594,7 +625,27 @@ export default function UsersPage() {
             </div>
             <div className="space-y-1.5">
               <Label>Email <span className="text-destructive">*</span></Label>
-              <Input type="email" placeholder="ali@maktab.uz" {...register('email')} />
+              <Input
+                type="email"
+                placeholder="ali@maktab.uz"
+                {...register('email')}
+                onBlur={async (e) => {
+                  const email = e.target.value.trim();
+                  if (!email || errors.email) return;
+                  setCheckingEmail(true);
+                  try {
+                    const result = await usersApi.checkEmail(email);
+                    if (result.exists && result.user) {
+                      setCheckEmailResult(result.user);
+                    }
+                  } catch {
+                    // ignore network errors
+                  } finally {
+                    setCheckingEmail(false);
+                  }
+                }}
+              />
+              {checkingEmail && <p className="text-xs text-muted-foreground">Tekshirilmoqda...</p>}
               {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
             </div>
             <div className="space-y-1.5">
@@ -825,6 +876,21 @@ export default function UsersPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Assign existing user to branch dialog */}
+      {checkEmailResult && (
+        <AssignBranchDialog
+          existingUser={checkEmailResult}
+          targetBranchId={watchedBranchId || activeBranchId || ''}
+          targetBranchName={branchesList.find((b: any) => b.id === (watchedBranchId || activeBranchId))?.name}
+          open={!!checkEmailResult}
+          onClose={() => setCheckEmailResult(null)}
+          onSuccess={() => {
+            setOpen(false);
+            reset();
+          }}
+        />
+      )}
 
       {/* Excel import dialog */}
       <ImportDialog

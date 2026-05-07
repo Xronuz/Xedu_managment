@@ -63,6 +63,7 @@ export interface JwtPayload {
   role: UserRole;
   schoolId: string | null;
   branchId: string | null;
+  assignedBranchIds?: string[];
   isSuperAdmin: boolean;
 }
 

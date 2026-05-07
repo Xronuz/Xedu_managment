@@ -188,6 +188,8 @@ enum AuditAction {
   login
   logout
   export
+  assign_branch
+  unassign_branch
 }
 
 enum Language {

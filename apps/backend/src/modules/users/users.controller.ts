@@ -12,6 +12,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { AssignBranchDto } from './dto/assign-branch.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
@@ -44,6 +45,14 @@ export class UsersController {
   @ApiOperation({ summary: 'O\'z profili' })
   getMe(@CurrentUser('sub') userId: string) {
     return this.usersService.getMe(userId);
+  }
+
+  @Get('check-email')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: "Email mavjudligini tekshirish (o'z maktab ichida)" })
+  @ApiQuery({ name: 'email', required: true, type: String })
+  checkEmail(@Query('email') email: string, @CurrentUser() user: JwtPayload) {
+    return this.usersService.checkEmail(email, user);
   }
 
   @Get(':id')
@@ -85,6 +94,30 @@ export class UsersController {
   @ApiOperation({ summary: 'Bloklangan foydalanuvchini qayta faollashtirish' })
   restore(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.usersService.restore(id, user);
+  }
+
+  @Post(':id/assign-branch')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Foydalanuvchini filialga biriktirish" })
+  assignBranch(
+    @Param('id') id: string,
+    @Body() dto: AssignBranchDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.usersService.assignBranch(id, dto, user);
+  }
+
+  @Delete(':id/assign-branch/:branchId')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Foydalanuvchini filialdan olib tashlash" })
+  removeBranchAssignment(
+    @Param('id') id: string,
+    @Param('branchId') branchId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.usersService.removeBranchAssignment(id, branchId, user);
   }
 
   @Delete(':id/permanent')

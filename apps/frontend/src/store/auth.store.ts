@@ -10,6 +10,8 @@ export interface AuthUser {
   role: string;
   schoolId: string | null;
   branchId: string | null;
+  avatarUrl?: string | null;
+  assignedBranchIds?: string[];
 }
 
 interface AuthState {

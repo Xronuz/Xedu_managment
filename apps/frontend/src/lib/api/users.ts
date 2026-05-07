@@ -78,4 +78,30 @@ export const usersApi = {
     });
     return data as { created: number; skipped: number; errors: string[] };
   },
+
+  checkEmail: async (email: string): Promise<{
+    exists: boolean;
+    user?: {
+      id: string;
+      firstName: string;
+      lastName: string;
+      role: string;
+      primaryBranchId: string | null;
+      primaryBranchName: string | null;
+      assignedBranches: { id: string; name: string }[];
+    };
+  }> => {
+    const { data } = await apiClient.get('/users/check-email', { params: { email } });
+    return data;
+  },
+
+  assignBranch: async (userId: string, branchId: string, role: string) => {
+    const { data } = await apiClient.post(`/users/${userId}/assign-branch`, { branchId, role });
+    return data;
+  },
+
+  removeBranchAssignment: async (userId: string, branchId: string) => {
+    const { data } = await apiClient.delete(`/users/${userId}/assign-branch/${branchId}`);
+    return data;
+  },
 };

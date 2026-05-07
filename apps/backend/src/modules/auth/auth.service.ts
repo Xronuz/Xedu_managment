@@ -204,13 +204,20 @@ export class AuthService {
       throw new ForbiddenException('Bu filial sizning maktabingizga tegishli emas');
     }
 
-    if (currentUser.role === UserRole.BRANCH_ADMIN) {
-      const assignment = await this.prisma.userBranchAssignment.findUnique({
-        where: { userId_branchId: { userId: currentUser.sub, branchId: targetBranchId } },
-        select: { isActive: true },
-      });
-      if (!assignment?.isActive && currentUser.branchId !== targetBranchId) {
-        throw new ForbiddenException('Bu filialga kirish huquqingiz yo\'q');
+    const SCHOOL_WIDE_SWITCHERS = [UserRole.SUPER_ADMIN, UserRole.DIRECTOR];
+    if (!SCHOOL_WIDE_SWITCHERS.includes(currentUser.role)) {
+      // Director/super_admin'dan tashqari hamma — assignment talab qiladi
+      const isAssigned =
+        currentUser.branchId === targetBranchId ||
+        (currentUser.assignedBranchIds?.includes(targetBranchId) ?? false);
+      const hasActiveAssignment = isAssigned
+        ? true
+        : !!(await this.prisma.userBranchAssignment.findUnique({
+            where: { userId_branchId: { userId: currentUser.sub, branchId: targetBranchId } },
+            select: { isActive: true },
+          }))?.isActive;
+      if (!hasActiveAssignment) {
+        throw new ForbiddenException("Bu filialga kirish huquqingiz yo'q");
       }
     }
 
@@ -257,12 +264,25 @@ export class AuthService {
     branchId?: string | null;
   }): Promise<TokenPair> {
     const isSuperAdmin = user.role === UserRole.SUPER_ADMIN;
+
+    // Load active branch assignments (excluding primary branch)
+    const assignments = await this.prisma.userBranchAssignment.findMany({
+      where: {
+        userId: user.id,
+        isActive: true,
+        branchId: { not: user.branchId ?? undefined },
+      },
+      select: { branchId: true },
+    });
+    const assignedBranchIds = assignments.map(a => a.branchId);
+
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,
       role: user.role as UserRole,
       schoolId: user.schoolId,
       branchId: user.branchId!,
+      assignedBranchIds,
       isSuperAdmin,
     };
 

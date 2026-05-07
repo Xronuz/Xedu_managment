@@ -29,7 +29,12 @@ import {
 import { Badge } from '@/components/ui/badge';
 
 /** Bu rollar uchun filial switcher ko'rsatiladi */
-const SWITCHER_ROLES = new Set(['director', 'branch_admin']);
+const SWITCHER_ROLES = new Set([
+  'director', 'branch_admin',
+  'vice_principal',
+  'teacher', 'class_teacher',
+  'accountant', 'librarian',
+]);
 
 export function BranchSwitcher() {
   const user = useAuthStore((s) => s.user);
@@ -67,15 +72,27 @@ export function BranchSwitcher() {
   }, [fetchedBranches, setBranches]);
 
   const isDirector = user?.role === 'director';
+  const canSeeAllBranches = isDirector || user?.role === 'super_admin';
 
   // Hozirgi filial nomi
   const currentLabel = activeBranchId
     ? (activeBranchMeta?.name ?? branches.find((b) => b.id === activeBranchId)?.name ?? 'Filial')
-    : isDirector
+    : canSeeAllBranches
       ? 'Barcha filiallar'
       : 'Filial tanlanmagan';
 
-  const activeBranches = branches.filter((b) => b.isActive);
+  // Staff rollari uchun faqat biriktirilgan filiallar
+  const assignedBranchIds = user?.assignedBranchIds ?? [];
+  const allEligibleBranchIds = [
+    user?.branchId,
+    ...assignedBranchIds,
+  ].filter(Boolean) as string[];
+
+  const activeBranches = branches.filter((b) => {
+    if (!b.isActive) return false;
+    if (canSeeAllBranches) return true;
+    return allEligibleBranchIds.includes(b.id);
+  });
 
   // branch_admin uchun: faqat bitta filiali bo'lsa — dropdown emas, oddiy badge
   const isBranchAdmin = user.role === 'branch_admin';

@@ -73,7 +73,7 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, 'id'>;
 
-function toast({ ...props }: Toast) {
+function toastBase({ ...props }: Toast) {
   const id = genId();
   const update = (p: ToasterToast) => dispatch({ type: 'UPDATE_TOAST', toast: { ...p, id } });
   const dismiss = () => dispatch({ type: 'DISMISS_TOAST', toastId: id });
@@ -81,13 +81,41 @@ function toast({ ...props }: Toast) {
   return { id, dismiss, update };
 }
 
+/* ═════════════════════════════════════════════════════════════════════════════
+   Enterprise Toast Helpers — Semantic, concise, calm
+   ═════════════════════════════════════════════════════════════════════════════ */
+
+export const appToast = {
+  /** Success: calm confirmation */
+  success: (message: string, opts?: Partial<Toast>) =>
+    toastBase({ variant: 'success', title: message, ...opts }),
+
+  /** Error: clear problem statement */
+  error: (message: string, opts?: Partial<Toast>) =>
+    toastBase({ variant: 'destructive', title: message, ...opts }),
+
+  /** Warning: attention without alarm */
+  warning: (message: string, opts?: Partial<Toast>) =>
+    toastBase({ variant: 'warning', title: message, ...opts }),
+
+  /** Info: neutral update */
+  info: (message: string, opts?: Partial<Toast>) =>
+    toastBase({ variant: 'info', title: message, ...opts }),
+
+  /** Generic with explicit variant */
+  show: (opts: Toast) => toastBase(opts),
+
+  /** Dismiss all or specific toast */
+  dismiss: (id?: string) => dispatch({ type: 'DISMISS_TOAST', toastId: id }),
+};
+
 function useToast() {
   const [state, setState] = React.useState<State>(memoryState);
   React.useEffect(() => {
     listeners.push(setState);
     return () => { const i = listeners.indexOf(setState); if (i > -1) listeners.splice(i, 1); };
   }, []);
-  return { ...state, toast, dismiss: (id?: string) => dispatch({ type: 'DISMISS_TOAST', toastId: id }) };
+  return { ...state, toast: toastBase, dismiss: (id?: string) => dispatch({ type: 'DISMISS_TOAST', toastId: id }) };
 }
 
-export { useToast, toast };
+export { useToast, toastBase as toast };

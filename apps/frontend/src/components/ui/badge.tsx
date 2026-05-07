@@ -3,40 +3,40 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const badgeVariants = cva(
-  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 select-none',
+  'inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-xedu-primary/30 focus:ring-offset-2 select-none',
   {
     variants: {
       variant: {
         default:
-          'border-transparent bg-primary text-primary-foreground hover:bg-primary/85',
+          'border-transparent bg-xedu-primary text-white hover:bg-xedu-primary-hover',
         secondary:
-          'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/75',
+          'border-transparent bg-xedu-slate-100 text-xedu-slate-900 hover:bg-xedu-slate-200 dark:bg-xedu-slate-800 dark:text-xedu-slate-100 dark:hover:bg-xedu-slate-700',
         destructive:
-          'border-transparent bg-destructive/15 text-destructive border-destructive/20 dark:bg-destructive/25',
+          'border-transparent bg-xedu-ruby/10 text-xedu-ruby border-xedu-ruby/15 dark:bg-xedu-ruby/20 dark:border-xedu-ruby/25',
         outline:
           'border-xedu-slate-200 text-xedu-slate-700 bg-white dark:border-xedu-slate-700 dark:text-xedu-slate-200 dark:bg-xedu-slate-900',
 
-        /* ── Semantic status variants ── */
+        /* ── Semantic status variants (limited palette) ── */
         success:
-          'border-transparent bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300',
+          'border-transparent bg-xedu-primary-light text-xedu-primary dark:bg-xedu-primary/20 dark:text-xedu-primary',
         warning:
-          'border-transparent bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300',
+          'border-transparent bg-xedu-amber/10 text-xedu-amber dark:bg-xedu-amber/15 dark:text-xedu-amber',
         info:
-          'border-transparent bg-blue-100 text-blue-800 dark:bg-blue-900/40 dark:text-blue-300',
-        purple:
-          'border-transparent bg-violet-100 text-violet-800 dark:bg-violet-900/40 dark:text-violet-300',
-        rose:
-          'border-transparent bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300',
-        cyan:
-          'border-transparent bg-cyan-100 text-cyan-800 dark:bg-cyan-900/40 dark:text-cyan-300',
+          'border-transparent bg-xedu-sky/10 text-xedu-sky dark:bg-xedu-sky/15 dark:text-xedu-sky',
+        violet:
+          'border-transparent bg-xedu-violet/10 text-xedu-violet dark:bg-xedu-violet/15 dark:text-xedu-violet',
+        ruby:
+          'border-transparent bg-xedu-ruby/10 text-xedu-ruby dark:bg-xedu-ruby/15 dark:text-xedu-ruby',
+        gold:
+          'border-transparent bg-xedu-gold/10 text-xedu-gold dark:bg-xedu-gold/15 dark:text-xedu-gold',
 
-        /* ── Subtle tinted variants — no border (Phase 15) ── */
+        /* ── Subtle tinted variants — no border ── */
         'outline-success':
-          'border-transparent text-emerald-700 bg-emerald-50 dark:text-emerald-300 dark:bg-emerald-950/40',
+          'border-transparent text-xedu-primary bg-xedu-primary-light dark:text-xedu-primary dark:bg-xedu-primary/15',
         'outline-warning':
-          'border-transparent text-amber-700 bg-amber-50 dark:text-amber-300 dark:bg-amber-950/40',
+          'border-transparent text-xedu-amber bg-xedu-amber/10 dark:text-xedu-amber dark:bg-xedu-amber/15',
         'outline-destructive':
-          'border-transparent text-red-700 bg-red-50 dark:text-red-300 dark:bg-red-950/40',
+          'border-transparent text-xedu-ruby bg-xedu-ruby/10 dark:text-xedu-ruby dark:bg-xedu-ruby/15',
       },
     },
     defaultVariants: { variant: 'default' },

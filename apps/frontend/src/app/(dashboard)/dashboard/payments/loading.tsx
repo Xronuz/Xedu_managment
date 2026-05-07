@@ -12,13 +12,13 @@ export default function PaymentsLoading() {
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="rounded-xl border bg-card p-4 space-y-2">
+          <div key={i} className="rounded-xl border bg-white dark:bg-xedu-slate-900 p-4 space-y-2">
             <Skeleton className="h-4 w-24" />
             <Skeleton className="h-8 w-28" />
           </div>
         ))}
       </div>
-      <div className="rounded-xl border bg-card divide-y">
+      <div className="rounded-xl border bg-white dark:bg-xedu-slate-900 divide-y">
         {[...Array(7)].map((_, i) => (
           <div key={i} className="flex items-center gap-4 p-4">
             <Skeleton className="h-9 w-9 rounded-full" />

@@ -179,14 +179,14 @@ export const LEAD_STATUS_CONFIG: Record<LeadStatus, {
 };
 
 export const LEAD_SOURCE_CONFIG: Record<LeadSource, { label: string; emoji: string; color: string }> = {
-  INSTAGRAM: { label: 'Instagram', emoji: '📸', color: 'text-pink-600'   },
-  TELEGRAM:  { label: 'Telegram',  emoji: '✈️', color: 'text-blue-500'   },
-  FACEBOOK:  { label: 'Facebook',  emoji: '👥', color: 'text-blue-700'   },
+  INSTAGRAM: { label: 'Instagram', emoji: '', color: 'text-pink-600'   },
+  TELEGRAM:  { label: 'Telegram',  emoji: '', color: 'text-blue-500'   },
+  FACEBOOK:  { label: 'Facebook',  emoji: '', color: 'text-blue-700'   },
   WEBSITE:   { label: 'Sayt',      emoji: '🌐', color: 'text-teal-600'   },
   REFERRAL:  { label: 'Tavsiya',   emoji: '🤝', color: 'text-green-600'  },
   CALL:      { label: "Qo'ng'iroq", emoji: '📞', color: 'text-amber-600'  },
   WALK_IN:   { label: 'Shaxsan',   emoji: '🚶', color: 'text-indigo-600' },
-  OTHER:     { label: 'Boshqa',    emoji: '📋', color: 'text-gray-500'   },
+  OTHER:     { label: 'Boshqa',    emoji: '', color: 'text-gray-500'   },
 };
 
 export const KANBAN_COLUMNS: LeadStatus[] = [

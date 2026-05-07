@@ -208,6 +208,7 @@ export class UsersService {
         schoolId,
         branchId,
         passwordHash,
+        isFirstLogin: true,
       },
       select: this.userSelectFields(),
     });
@@ -524,7 +525,7 @@ export class UsersService {
     if (!valid) throw new UnauthorizedException('Joriy parol noto\'g\'ri');
 
     const passwordHash = await bcrypt.hash(dto.newPassword, 12);
-    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
+    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash, isFirstLogin: false } });
     return { message: 'Parol muvaffaqiyatli yangilandi' };
   }
 

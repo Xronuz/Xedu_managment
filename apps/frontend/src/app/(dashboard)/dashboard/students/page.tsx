@@ -69,7 +69,7 @@ function StudentsContent() {
     <div>
       <div className="mb-1">
         <h1 className="text-xl font-bold text-foreground">O&apos;quvchilar</h1>
-        <p className="text-sm text-muted-foreground">Davomat, baholar, imtihonlar va uy vazifalari</p>
+        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Davomat, baholar, imtihonlar va uy vazifalari</p>
       </div>
       <div className="mt-3">
         <SectionTabs tabs={TABS} defaultTab="attendance" />

@@ -52,19 +52,19 @@ export default function LibraryPage() {
 
   const createBookMutation = useMutation({
     mutationFn: libraryApi.createBook,
-    onSuccess: () => { toast({ title: '✅ Kitob qo\'shildi' }); queryClient.invalidateQueries({ queryKey: ['library'] }); setBookOpen(false); setBookForm(EMPTY_BOOK); },
+    onSuccess: () => { toast({ title: ' Kitob qo\'shildi' }); queryClient.invalidateQueries({ queryKey: ['library'] }); setBookOpen(false); setBookForm(EMPTY_BOOK); },
     onError: (err: any) => { const msg = err?.response?.data?.message; toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' }); },
   });
 
   const loanMutation = useMutation({
     mutationFn: libraryApi.loanBook,
-    onSuccess: () => { toast({ title: '✅ Kitob berildi' }); queryClient.invalidateQueries({ queryKey: ['library'] }); setLoanOpen(false); setLoanForm(EMPTY_LOAN); },
+    onSuccess: () => { toast({ title: ' Kitob berildi' }); queryClient.invalidateQueries({ queryKey: ['library'] }); setLoanOpen(false); setLoanForm(EMPTY_LOAN); },
     onError: (err: any) => { const msg = err?.response?.data?.message; toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' }); },
   });
 
   const returnMutation = useMutation({
     mutationFn: libraryApi.returnBook,
-    onSuccess: () => { toast({ title: '✅ Kitob qaytarildi' }); queryClient.invalidateQueries({ queryKey: ['library'] }); },
+    onSuccess: () => { toast({ title: ' Kitob qaytarildi' }); queryClient.invalidateQueries({ queryKey: ['library'] }); },
   });
 
   const exportPdfMutation = useMutation({
@@ -91,7 +91,7 @@ export default function LibraryPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2"><Library className="h-6 w-6 text-primary" /> Kutubxona</h1>
-          <p className="text-muted-foreground">Maktab kutubxonasini boshqarish</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Maktab kutubxonasini boshqarish</p>
         </div>
         {canManage && (
           <div className="flex gap-2 flex-wrap">
@@ -127,7 +127,7 @@ export default function LibraryPage() {
           <Card key={label}>
             <CardContent className="p-4 flex items-center gap-4">
               <div className={`p-3 rounded-xl ${bg}`}><Icon className={`h-5 w-5 ${color}`} /></div>
-              <div><p className="text-xs text-muted-foreground">{label}</p><p className="text-2xl font-bold">{value}</p></div>
+              <div><p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{label}</p><p className="text-2xl font-bold">{value}</p></div>
             </CardContent>
           </Card>
         ))}
@@ -145,7 +145,7 @@ export default function LibraryPage() {
       {tab === 'books' && (
         <>
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
             <Input placeholder="Kitob nomi, muallif..." className="pl-9" value={search} onChange={e => setSearch(e.target.value)} />
           </div>
           {booksLoading ? (
@@ -168,7 +168,7 @@ export default function LibraryPage() {
                       <div className="p-2 rounded-lg bg-primary/10"><BookOpen className="h-5 w-5 text-primary" /></div>
                       <div>
                         <p className="font-medium">{book.title}</p>
-                        <p className="text-sm text-muted-foreground">{book.author ?? 'Muallif ko\'rsatilmagan'} {book.isbn && `· ISBN: ${book.isbn}`}</p>
+                        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{book.author ?? 'Muallif ko\'rsatilmagan'} {book.isbn && `· ISBN: ${book.isbn}`}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
@@ -201,11 +201,11 @@ export default function LibraryPage() {
               {(loans as any[]).map((loan: any) => {
                 const isOverdue = loan.dueDate && new Date(loan.dueDate) < new Date();
                 return (
-                  <Card key={loan.id} className={isOverdue ? 'border-destructive/40' : ''}>
+                  <Card key={loan.id} className={isOverdue ? 'border-xedu-ruby/40' : ''}>
                     <CardContent className="flex items-center justify-between p-4">
                       <div>
                         <p className="font-medium">{loan.book?.title}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                           {loan.student?.firstName} {loan.student?.lastName} · {new Date(loan.loanDate).toLocaleDateString('uz-UZ')}
                         </p>
                       </div>
@@ -232,9 +232,9 @@ export default function LibraryPage() {
           <DialogHeader><DialogTitle>Yangi kitob qo'shish</DialogTitle><DialogDescription>Kutubxonaga kitob qo'shing</DialogDescription></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Kitob nomi <span className="text-destructive">*</span></Label>
+              <Label>Kitob nomi <span className="text-xedu-ruby">*</span></Label>
               <Input placeholder="Masalan: Matematika 9-sinf" value={bookForm.title} onChange={e => { setBookForm(f => ({ ...f, title: e.target.value })); setBookErrors(er => { const n = { ...er }; delete n.title; return n; }); }} />
-              {bookErrors.title && <p className="text-xs text-destructive">{bookErrors.title}</p>}
+              {bookErrors.title && <p className="text-xs text-xedu-ruby">{bookErrors.title}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
@@ -267,28 +267,28 @@ export default function LibraryPage() {
           <DialogHeader><DialogTitle>Kitob berish</DialogTitle><DialogDescription>O'quvchiga kitob bering</DialogDescription></DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Kitob <span className="text-destructive">*</span></Label>
+              <Label>Kitob <span className="text-xedu-ruby">*</span></Label>
               <Select value={loanForm.bookId} onValueChange={v => { setLoanForm(f => ({ ...f, bookId: v })); setLoanErrors(e => { const n = { ...e }; delete n.bookId; return n; }); }}>
                 <SelectTrigger><SelectValue placeholder="Kitob tanlang..." /></SelectTrigger>
                 <SelectContent>{(books as any[]).filter((b: any) => b.availableCopies > 0).map((b: any) => <SelectItem key={b.id} value={b.id}>{b.title}</SelectItem>)}</SelectContent>
               </Select>
-              {loanErrors.bookId && <p className="text-xs text-destructive">{loanErrors.bookId}</p>}
+              {loanErrors.bookId && <p className="text-xs text-xedu-ruby">{loanErrors.bookId}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label>O&apos;quvchi <span className="text-destructive">*</span></Label>
+              <Label>O&apos;quvchi <span className="text-xedu-ruby">*</span></Label>
               <div className="relative">
-                <div className="flex items-center border rounded-md px-3 py-2 gap-2 focus-within:ring-1 focus-within:ring-ring">
-                  <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+                <div className="flex items-center border rounded-md px-3 py-2 gap-2 focus-within:ring-1 focus-within:ring-xedu-primary/30">
+                  <Search className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0" />
                   <input
-                    className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                    className="flex-1 bg-transparent text-sm outline-none placeholder:text-xedu-slate-500 dark:text-xedu-slate-400"
                     placeholder="Ism bo'yicha qidirish..."
                     value={studentSearch}
                     onChange={e => setStudentSearch(e.target.value)}
                   />
-                  <ChevronsUpDown className="h-4 w-4 text-muted-foreground shrink-0 opacity-50" />
+                  <ChevronsUpDown className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0 opacity-50" />
                 </div>
                 {studentSearch && (
-                  <div className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md max-h-48 overflow-y-auto">
+                  <div className="absolute z-50 mt-1 w-full rounded-md border bg-white dark:bg-xedu-slate-900 shadow-md max-h-48 overflow-y-auto">
                     {students
                       .filter((s: any) =>
                         `${s.firstName} ${s.lastName}`.toLowerCase().includes(studentSearch.toLowerCase())
@@ -311,17 +311,17 @@ export default function LibraryPage() {
                     {students.filter((s: any) =>
                       `${s.firstName} ${s.lastName}`.toLowerCase().includes(studentSearch.toLowerCase())
                     ).length === 0 && (
-                      <p className="px-3 py-2 text-sm text-muted-foreground">O&apos;quvchi topilmadi</p>
+                      <p className="px-3 py-2 text-sm text-xedu-slate-500 dark:text-xedu-slate-400">O&apos;quvchi topilmadi</p>
                     )}
                   </div>
                 )}
               </div>
               {loanForm.studentId && (
-                <p className="text-xs text-muted-foreground">
-                  ✓ Tanlandi: {students.find((s: any) => s.id === loanForm.studentId)?.firstName} {students.find((s: any) => s.id === loanForm.studentId)?.lastName}
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
+                   Tanlandi: {students.find((s: any) => s.id === loanForm.studentId)?.firstName} {students.find((s: any) => s.id === loanForm.studentId)?.lastName}
                 </p>
               )}
-              {loanErrors.studentId && <p className="text-xs text-destructive">{loanErrors.studentId}</p>}
+              {loanErrors.studentId && <p className="text-xs text-xedu-ruby">{loanErrors.studentId}</p>}
             </div>
           </div>
           <DialogFooter className="gap-2">

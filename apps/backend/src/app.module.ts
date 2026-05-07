@@ -53,6 +53,7 @@ import { CoinsModule }  from './modules/coins/coins.module';
 import { KpiModule }  from './modules/kpi/kpi.module';
 import { AiAnalyticsModule } from './modules/ai-analytics/ai-analytics.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
+import { InvitationsModule } from './modules/invitations/invitations.module';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { envValidationSchema } from './common/config/env.validation';
 
@@ -135,6 +136,7 @@ import { envValidationSchema } from './common/config/env.validation';
     KpiModule,
     AiAnalyticsModule,
     MarketingModule,             // Gamification — Coin & Reward system (Phase 7)
+    InvitationsModule,           // Takliflar / invitation system
   ],
   providers: [
     // Global rate limiting — barcha endpointlarga qo'llaniladi

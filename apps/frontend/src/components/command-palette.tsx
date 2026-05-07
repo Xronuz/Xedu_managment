@@ -153,12 +153,18 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
       <CommandInput
-        placeholder="Qidirish..."
+        placeholder="Qidirish: sahifa, foydalanuvchi, sinf..."
         value={search}
         onValueChange={setSearch}
       />
       <CommandList>
-        <CommandEmpty>Hech narsa topilmadi</CommandEmpty>
+        <CommandEmpty>
+          <div className="flex flex-col items-center justify-center py-10 gap-2 text-xedu-slate-500">
+            <Search className="h-8 w-8 opacity-20" />
+            <p className="text-sm font-medium">Natija topilmadi</p>
+            <p className="text-xs opacity-70">Boshqa so&apos;z bilan urinib ko&apos;ring</p>
+          </div>
+        </CommandEmpty>
 
         {recentItems.length > 0 && !search.trim() && (
           <CommandGroup heading="So'nggi sahifalar">
@@ -166,10 +172,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
               <CommandItem
                 key={item.href}
                 onSelect={() => handleNavigate(item.href)}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 rounded-lg"
               >
-                <History className="h-4 w-4 text-muted-foreground" />
-                <span>{item.label}</span>
+                <History className="h-4 w-4 text-xedu-slate-400" />
+                <span className="text-sm">{item.label}</span>
+                <kbd className="ml-auto hidden sm:inline-flex h-5 items-center gap-1 rounded border border-xedu-slate-200 bg-xedu-slate-50 px-1.5 font-mono text-[10px] font-medium text-xedu-slate-500">
+                  ↵
+                </kbd>
               </CommandItem>
             ))}
           </CommandGroup>
@@ -183,10 +192,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                 <CommandItem
                   key={item.href}
                   onSelect={() => handleNavigate(item.href)}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 rounded-lg"
                 >
-                  <Icon className="h-4 w-4 text-muted-foreground" />
-                  <span>{item.label}</span>
+                  <Icon className="h-4 w-4 text-xedu-slate-400" />
+                  <span className="text-sm">{item.label}</span>
+                  <kbd className="ml-auto hidden sm:inline-flex h-5 items-center gap-1 rounded border border-xedu-slate-200 bg-xedu-slate-50 px-1.5 font-mono text-[10px] font-medium text-xedu-slate-500">
+                    ↵
+                  </kbd>
                 </CommandItem>
               );
             })}
@@ -201,10 +213,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                 <CommandItem
                   key={u.id}
                   onSelect={() => handleNavigate(`/dashboard/users/${u.id}`)}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 rounded-lg"
                 >
-                  <UserCircle className="h-4 w-4 text-muted-foreground" />
-                  <span>{u.firstName} {u.lastName}</span>
+                  <UserCircle className="h-4 w-4 text-xedu-slate-400" />
+                  <span className="text-sm">{u.firstName} {u.lastName}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -219,10 +231,10 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
                 <CommandItem
                   key={c.id}
                   onSelect={() => handleNavigate(`/dashboard/classes/${c.id}`)}
-                  className="flex items-center gap-2"
+                  className="flex items-center gap-2 rounded-lg"
                 >
-                  <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                  <span>{c.name}</span>
+                  <GraduationCap className="h-4 w-4 text-xedu-slate-400" />
+                  <span className="text-sm">{c.name}</span>
                 </CommandItem>
               ))}
             </CommandGroup>

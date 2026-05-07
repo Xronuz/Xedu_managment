@@ -15,23 +15,22 @@ import {
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuthStore } from '@/store/auth.store';
-import { authApi } from '@/lib/api/auth';
 import { getInitials, getRoleLabel } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { HeaderActionsSlot } from '@/lib/header-actions-context';
 
 const ROLE_COLORS: Record<string, string> = {
-  director:       'ring-violet-400',
-  branch_admin:   'ring-orange-400',
-  vice_principal: 'ring-indigo-400',
-  teacher:        'ring-emerald-400',
-  class_teacher:  'ring-emerald-400',
-  accountant:     'ring-amber-400',
-  librarian:      'ring-cyan-400',
-  student:        'ring-sky-400',
-  parent:         'ring-rose-400',
-  super_admin:    'ring-emerald-500',
+  director:       'ring-xedu-violet',
+  branch_admin:   'ring-xedu-amber',
+  vice_principal: 'ring-xedu-sky',
+  teacher:        'ring-xedu-primary',
+  class_teacher:  'ring-xedu-primary',
+  accountant:     'ring-xedu-gold',
+  librarian:      'ring-xedu-sky',
+  student:        'ring-xedu-sky',
+  parent:         'ring-xedu-ruby',
+  super_admin:    'ring-xedu-primary',
 };
 
 export function Header() {
@@ -41,13 +40,12 @@ export function Header() {
   const { user, logout } = useAuthStore();
 
   const handleLogout = async () => {
-    try { await authApi.logout(); } catch { /* ignore */ }
-    logout();
+    await logout();
     // Full page reload so middleware runs and clears any stale cookie state
-    window.location.href = '/login';
+    window.location.href = '/login?reason=logged_out';
   };
 
-  const ringColor = user ? (ROLE_COLORS[user.role] ?? 'ring-emerald-500') : 'ring-emerald-500';
+  const ringColor = user ? (ROLE_COLORS[user.role] ?? 'ring-xedu-primary') : 'ring-xedu-primary';
 
   return (
     <header
@@ -70,7 +68,7 @@ export function Header() {
           )}
         >
           <Search className="h-4 w-4 shrink-0 text-xedu-slate-400 dark:text-xedu-slate-500" />
-          <span className="flex-1 text-left text-[13px] text-xedu-slate-400 dark:text-xedu-slate-500">Qidiruv...</span>
+          <span className="flex-1 text-left text-[13px] text-xedu-slate-400 dark:text-xedu-slate-500">Qidiruv: o'quvchi, to'lov, sinf...</span>
           <kbd className="hidden sm:inline-flex h-5 select-none items-center rounded-md bg-xedu-slate-200/80 dark:bg-xedu-slate-700/80 px-1.5 font-mono text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400 tracking-tight">⌘K</kbd>
         </button>
       </div>
@@ -81,7 +79,7 @@ export function Header() {
       </div>
 
       {/* Right */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         <BranchSwitcher />
 
         <button
@@ -104,14 +102,14 @@ export function Header() {
           <DropdownMenuTrigger asChild>
             <button className={cn(
               'flex items-center gap-2.5 rounded-full pl-2 pr-4 ml-0.5 h-[52px]',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary/40',
               'transition-all duration-200 hover:shadow-sm',
               'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
               'border border-black/[0.06] dark:border-white/[0.06]',
             )}>
-              <Avatar className={cn('h-8 w-8 ring-2 ring-offset-1 ring-offset-white dark:ring-offset-slate-900 shrink-0', ringColor)}>
+              <Avatar className={cn('h-8 w-8 ring-2 ring-offset-1 ring-offset-xedu-bg-elevated dark:ring-offset-xedu-slate-900 shrink-0', ringColor)}>
                 <AvatarImage src={user?.avatarUrl ?? undefined} />
-                <AvatarFallback className="text-[11px] font-bold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                <AvatarFallback className="text-[11px] font-bold bg-xedu-primary-light dark:bg-xedu-primary/20 text-xedu-primary dark:text-xedu-primary">
                   {user ? getInitials(user.firstName, user.lastName) : 'U'}
                 </AvatarFallback>
               </Avatar>
@@ -126,36 +124,36 @@ export function Header() {
           <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuLabel className="pb-1">
               <p className="text-sm font-semibold">{user?.firstName} {user?.lastName}</p>
-              <p className="text-xs font-normal text-muted-foreground mt-0.5">{user ? getRoleLabel(user.role) : ''}</p>
+              <p className="text-xs font-normal text-xedu-slate-400 mt-0.5">{user ? getRoleLabel(user.role) : ''}</p>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => router.push('/dashboard/profile')} className="cursor-pointer">
-              <User className="mr-2 h-4 w-4 text-muted-foreground" /> Profil
+              <User className="mr-2 h-4 w-4 text-xedu-slate-400" /> Profil
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push('/dashboard/settings')} className="cursor-pointer">
-              <Settings className="mr-2 h-4 w-4 text-muted-foreground" /> Sozlamalar
+              <Settings className="mr-2 h-4 w-4 text-xedu-slate-400" /> Sozlamalar
             </DropdownMenuItem>
             {user && ['director', 'vice_principal', 'super_admin'].includes(user.role) && (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-[11px] font-normal text-muted-foreground/70 py-0.5">Tizim</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[11px] font-normal text-xedu-slate-400/70 py-0.5">Tizim</DropdownMenuLabel>
                 <DropdownMenuItem onClick={() => router.push('/dashboard/audit-log')} className="cursor-pointer">
-                  <ClipboardList className="mr-2 h-4 w-4 text-muted-foreground" /> Audit Log
+                  <ClipboardList className="mr-2 h-4 w-4 text-xedu-slate-400" /> Audit Log
                 </DropdownMenuItem>
                 {user.role === 'super_admin' && (
                   <>
                     <DropdownMenuItem onClick={() => router.push('/dashboard/schools')} className="cursor-pointer">
-                      <GraduationCap className="mr-2 h-4 w-4 text-muted-foreground" /> Maktablar
+                      <GraduationCap className="mr-2 h-4 w-4 text-xedu-slate-400" /> Maktablar
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => router.push('/dashboard/system-health')} className="cursor-pointer">
-                      <Activity className="mr-2 h-4 w-4 text-muted-foreground" /> Tizim holati
+                      <Activity className="mr-2 h-4 w-4 text-xedu-slate-400" /> Tizim holati
                     </DropdownMenuItem>
                   </>
                 )}
               </>
             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive focus:bg-destructive/8">
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-xedu-ruby focus:text-xedu-ruby focus:bg-xedu-ruby/10">
               <LogOut className="mr-2 h-4 w-4" /> Chiqish
             </DropdownMenuItem>
           </DropdownMenuContent>

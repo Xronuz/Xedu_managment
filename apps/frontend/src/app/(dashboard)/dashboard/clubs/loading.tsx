@@ -12,7 +12,7 @@ export default function ClubsLoading() {
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="rounded-xl border bg-card p-5 space-y-3">
+          <div key={i} className="rounded-xl border bg-white dark:bg-xedu-slate-900 p-5 space-y-3">
             <div className="flex items-start justify-between">
               <div className="space-y-2">
                 <Skeleton className="h-5 w-32" />

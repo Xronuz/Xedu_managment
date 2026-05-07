@@ -1,5 +1,5 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { toast } from '@/components/ui/use-toast';
+import { appToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth.store';
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
@@ -81,11 +81,13 @@ apiClient.interceptors.response.use(
         isRefreshing = false;
         refreshAttempts = 0;
         if (typeof window !== 'undefined') {
-          localStorage.clear();
+          // Targeted cleanup — do NOT wipe all localStorage
+          localStorage.removeItem('auth-storage');
+          localStorage.removeItem('branch-storage');
           // /auth/clear clears httpOnly cookies server-side, then redirects to /login.
           // Direct redirect to /login won't work: middleware still sees the stale
           // access_token cookie and loops back to /dashboard.
-          window.location.href = '/auth/clear';
+          window.location.href = '/auth/clear?reason=session_expired';
         }
         return Promise.reject(error);
       }
@@ -118,9 +120,10 @@ apiClient.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         if (typeof window !== 'undefined') {
-          localStorage.clear();
+          localStorage.removeItem('auth-storage');
+          localStorage.removeItem('branch-storage');
           // /auth/clear clears httpOnly cookies server-side, then redirects to /login.
-          window.location.href = '/auth/clear';
+          window.location.href = '/auth/clear?reason=session_expired';
         }
         return Promise.reject(refreshError);
       } finally {
@@ -133,30 +136,22 @@ apiClient.interceptors.response.use(
 
     if (typeof window !== 'undefined') {
       if (status === 403) {
-        showDedupedToast(403, () => toast({
-          variant: 'destructive',
-          title: 'Ruxsat yo\'q',
+        showDedupedToast(403, () => appToast.error('Ruxsat yo\'q', {
           description: 'Bu amalni bajarish uchun sizda yetarli huquq yo\'q.',
         }));
       } else if (status === 404) {
-        showDedupedToast(404, () => toast({
-          variant: 'destructive',
-          title: 'Topilmadi',
+        showDedupedToast(404, () => appToast.error('Topilmadi', {
           description: 'So\'ralgan resurs mavjud emas yoki o\'chirilgan.',
         }));
       } else if (status === 422) {
         // Validation errors — usually handled by the form itself
       } else if (status && status >= 500) {
-        showDedupedToast(status, () => toast({
-          variant: 'destructive',
-          title: 'Server xatosi',
-          description: `Serverda xatolik yuz berdi (${status}). Iltimos, qayta urinib ko'ring.`,
+        showDedupedToast(status, () => appToast.error('Server xatosi', {
+          description: `Serverda xatolik yuz berdi (${status}). Iltimos, keyinroq qayta urinib ko'ring.`,
         }));
       } else if (!status) {
         // Network error (no response)
-        showDedupedToast('network', () => toast({
-          variant: 'destructive',
-          title: 'Tarmoq xatosi',
+        showDedupedToast('network', () => appToast.error('Tarmoq xatosi', {
           description: 'Serverga ulanib bo\'lmadi. Internet aloqangizni tekshiring.',
         }));
       }

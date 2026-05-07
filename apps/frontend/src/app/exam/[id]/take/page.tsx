@@ -72,7 +72,7 @@ function StartScreen({
   loading: boolean;
 }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-xedu-slate-950 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center pb-2">
           <div className="mx-auto mb-3 p-3 bg-primary/10 rounded-full w-fit">
@@ -84,15 +84,15 @@ function StartScreen({
           <div className="grid grid-cols-3 gap-3 text-center">
             <div className="bg-muted rounded-lg p-3">
               <p className="text-2xl font-bold">{questionCount}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Savol</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">Savol</p>
             </div>
             <div className="bg-muted rounded-lg p-3">
               <p className="text-2xl font-bold">{duration ?? '∞'}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Daqiqa</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">Daqiqa</p>
             </div>
             <div className="bg-muted rounded-lg p-3">
               <p className="text-2xl font-bold">{maxScore}</p>
-              <p className="text-xs text-muted-foreground mt-0.5">Ball</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">Ball</p>
             </div>
           </div>
 
@@ -133,7 +133,7 @@ function ResultScreen({
 }) {
   const passed = percentage >= 50;
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-xedu-slate-950 p-4">
       <Card className="w-full max-w-md text-center">
         <CardContent className="pt-8 pb-8 space-y-5">
           <div className={`mx-auto p-4 rounded-full w-fit ${passed ? 'bg-green-100 dark:bg-green-950/40' : 'bg-red-100 dark:bg-red-950/40'}`}>
@@ -144,16 +144,16 @@ function ResultScreen({
 
           <div>
             <h2 className="text-2xl font-bold">
-              {passed ? 'Tabriklaymiz! 🎉' : "Afsuski o'tmadingiz"}
+              {passed ? 'Tabriklaymiz! ' : "Afsuski o'tmadingiz"}
             </h2>
-            <p className="text-muted-foreground text-sm mt-1">
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm mt-1">
               {passed ? "Imtihonni muvaffaqiyatli topshirdingiz" : "Keyingi safar omad"}
             </p>
           </div>
 
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Natija</span>
+              <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Natija</span>
               <span className="font-bold">{percentage}%</span>
             </div>
             <Progress value={percentage} className="h-3" />
@@ -162,13 +162,13 @@ function ResultScreen({
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-muted rounded-lg p-3">
               <p className="text-2xl font-bold">{score} / {total}</p>
-              <p className="text-xs text-muted-foreground">Ball</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Ball</p>
             </div>
             <div className={`rounded-lg p-3 ${passed ? 'bg-green-50 dark:bg-green-950/30' : 'bg-red-50 dark:bg-red-950/30'}`}>
               <p className={`text-2xl font-bold ${passed ? 'text-green-600' : 'text-red-500'}`}>
                 {passed ? "O'tdi" : "O'tmadi"}
               </p>
-              <p className="text-xs text-muted-foreground">Holat</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Holat</p>
             </div>
           </div>
 
@@ -318,9 +318,9 @@ export default function ExamTakePage() {
   const progress = questions.length > 0 ? ((currentIdx + 1) / questions.length) * 100 : 0;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-white dark:bg-xedu-slate-950 flex flex-col">
       {/* Top bar */}
-      <div className="sticky top-0 z-10 bg-background border-b px-4 py-2.5 flex items-center justify-between gap-4">
+      <div className="sticky top-0 z-10 bg-white dark:bg-xedu-slate-950 border-b px-4 py-2.5 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Badge variant="outline" className="font-mono text-sm">
             {currentIdx + 1} / {questions.length}
@@ -328,7 +328,7 @@ export default function ExamTakePage() {
           <div className="hidden sm:block">
             <Progress value={progress} className="w-32 h-2" />
           </div>
-          <span className="text-xs text-muted-foreground hidden sm:block">
+          <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 hidden sm:block">
             {answeredCount} ta javob berildi
           </span>
           {/* Auto-save indicator */}
@@ -403,7 +403,7 @@ export default function ExamTakePage() {
                     className={`w-full text-left rounded-lg border-2 p-4 transition-all ${
                       selected
                         ? 'border-primary bg-primary/5 text-primary font-medium'
-                        : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                        : 'border-xedu-slate-200 dark:border-xedu-slate-700 hover:border-primary/50 hover:bg-muted/50'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -465,9 +465,9 @@ export default function ExamTakePage() {
       </div>
 
       {/* Question navigation grid (bottom) */}
-      <div className="border-t bg-background px-4 py-3">
+      <div className="border-t bg-white dark:bg-xedu-slate-950 px-4 py-3">
         <div className="max-w-2xl mx-auto">
-          <p className="text-xs text-muted-foreground mb-2">Savollar:</p>
+          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-2">Savollar:</p>
           <div className="flex flex-wrap gap-1.5">
             {questions.map((q, i) => {
               const hasAnswer = !!(answers[q.id]?.selectedOptionId || answers[q.id]?.textAnswer);
@@ -481,7 +481,7 @@ export default function ExamTakePage() {
                       ? 'bg-primary text-primary-foreground ring-2 ring-primary ring-offset-1'
                       : hasAnswer
                       ? 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400'
-                      : 'bg-muted hover:bg-muted/80 text-muted-foreground'
+                      : 'bg-muted hover:bg-muted/80 text-xedu-slate-500 dark:text-xedu-slate-400'
                   }`}
                 >
                   {i + 1}

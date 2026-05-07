@@ -2,6 +2,8 @@
 
 import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import { ShieldAlert, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/auth.store';
 import { canAccessRoute, ROLE_HOME, type UserRole } from '@/config/permissions';
 
@@ -23,7 +25,7 @@ export function useRoleGuard() {
       const home = ROLE_HOME[user.role as UserRole] ?? '/dashboard';
       router.replace(home);
     }
-  }, [isAuthenticated, user, pathname, router]);
+  }, [isAuthenticated, user?.role, pathname, router]);
 }
 
 /**
@@ -37,13 +39,30 @@ interface RoleGuardProps {
 
 export function RoleGuard({ children, allowedRoles, fallback }: RoleGuardProps) {
   const { user } = useAuthStore();
+  const router = useRouter();
 
   if (!user || !allowedRoles.includes(user.role)) {
-    return fallback ?? (
-      <div className="flex flex-col items-center justify-center h-[60vh] text-muted-foreground">
-        <p className="text-lg font-medium">Ruxsat yo'q</p>
-        <p className="text-sm">Bu sahifani ko'rish uchun huquqingiz yetarli emas</p>
-      </div>
+    return (
+      fallback ?? (
+        <div className="flex flex-col items-center justify-center h-[60vh] text-xedu-slate-500 dark:text-xedu-slate-400 px-4">
+          <div className="h-16 w-16 rounded-2xl bg-xedu-slate-100 dark:bg-xedu-slate-800/60 flex items-center justify-center mb-5">
+            <ShieldAlert className="h-8 w-8 text-xedu-slate-400 dark:text-xedu-slate-500" />
+          </div>
+          <p className="text-lg font-bold text-xedu-slate-800 dark:text-xedu-slate-100 mb-1">Ruxsat yo'q</p>
+          <p className="text-sm text-center max-w-sm mb-6">
+            Bu sahifani ko'rish uchun sizda yetarli huquq yo'q.
+            Agar bu xatolik deb o'ylasangiz, administratoringizga murojaat qiling.
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.replace('/dashboard')}
+          >
+            <ArrowLeft className="mr-1.5 h-4 w-4" />
+            Bosh sahifaga qaytish
+          </Button>
+        </div>
+      )
     );
   }
 

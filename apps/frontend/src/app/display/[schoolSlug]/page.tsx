@@ -47,7 +47,7 @@ const SLOT_COLORS = [
   'bg-sky-600',
   'bg-cyan-600',
   'bg-teal-600',
-  'bg-emerald-600',
+  'bg-xedu-primary',
   'bg-green-600',
 ];
 
@@ -250,7 +250,7 @@ export default function DisplayPage() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-indigo-950 via-indigo-900 to-violet-950 flex items-center justify-center">
         <div className="text-center space-y-4 max-w-md">
-          <div className="text-6xl">⚠️</div>
+          <div className="text-6xl"></div>
           <p className="text-white text-2xl font-bold">Xatolik yuz berdi</p>
           <p className="text-indigo-300">{error}</p>
           <button

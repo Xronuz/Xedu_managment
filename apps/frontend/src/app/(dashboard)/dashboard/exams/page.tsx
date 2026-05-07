@@ -91,7 +91,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
     mutationFn: (payload: Parameters<typeof onlineExamApi.addQuestion>[1]) =>
       onlineExamApi.addQuestion(exam.id, payload),
     onSuccess: () => {
-      toast({ title: '✅ Savol qo\'shildi' });
+      toast({ title: ' Savol qo\'shildi' });
       queryClient.invalidateQueries({ queryKey: ['online-exam', exam.id, 'questions'] });
       setAddingQ(false);
       setQForm({ type: 'multiple_choice', text: '', points: '1', explanation: '', options: [{ text: '', isCorrect: false }, { text: '', isCorrect: false }, { text: '', isCorrect: false }, { text: '', isCorrect: false }] });
@@ -163,14 +163,14 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
             {qLoading ? (
               <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-12" />)}</div>
             ) : (questions as ExamQuestion[]).length === 0 && !addingQ ? (
-              <div className="py-8 text-center text-muted-foreground">
+              <div className="py-8 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
                 <HelpCircle className="h-10 w-10 mx-auto mb-2 opacity-30" />
                 <p>Hali savollar yo&apos;q</p>
               </div>
             ) : (
               <div className="space-y-2">
                 {(questions as ExamQuestion[]).map((q, i) => (
-                  <div key={q.id} className="rounded-lg border bg-card">
+                  <div key={q.id} className="rounded-lg border bg-white dark:bg-xedu-slate-900">
                     <div className="flex items-start gap-3 p-3">
                       <span className="bg-primary/10 text-primary rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                         {i + 1}
@@ -179,7 +179,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
                         <p className="text-sm font-medium line-clamp-2">{q.text}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <Badge variant="outline" className="text-[10px] px-1.5 py-0">{QTYPE_LABELS[q.type]}</Badge>
-                          <span className="text-xs text-muted-foreground">{q.points} ball</span>
+                          <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{q.points} ball</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-1 shrink-0">
@@ -188,7 +188,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
                           {expandedQ === q.id ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
                         </Button>
                         {canManage && (
-                          <Button size="icon" variant="ghost" className="h-7 w-7 hover:text-destructive"
+                          <Button size="icon" variant="ghost" className="h-7 w-7 hover:text-xedu-ruby"
                             onClick={async () => { if (await ask({ title: "Savolni o'chirasizmi?", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(q.id); }}
                             disabled={deleteMutation.isPending}>
                             <Trash2 className="h-3.5 w-3.5" />
@@ -199,13 +199,13 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
                     {expandedQ === q.id && q.options.length > 0 && (
                       <div className="px-3 pb-3 pt-0 space-y-1 border-t mt-1">
                         {q.options.map((opt, oi) => (
-                          <div key={opt.id} className={`flex items-center gap-2 text-xs rounded px-2 py-1 ${opt.isCorrect ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400' : 'text-muted-foreground'}`}>
+                          <div key={opt.id} className={`flex items-center gap-2 text-xs rounded px-2 py-1 ${opt.isCorrect ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
                             <span className="font-bold">{String.fromCharCode(65 + oi)}.</span>
                             <span>{opt.text}</span>
                             {opt.isCorrect && <CheckCircle className="ml-auto h-3.5 w-3.5 text-green-600 shrink-0" />}
                           </div>
                         ))}
-                        {q.explanation && <p className="text-xs text-muted-foreground italic mt-2 px-2">Izoh: {q.explanation}</p>}
+                        {q.explanation && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 italic mt-2 px-2">Izoh: {q.explanation}</p>}
                       </div>
                     )}
                   </div>
@@ -215,7 +215,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
 
             {/* Add question form */}
             {canManage && addingQ && (
-              <div className="rounded-lg border p-4 space-y-3 bg-muted/30">
+              <div className="rounded-lg border p-4 space-y-3 bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
                 <p className="text-sm font-medium">Yangi savol</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
@@ -302,7 +302,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
             {sLoading ? (
               <div className="space-y-2">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-12" />)}</div>
             ) : (sessions as any[]).length === 0 ? (
-              <div className="py-8 text-center text-muted-foreground">
+              <div className="py-8 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
                 <Users className="h-10 w-10 mx-auto mb-2 opacity-30" />
                 <p>Hali hech kim imtihon topshirmagan</p>
               </div>
@@ -312,7 +312,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
                   const statusColor = s.status === 'submitted' || s.status === 'graded' ? 'text-green-600' : s.status === 'timed_out' ? 'text-red-500' : 'text-blue-500';
                   const statusLabel = { in_progress: 'Jarayonda', submitted: 'Topshirildi', timed_out: 'Vaqt tugadi', graded: 'Baholandi', not_started: 'Boshlanmagan' }[s.status as string] ?? s.status;
                   return (
-                    <div key={s.id} className="flex items-center justify-between rounded-lg border px-3 py-2.5 bg-card">
+                    <div key={s.id} className="flex items-center justify-between rounded-lg border px-3 py-2.5 bg-white dark:bg-xedu-slate-900">
                       <div>
                         <p className="text-sm font-medium">{s.student?.firstName} {s.student?.lastName}</p>
                         <p className={`text-xs ${statusColor}`}>{statusLabel}</p>
@@ -322,9 +322,9 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
                           <p className="text-sm font-bold flex items-center gap-1 justify-end">
                             <Star className="h-3.5 w-3.5 text-yellow-500" /> {s.score} / {exam.maxScore}
                           </p>
-                        ) : <p className="text-xs text-muted-foreground">—</p>}
+                        ) : <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">—</p>}
                         {s.percentage !== null && s.percentage !== undefined && (
-                          <p className="text-xs text-muted-foreground">{s.percentage}%</p>
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{s.percentage}%</p>
                         )}
                       </div>
                     </div>
@@ -382,7 +382,7 @@ export default function ExamsPage() {
   const createMutation = useMutation({
     mutationFn: examsApi.create,
     onSuccess: () => {
-      toast({ title: '✅ Imtihon qo\'shildi' });
+      toast({ title: ' Imtihon qo\'shildi' });
       queryClient.invalidateQueries({ queryKey: ['exams'] });
       setSingleOpen(false);
       setSForm(SINGLE_EMPTY);
@@ -417,7 +417,7 @@ export default function ExamsPage() {
   const bulkMutation = useMutation({
     mutationFn: examsApi.bulkCreate,
     onSuccess: (res: any) => {
-      toast({ title: `✅ ${res.count ?? ''} ta imtihon yaratildi` });
+      toast({ title: ` ${res.count ?? ''} ta imtihon yaratildi` });
       queryClient.invalidateQueries({ queryKey: ['exams'] });
       setBulkOpen(false);
       setBForm(BULK_EMPTY);
@@ -459,7 +459,7 @@ export default function ExamsPage() {
   const publishMutation = useMutation({
     mutationFn: (id: string) => examsApi.publish(id),
     onSuccess: () => {
-      toast({ title: "✅ E'lon qilindi" });
+      toast({ title: " E'lon qilindi" });
       queryClient.invalidateQueries({ queryKey: ['exams'] });
     },
     onError: (err: any) => {
@@ -603,36 +603,36 @@ export default function ExamsPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Sarlavha <span className="text-destructive">*</span></Label>
+              <Label>Sarlavha <span className="text-xedu-ruby">*</span></Label>
               <Input placeholder="Masalan: 1-chorak imtihoni" value={sForm.title} onChange={inp(setSForm)('title')} />
-              {sErrors.title && <p className="text-xs text-destructive">{sErrors.title}</p>}
+              {sErrors.title && <p className="text-xs text-xedu-ruby">{sErrors.title}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Sinf <span className="text-destructive">*</span></Label>
+                <Label>Sinf <span className="text-xedu-ruby">*</span></Label>
                 <Select value={sForm.classId} onValueChange={sel(setSForm)('classId')}>
                   <SelectTrigger><SelectValue placeholder="Sinf..." /></SelectTrigger>
                   <SelectContent>{(classes as any[]).map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
-                {sErrors.classId && <p className="text-xs text-destructive">{sErrors.classId}</p>}
+                {sErrors.classId && <p className="text-xs text-xedu-ruby">{sErrors.classId}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Fan <span className="text-destructive">*</span></Label>
+                <Label>Fan <span className="text-xedu-ruby">*</span></Label>
                 <Select value={sForm.subjectId} onValueChange={sel(setSForm)('subjectId')}>
                   <SelectTrigger><SelectValue placeholder="Fan..." /></SelectTrigger>
                   <SelectContent>{(subjects as any[]).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                 </Select>
-                {sErrors.subjectId && <p className="text-xs text-destructive">{sErrors.subjectId}</p>}
+                {sErrors.subjectId && <p className="text-xs text-xedu-ruby">{sErrors.subjectId}</p>}
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Tur <span className="text-destructive">*</span></Label>
+                <Label>Tur <span className="text-xedu-ruby">*</span></Label>
                 <Select value={sForm.frequency} onValueChange={sel(setSForm)('frequency')}>
                   <SelectTrigger><SelectValue placeholder="Tur..." /></SelectTrigger>
                   <SelectContent>{Object.entries(FREQUENCY_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent>
                 </Select>
-                {sErrors.frequency && <p className="text-xs text-destructive">{sErrors.frequency}</p>}
+                {sErrors.frequency && <p className="text-xs text-xedu-ruby">{sErrors.frequency}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Max ball</Label>
@@ -641,9 +641,9 @@ export default function ExamsPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Sana va vaqt <span className="text-destructive">*</span></Label>
+                <Label>Sana va vaqt <span className="text-xedu-ruby">*</span></Label>
                 <Input type="datetime-local" value={sForm.scheduledAt} onChange={inp(setSForm)('scheduledAt')} />
-                {sErrors.scheduledAt && <p className="text-xs text-destructive">{sErrors.scheduledAt}</p>}
+                {sErrors.scheduledAt && <p className="text-xs text-xedu-ruby">{sErrors.scheduledAt}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Davomiyligi (daq.)</Label>
@@ -671,25 +671,25 @@ export default function ExamsPage() {
           <div className="space-y-4 py-2">
             {/* Sarlavha */}
             <div className="space-y-1.5">
-              <Label>Sarlavha <span className="text-destructive">*</span></Label>
+              <Label>Sarlavha <span className="text-xedu-ruby">*</span></Label>
               <Input placeholder="Masalan: Oylik imtihon — Mart 2026" value={bForm.title} onChange={inp(setBForm)('title')} />
-              {bErrors.title && <p className="text-xs text-destructive">{bErrors.title}</p>}
+              {bErrors.title && <p className="text-xs text-xedu-ruby">{bErrors.title}</p>}
             </div>
 
             {/* Tur + Sana */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Tur <span className="text-destructive">*</span></Label>
+                <Label>Tur <span className="text-xedu-ruby">*</span></Label>
                 <Select value={bForm.frequency} onValueChange={sel(setBForm)('frequency')}>
                   <SelectTrigger><SelectValue placeholder="Tur tanlang..." /></SelectTrigger>
                   <SelectContent>{Object.entries(FREQUENCY_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent>
                 </Select>
-                {bErrors.frequency && <p className="text-xs text-destructive">{bErrors.frequency}</p>}
+                {bErrors.frequency && <p className="text-xs text-xedu-ruby">{bErrors.frequency}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Sana <span className="text-destructive">*</span></Label>
+                <Label>Sana <span className="text-xedu-ruby">*</span></Label>
                 <Input type="datetime-local" value={bForm.scheduledAt} onChange={inp(setBForm)('scheduledAt')} />
-                {bErrors.scheduledAt && <p className="text-xs text-destructive">{bErrors.scheduledAt}</p>}
+                {bErrors.scheduledAt && <p className="text-xs text-xedu-ruby">{bErrors.scheduledAt}</p>}
               </div>
             </div>
 
@@ -710,14 +710,14 @@ export default function ExamsPage() {
               {/* Sinflar */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label>Sinflar <span className="text-destructive">*</span></Label>
+                  <Label>Sinflar <span className="text-xedu-ruby">*</span></Label>
                   <div className="flex gap-1.5">
                     {bForm.classIds.length > 0 && (
                       <span className="text-xs text-primary font-medium">{bForm.classIds.length} tanlandi</span>
                     )}
                     <button
                       type="button"
-                      className="text-xs text-muted-foreground hover:text-primary underline"
+                      className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-primary underline"
                       onClick={() => {
                         const allIds = (classes as any[]).map((c: any) => c.id);
                         setBForm(f => ({
@@ -731,7 +731,7 @@ export default function ExamsPage() {
                   </div>
                 </div>
                 {(classes as any[]).length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic">Yuklanmoqda...</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 italic">Yuklanmoqda...</p>
                 ) : (
                   <div className="max-h-60 overflow-y-auto rounded-lg border p-2 space-y-0.5">
                     {(classes as any[]).map((c: any) => (
@@ -743,20 +743,20 @@ export default function ExamsPage() {
                     ))}
                   </div>
                 )}
-                {bErrors.classIds && <p className="text-xs text-destructive">{bErrors.classIds}</p>}
+                {bErrors.classIds && <p className="text-xs text-xedu-ruby">{bErrors.classIds}</p>}
               </div>
 
               {/* Fanlar */}
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label>Fanlar <span className="text-destructive">*</span></Label>
+                  <Label>Fanlar <span className="text-xedu-ruby">*</span></Label>
                   <div className="flex gap-1.5">
                     {bForm.subjectIds.length > 0 && (
                       <span className="text-xs text-primary font-medium">{bForm.subjectIds.length} tanlandi</span>
                     )}
                     <button
                       type="button"
-                      className="text-xs text-muted-foreground hover:text-primary underline"
+                      className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-primary underline"
                       onClick={() => {
                         const allIds = (subjects as any[]).map((s: any) => s.id);
                         setBForm(f => ({
@@ -770,7 +770,7 @@ export default function ExamsPage() {
                   </div>
                 </div>
                 {(subjects as any[]).length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic">Yuklanmoqda...</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 italic">Yuklanmoqda...</p>
                 ) : (
                   <div className="max-h-60 overflow-y-auto rounded-lg border p-2 space-y-0.5">
                     {(subjects as any[]).map((s: any) => (
@@ -783,7 +783,7 @@ export default function ExamsPage() {
                     ))}
                   </div>
                 )}
-                {bErrors.subjectIds && <p className="text-xs text-destructive">{bErrors.subjectIds}</p>}
+                {bErrors.subjectIds && <p className="text-xs text-xedu-ruby">{bErrors.subjectIds}</p>}
               </div>
             </div>
 
@@ -793,7 +793,7 @@ export default function ExamsPage() {
                 Jami{' '}
                 <span className="font-bold text-primary text-base">{bForm.classIds.length * bForm.subjectIds.length}</span>
                 {' '}ta imtihon yaratiladi
-                <span className="text-muted-foreground ml-1.5 block text-xs mt-0.5">
+                <span className="text-xedu-slate-500 dark:text-xedu-slate-400 ml-1.5 block text-xs mt-0.5">
                   {bForm.classIds.length} ta sinf × {bForm.subjectIds.length} ta fan
                 </span>
               </div>

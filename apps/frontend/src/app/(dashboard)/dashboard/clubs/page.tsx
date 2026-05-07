@@ -125,7 +125,7 @@ function ClubFormDialog({ open, onClose, editData }: { open: boolean; onClose: (
       return editData ? clubsApi.update(editData.id, payload) : clubsApi.create(payload);
     },
     onSuccess: () => {
-      toast({ title: editData ? 'To\'garak yangilandi ✓' : 'To\'garak yaratildi ✓' });
+      toast({ title: editData ? 'To\'garak yangilandi ' : 'To\'garak yaratildi ' });
       qc.invalidateQueries({ queryKey: ['clubs'] });
       onClose();
       setForm(EMPTY_FORM);
@@ -221,7 +221,7 @@ function ClubFormDialog({ open, onClose, editData }: { open: boolean; onClose: (
                   className={`h-8 w-8 rounded-md text-xs font-medium transition-colors ${
                     form.scheduleDays.includes(value)
                       ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:bg-accent'
+                      : 'bg-muted text-xedu-slate-500 dark:text-xedu-slate-400 hover:bg-accent'
                   }`}
                 >
                   {label}
@@ -276,7 +276,7 @@ function JoinRequestDialog({
           <DialogTitle>"{club?.name}" to'garagiga ariza</DialogTitle>
         </DialogHeader>
         <div className="space-y-3 py-2">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
             Arizangiz to'garak rahbariga yuboriladi. Rahbar tasdiqlashidan keyin a'zo bo'lasiz.
           </p>
           <div className="space-y-1">
@@ -317,7 +317,7 @@ function JoinRequestsPanel({ clubId }: { clubId: string }) {
   const approveMut = useMutation({
     mutationFn: (requestId: string) => clubsApi.approveRequest(clubId, requestId),
     onSuccess: () => {
-      toast({ title: 'Ariza tasdiqlandi ✓' });
+      toast({ title: 'Ariza tasdiqlandi ' });
       qc.invalidateQueries({ queryKey: ['clubs'] });
     },
     onError: (err: any) => toast({ title: 'Xatolik', description: err?.response?.data?.message, variant: 'destructive' }),
@@ -332,17 +332,17 @@ function JoinRequestsPanel({ clubId }: { clubId: string }) {
     onError: (err: any) => toast({ title: 'Xatolik', description: err?.response?.data?.message, variant: 'destructive' }),
   });
 
-  if (isLoading) return <div className="py-6 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>;
+  if (isLoading) return <div className="py-6 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-xedu-slate-500 dark:text-xedu-slate-400" /></div>;
 
   const pending = requests as ClubJoinRequest[];
   if (pending.length === 0) return (
-    <p className="text-sm text-muted-foreground text-center py-4">Kutilayotgan arizalar yo'q</p>
+    <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 text-center py-4">Kutilayotgan arizalar yo'q</p>
   );
 
   return (
     <div className="space-y-2">
       {pending.map((req) => (
-        <div key={req.id} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+        <div key={req.id} className="flex items-center gap-3 p-3 rounded-lg border bg-white dark:bg-xedu-slate-900">
           <Avatar className="h-9 w-9 shrink-0">
             <AvatarImage src={req.student?.avatarUrl} />
             <AvatarFallback>{req.student?.firstName?.[0]}{req.student?.lastName?.[0]}</AvatarFallback>
@@ -351,7 +351,7 @@ function JoinRequestsPanel({ clubId }: { clubId: string }) {
             <p className="font-medium text-sm truncate">
               {req.student?.firstName} {req.student?.lastName}
             </p>
-            {req.message && <p className="text-xs text-muted-foreground truncate">{req.message}</p>}
+            {req.message && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{req.message}</p>}
           </div>
           <div className="flex gap-1 shrink-0">
             <Button
@@ -365,7 +365,7 @@ function JoinRequestsPanel({ clubId }: { clubId: string }) {
             </Button>
             <Button
               size="icon" variant="ghost"
-              className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+              className="h-8 w-8 text-xedu-ruby hover:text-xedu-ruby hover:bg-xedu-ruby/10"
               onClick={() => rejectMut.mutate(req.id)}
               disabled={approveMut.isPending || rejectMut.isPending}
               title="Rad etish"
@@ -397,7 +397,7 @@ function ClubCard({
   const isFull = club.maxMembers && memberCount >= club.maxMembers;
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-sm transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
@@ -426,9 +426,9 @@ function ClubCard({
       </CardHeader>
       <CardContent className="space-y-3">
         {club.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2">{club.description}</p>
+          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 line-clamp-2">{club.description}</p>
         )}
-        <div className="space-y-1.5 text-xs text-muted-foreground">
+        <div className="space-y-1.5 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
           {club.leader && (
             <div className="flex items-center gap-1.5">
               <Users className="h-3.5 w-3.5 shrink-0" />
@@ -445,7 +445,7 @@ function ClubCard({
             <Users className="h-3.5 w-3.5 shrink-0" />
             <span>
               {memberCount} a'zo{club.maxMembers ? ` / ${club.maxMembers}` : ''}
-              {isFull && <span className="text-destructive ml-1">(to'lgan)</span>}
+              {isFull && <span className="text-xedu-ruby ml-1">(to'lgan)</span>}
             </span>
           </div>
         </div>
@@ -456,7 +456,7 @@ function ClubCard({
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEdit}>
                 <Edit3 className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={onDelete}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-xedu-ruby hover:text-xedu-ruby" onClick={onDelete}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
@@ -502,7 +502,7 @@ function LedClubCard({
   const pendingCount = (pendingRequests as any[]).length;
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="hover:shadow-sm transition-shadow">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
@@ -523,7 +523,7 @@ function LedClubCard({
               <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onEdit}>
                 <Edit3 className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={onDelete}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 text-xedu-ruby hover:text-xedu-ruby" onClick={onDelete}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
@@ -532,10 +532,10 @@ function LedClubCard({
       </CardHeader>
       <CardContent className="space-y-3">
         {club.description && (
-          <p className="text-sm text-muted-foreground line-clamp-2">{club.description}</p>
+          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 line-clamp-2">{club.description}</p>
         )}
         {club.schedule && (
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
             <Calendar className="h-3.5 w-3.5 shrink-0" />
             <span>{club.schedule}</span>
           </div>
@@ -623,7 +623,7 @@ export default function ClubsPage() {
     onMutate: ({ id }) => setActioningId(id),
     onSettled: () => { setActioningId(null); setJoinTarget(null); },
     onSuccess: () => {
-      toast({ title: 'Ariza yuborildi ✓', description: 'To\'garak rahbari tasdiqlashini kuting' });
+      toast({ title: 'Ariza yuborildi ', description: 'To\'garak rahbari tasdiqlashini kuting' });
       qc.invalidateQueries({ queryKey: ['clubs'] });
     },
     onError: (err: any) => toast({ title: 'Xatolik', description: err?.response?.data?.message, variant: 'destructive' }),
@@ -662,7 +662,7 @@ export default function ClubsPage() {
   const renderClubGrid = (list: any[]) => {
     if (isLoading) return (
       <div className="flex h-40 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="h-6 w-6 animate-spin text-xedu-slate-500 dark:text-xedu-slate-400" />
       </div>
     );
     if (list.length === 0) return (
@@ -702,7 +702,7 @@ export default function ClubsPage() {
             <Puzzle className="h-7 w-7 text-primary" />
             To'garaklar
           </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm mt-0.5">
             Maktab to'garaklari va qo'shimcha mashg'ulotlar
           </p>
         </div>
@@ -716,7 +716,7 @@ export default function ClubsPage() {
 
       {/* Search */}
       <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
         <Input
           className="pl-9"
           placeholder="To'garak qidirish..."
@@ -772,7 +772,7 @@ export default function ClubsPage() {
                     'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium border transition-all',
                     activeCat === cat.value
                       ? 'bg-primary text-primary-foreground border-primary'
-                      : 'border-border hover:border-primary/50 hover:bg-accent',
+                      : 'border-xedu-slate-200 dark:border-xedu-slate-700 hover:border-primary/50 hover:bg-accent',
                   )}
                 >
                   <Icon className={cn('h-3.5 w-3.5', activeCat !== cat.value && cat.color)} />
@@ -822,14 +822,14 @@ export default function ClubsPage() {
                 <EmptyState icon={Clock} title="Kutilayotgan arizalar yo'q" description="" />
               ) : (
                 (myRequests as any[]).filter((r: any) => r.status === 'PENDING').map((req: any) => (
-                  <div key={req.id} className="flex items-center gap-3 p-4 rounded-lg border bg-card">
+                  <div key={req.id} className="flex items-center gap-3 p-4 rounded-lg border bg-white dark:bg-xedu-slate-900">
                     <div className="h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center shrink-0">
                       <Clock className="h-5 w-5 text-amber-600" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium">{req.club?.name}</p>
-                      {req.message && <p className="text-sm text-muted-foreground truncate">{req.message}</p>}
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      {req.message && <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{req.message}</p>}
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">
                         Yuborildi: {new Date(req.createdAt).toLocaleDateString('uz-UZ')}
                       </p>
                     </div>

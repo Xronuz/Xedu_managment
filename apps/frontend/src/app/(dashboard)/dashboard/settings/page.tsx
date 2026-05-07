@@ -258,7 +258,7 @@ export default function SettingsPage() {
 
   const userInitials = getInitials(user?.firstName ?? '', user?.lastName ?? '');
   const roleLabel = getRoleLabel(user?.role ?? '');
-  const roleBadgeClass = ROLE_BADGE_COLORS[user?.role ?? ''] ?? 'bg-muted text-muted-foreground';
+  const roleBadgeClass = ROLE_BADGE_COLORS[user?.role ?? ''] ?? 'bg-muted text-xedu-slate-500 dark:text-xedu-slate-400';
   const roleDescription = ROLE_DESCRIPTIONS[user?.role ?? ''] ?? '';
 
   // ─── Render ───────────────────────────────────────────────────────────────
@@ -307,7 +307,7 @@ export default function SettingsPage() {
                       <p className="font-semibold text-base truncate">
                         {user?.firstName} {user?.lastName}
                       </p>
-                      <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
+                      <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{user?.email}</p>
                       <span
                         className={`mt-1 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${roleBadgeClass}`}
                       >
@@ -323,7 +323,7 @@ export default function SettingsPage() {
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
                       <Label htmlFor="firstName">
-                        Ism <span className="text-destructive">*</span>
+                        Ism <span className="text-xedu-ruby">*</span>
                       </Label>
                       <Input
                         id="firstName"
@@ -334,7 +334,7 @@ export default function SettingsPage() {
                     </div>
                     <div className="space-y-1.5">
                       <Label htmlFor="lastName">
-                        Familiya <span className="text-destructive">*</span>
+                        Familiya <span className="text-xedu-ruby">*</span>
                       </Label>
                       <Input
                         id="lastName"
@@ -362,7 +362,7 @@ export default function SettingsPage() {
                       disabled
                       className="opacity-60 cursor-not-allowed"
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                       Email manzilingizni o'zgartirish uchun administratorga murojaat qiling
                     </p>
                   </div>
@@ -390,7 +390,7 @@ export default function SettingsPage() {
                   {/* Current password */}
                   <div className="space-y-1.5">
                     <Label htmlFor="currentPassword">
-                      Joriy parol <span className="text-destructive">*</span>
+                      Joriy parol <span className="text-xedu-ruby">*</span>
                     </Label>
                     <div className="relative">
                       <Input
@@ -407,14 +407,14 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={() => setShowCurrent((s) => !s)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground transition-colors"
                         aria-label={showCurrent ? 'Parolni yashirish' : 'Parolni ko\'rsatish'}
                       >
                         {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                     {pwErrors.currentPassword && (
-                      <p className="text-xs text-destructive">{pwErrors.currentPassword}</p>
+                      <p className="text-xs text-xedu-ruby">{pwErrors.currentPassword}</p>
                     )}
                   </div>
 
@@ -423,7 +423,7 @@ export default function SettingsPage() {
                   {/* New password */}
                   <div className="space-y-1.5">
                     <Label htmlFor="newPassword">
-                      Yangi parol <span className="text-destructive">*</span>
+                      Yangi parol <span className="text-xedu-ruby">*</span>
                     </Label>
                     <div className="relative">
                       <Input
@@ -440,14 +440,14 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={() => setShowNew((s) => !s)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground transition-colors"
                         aria-label={showNew ? 'Parolni yashirish' : 'Parolni ko\'rsatish'}
                       >
                         {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                     {pwErrors.newPassword && (
-                      <p className="text-xs text-destructive">{pwErrors.newPassword}</p>
+                      <p className="text-xs text-xedu-ruby">{pwErrors.newPassword}</p>
                     )}
                     {/* Password strength hint */}
                     {pwForm.newPassword.length > 0 && (
@@ -478,7 +478,7 @@ export default function SettingsPage() {
                   {/* Confirm password */}
                   <div className="space-y-1.5">
                     <Label htmlFor="confirmPassword">
-                      Yangi parolni tasdiqlang <span className="text-destructive">*</span>
+                      Yangi parolni tasdiqlang <span className="text-xedu-ruby">*</span>
                     </Label>
                     <div className="relative">
                       <Input
@@ -495,14 +495,14 @@ export default function SettingsPage() {
                       <button
                         type="button"
                         onClick={() => setShowConfirm((s) => !s)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground transition-colors"
                         aria-label={showConfirm ? 'Parolni yashirish' : 'Parolni ko\'rsatish'}
                       >
                         {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
                     </div>
                     {pwErrors.confirmPassword && (
-                      <p className="text-xs text-destructive">{pwErrors.confirmPassword}</p>
+                      <p className="text-xs text-xedu-ruby">{pwErrors.confirmPassword}</p>
                     )}
                     {pwForm.confirmPassword.length > 0 &&
                       pwForm.newPassword === pwForm.confirmPassword && (
@@ -553,10 +553,10 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-2">
                 {/* In-app */}
-                <div className="flex items-center justify-between rounded-xl border p-4 transition-colors hover:bg-muted/30">
+                <div className="flex items-center justify-between rounded-xl border p-4 transition-colors hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30">
                   <div className="space-y-0.5">
                     <p className="text-sm font-medium">In-app bildirishnomalar</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                       Platforma ichida bildirishnomalarni ko'rsatish
                     </p>
                   </div>
@@ -568,10 +568,10 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Email */}
-                <div className="flex items-center justify-between rounded-xl border p-4 transition-colors hover:bg-muted/30">
+                <div className="flex items-center justify-between rounded-xl border p-4 transition-colors hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30">
                   <div className="space-y-0.5">
                     <p className="text-sm font-medium">Email bildirishnomalar</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                       Muhim hodisalar haqida email orqali xabar olish
                     </p>
                   </div>
@@ -583,10 +583,10 @@ export default function SettingsPage() {
                 </div>
 
                 {/* SMS */}
-                <div className="flex items-center justify-between rounded-xl border p-4 transition-colors hover:bg-muted/30">
+                <div className="flex items-center justify-between rounded-xl border p-4 transition-colors hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30">
                   <div className="space-y-0.5">
                     <p className="text-sm font-medium">SMS bildirishnomalar</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                       Telefon raqamingizga SMS xabarlar yuborish
                     </p>
                   </div>
@@ -677,7 +677,7 @@ export default function SettingsPage() {
                         onChange={(e) => setSysForm((f) => ({ ...f, bhm: Number(e.target.value) }))}
                         placeholder="1050000"
                       />
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         Joriy: {sysForm.bhm ? sysForm.bhm.toLocaleString('uz-UZ') + " so'm" : '—'}
                       </p>
                     </div>
@@ -692,7 +692,7 @@ export default function SettingsPage() {
                         onChange={(e) => setSysForm((f) => ({ ...f, pass_threshold: Number(e.target.value) }))}
                         placeholder="55"
                       />
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         Minimal o'tish foizi
                       </p>
                     </div>
@@ -707,7 +707,7 @@ export default function SettingsPage() {
                         onChange={(e) => setSysForm((f) => ({ ...f, work_days: Number(e.target.value) }))}
                         placeholder="22"
                       />
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         Oylik hisob-kitob uchun
                       </p>
                     </div>
@@ -767,7 +767,7 @@ export default function SettingsPage() {
                         </SelectItem>
                       </SelectContent>
                     </Select>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                       Joriy til:{' '}
                       <Badge variant="outline" className="text-xs">
                         {language === Language.UZ ? "O'zbekcha" : 'Русский'}

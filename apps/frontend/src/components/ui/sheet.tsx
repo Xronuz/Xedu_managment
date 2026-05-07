@@ -101,14 +101,14 @@ export function Sheet({
           {/* Panel */}
           <div
             className={cn(
-              'fixed z-50 flex flex-col bg-background shadow-xl overflow-y-auto',
+              'fixed z-50 flex flex-col bg-white dark:bg-xedu-slate-900 shadow-md overflow-y-auto',
               sideClasses[side],
             )}
           >
             {/* Close button */}
             <button
               onClick={() => handleChange(false)}
-              className="absolute right-4 top-4 rounded-md p-1 text-muted-foreground hover:text-foreground transition-colors z-10"
+              className="absolute right-4 top-4 rounded-md p-1 text-xedu-slate-400 dark:text-xedu-slate-500 hover:text-xedu-slate-900 dark:hover:text-xedu-slate-100 transition-colors z-10"
             >
               <X className="h-5 w-5" />
               <span className="sr-only">Yopish</span>
@@ -186,7 +186,7 @@ export function SheetContent({ side = 'right', className, children, hideClose = 
       {/* Panel */}
       <div
         className={cn(
-          'fixed z-50 flex flex-col bg-background shadow-xl',
+          'fixed z-50 flex flex-col bg-white dark:bg-xedu-slate-900 shadow-md',
           sideClasses[side],
           className,
         )}
@@ -195,7 +195,7 @@ export function SheetContent({ side = 'right', className, children, hideClose = 
         {!hideClose && (
           <button
             onClick={() => onOpenChange(false)}
-            className="absolute right-4 top-4 rounded-md p-1 text-muted-foreground hover:text-foreground transition-colors z-10"
+            className="absolute right-4 top-4 rounded-md p-1 text-xedu-slate-400 dark:text-xedu-slate-500 hover:text-xedu-slate-900 dark:hover:text-xedu-slate-100 transition-colors z-10"
           >
             <X className="h-5 w-5" />
             <span className="sr-only">Yopish</span>
@@ -228,7 +228,7 @@ export function SheetTitle({ className, children, ...props }: React.HTMLAttribut
 /* ── SheetDescription ────────────────────────────────────────────────── */
 export function SheetDescription({ className, children, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
   return (
-    <p className={cn('text-sm text-muted-foreground', className)} {...props}>
+    <p className={cn('text-sm text-xedu-slate-400 dark:text-xedu-slate-500', className)} {...props}>
       {children}
     </p>
   );

@@ -51,7 +51,7 @@ function EducationContent() {
     <div>
       <div className="mb-1">
         <h1 className="text-xl font-bold text-foreground">Ta&apos;lim</h1>
-        <p className="text-sm text-muted-foreground">Sinflar, dars jadvali va akademik rejalar</p>
+        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Sinflar, dars jadvali va akademik rejalar</p>
       </div>
 
       <div className="mt-3">

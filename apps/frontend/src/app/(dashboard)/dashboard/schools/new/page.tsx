@@ -124,7 +124,7 @@ export default function NewSchoolPage() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold">Yangi maktab qo'shish</h1>
-          <p className="text-muted-foreground">Platformga yangi maktab onboarding qilish</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Platformga yangi maktab onboarding qilish</p>
         </div>
       </div>
 
@@ -140,7 +140,7 @@ export default function NewSchoolPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             {errors._form && (
-              <div className="rounded-lg bg-destructive/10 border border-destructive/30 px-4 py-3 text-sm text-destructive">
+              <div className="rounded-lg bg-xedu-ruby/10 border border-xedu-ruby/30 px-4 py-3 text-sm text-xedu-ruby">
                 {errors._form}
               </div>
             )}
@@ -148,7 +148,7 @@ export default function NewSchoolPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
                 <Label htmlFor="name">
-                  Maktab nomi <span className="text-destructive">*</span>
+                  Maktab nomi <span className="text-xedu-ruby">*</span>
                 </Label>
                 <Input
                   id="name"
@@ -157,15 +157,15 @@ export default function NewSchoolPage() {
                   onChange={(e) => handleNameChange(e.target.value)}
                   className={errors.name ? 'border-destructive' : ''}
                 />
-                {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+                {errors.name && <p className="text-xs text-xedu-ruby">{errors.name}</p>}
               </div>
 
               <div className="space-y-1.5">
                 <Label htmlFor="slug">
-                  Slug (URL) <span className="text-destructive">*</span>
+                  Slug (URL) <span className="text-xedu-ruby">*</span>
                 </Label>
                 <div className="flex items-center">
-                  <span className="flex h-9 items-center rounded-l-md border border-r-0 bg-muted px-3 text-xs text-muted-foreground">
+                  <span className="flex h-9 items-center rounded-l-md border border-r-0 bg-muted px-3 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                     eduplatform.uz/
                   </span>
                   <Input
@@ -179,7 +179,7 @@ export default function NewSchoolPage() {
                     className={`rounded-l-none ${errors.slug ? 'border-destructive' : ''}`}
                   />
                 </div>
-                {errors.slug && <p className="text-xs text-destructive">{errors.slug}</p>}
+                {errors.slug && <p className="text-xs text-xedu-ruby">{errors.slug}</p>}
               </div>
             </div>
 
@@ -203,7 +203,7 @@ export default function NewSchoolPage() {
                   onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
                   className={errors.email ? 'border-destructive' : ''}
                 />
-                {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+                {errors.email && <p className="text-xs text-xedu-ruby">{errors.email}</p>}
               </div>
               <div className="space-y-1.5 sm:col-span-1 col-span-3">
                 <Label htmlFor="address">Manzil</Label>
@@ -234,7 +234,7 @@ export default function NewSchoolPage() {
                   className={`relative flex flex-col gap-2 rounded-xl border-2 p-4 text-left transition-all hover:bg-accent ${
                     form.subscriptionTier === tier.value
                       ? `${tier.color} bg-accent`
-                      : 'border-border'
+                      : 'border-xedu-slate-200 dark:border-xedu-slate-700'
                   }`}
                 >
                   {form.subscriptionTier === tier.value && (
@@ -244,10 +244,10 @@ export default function NewSchoolPage() {
                     <span className="font-semibold">{tier.label}</span>
                     <Badge variant="secondary" className="text-xs">{tier.price}</Badge>
                   </div>
-                  <p className="text-xs text-muted-foreground">{tier.description}</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{tier.description}</p>
                   <ul className="space-y-1">
                     {tier.features.map((f) => (
-                      <li key={f} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <li key={f} className="flex items-center gap-1.5 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         <CheckCircle2 className="h-3 w-3 text-green-500 flex-shrink-0" />
                         {f}
                       </li>

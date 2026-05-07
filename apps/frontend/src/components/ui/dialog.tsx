@@ -45,7 +45,7 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-xedu-slate-100 text-xedu-slate-500 hover:bg-xedu-slate-200 hover:text-xedu-slate-900 dark:bg-xedu-slate-800 dark:text-xedu-slate-400 dark:hover:bg-xedu-slate-700 dark:hover:text-white transition-colors ring-offset-background focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:ring-offset-1 disabled:pointer-events-none">
+      <DialogPrimitive.Close className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-xedu-slate-100 text-xedu-slate-500 hover:bg-xedu-slate-200 hover:text-xedu-slate-900 dark:bg-xedu-slate-800 dark:text-xedu-slate-400 dark:hover:bg-xedu-slate-700 dark:hover:text-white transition-colors ring-offset-white dark:ring-offset-xedu-slate-900 focus:outline-none focus:ring-2 focus:ring-xedu-primary/30 focus:ring-offset-1 disabled:pointer-events-none">
         <X className="h-4 w-4" />
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
@@ -82,7 +82,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn('text-sm text-muted-foreground', className)}
+    className={cn('text-sm text-xedu-slate-500 dark:text-xedu-slate-400', className)}
     {...props}
   />
 ));

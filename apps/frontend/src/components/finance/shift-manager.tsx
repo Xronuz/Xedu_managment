@@ -102,7 +102,7 @@ export function ShiftManager() {
         title: 'Smena yopildi',
         description: hasDisc
           ? `Farq: ${discrepancy > 0 ? '+' : ''}${formatUZS(discrepancy)}`
-          : 'Balans mos keladi ✓',
+          : 'Balans mos keladi ',
         variant: hasDisc ? 'destructive' : 'default',
       });
       setCloseShiftDialog(false);
@@ -153,26 +153,26 @@ export function ShiftManager() {
             <>
               <div className="space-y-1.5 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">G'azna:</span>
+                  <span className="text-xedu-slate-500 dark:text-xedu-slate-400">G'azna:</span>
                   <span className="font-medium">{activeShift.treasury?.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Ochildi:</span>
+                  <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Ochildi:</span>
                   <span className="font-medium">
                     {format(new Date(activeShift.startTime), 'HH:mm, dd MMM', { locale: uz })}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Boshlanish balansi:</span>
+                  <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Boshlanish balansi:</span>
                   <span className="font-medium">{formatUZS(activeShift.startingBalance)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Hozirgi balans:</span>
-                  <span className="font-bold text-green-600">
+                  <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Hozirgi balans:</span>
+                  <span className="font-bold text-xedu-primary">
                     {formatUZS(activeShift.treasury?.balance ?? 0)}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                   <User className="h-3 w-3" />
                   {activeShift.opener?.firstName} {activeShift.opener?.lastName} tomonidan ochildi
                 </div>
@@ -192,7 +192,7 @@ export function ShiftManager() {
           ) : (
             /* ── Yopiq smena ko'rinishi ─────────────────────────────────── */
             <>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                 Naqd to'lov qabul qilish uchun avval smenani oching
               </p>
               <Button
@@ -200,7 +200,7 @@ export function ShiftManager() {
                 variant="outline"
                 onClick={() => setOpenShiftDialog(true)}
               >
-                <PlayCircle className="h-4 w-4 text-green-600" />
+                <PlayCircle className="h-4 w-4 text-xedu-primary" />
                 Smenani ochish
               </Button>
             </>
@@ -238,7 +238,7 @@ export function ShiftManager() {
             <div className="space-y-2">
               <Label htmlFor="starting-balance">
                 Boshlanish balansi
-                <span className="text-muted-foreground text-xs ml-1">(naqd inventarizatsiya)</span>
+                <span className="text-xedu-slate-500 dark:text-xedu-slate-400 text-xs ml-1">(naqd inventarizatsiya)</span>
               </Label>
               <Input
                 id="starting-balance"
@@ -278,7 +278,7 @@ export function ShiftManager() {
               {/* Kutilgan vs haqiqiy */}
               <div className="rounded-lg border p-3 space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Kutilgan balans:</span>
+                  <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Kutilgan balans:</span>
                   <span className="font-semibold">
                     {formatUZS(activeShift.treasury?.balance ?? 0)}
                   </span>
@@ -288,7 +288,7 @@ export function ShiftManager() {
               <div className="space-y-2">
                 <Label htmlFor="actual-balance">
                   Haqiqiy balans
-                  <span className="text-muted-foreground text-xs ml-1">(kassir hisoblagan)</span>
+                  <span className="text-xedu-slate-500 dark:text-xedu-slate-400 text-xs ml-1">(kassir hisoblagan)</span>
                 </Label>
                 <Input
                   id="actual-balance"
@@ -305,7 +305,7 @@ export function ShiftManager() {
                     const act = Number(actualBalance);
                     const diff = exp - act;
                     if (diff === 0) return (
-                      <p className="text-xs text-green-600 flex items-center gap-1">
+                      <p className="text-xs text-xedu-primary flex items-center gap-1">
                         <CheckCircle2 className="h-3.5 w-3.5" /> Balans mos
                       </p>
                     );

@@ -16,14 +16,14 @@ import { aiAnalyticsApi } from '@/lib/api/ai-analytics';
 import { cn } from '@/lib/utils';
 
 const RISK_COLORS = {
-  LOW:      { bg: 'bg-emerald-100', text: 'text-emerald-700', bar: 'bg-emerald-500', label: 'Past' },
+  LOW:      { bg: 'bg-xedu-primary-light', text: 'text-xedu-primary', bar: 'bg-xedu-primary', label: 'Past' },
   MEDIUM:   { bg: 'bg-amber-100',   text: 'text-amber-700',   bar: 'bg-amber-500',   label: "O'rta" },
   HIGH:     { bg: 'bg-orange-100',  text: 'text-orange-700',  bar: 'bg-orange-500',  label: 'Yuqori' },
   CRITICAL: { bg: 'bg-red-100',     text: 'text-red-700',     bar: 'bg-red-500',     label: 'Kritik' },
 };
 
 const TREND_ICONS = {
-  IMPROVING: <TrendingUp className="h-4 w-4 text-emerald-500" />,
+  IMPROVING: <TrendingUp className="h-4 w-4 text-xedu-primary" />,
   STABLE:    <Minus className="h-4 w-4 text-slate-400" />,
   DECLINING: <TrendingDown className="h-4 w-4 text-red-500" />,
 };
@@ -33,7 +33,7 @@ function RiskDistributionCard({ label, count, total, color }: { label: string; c
   return (
     <div className="space-y-2">
       <div className="flex justify-between text-sm">
-        <span className="text-muted-foreground">{label}</span>
+        <span className="text-xedu-slate-500 dark:text-xedu-slate-400">{label}</span>
         <span className="font-semibold">{count} ({pct}%)</span>
       </div>
       <div className="h-2 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -57,7 +57,7 @@ function StudentCard({ student, expanded, onToggle }: { student: any; expanded: 
             </div>
             <div>
               <p className="font-semibold text-sm">{student.firstName} {student.lastName}</p>
-              <p className="text-xs text-muted-foreground">{student.className ?? 'Sinf belgilanmagan'}</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{student.className ?? 'Sinf belgilanmagan'}</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -74,24 +74,24 @@ function StudentCard({ student, expanded, onToggle }: { student: any; expanded: 
           <div className="mt-4 space-y-3 pt-3 border-t">
             <div className="grid grid-cols-3 gap-3">
               <div className="text-center">
-                <p className="text-xs text-muted-foreground">GPA</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">GPA</p>
                 <p className="text-lg font-bold">{student.gpa}</p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-muted-foreground">Davomat</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Davomat</p>
                 <p className="text-lg font-bold">{student.attendanceRate}%</p>
               </div>
               <div className="text-center">
-                <p className="text-xs text-muted-foreground">Uy vazifasi</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Uy vazifasi</p>
                 <p className="text-lg font-bold">{student.homeworkCompletion}%</p>
               </div>
             </div>
 
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Baho trendi:</span>
+              <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Baho trendi:</span>
               {TREND_ICONS[student.lastGradeTrend as keyof typeof TREND_ICONS]}
               <span className={cn(
-                student.lastGradeTrend === 'IMPROVING' ? 'text-emerald-600' :
+                student.lastGradeTrend === 'IMPROVING' ? 'text-xedu-primary' :
                 student.lastGradeTrend === 'DECLINING' ? 'text-red-600' : 'text-slate-500',
               )}>
                 {student.lastGradeTrend === 'IMPROVING' ? 'Yaxshilanmoqda' :
@@ -107,7 +107,7 @@ function StudentCard({ student, expanded, onToggle }: { student: any; expanded: 
             )}
 
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold text-muted-foreground flex items-center gap-1">
+              <p className="text-xs font-semibold text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1">
                 <Lightbulb className="h-3 w-3" />
                 Tavsiyalar
               </p>
@@ -153,7 +153,7 @@ export default function AiAnalyticsPage() {
           <Brain className="h-6 w-6 text-indigo-500" />
           <h1 className="text-2xl font-bold tracking-tight">AI Analytics</h1>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
           O'quvchilar holatini tahlil qilish va risk baholash tizimi
         </p>
       </div>
@@ -171,7 +171,7 @@ export default function AiAnalyticsPage() {
             <CardContent className="pt-5 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Jami o'quvchilar</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Jami o'quvchilar</p>
                   <p className="text-2xl font-bold">{total}</p>
                 </div>
                 <Users className="h-8 w-8 text-slate-300" />
@@ -182,7 +182,7 @@ export default function AiAnalyticsPage() {
             <CardContent className="pt-5 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">O'rtacha GPA</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">O'rtacha GPA</p>
                   <p className="text-2xl font-bold">{dashboard?.averages.gpa ?? '—'}</p>
                 </div>
                 <GraduationCap className="h-8 w-8 text-slate-300" />
@@ -193,7 +193,7 @@ export default function AiAnalyticsPage() {
             <CardContent className="pt-5 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">O'rtacha davomat</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">O'rtacha davomat</p>
                   <p className="text-2xl font-bold">{dashboard?.averages.attendance ?? '—'}%</p>
                 </div>
                 <Calendar className="h-8 w-8 text-slate-300" />
@@ -204,7 +204,7 @@ export default function AiAnalyticsPage() {
             <CardContent className="pt-5 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Kritik holat</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Kritik holat</p>
                   <p className="text-2xl font-bold text-red-600">
                     {dashboard?.riskDistribution.critical ?? 0}
                   </p>
@@ -223,7 +223,7 @@ export default function AiAnalyticsPage() {
             <CardTitle className="text-sm font-semibold">Risk taqsimoti</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <RiskDistributionCard label="Past" count={dashboard.riskDistribution.low} total={total} color="bg-emerald-500" />
+            <RiskDistributionCard label="Past" count={dashboard.riskDistribution.low} total={total} color="bg-xedu-primary" />
             <RiskDistributionCard label="O'rta" count={dashboard.riskDistribution.medium} total={total} color="bg-amber-500" />
             <RiskDistributionCard label="Yuqori" count={dashboard.riskDistribution.high} total={total} color="bg-orange-500" />
             <RiskDistributionCard label="Kritik" count={dashboard.riskDistribution.critical} total={total} color="bg-red-500" />
@@ -236,7 +236,7 @@ export default function AiAnalyticsPage() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-bold">O'quvchilar tahlili</h2>
           <div className="relative w-64">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
             <Input
               placeholder="Qidirish..."
               value={search}
@@ -251,7 +251,7 @@ export default function AiAnalyticsPage() {
             {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-16" />)}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
+          <div className="text-center py-12 text-xedu-slate-500 dark:text-xedu-slate-400">
             <Brain className="h-10 w-10 mx-auto mb-3 text-slate-300" />
             <p>Ma'lumot topilmadi</p>
           </div>

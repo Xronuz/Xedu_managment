@@ -137,7 +137,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
       setCommitResult(result);
       setStep('result');
       if (result.created > 0) {
-        toast({ title: `✅ ${result.created} ta yozuv saqlandi` });
+        toast({ title: `${result.created} ta yozuv saqlandi` });
         onSuccess?.();
       }
     },
@@ -189,10 +189,10 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
         {step === 'upload' && (
           <div className="space-y-4 py-2">
             {/* Namuna fayl */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 border">
               <div className="text-sm">
                 <div className="font-medium">Namuna fayl yuklab oling</div>
-                <div className="text-muted-foreground text-xs mt-0.5">
+                <div className="text-xedu-slate-500 dark:text-xedu-slate-400 text-xs mt-0.5">
                   Ustunlar: {config.columns.join(' • ')}
                 </div>
               </div>
@@ -208,7 +208,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
             {/* Drag & drop zone */}
             <div
               className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors
-                ${dragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/30 hover:border-primary/50 hover:bg-muted/30'}`}
+                ${dragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/30 hover:border-primary/50 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30'}`}
               onDragOver={e => { e.preventDefault(); setDragOver(true); }}
               onDragLeave={() => setDragOver(false)}
               onDrop={handleDrop}
@@ -218,14 +218,14 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
                 ? (
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                    <p className="text-sm text-muted-foreground">Fayl tahlil qilinmoqda…</p>
+                    <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Fayl tahlil qilinmoqda…</p>
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-3">
-                    <Upload className="h-10 w-10 text-muted-foreground/50" />
+                    <Upload className="h-10 w-10 text-xedu-slate-500 dark:text-xedu-slate-400/50" />
                     <div>
                       <p className="font-medium">Excel faylni bu yerga tashlang</p>
-                      <p className="text-sm text-muted-foreground mt-1">yoki bosib faylni tanlang (.xlsx, .xls)</p>
+                      <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">yoki bosib faylni tanlang (.xlsx, .xls)</p>
                     </div>
                   </div>
                 )}
@@ -247,15 +247,15 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
             <div className="grid grid-cols-3 gap-3">
               <div className="text-center p-3 rounded-lg bg-muted/40 border">
                 <div className="text-2xl font-bold">{parseResult.total}</div>
-                <div className="text-xs text-muted-foreground">Jami qator</div>
+                <div className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Jami qator</div>
               </div>
               <div className="text-center p-3 rounded-lg bg-green-50 border border-green-200">
-                <div className="text-2xl font-bold text-green-600">{parseResult.valid}</div>
-                <div className="text-xs text-muted-foreground">Yaroqli</div>
+                <div className="text-2xl font-bold text-xedu-primary">{parseResult.valid}</div>
+                <div className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Yaroqli</div>
               </div>
               <div className="text-center p-3 rounded-lg bg-red-50 border border-red-200">
                 <div className="text-2xl font-bold text-red-600">{parseResult.invalid}</div>
-                <div className="text-xs text-muted-foreground">Xatolik bor</div>
+                <div className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Xatolik bor</div>
               </div>
             </div>
 
@@ -277,7 +277,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
                     <div className="p-2 space-y-1">
                       {invalidRows.map((row) => (
                         <div key={row.row} className="flex gap-2 text-xs p-1.5 rounded bg-red-50/50">
-                          <span className="font-mono text-muted-foreground w-12 shrink-0">Qator {row.row}:</span>
+                          <span className="font-mono text-xedu-slate-500 dark:text-xedu-slate-400 w-12 shrink-0">Qator {row.row}:</span>
                           <span className="text-red-600">{row.errors.join(', ')}</span>
                         </div>
                       ))}
@@ -290,8 +290,8 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
             {/* Yaroqli qatorlar preview */}
             {validRows.length > 0 && (
               <div className="border rounded-lg overflow-hidden">
-                <div className="p-2 bg-muted/50 text-xs font-medium text-muted-foreground flex items-center gap-1.5">
-                  <CheckCircle2 className="h-3.5 w-3.5 text-green-600" />
+                <div className="p-2 bg-xedu-slate-50 dark:bg-xedu-slate-800/60 text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1.5">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-xedu-primary" />
                   Quyidagi {Math.min(validRows.length, 5)} ta yozuv saqlanadi (jami {validRows.length}):
                 </div>
                 <ScrollArea className="max-h-48">
@@ -305,7 +305,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
                       </div>
                     ))}
                     {validRows.length > 5 && (
-                      <div className="px-3 py-2 text-xs text-muted-foreground">
+                      <div className="px-3 py-2 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         … va yana {validRows.length - 5} ta
                       </div>
                     )}
@@ -328,7 +328,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
                     ))}
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                   Agar tanlanmasa, import joriy filialga amalga oshiriladi
                 </p>
               </div>
@@ -350,7 +350,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
             <div>
               <p className="text-xl font-bold">{commitResult.created} ta yozuv saqlandi!</p>
               {commitResult.skipped > 0 && (
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
                   {commitResult.skipped} ta o&apos;tkazib yuborildi (allaqachon mavjud)
                 </p>
               )}

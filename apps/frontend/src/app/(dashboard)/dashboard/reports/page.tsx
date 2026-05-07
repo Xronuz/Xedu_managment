@@ -29,12 +29,12 @@ import { useAuthStore } from '@/store/auth.store';
 import { formatCurrency } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 
-// ── Palette — harmonious indigo/violet/emerald/amber scale ───────────────────
+// ── Palette — harmonious indigo/violet/primary/amber scale ───────────────────
 const P = {
   indigo:   '#6366f1',
   violet:   '#8b5cf6',
   sky:      '#0ea5e9',
-  emerald:  '#10b981',
+  primary:  '#0F7B53',
   amber:    '#f59e0b',
   rose:     '#f43f5e',
   slate:    '#94a3b8',
@@ -42,8 +42,8 @@ const P = {
   series: ['#6366f1', '#8b5cf6', '#0ea5e9', '#10b981', '#f59e0b', '#f43f5e', '#ec4899'],
 };
 
-const STATUS_COLOR = { paid: P.emerald, pending: P.amber, overdue: P.rose };
-const PIE_COLORS   = [P.emerald, P.rose, P.amber, P.sky];
+const STATUS_COLOR = { paid: P.primary, pending: P.amber, overdue: P.rose };
+const PIE_COLORS   = [P.primary, P.rose, P.amber, P.sky];
 const MONTH_UZ     = ['Yan','Fev','Mar','Apr','May','Iyun','Iyul','Avg','Sen','Okt','Noy','Dek'];
 
 // ── Shared helpers ────────────────────────────────────────────────────────────
@@ -73,11 +73,11 @@ function getPreset(preset: 'this_month' | 'last_month' | 'this_quarter' | 'this_
 function CustomTooltip({ active, payload, label, formatter }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border bg-background/95 backdrop-blur-sm p-3 shadow-xl text-xs space-y-1 min-w-[140px]">
+    <div className="rounded-xl border bg-white/95 dark:bg-xedu-slate-950/95 backdrop-blur-sm p-3 shadow-md text-xs space-y-1 min-w-[140px]">
       <p className="font-semibold text-foreground mb-1.5 border-b pb-1">{label}</p>
       {payload.map((entry: any, i: number) => (
         <p key={i} className="flex justify-between gap-4" style={{ color: entry.color }}>
-          <span className="text-muted-foreground">{entry.name}</span>
+          <span className="text-xedu-slate-500 dark:text-xedu-slate-400">{entry.name}</span>
           <span className="font-bold">{formatter ? formatter(entry.value) : entry.value}</span>
         </p>
       ))}
@@ -98,12 +98,12 @@ function KPICard({
       <CardContent className="p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1 min-w-0">
-            <p className="text-xs font-medium text-muted-foreground truncate">{label}</p>
+            <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{label}</p>
             <p className="text-2xl font-bold tracking-tight">{value}</p>
-            {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
+            {sub && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{sub}</p>}
             {trend && (
               <div className={`flex items-center gap-1 text-xs font-medium ${
-                trend.dir === 'up' ? 'text-emerald-600 dark:text-emerald-400'
+                trend.dir === 'up' ? 'text-xedu-primary dark:text-xedu-primary'
                   : trend.dir === 'down' ? 'text-rose-500 dark:text-rose-400'
                   : 'text-slate-500'
               }`}>
@@ -214,7 +214,7 @@ function AnalyticsTab() {
   const funnelChart = useMemo(() =>
     (marketing?.funnelBySource ?? []).slice(0, 6).map(r => ({
       name:  SOURCE_LABELS[r.source]?.label ?? r.source,
-      emoji: SOURCE_LABELS[r.source]?.emoji ?? '📋',
+      emoji: SOURCE_LABELS[r.source]?.emoji ?? '',
       Jami:  r.total,
       "Aylangan": r.converted,
       "Daromad (M)": Math.round(r.estimatedRevenue / 1_000_000),
@@ -234,14 +234,14 @@ function AnalyticsTab() {
 
       {/* ── Report Filter bar ──────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-muted/20 px-4 py-3">
-        <Filter className="h-4 w-4 text-muted-foreground shrink-0" />
-        <span className="text-sm font-medium text-muted-foreground mr-1">Filtr:</span>
+        <Filter className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0" />
+        <span className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400 mr-1">Filtr:</span>
 
         {/* Branch selector */}
         <select
           value={branchFilter}
           onChange={(e) => setBranchFilter(e.target.value)}
-          className="h-8 rounded-lg border bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="h-8 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
         >
           <option value="">Barcha filiallar</option>
           {(branchList ?? []).map((b) => (
@@ -253,7 +253,7 @@ function AnalyticsTab() {
         <select
           value={months}
           onChange={(e) => setMonths(Number(e.target.value))}
-          className="h-8 rounded-lg border bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+          className="h-8 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
         >
           <option value={3}>3 oy</option>
           <option value={6}>6 oy</option>
@@ -263,7 +263,7 @@ function AnalyticsTab() {
         {branchFilter && (
           <button
             onClick={() => setBranchFilter('')}
-            className="text-xs text-muted-foreground hover:text-foreground underline ml-1"
+            className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground underline ml-1"
           >
             Tozalash
           </button>
@@ -272,8 +272,8 @@ function AnalyticsTab() {
 
       {/* ── Export bar ─────────────────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-muted/20 px-4 py-3">
-        <FileSpreadsheet className="h-4 w-4 text-muted-foreground shrink-0" />
-        <span className="text-sm font-medium text-muted-foreground mr-2">Excel eksport:</span>
+        <FileSpreadsheet className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0" />
+        <span className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400 mr-2">Excel eksport:</span>
         {(['students', 'payments', 'attendance'] as const).map((t) => {
           const labels = { students: "O'quvchilar", payments: "To'lovlar", attendance: 'Davomat' };
           return (
@@ -294,7 +294,7 @@ function AnalyticsTab() {
 
       {/* ── Pulse KPIs ─────────────────────────────────────────────────── */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/70 mb-3 flex items-center gap-2">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-xedu-slate-500 dark:text-xedu-slate-400/70 mb-3 flex items-center gap-2">
           <Zap className="h-3.5 w-3.5" /> Bugungi holat
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -311,8 +311,8 @@ function AnalyticsTab() {
             value={pulse?.today.attendanceRate != null ? `${pulse.today.attendanceRate}%` : '—'}
             sub={`${pulse?.today.present ?? 0} keldi · ${pulse?.today.absent ?? 0} kelmadi`}
             icon={CheckCircle}
-            iconBg="bg-emerald-500/10"
-            iconColor="text-emerald-500"
+            iconBg="bg-xedu-primary/10"
+            iconColor="text-xedu-primary"
             trend={attTrend}
           />
           <KPICard
@@ -351,7 +351,7 @@ function AnalyticsTab() {
             {finLoading ? (
               <Skeleton className="h-[260px] rounded-lg" />
             ) : monthlyChart.length === 0 ? (
-              <div className="h-[260px] flex items-center justify-center text-sm text-muted-foreground">
+              <div className="h-[260px] flex items-center justify-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                 Ma'lumot yo'q
               </div>
             ) : (
@@ -359,8 +359,8 @@ function AnalyticsTab() {
                 <AreaChart data={monthlyChart} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="gPaid" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%"  stopColor={P.emerald} stopOpacity={0.18} />
-                      <stop offset="95%" stopColor={P.emerald} stopOpacity={0}    />
+                      <stop offset="5%"  stopColor={P.primary} stopOpacity={0.18} />
+                      <stop offset="95%" stopColor={P.primary} stopOpacity={0}    />
                     </linearGradient>
                     <linearGradient id="gPending" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%"  stopColor={P.amber} stopOpacity={0.15} />
@@ -376,7 +376,7 @@ function AnalyticsTab() {
                   <YAxis tick={{ fontSize: 10 }} tickFormatter={fmt} width={52} />
                   <Tooltip content={<CustomTooltip formatter={formatCurrency} />} />
                   <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
-                  <Area dataKey="paid"    name="To'langan"    stroke={P.emerald} fill="url(#gPaid)"    strokeWidth={2} dot={false} />
+                  <Area dataKey="paid"    name="To'langan"    stroke={P.primary} fill="url(#gPaid)"    strokeWidth={2} dot={false} />
                   <Area dataKey="pending" name="Kutilmoqda"   stroke={P.amber}   fill="url(#gPending)" strokeWidth={1.5} dot={false} strokeDasharray="4 2" />
                   <Area dataKey="overdue" name="Kechikkan"    stroke={P.rose}    fill="url(#gOverdue)" strokeWidth={1.5} dot={false} strokeDasharray="4 2" />
                 </AreaChart>
@@ -395,7 +395,7 @@ function AnalyticsTab() {
             {finLoading ? (
               <div className="space-y-2">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10 rounded-lg" />)}</div>
             ) : (finance?.branches ?? []).length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">Ma'lumot yo'q</p>
+              <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 text-center py-8">Ma'lumot yo'q</p>
             ) : (
               <div className="space-y-2">
                 {(finance?.branches ?? [])
@@ -429,7 +429,7 @@ function AnalyticsTab() {
 
       {/* ── Branch Comparison BarChart + Radar ─────────────────────────── */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/70 mb-3 flex items-center gap-2">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-xedu-slate-500 dark:text-xedu-slate-400/70 mb-3 flex items-center gap-2">
           <Building2 className="h-3.5 w-3.5" /> Filiallar solishtirmasi
         </h2>
         <div className="grid gap-5 lg:grid-cols-2">
@@ -442,7 +442,7 @@ function AnalyticsTab() {
               {branchLoading ? (
                 <Skeleton className="h-[240px] rounded-lg" />
               ) : (branches ?? []).length === 0 ? (
-                <div className="h-[240px] flex items-center justify-center text-sm text-muted-foreground">
+                <div className="h-[240px] flex items-center justify-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                   Ma'lumot yo'q
                 </div>
               ) : (
@@ -455,7 +455,7 @@ function AnalyticsTab() {
                     <Tooltip content={<CustomTooltip />} />
                     <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
                     <Bar yAxisId="left"  dataKey="studentCount"  name="O'quvchilar" fill={P.indigo}  radius={[4, 4, 0, 0]} />
-                    <Bar yAxisId="right" dataKey="attendancePct" name="Davomat %"   fill={P.emerald} radius={[4, 4, 0, 0]} />
+                    <Bar yAxisId="right" dataKey="attendancePct" name="Davomat %"   fill={P.primary} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -472,20 +472,20 @@ function AnalyticsTab() {
               {branchLoading ? (
                 <div className="space-y-2">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}</div>
               ) : (branches ?? []).length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">Ma'lumot yo'q</p>
+                <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 text-center py-8">Ma'lumot yo'q</p>
               ) : (
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="text-left py-2 text-xs font-medium text-muted-foreground">Filial</th>
-                      <th className="text-center py-2 text-xs font-medium text-muted-foreground">Ball</th>
-                      <th className="text-center py-2 text-xs font-medium text-muted-foreground">Davomat</th>
-                      <th className="text-center py-2 text-xs font-medium text-muted-foreground">Lead %</th>
+                      <th className="text-left py-2 text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Filial</th>
+                      <th className="text-center py-2 text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Ball</th>
+                      <th className="text-center py-2 text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Davomat</th>
+                      <th className="text-center py-2 text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Lead %</th>
                     </tr>
                   </thead>
                   <tbody>
                     {(branches ?? []).map((b, i) => (
-                      <tr key={b.branchId} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                      <tr key={b.branchId} className="border-b last:border-0 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
                         <td className="py-2.5">
                           <div className="flex items-center gap-2">
                             <span className={`text-xs font-bold h-5 w-5 rounded-full flex items-center justify-center text-white`}
@@ -496,7 +496,7 @@ function AnalyticsTab() {
                           </div>
                         </td>
                         <td className="py-2.5 text-center">
-                          <span className="font-bold text-sm" style={{ color: b.avgGrade >= 70 ? P.emerald : b.avgGrade >= 50 ? P.amber : P.rose }}>
+                          <span className="font-bold text-sm" style={{ color: b.avgGrade >= 70 ? P.primary : b.avgGrade >= 50 ? P.amber : P.rose }}>
                             {b.avgGrade}
                           </span>
                         </td>
@@ -518,7 +518,7 @@ function AnalyticsTab() {
 
       {/* ── Marketing ROI ──────────────────────────────────────────────── */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/70 mb-3 flex items-center gap-2">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-xedu-slate-500 dark:text-xedu-slate-400/70 mb-3 flex items-center gap-2">
           <Target className="h-3.5 w-3.5" /> Marketing ROI
         </h2>
         <div className="grid gap-5 lg:grid-cols-2">
@@ -532,7 +532,7 @@ function AnalyticsTab() {
               {mktLoading ? (
                 <Skeleton className="h-[240px] rounded-lg" />
               ) : funnelChart.length === 0 ? (
-                <div className="h-[240px] flex items-center justify-center text-sm text-muted-foreground">
+                <div className="h-[240px] flex items-center justify-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                   Lead ma'lumotlari yo'q
                 </div>
               ) : (
@@ -544,7 +544,7 @@ function AnalyticsTab() {
                     <Tooltip content={<CustomTooltip />} />
                     <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 11 }} />
                     <Bar dataKey="Jami"      fill={P.sky}    radius={[4, 4, 0, 0]} />
-                    <Bar dataKey="Aylangan"  fill={P.emerald} radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="Aylangan"  fill={P.primary} radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               )}
@@ -561,20 +561,20 @@ function AnalyticsTab() {
               {mktLoading ? (
                 <div className="space-y-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 rounded-lg" />)}</div>
               ) : (marketing?.funnelBySource ?? []).length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">Ma'lumot yo'q</p>
+                <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 text-center py-8">Ma'lumot yo'q</p>
               ) : (
                 <div className="space-y-3">
                   {(marketing?.funnelBySource ?? []).map((r, i) => {
                     const max = marketing!.funnelBySource[0]?.estimatedRevenue || 1;
                     const pct = Math.round((r.estimatedRevenue / max) * 100);
-                    const src = SOURCE_LABELS[r.source] ?? { label: r.source, emoji: '📋' };
+                    const src = SOURCE_LABELS[r.source] ?? { label: r.source, emoji: '' };
                     return (
                       <div key={r.source} className="space-y-1">
                         <div className="flex items-center justify-between text-xs">
                           <span className="flex items-center gap-1.5 font-medium">
                             <span>{src.emoji}</span>
                             {src.label}
-                            <span className="text-muted-foreground">({r.total} lead, {r.conversionRate}%)</span>
+                            <span className="text-xedu-slate-500 dark:text-xedu-slate-400">({r.total} lead, {r.conversionRate}%)</span>
                           </span>
                           <span className="font-semibold">{fmt(r.estimatedRevenue)} UZS</span>
                         </div>
@@ -587,7 +587,7 @@ function AnalyticsTab() {
                       </div>
                     );
                   })}
-                  <p className="text-xs text-muted-foreground pt-1">
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 pt-1">
                     O'rtacha to'lov: <span className="font-semibold">{formatCurrency(marketing?.avgPaymentPerStudent ?? 0)}</span>
                   </p>
                 </div>
@@ -599,7 +599,7 @@ function AnalyticsTab() {
 
       {/* ── Smart Alerts ───────────────────────────────────────────────── */}
       <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/70 mb-3 flex items-center gap-2">
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-xedu-slate-500 dark:text-xedu-slate-400/70 mb-3 flex items-center gap-2">
           <ShieldAlert className="h-3.5 w-3.5" />
           Smart Alerts
           {!alertLoading && (alerts ?? []).length > 0 && (
@@ -615,8 +615,8 @@ function AnalyticsTab() {
           <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}</div>
         ) : (alerts ?? []).length === 0 ? (
           <Card>
-            <CardContent className="py-8 flex flex-col items-center gap-2 text-muted-foreground">
-              <CheckCircle className="h-8 w-8 text-emerald-500" />
+            <CardContent className="py-8 flex flex-col items-center gap-2 text-xedu-slate-500 dark:text-xedu-slate-400">
+              <CheckCircle className="h-8 w-8 text-xedu-primary" />
               <p className="text-sm font-medium">Hamma narsa yaxshi!</p>
               <p className="text-xs">Hozircha ogohlantirish yo'q</p>
             </CardContent>
@@ -638,10 +638,10 @@ function AnalyticsTab() {
                         <Badge variant="outline" className="text-[10px] h-4 px-1">{alert.branchName}</Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{alert.message}</p>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">{alert.message}</p>
                   </div>
                   <span className={`text-xs font-bold shrink-0 ${cfg.text}`}>
-                    {alert.type === 'danger' ? '❗' : alert.type === 'warning' ? '⚠️' : 'ℹ️'}
+                    {alert.type === 'danger' ? '' : alert.type === 'warning' ? '' : ''}
                   </span>
                 </div>
               );
@@ -696,7 +696,7 @@ function AttendanceReport({ dateRange, dateKey }: { dateRange: { from: string; t
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-4">
-        <KPICard label="Jami keldi"  value={summary.present} icon={CheckCircle}  iconBg="bg-emerald-500/10" iconColor="text-emerald-500" />
+        <KPICard label="Jami keldi"  value={summary.present} icon={CheckCircle}  iconBg="bg-xedu-primary/10" iconColor="text-xedu-primary" />
         <KPICard label="Kelmadi"     value={summary.absent}  icon={XCircle}      iconBg="bg-rose-500/10"    iconColor="text-rose-500"    />
         <KPICard label="Kechikdi"    value={summary.late}    icon={Clock}        iconBg="bg-amber-500/10"   iconColor="text-amber-500"   />
         <KPICard
@@ -731,16 +731,16 @@ function AttendanceReport({ dateRange, dateKey }: { dateRange: { from: string; t
           </CardHeader>
           <CardContent className="overflow-y-auto max-h-[280px]">
             {ranked.length === 0 ? (
-              <p className="text-center text-sm text-muted-foreground py-8">Ma'lumot yo'q</p>
+              <p className="text-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400 py-8">Ma'lumot yo'q</p>
             ) : (
               <table className="w-full text-xs">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-1.5 font-medium text-muted-foreground">#</th>
-                    <th className="text-left py-1.5 font-medium text-muted-foreground">Ism</th>
-                    <th className="text-center py-1.5 font-medium text-emerald-600">✅</th>
+                    <th className="text-left py-1.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">#</th>
+                    <th className="text-left py-1.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Ism</th>
+                    <th className="text-center py-1.5 font-medium text-xedu-primary"></th>
                     <th className="text-center py-1.5 font-medium text-rose-500">❌</th>
-                    <th className="text-right py-1.5 font-medium text-muted-foreground">%</th>
+                    <th className="text-right py-1.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">%</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -748,13 +748,13 @@ function AttendanceReport({ dateRange, dateKey }: { dateRange: { from: string; t
                     const t   = row.present + row.absent + row.late;
                     const pct = t > 0 ? Math.round((row.present / t) * 100) : 0;
                     return (
-                      <tr key={i} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                        <td className="py-2 text-muted-foreground">{i + 1}</td>
+                      <tr key={i} className="border-b last:border-0 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
+                        <td className="py-2 text-xedu-slate-500 dark:text-xedu-slate-400">{i + 1}</td>
                         <td className="py-2 font-medium">{row.name}</td>
-                        <td className="py-2 text-center text-emerald-600">{row.present}</td>
+                        <td className="py-2 text-center text-xedu-primary">{row.present}</td>
                         <td className="py-2 text-center text-rose-500">{row.absent}</td>
                         <td className="py-2 text-right">
-                          <span className={`font-bold ${pct >= 80 ? 'text-emerald-600' : pct >= 60 ? 'text-amber-600' : 'text-rose-500'}`}>
+                          <span className={`font-bold ${pct >= 80 ? 'text-xedu-primary' : pct >= 60 ? 'text-amber-600' : 'text-rose-500'}`}>
                             {pct}%
                           </span>
                         </td>
@@ -784,7 +784,7 @@ function GradesReport({ dateRange, dateKey }: { dateRange: { from: string; to: s
 
   const distribution = useMemo(() => {
     const buckets = [
-      { label: '90–100%', min: 90, max: 101, count: 0, color: P.emerald },
+      { label: '90–100%', min: 90, max: 101, count: 0, color: P.primary },
       { label: '70–89%',  min: 70, max: 90,  count: 0, color: '#84cc16' },
       { label: '50–69%',  min: 50, max: 70,  count: 0, color: P.amber   },
       { label: '0–49%',   min: 0,  max: 50,  count: 0, color: P.rose    },
@@ -819,9 +819,9 @@ function GradesReport({ dateRange, dateKey }: { dateRange: { from: string; to: s
         {distribution.map(b => (
           <Card key={b.label}>
             <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground">{b.label}</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{b.label}</p>
               <p className="text-2xl font-bold" style={{ color: b.color }}>{b.count}</p>
-              <p className="text-xs text-muted-foreground">ta baho</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">ta baho</p>
             </CardContent>
           </Card>
         ))}
@@ -871,19 +871,19 @@ function GradesReport({ dateRange, dateKey }: { dateRange: { from: string; to: s
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2 font-medium text-muted-foreground">O'quvchi</th>
-                    <th className="text-left py-2 font-medium text-muted-foreground">Fan</th>
-                    <th className="text-center py-2 font-medium text-muted-foreground">Tur</th>
-                    <th className="text-right py-2 font-medium text-muted-foreground">Ball</th>
+                    <th className="text-left py-2 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">O'quvchi</th>
+                    <th className="text-left py-2 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Fan</th>
+                    <th className="text-center py-2 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Tur</th>
+                    <th className="text-right py-2 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Ball</th>
                   </tr>
                 </thead>
                 <tbody>
                   {rows.slice(0, 50).map((g: any) => {
                     const pct = g.maxScore > 0 ? Math.round((g.score / g.maxScore) * 100) : 0;
                     return (
-                      <tr key={g.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
+                      <tr key={g.id} className="border-b last:border-0 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
                         <td className="py-2 font-medium">{g.student?.firstName} {g.student?.lastName}</td>
-                        <td className="py-2 text-muted-foreground">{g.subject?.name}</td>
+                        <td className="py-2 text-xedu-slate-500 dark:text-xedu-slate-400">{g.subject?.name}</td>
                         <td className="py-2 text-center"><Badge variant="outline" className="text-xs">{g.type}</Badge></td>
                         <td className="py-2 text-right">
                           <Badge variant={pct >= 80 ? 'default' : pct >= 60 ? 'secondary' : 'destructive'}>
@@ -896,7 +896,7 @@ function GradesReport({ dateRange, dateKey }: { dateRange: { from: string; to: s
                 </tbody>
               </table>
               {rows.length > 50 && (
-                <p className="text-xs text-muted-foreground text-center pt-3">va yana {rows.length - 50} ta...</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 text-center pt-3">va yana {rows.length - 50} ta...</p>
               )}
             </div>
           </CardContent>
@@ -945,7 +945,7 @@ function FinanceReport({ dateRange, dateKey }: { dateRange: { from: string; to: 
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
-        <KPICard label="Jami to'langan" value={formatCurrency(totalPaid)}    icon={CheckCircle}  iconBg="bg-emerald-500/10" iconColor="text-emerald-500" />
+        <KPICard label="Jami to'langan" value={formatCurrency(totalPaid)}    icon={CheckCircle}  iconBg="bg-xedu-primary/10" iconColor="text-xedu-primary" />
         <KPICard label="Kutilmoqda"     value={formatCurrency(totalPending)} icon={AlertTriangle} iconBg="bg-amber-500/10"   iconColor="text-amber-500"   />
         <KPICard label="Qarzdorlar"     value={`${debtors.length} o'quvchi`} icon={Users}        iconBg="bg-rose-500/10"    iconColor="text-rose-500"    />
       </div>
@@ -976,7 +976,7 @@ function FinanceReport({ dateRange, dateKey }: { dateRange: { from: string; to: 
       {debtors.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-sm font-medium text-destructive flex items-center gap-2">
+            <CardTitle className="text-sm font-medium text-xedu-ruby flex items-center gap-2">
               <AlertTriangle className="h-4 w-4" /> Qarzdorlar ro'yxati ({debtors.length} ta)
             </CardTitle>
           </CardHeader>
@@ -985,16 +985,16 @@ function FinanceReport({ dateRange, dateKey }: { dateRange: { from: string; to: 
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2 font-medium text-muted-foreground">#</th>
-                    <th className="text-left py-2 font-medium text-muted-foreground">O'quvchi</th>
-                    <th className="text-right py-2 font-medium text-muted-foreground">Summa</th>
-                    <th className="text-center py-2 font-medium text-muted-foreground">Holat</th>
+                    <th className="text-left py-2 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">#</th>
+                    <th className="text-left py-2 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">O'quvchi</th>
+                    <th className="text-right py-2 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Summa</th>
+                    <th className="text-center py-2 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Holat</th>
                   </tr>
                 </thead>
                 <tbody>
                   {debtors.map((d: any, i: number) => (
-                    <tr key={d.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                      <td className="py-2.5 text-muted-foreground">{i + 1}</td>
+                    <tr key={d.id} className="border-b last:border-0 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
+                      <td className="py-2.5 text-xedu-slate-500 dark:text-xedu-slate-400">{i + 1}</td>
                       <td className="py-2.5 font-medium">{d.student?.firstName} {d.student?.lastName}</td>
                       <td className="py-2.5 text-right font-semibold">{formatCurrency(d.amount)}</td>
                       <td className="py-2.5 text-center">
@@ -1061,7 +1061,7 @@ export default function ReportsPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <BarChart3 className="h-6 w-6 text-primary" /> Hisobotlar
           </h1>
-          <p className="text-muted-foreground text-sm">Tahlil, statistika va eksport</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">Tahlil, statistika va eksport</p>
         </div>
         {activeTab !== 'analytics' && (
           <div className="flex items-center gap-2">
@@ -1090,18 +1090,18 @@ export default function ReportsPage() {
       {/* ── Date range filter bar (hidden on Analytics tab) ─────────────── */}
       {activeTab !== 'analytics' && (
         <div className="flex flex-wrap items-center gap-2 rounded-xl border bg-muted/20 px-4 py-3">
-          <CalendarRange className="h-4 w-4 text-muted-foreground shrink-0" />
-          <span className="text-sm text-muted-foreground font-medium mr-1">Sana oraliq:</span>
+          <CalendarRange className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0" />
+          <span className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 font-medium mr-1">Sana oraliq:</span>
           <input
             type="date" value={dateRange.from}
             onChange={(e) => setDateRange(r => ({ ...r, from: e.target.value }))}
-            className="h-8 rounded-lg border bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+            className="h-8 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
-          <span className="text-muted-foreground text-sm">—</span>
+          <span className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">—</span>
           <input
             type="date" value={dateRange.to}
             onChange={(e) => setDateRange(r => ({ ...r, to: e.target.value }))}
-            className="h-8 rounded-lg border bg-background px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+            className="h-8 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
           <Button variant="default" size="sm" onClick={() => setDateKey(k => k + 1)} className="h-8">
             <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Qo'llash
@@ -1111,7 +1111,7 @@ export default function ReportsPage() {
               <button
                 key={key}
                 onClick={() => applyPreset(key)}
-                className="text-xs px-2.5 py-1 rounded-lg border hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+                className="text-xs px-2.5 py-1 rounded-lg border hover:bg-accent transition-colors text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground"
               >
                 {key === 'this_month' ? 'Bu oy' : key === 'last_month' ? "O'tgan oy" : key === 'this_quarter' ? 'Chorak' : 'Bu yil'}
               </button>
@@ -1128,8 +1128,8 @@ export default function ReportsPage() {
             onClick={() => setActiveTab(key)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
               activeTab === key
-                ? 'bg-background shadow text-foreground'
-                : 'text-muted-foreground hover:text-foreground'
+                ? 'bg-white dark:bg-xedu-slate-950 shadow text-foreground'
+                : 'text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground'
             }`}
           >
             <Icon className="h-4 w-4" />

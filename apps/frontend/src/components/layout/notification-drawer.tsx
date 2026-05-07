@@ -23,12 +23,12 @@ import { cn } from '@/lib/utils';
 
 /* ── notification type helpers ───────────────────────────────────────── */
 const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; bg: string }> = {
-  attendance:  { icon: ClipboardCheck, color: 'text-green-600',  bg: 'bg-green-100 dark:bg-green-900/30' },
-  grade:       { icon: BookOpen,       color: 'text-blue-600',   bg: 'bg-blue-100 dark:bg-blue-900/30' },
+  attendance:  { icon: ClipboardCheck, color: 'text-xedu-primary',  bg: 'bg-xedu-primary-light dark:bg-xedu-primary/20' },
+  grade:       { icon: BookOpen,       color: 'text-xedu-sky',   bg: 'bg-xedu-sky/10 dark:bg-xedu-sky/20' },
   payment:     { icon: CreditCard,     color: 'text-orange-600', bg: 'bg-orange-100 dark:bg-orange-900/30' },
   homework:    { icon: BookOpen,       color: 'text-violet-600', bg: 'bg-violet-100 dark:bg-violet-900/30' },
   in_app:      { icon: Info,           color: 'text-primary',    bg: 'bg-primary/10' },
-  default:     { icon: AlertCircle,    color: 'text-muted-foreground', bg: 'bg-muted' },
+  default:     { icon: AlertCircle,    color: 'text-xedu-slate-500 dark:text-xedu-slate-400', bg: 'bg-muted' },
 };
 
 function timeAgo(dateStr: string): string {
@@ -70,8 +70,8 @@ function NotifRow({
       {/* content */}
       <div className="flex-1 min-w-0">
         <p className={cn('text-sm leading-snug', !notif.isRead && 'font-semibold')}>{notif.title}</p>
-        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{notif.body}</p>
-        <p className="text-[11px] text-muted-foreground mt-1">{timeAgo(notif.createdAt)}</p>
+        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5 line-clamp-2">{notif.body}</p>
+        <p className="text-[11px] text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">{timeAgo(notif.createdAt)}</p>
       </div>
 
       {/* unread dot */}
@@ -130,7 +130,7 @@ export function NotificationDrawer() {
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <button
-          className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-xedu-slate-900 shadow-pill text-xedu-slate-600 dark:text-xedu-slate-300 hover:text-xedu-slate-900 dark:hover:text-white hover:shadow-md transition-all duration-150"
+          className="relative flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-xedu-slate-900 shadow-pill text-xedu-slate-600 dark:text-xedu-slate-300 hover:text-xedu-slate-900 dark:hover:text-white hover:shadow-sm transition-all duration-150"
           aria-label="Bildirishnomalar"
         >
           <Bell className="h-4 w-4" />
@@ -158,7 +158,7 @@ export function NotificationDrawer() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-7 text-xs gap-1.5 text-muted-foreground"
+                className="h-7 text-xs gap-1.5 text-xedu-slate-500 dark:text-xedu-slate-400"
                 disabled={markAllMutation.isPending}
                 onClick={() => markAllMutation.mutate()}
               >
@@ -171,7 +171,7 @@ export function NotificationDrawer() {
             )}
             <button
               onClick={() => setOpen(false)}
-              className="h-7 w-7 flex items-center justify-center rounded-md text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+              className="h-7 w-7 flex items-center justify-center rounded-md text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground hover:bg-accent transition-colors"
               aria-label="Yopish"
             >
               <X className="h-4 w-4" />
@@ -183,13 +183,13 @@ export function NotificationDrawer() {
         <ScrollArea className="flex-1">
           {isLoading ? (
             <div className="flex h-40 items-center justify-center">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <Loader2 className="h-5 w-5 animate-spin text-xedu-slate-500 dark:text-xedu-slate-400" />
             </div>
           ) : notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-48 gap-2 text-center px-6">
-              <Bell className="h-10 w-10 text-muted-foreground opacity-30" />
-              <p className="text-sm font-medium text-muted-foreground">Bildirishnomalar yo'q</p>
-              <p className="text-xs text-muted-foreground">Yangi bildirishnomalar shu yerda ko'rinadi</p>
+              <Bell className="h-10 w-10 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-30" />
+              <p className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Bildirishnomalar yo'q</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Yangi bildirishnomalar shu yerda ko'rinadi</p>
             </div>
           ) : (
             <div className="divide-y">

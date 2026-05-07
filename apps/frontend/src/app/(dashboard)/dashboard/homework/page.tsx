@@ -90,7 +90,7 @@ function MySubmissionDialog({ homeworkId, homeworkTitle, open, onClose }: {
         {isLoading ? (
           <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-10" />)}</div>
         ) : !submission ? (
-          <div className="py-10 text-center text-muted-foreground">
+          <div className="py-10 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
             <FileX className="h-10 w-10 mx-auto mb-3 opacity-30" />
             <p>Topshiriq hali topshirilmagan</p>
           </div>
@@ -104,7 +104,7 @@ function MySubmissionDialog({ homeworkId, homeworkTitle, open, onClose }: {
                   ? <><Star className="h-3.5 w-3.5" /> Ball: {submission.score}</>
                   : 'Baholanmagan'}
               </Badge>
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                 {submission.submittedAt
                   ? new Date(submission.submittedAt).toLocaleString('uz-UZ')
                   : 'Topshirildi'}
@@ -114,15 +114,15 @@ function MySubmissionDialog({ homeworkId, homeworkTitle, open, onClose }: {
             {/* Content */}
             {submission.content && (
               <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground">Javob:</p>
-                <p className="text-sm bg-muted/50 rounded-md p-3 whitespace-pre-wrap">{submission.content}</p>
+                <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Javob:</p>
+                <p className="text-sm bg-xedu-slate-50 dark:bg-xedu-slate-800/60 rounded-md p-3 whitespace-pre-wrap">{submission.content}</p>
               </div>
             )}
 
             {/* File */}
             {submission.fileUrl && (
               <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground">Biriktirilgan fayl:</p>
+                <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Biriktirilgan fayl:</p>
                 <a
                   href={submission.fileUrl}
                   target="_blank"
@@ -139,7 +139,7 @@ function MySubmissionDialog({ homeworkId, homeworkTitle, open, onClose }: {
             {/* Teacher feedback */}
             {submission.feedback && (
               <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground">O&apos;qituvchi izohi:</p>
+                <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">O&apos;qituvchi izohi:</p>
                 <p className="text-sm bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-md p-3 italic">
                   {submission.feedback}
                 </p>
@@ -184,7 +184,7 @@ function SubmissionsDialog({ homework, open, onClose }: {
     mutationFn: ({ submissionId, score }: { submissionId: string; score: number }) =>
       homeworkApi.grade(homework.id, submissionId, score),
     onSuccess: (_data, vars) => {
-      toast({ title: `✅ Ball saqlandi` });
+      toast({ title: ` Ball saqlandi` });
       queryClient.invalidateQueries({ queryKey: ['homework', homework.id] });
       queryClient.invalidateQueries({ queryKey: ['homework'] });
       setScores(prev => ({ ...prev, [vars.submissionId]: String(vars.score) }));
@@ -224,7 +224,7 @@ function SubmissionsDialog({ homework, open, onClose }: {
         {isLoading ? (
           <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16" />)}</div>
         ) : submissions.length === 0 ? (
-          <div className="py-10 text-center text-muted-foreground">
+          <div className="py-10 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
             <FileX className="h-10 w-10 mx-auto mb-3 opacity-30" />
             <p>Hali hech kim topshirmagan</p>
           </div>
@@ -237,13 +237,13 @@ function SubmissionsDialog({ homework, open, onClose }: {
                     <p className="font-medium text-sm">
                       {sub.student?.firstName} {sub.student?.lastName}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">
                       {sub.submittedAt
                         ? new Date(sub.submittedAt).toLocaleString('uz-UZ')
                         : 'Sana noma\'lum'}
                     </p>
                     {sub.content && (
-                      <p className="text-sm mt-2 bg-muted/50 rounded-md p-2 whitespace-pre-wrap">
+                      <p className="text-sm mt-2 bg-xedu-slate-50 dark:bg-xedu-slate-800/60 rounded-md p-2 whitespace-pre-wrap">
                         {sub.content}
                       </p>
                     )}
@@ -260,7 +260,7 @@ function SubmissionsDialog({ homework, open, onClose }: {
                 </div>
                 {/* Inline scoring */}
                 <div className="flex items-center gap-2 pt-1">
-                  <Label className="text-xs text-muted-foreground shrink-0">Ball:</Label>
+                  <Label className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0">Ball:</Label>
                   <Input
                     type="number"
                     min={0}
@@ -322,7 +322,7 @@ export default function HomeworkPage() {
   const createMutation = useMutation({
     mutationFn: homeworkApi.create,
     onSuccess: () => {
-      toast({ title: '✅ Uy vazifasi qo\'shildi' });
+      toast({ title: ' Uy vazifasi qo\'shildi' });
       queryClient.invalidateQueries({ queryKey: ['homework'] });
       setOpen(false);
       setForm(EMPTY);
@@ -337,7 +337,7 @@ export default function HomeworkPage() {
     mutationFn: ({ id, content, fileUrl }: { id: string; content: string; fileUrl?: string }) =>
       homeworkApi.submit(id, { content, fileUrl }),
     onSuccess: () => {
-      toast({ title: '✅ Topshirildi!', description: "Uy vazifangiz o'qituvchiga yuborildi" });
+      toast({ title: ' Topshirildi!', description: "Uy vazifangiz o'qituvchiga yuborildi" });
       setSubmittingId(null);
       setSubmitText('');
       setSubmitFile(null);
@@ -420,7 +420,7 @@ export default function HomeworkPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <BookMarked className="h-6 w-6 text-primary" /> Uy vazifalari
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">
             {isAdmin ? 'Barcha uy vazifalari statistikasi' : isStudent ? 'Uy vazifalaringizni ko\'ring va topshiring' : 'Uy vazifalarini boshqarish'}
           </p>
         </div>
@@ -443,7 +443,7 @@ export default function HomeworkPage() {
               <CardContent className="p-4 flex items-center gap-4">
                 <div className={`p-3 rounded-xl ${bg}`}><Icon className={`h-5 w-5 ${color}`} /></div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{label}</p>
                   <p className="text-2xl font-bold">{value}</p>
                 </div>
               </CardContent>
@@ -470,14 +470,14 @@ export default function HomeworkPage() {
         <div className="space-y-6">
           {active.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Faol vazifalar</h2>
+              <h2 className="text-sm font-semibold text-xedu-slate-500 dark:text-xedu-slate-400 uppercase tracking-wide mb-3">Faol vazifalar</h2>
               <div className="space-y-3">
                 {active.map((hw: any) => {
                   const daysLeft = Math.ceil((new Date(hw.dueDate).getTime() - now.getTime()) / 86400000);
                   const isUrgent = daysLeft <= 1;
                   const submissionCount = hw._count?.submissions ?? hw.submissions?.length ?? 0;
                   return (
-                    <Card key={hw.id} className={`hover:shadow-md transition-shadow ${isUrgent ? 'border-orange-300 dark:border-orange-700' : ''}`}>
+                    <Card key={hw.id} className={`hover:shadow-sm transition-shadow ${isUrgent ? 'border-orange-300 dark:border-orange-700' : ''}`}>
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between gap-4">
                           <div className="flex items-start gap-3 flex-1">
@@ -486,17 +486,17 @@ export default function HomeworkPage() {
                             </div>
                             <div className="flex-1">
                               <p className="font-semibold">{hw.title}</p>
-                              {hw.description && <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{hw.description}</p>}
+                              {hw.description && <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1 line-clamp-2">{hw.description}</p>}
                               <div className="flex items-center gap-2 mt-2 flex-wrap">
                                 {hw.subject && <Badge variant="outline" className="text-xs">{hw.subject.name}</Badge>}
                                 {hw.class && <Badge variant="secondary" className="text-xs">{hw.class.name}</Badge>}
-                                <span className={`text-xs flex items-center gap-1 ${isUrgent ? 'text-orange-500 font-medium' : 'text-muted-foreground'}`}>
+                                <span className={`text-xs flex items-center gap-1 ${isUrgent ? 'text-orange-500 font-medium' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
                                   <Calendar className="h-3 w-3" />
                                   {new Date(hw.dueDate).toLocaleDateString('uz-UZ')}
                                   {isUrgent && daysLeft === 0 ? ' (Bugun!)' : isUrgent ? ' (Ertaga!)' : ''}
                                 </span>
                                 {(isTeacher || isAdmin) && submissionCount > 0 && (
-                                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                  <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1">
                                     <Users className="h-3 w-3" /> {submissionCount} ta topshirilgan
                                   </span>
                                 )}
@@ -519,12 +519,12 @@ export default function HomeworkPage() {
                                       onChange={e => setSubmitFile(e.target.files?.[0] ?? null)}
                                     />
                                     {submitFile ? (
-                                      <div className="flex items-center gap-1.5 text-xs rounded-md border px-2.5 py-1.5 bg-muted/50 flex-1 min-w-0">
-                                        <Paperclip className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+                                      <div className="flex items-center gap-1.5 text-xs rounded-md border px-2.5 py-1.5 bg-xedu-slate-50 dark:bg-xedu-slate-800/60 flex-1 min-w-0">
+                                        <Paperclip className="h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0" />
                                         <span className="truncate">{submitFile.name}</span>
                                         <button
                                           onClick={() => { setSubmitFile(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
-                                          className="ml-auto shrink-0 text-muted-foreground hover:text-destructive"
+                                          className="ml-auto shrink-0 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                                         >
                                           <X className="h-3.5 w-3.5" />
                                         </button>
@@ -587,7 +587,7 @@ export default function HomeworkPage() {
 
           {expired.length > 0 && (
             <div>
-              <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Muddati o'tgan</h2>
+              <h2 className="text-sm font-semibold text-xedu-slate-500 dark:text-xedu-slate-400 uppercase tracking-wide mb-3">Muddati o'tgan</h2>
               <div className="space-y-2 opacity-70">
                 {expired.map((hw: any) => {
                   const submissionCount = hw._count?.submissions ?? hw.submissions?.length ?? 0;
@@ -595,12 +595,12 @@ export default function HomeworkPage() {
                     <Card key={hw.id}>
                       <CardContent className="p-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <CheckCircle2 className="h-4 w-4 text-muted-foreground" />
+                          <CheckCircle2 className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
                           <span className="text-sm line-through">{hw.title}</span>
                           {hw.subject && <Badge variant="outline" className="text-xs">{hw.subject.name}</Badge>}
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">{new Date(hw.dueDate).toLocaleDateString('uz-UZ')}</span>
+                          <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{new Date(hw.dueDate).toLocaleDateString('uz-UZ')}</span>
                           {(isTeacher || isAdmin) && (
                             <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => setGradingHw(hw)}>
                               <FileCheck className="mr-1 h-3 w-3" /> {submissionCount} ta
@@ -631,32 +631,32 @@ export default function HomeworkPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Sarlavha <span className="text-destructive">*</span></Label>
+              <Label>Sarlavha <span className="text-xedu-ruby">*</span></Label>
               <Input placeholder="Masalan: §5 mashqlar" value={form.title} onChange={inp('title')} />
-              {errors.title && <p className="text-xs text-destructive">{errors.title}</p>}
+              {errors.title && <p className="text-xs text-xedu-ruby">{errors.title}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Sinf <span className="text-destructive">*</span></Label>
+                <Label>Sinf <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.classId} onValueChange={sel('classId')}>
                   <SelectTrigger><SelectValue placeholder="Sinf..." /></SelectTrigger>
                   <SelectContent>{(classes as any[]).map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
-                {errors.classId && <p className="text-xs text-destructive">{errors.classId}</p>}
+                {errors.classId && <p className="text-xs text-xedu-ruby">{errors.classId}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Fan <span className="text-destructive">*</span></Label>
+                <Label>Fan <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.subjectId} onValueChange={sel('subjectId')}>
                   <SelectTrigger><SelectValue placeholder="Fan..." /></SelectTrigger>
                   <SelectContent>{(subjects as any[]).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                 </Select>
-                {errors.subjectId && <p className="text-xs text-destructive">{errors.subjectId}</p>}
+                {errors.subjectId && <p className="text-xs text-xedu-ruby">{errors.subjectId}</p>}
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Topshirish muddati <span className="text-destructive">*</span></Label>
+              <Label>Topshirish muddati <span className="text-xedu-ruby">*</span></Label>
               <Input type="datetime-local" value={form.dueDate} onChange={inp('dueDate')} />
-              {errors.dueDate && <p className="text-xs text-destructive">{errors.dueDate}</p>}
+              {errors.dueDate && <p className="text-xs text-xedu-ruby">{errors.dueDate}</p>}
             </div>
             <div className="space-y-1.5">
               <Label>Tavsif / Topshiriq matni</Label>

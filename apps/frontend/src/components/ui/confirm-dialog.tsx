@@ -15,12 +15,12 @@ export function ConfirmDialog() {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             {variant === 'destructive' ? (
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-destructive/10 shrink-0">
-                <Trash2 className="h-4 w-4 text-destructive" />
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-xedu-ruby/10 shrink-0">
+                <Trash2 className="h-4 w-4 text-xedu-ruby" />
               </span>
             ) : (
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/30 shrink-0">
-                <AlertTriangle className="h-4 w-4 text-amber-600" />
+              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-xedu-amber/10 dark:bg-xedu-amber/15 shrink-0">
+                <AlertTriangle className="h-4 w-4 text-xedu-amber" />
               </span>
             )}
             {title}

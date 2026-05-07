@@ -15,6 +15,7 @@ export interface AuthResponse {
     role: string;
     schoolId: string | null;
     branchId: string | null;
+    isFirstLogin: boolean;
   };
   tokens: TokenPair;
 }
@@ -66,6 +67,15 @@ export const authApi = {
    */
   switchBranch: async (branchId: string | null): Promise<TokenPair> => {
     const { data } = await apiClient.post<TokenPair>('/auth/switch-branch', { branchId });
+    return data;
+  },
+
+  /**
+   * Birinchi kirishda parolni o'zgartirish.
+   * Backend isFirstLogin=false qiladi va yangi parolni saqlaydi.
+   */
+  firstLogin: async (payload: { currentPassword: string; newPassword: string }): Promise<{ message: string }> => {
+    const { data } = await apiClient.post<{ message: string }>('/auth/first-login', payload);
     return data;
   },
 };

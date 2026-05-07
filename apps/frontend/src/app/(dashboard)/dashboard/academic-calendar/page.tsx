@@ -72,7 +72,7 @@ export default function AcademicCalendarPage() {
       color:       form.color,
     }),
     onSuccess: () => {
-      toast({ title: '✅ Tadbir qo\'shildi' });
+      toast({ title: 'Tadbir qo\'shildi' });
       queryClient.invalidateQueries({ queryKey: ['academic-calendar'] });
       setOpen(false);
       setForm(EMPTY);
@@ -124,7 +124,7 @@ export default function AcademicCalendarPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <CalendarDays className="h-6 w-6 text-primary" /> Akademik kalendar
           </h1>
-          <p className="text-muted-foreground">Ta'tillar, imtihonlar, tadbirlar</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Ta'tillar, imtihonlar, tadbirlar</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <Button
@@ -154,7 +154,7 @@ export default function AcademicCalendarPage() {
       {/* Legend */}
       <div className="flex flex-wrap gap-2">
         {EVENT_TYPES.map(t => (
-          <div key={t.value} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div key={t.value} className="flex items-center gap-1.5 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
             <div className="h-2.5 w-2.5 rounded-full" style={{ background: t.color }} />
             {t.label}
           </div>
@@ -185,7 +185,7 @@ export default function AcademicCalendarPage() {
               {/* Day-of-week headers */}
               <div className="grid grid-cols-7 mb-1">
                 {DAYS_SHORT.map(d => (
-                  <div key={d} className="text-center text-xs font-medium text-muted-foreground py-1">{d}</div>
+                  <div key={d} className="text-center text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 py-1">{d}</div>
                 ))}
               </div>
 
@@ -203,12 +203,12 @@ export default function AcademicCalendarPage() {
                   return (
                     <div
                       key={idx}
-                      className={`bg-background min-h-[80px] p-1 ${!isCurrentMonth ? 'opacity-30' : ''}`}
+                      className={`bg-white dark:bg-xedu-slate-950 min-h-[80px] p-1 ${!isCurrentMonth ? 'opacity-30' : ''}`}
                     >
                       {isCurrentMonth && (
                         <>
                           <div className={`inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-medium mb-1
-                            ${isToday ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'}`}>
+                            ${isToday ? 'bg-primary text-primary-foreground' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
                             {day}
                           </div>
                           <div className="space-y-0.5">
@@ -235,7 +235,7 @@ export default function AcademicCalendarPage() {
                               );
                             })}
                             {dayEvents.length > 3 && (
-                              <p className="text-[9px] text-muted-foreground pl-1">+{dayEvents.length - 3} ko'proq</p>
+                              <p className="text-[9px] text-xedu-slate-500 dark:text-xedu-slate-400 pl-1">+{dayEvents.length - 3} ko'proq</p>
                             )}
                           </div>
                         </>
@@ -263,14 +263,14 @@ export default function AcademicCalendarPage() {
                   <div className="h-3 w-3 rounded-full shrink-0" style={{ background: e.color ?? typeConf?.color ?? '#94a3b8' }} />
                   <div className="flex-1">
                     <p className="font-medium">{e.title}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                       {new Date(e.startDate).toLocaleDateString('uz-UZ')}
                       {e.startDate !== e.endDate && ` – ${new Date(e.endDate).toLocaleDateString('uz-UZ')}`}
                     </p>
                   </div>
                   <Badge variant="secondary" className="text-xs">{typeConf?.label ?? e.type}</Badge>
                   {canManage && (
-                    <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                       onClick={() => deleteMutation.mutate(e.id)}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
@@ -291,7 +291,7 @@ export default function AcademicCalendarPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Nomi <span className="text-destructive">*</span></Label>
+              <Label>Nomi <span className="text-xedu-ruby">*</span></Label>
               <Input
                 placeholder="Tadbir nomi..."
                 value={form.title}
@@ -312,11 +312,11 @@ export default function AcademicCalendarPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Boshlanish <span className="text-destructive">*</span></Label>
+                <Label>Boshlanish <span className="text-xedu-ruby">*</span></Label>
                 <Input type="date" value={form.startDate} onChange={e => setForm(f => ({ ...f, startDate: e.target.value }))} />
               </div>
               <div className="space-y-1.5">
-                <Label>Tugash <span className="text-destructive">*</span></Label>
+                <Label>Tugash <span className="text-xedu-ruby">*</span></Label>
                 <Input type="date" value={form.endDate} onChange={e => setForm(f => ({ ...f, endDate: e.target.value }))} />
               </div>
             </div>

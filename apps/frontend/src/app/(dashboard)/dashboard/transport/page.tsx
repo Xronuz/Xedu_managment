@@ -103,7 +103,7 @@ export default function TransportPage() {
   const createMutation = useMutation({
     mutationFn: transportApi.createRoute,
     onSuccess: () => {
-      toast({ title: '✅ Marshrut qo\'shildi' });
+      toast({ title: 'Marshrut qo\'shildi' });
       queryClient.invalidateQueries({ queryKey: ['transport'] });
       setRouteOpen(false);
     },
@@ -117,7 +117,7 @@ export default function TransportPage() {
     mutationFn: ({ id, data }: { id: string; data: Partial<CreateRouteDto> }) =>
       transportApi.updateRoute(id, data),
     onSuccess: () => {
-      toast({ title: '✅ Marshrut yangilandi' });
+      toast({ title: 'Marshrut yangilandi' });
       queryClient.invalidateQueries({ queryKey: ['transport'] });
       setRouteOpen(false);
       setEditRoute(null);
@@ -145,7 +145,7 @@ export default function TransportPage() {
     mutationFn: ({ routeId, studentId, stopName }: { routeId: string; studentId: string; stopName?: string }) =>
       transportApi.assignStudent(routeId, { studentId, stopName }),
     onSuccess: () => {
-      toast({ title: '✅ O\'quvchi biriktirildi' });
+      toast({ title: 'O\'quvchi biriktirildi' });
       queryClient.invalidateQueries({ queryKey: ['transport'] });
       setAssignOpen(false);
       setAssignStudentId('');
@@ -225,7 +225,7 @@ export default function TransportPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Bus className="h-6 w-6 text-primary" /> Transport
           </h1>
-          <p className="text-muted-foreground">Mening avtobus marshrутim</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Mening avtobus marshrутim</p>
         </div>
 
         {myRouteLoading ? (
@@ -236,9 +236,9 @@ export default function TransportPage() {
         ) : !myRoute ? (
           <Card>
             <CardContent className="py-16 text-center space-y-2">
-              <Bus className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-30" />
-              <p className="text-muted-foreground font-medium">Siz hali hech qanday avtobus marshrutiga biriktirilmagansiz</p>
-              <p className="text-sm text-muted-foreground">
+              <Bus className="mx-auto mb-3 h-12 w-12 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-30" />
+              <p className="text-xedu-slate-500 dark:text-xedu-slate-400 font-medium">Siz hali hech qanday avtobus marshrutiga biriktirilmagansiz</p>
+              <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                 Marshrut qo&apos;shish uchun sinf rahbaringiz yoki maktab administratoriga murojaat qiling
               </p>
             </CardContent>
@@ -263,32 +263,32 @@ export default function TransportPage() {
               <CardContent className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <Clock className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Jo&apos;nash</p>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Jo&apos;nash</p>
                       <p className="font-medium">{myRoute.departureTime}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 text-sm">
-                    <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <Clock className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Yetib kelish</p>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Yetib kelish</p>
                       <p className="font-medium">{myRoute.arrivalTime}</p>
                     </div>
                   </div>
                 </div>
                 {(myRoute.driverName || myRoute.vehicleNumber) && (
-                  <div className="rounded-lg bg-muted/50 p-3 space-y-1.5">
+                  <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-3 space-y-1.5">
                     {myRoute.driverName && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Users className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-muted-foreground">Haydovchi:</span>
+                        <Users className="h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400" />
+                        <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Haydovchi:</span>
                         <span className="font-medium">{myRoute.driverName}</span>
                       </div>
                     )}
                     {myRoute.driverPhone && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Phone className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Phone className="h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400" />
                         <a href={`tel:${myRoute.driverPhone}`} className="text-primary hover:underline font-medium">
                           {myRoute.driverPhone}
                         </a>
@@ -296,8 +296,8 @@ export default function TransportPage() {
                     )}
                     {myRoute.vehicleNumber && (
                       <div className="flex items-center gap-2 text-sm">
-                        <Car className="h-3.5 w-3.5 text-muted-foreground" />
-                        <span className="text-muted-foreground">Avtobus:</span>
+                        <Car className="h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400" />
+                        <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Avtobus:</span>
                         <span className="font-medium">{myRoute.vehicleNumber}</span>
                       </div>
                     )}
@@ -343,7 +343,7 @@ export default function TransportPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Bus className="h-6 w-6 text-teal-500" /> Transport
           </h1>
-          <p className="text-muted-foreground">Avtobus marshrutlari va o&apos;quvchilar tashish</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Avtobus marshrutlari va o&apos;quvchilar tashish</p>
         </div>
         {canManage && (
           <Button onClick={openCreate}>
@@ -364,7 +364,7 @@ export default function TransportPage() {
               <CardContent className="p-4 flex items-center gap-4">
                 <div className={`p-3 rounded-xl ${bg}`}><Icon className={`h-5 w-5 ${color}`} /></div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{label}</p>
                   <p className="text-2xl font-bold">{value}</p>
                 </div>
               </CardContent>
@@ -381,8 +381,8 @@ export default function TransportPage() {
       ) : (routes as TransportRoute[]).length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <Bus className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-30" />
-            <p className="text-muted-foreground">Marshrut mavjud emas</p>
+            <Bus className="mx-auto mb-3 h-12 w-12 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-30" />
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Marshrut mavjud emas</p>
             {canManage && (
               <Button variant="outline" className="mt-4" onClick={openCreate}>
                 <Plus className="mr-2 h-4 w-4" /> Marshrut qo&apos;shish
@@ -395,7 +395,7 @@ export default function TransportPage() {
           {(routes as TransportRoute[]).map(route => (
             <Card
               key={route.id}
-              className={`cursor-pointer hover:shadow-md transition-shadow ${!route.isActive ? 'opacity-60' : ''}`}
+              className={`cursor-pointer hover:shadow-sm transition-shadow ${!route.isActive ? 'opacity-60' : ''}`}
               onClick={() => setDetailRouteId(route.id)}
             >
               <CardHeader className="pb-2">
@@ -413,19 +413,19 @@ export default function TransportPage() {
                 )}
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
-                <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="flex items-center gap-2 text-xedu-slate-500 dark:text-xedu-slate-400">
                   <Clock className="h-3.5 w-3.5" />
                   {route.departureTime} → {route.arrivalTime}
                 </div>
                 {route.driverName && (
-                  <div className="flex items-center gap-2 text-muted-foreground">
+                  <div className="flex items-center gap-2 text-xedu-slate-500 dark:text-xedu-slate-400">
                     <Car className="h-3.5 w-3.5" />
                     {route.driverName}
                     {route.vehicleNumber && <span className="text-xs opacity-60">· {route.vehicleNumber}</span>}
                   </div>
                 )}
                 <div className="flex items-center justify-between mt-2">
-                  <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+                  <div className="flex items-center gap-1.5 text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">
                     <Users className="h-3.5 w-3.5" />
                     {route.studentCount ?? 0}/{route.capacity} ta
                   </div>
@@ -437,7 +437,7 @@ export default function TransportPage() {
                         </span>
                       ))}
                       {(route.stops as string[]).length > 2 && (
-                        <span className="text-xs text-muted-foreground">+{(route.stops as string[]).length - 2}</span>
+                        <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">+{(route.stops as string[]).length - 2}</span>
                       )}
                     </div>
                   )}
@@ -448,7 +448,7 @@ export default function TransportPage() {
                       onClick={() => openEdit(route)}>
                       <Pencil className="mr-1 h-3 w-3" /> Tahrirlash
                     </Button>
-                    <Button size="sm" variant="ghost" className="h-7 text-xs flex-1 text-muted-foreground hover:text-destructive"
+                    <Button size="sm" variant="ghost" className="h-7 text-xs flex-1 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                       onClick={async () => {
                         if (await ask({ title: `"${route.name}" marshrutini o'chirasizmi?`, variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(route.id);
                       }}
@@ -490,7 +490,7 @@ export default function TransportPage() {
               {/* Stops */}
               {(detailRoute.stops as string[]).length > 0 && (
                 <div>
-                  <p className="text-xs font-medium text-muted-foreground mb-2">Bekatlar</p>
+                  <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 mb-2">Bekatlar</p>
                   <div className="flex flex-wrap gap-1.5">
                     {(detailRoute.stops as string[]).map((stop, i) => (
                       <span key={i} className="flex items-center gap-1 text-xs bg-muted px-2 py-1 rounded-full">
@@ -504,7 +504,7 @@ export default function TransportPage() {
               {/* Students */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-medium text-muted-foreground">
+                  <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
                     O&apos;quvchilar ({(detailRoute.assignments ?? []).length}/{detailRoute.capacity})
                   </p>
                   {canManage && (
@@ -515,7 +515,7 @@ export default function TransportPage() {
                   )}
                 </div>
                 {(detailRoute.assignments ?? []).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-4">O&apos;quvchilar biriktirilmagan</p>
+                  <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 text-center py-4">O&apos;quvchilar biriktirilmagan</p>
                 ) : (
                   <div className="space-y-1.5 max-h-60 overflow-y-auto">
                     {(detailRoute.assignments ?? []).map((a: any) => (
@@ -523,13 +523,13 @@ export default function TransportPage() {
                         <div>
                           <p className="text-sm font-medium">{a.student?.firstName} {a.student?.lastName}</p>
                           {a.stopName && (
-                            <p className="text-xs text-muted-foreground flex items-center gap-1">
+                            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1">
                               <MapPin className="h-2.5 w-2.5" /> {a.stopName}
                             </p>
                           )}
                         </div>
                         {canManage && (
-                          <Button size="icon" variant="ghost" className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          <Button size="icon" variant="ghost" className="h-7 w-7 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                             onClick={() => removeMutation.mutate({ routeId: detailRoute.id, studentId: a.studentId })}
                             disabled={removeMutation.isPending}>
                             <X className="h-3.5 w-3.5" />
@@ -555,13 +555,13 @@ export default function TransportPage() {
 
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Marshrut nomi <span className="text-destructive">*</span></Label>
+              <Label>Marshrut nomi <span className="text-xedu-ruby">*</span></Label>
               <Input
                 placeholder="Masalan: 1-marshrut (Yunusobod)"
                 value={routeForm.name}
                 onChange={e => { setRouteForm(f => ({ ...f, name: e.target.value })); setRouteErrors(er => { const n = { ...er }; delete n.name; return n; }); }}
               />
-              {routeErrors.name && <p className="text-xs text-destructive">{routeErrors.name}</p>}
+              {routeErrors.name && <p className="text-xs text-xedu-ruby">{routeErrors.name}</p>}
             </div>
 
             <div className="space-y-1.5">
@@ -577,22 +577,22 @@ export default function TransportPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Jo&apos;nash vaqti <span className="text-destructive">*</span></Label>
+                <Label>Jo&apos;nash vaqti <span className="text-xedu-ruby">*</span></Label>
                 <Input
                   type="time"
                   value={routeForm.departureTime}
                   onChange={e => { setRouteForm(f => ({ ...f, departureTime: e.target.value })); setRouteErrors(er => { const n = { ...er }; delete n.departureTime; return n; }); }}
                 />
-                {routeErrors.departureTime && <p className="text-xs text-destructive">{routeErrors.departureTime}</p>}
+                {routeErrors.departureTime && <p className="text-xs text-xedu-ruby">{routeErrors.departureTime}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Yetib kelish vaqti <span className="text-destructive">*</span></Label>
+                <Label>Yetib kelish vaqti <span className="text-xedu-ruby">*</span></Label>
                 <Input
                   type="time"
                   value={routeForm.arrivalTime}
                   onChange={e => { setRouteForm(f => ({ ...f, arrivalTime: e.target.value })); setRouteErrors(er => { const n = { ...er }; delete n.arrivalTime; return n; }); }}
                 />
-                {routeErrors.arrivalTime && <p className="text-xs text-destructive">{routeErrors.arrivalTime}</p>}
+                {routeErrors.arrivalTime && <p className="text-xs text-xedu-ruby">{routeErrors.arrivalTime}</p>}
               </div>
             </div>
 
@@ -603,7 +603,7 @@ export default function TransportPage() {
                 value={stopsInput}
                 onChange={e => setStopsInput(e.target.value)}
               />
-              <p className="text-xs text-muted-foreground">Har bir bekat nomini vergul bilan ajrating</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Har bir bekat nomini vergul bilan ajrating</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -652,7 +652,7 @@ export default function TransportPage() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className={`h-7 text-xs gap-1.5 ${routeForm.isActive ? 'text-green-600' : 'text-muted-foreground'}`}
+                className={`h-7 text-xs gap-1.5 ${routeForm.isActive ? 'text-green-600' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}
                 onClick={() => setRouteForm(f => ({ ...f, isActive: !f.isActive }))}
               >
                 {routeForm.isActive
@@ -681,7 +681,7 @@ export default function TransportPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>O&apos;quvchi <span className="text-destructive">*</span></Label>
+              <Label>O&apos;quvchi <span className="text-xedu-ruby">*</span></Label>
               <Select value={assignStudentId} onValueChange={setAssignStudentId}>
                 <SelectTrigger>
                   <SelectValue placeholder="O'quvchi tanlang..." />

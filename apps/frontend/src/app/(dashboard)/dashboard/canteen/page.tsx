@@ -106,7 +106,7 @@ export default function CanteenPage() {
   const upsertMutation = useMutation({
     mutationFn: canteenApi.upsert,
     onSuccess: () => {
-      toast({ title: '✅ Menyu saqlandi' });
+      toast({ title: 'Menyu saqlandi' });
       queryClient.invalidateQueries({ queryKey: ['canteen'] });
       setOpen(false);
       resetForm();
@@ -188,7 +188,7 @@ export default function CanteenPage() {
             <UtensilsCrossed className="h-6 w-6 text-primary" />
             Ovqatxona
           </h1>
-          <p className="text-muted-foreground">Haftalik ovqatxona menyusi</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Haftalik ovqatxona menyusi</p>
         </div>
         <div className="flex items-center gap-2">
           {/* View toggle */}
@@ -271,7 +271,7 @@ export default function CanteenPage() {
         <>
           {/* Selected day info + stats */}
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
               {formatDateUz(selectedDate)} uchun menyu
             </p>
             {dayMenu.length > 0 && (() => {
@@ -279,7 +279,7 @@ export default function CanteenPage() {
                 .reduce((sum, it) => sum + (it.calories ?? 0), 0);
               const totalPrice = dayMenu.reduce((sum, m) => sum + (m.price ?? 0), 0);
               return (
-                <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <div className="flex items-center gap-3 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                   {totalCal > 0 && (
                     <span className="flex items-center gap-1">
                       <Flame className="h-3.5 w-3.5 text-orange-500" />
@@ -305,8 +305,8 @@ export default function CanteenPage() {
           ) : dayMenu.length === 0 ? (
             <Card>
               <CardContent className="py-16 text-center">
-                <UtensilsCrossed className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-30" />
-                <p className="text-muted-foreground">Bu kun uchun menyu kiritilmagan</p>
+                <UtensilsCrossed className="mx-auto mb-3 h-12 w-12 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-30" />
+                <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Bu kun uchun menyu kiritilmagan</p>
                 {canManage && (
                   <Button
                     variant="outline"
@@ -341,7 +341,7 @@ export default function CanteenPage() {
                                 <CardDescription>{formatCurrency(menu.price)}</CardDescription>
                               )}
                               {totalCal > 0 && (
-                                <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                                <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-0.5">
                                   <Flame className="h-3 w-3 text-orange-400" />
                                   {totalCal} kkal
                                 </span>
@@ -353,7 +353,7 @@ export default function CanteenPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                            className="h-7 w-7 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                             onClick={() => removeMutation.mutate(menu.id)}
                             disabled={removeMutation.isPending}
                           >
@@ -369,7 +369,7 @@ export default function CanteenPage() {
                             <div>
                               <p className="text-sm font-medium">{item.name}</p>
                               {item.description && (
-                                <p className="text-xs text-muted-foreground">{item.description}</p>
+                                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{item.description}</p>
                               )}
                             </div>
                             {item.calories && (
@@ -380,7 +380,7 @@ export default function CanteenPage() {
                           </div>
                         ))}
                         {items.length === 0 && (
-                          <p className="text-xs text-muted-foreground italic">Taomlar kiritilmagan</p>
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 italic">Taomlar kiritilmagan</p>
                         )}
                       </div>
                     </CardContent>
@@ -414,7 +414,7 @@ export default function CanteenPage() {
                     <CardContent className="p-3 flex items-center gap-3">
                       <Icon className={`h-8 w-8 ${color} shrink-0 opacity-80`} />
                       <div>
-                        <p className="text-xs text-muted-foreground">{label}</p>
+                        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{label}</p>
                         <p className="text-sm font-bold">{value}</p>
                       </div>
                     </CardContent>
@@ -436,7 +436,7 @@ export default function CanteenPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b bg-muted/40">
-                      <th className="text-left p-3 font-medium text-muted-foreground w-32">Ovqat turi</th>
+                      <th className="text-left p-3 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 w-32">Ovqat turi</th>
                       {weekDays.map((day, i) => {
                         const dateStr = toDateStr(day);
                         const isToday = dateStr === toDateStr(new Date());
@@ -444,7 +444,7 @@ export default function CanteenPage() {
                           <th
                             key={i}
                             className={`p-3 text-center font-medium min-w-[110px] cursor-pointer hover:bg-accent transition-colors ${
-                              isToday ? 'text-primary' : 'text-muted-foreground'
+                              isToday ? 'text-primary' : 'text-xedu-slate-500 dark:text-xedu-slate-400'
                             }`}
                             onClick={() => { setSelectedDate(dateStr); setViewMode('day'); }}
                           >
@@ -459,7 +459,7 @@ export default function CanteenPage() {
                     {MEAL_TYPES.map(mealType => {
                       const MealIcon = mealType.icon;
                       return (
-                        <tr key={mealType.value} className="border-b last:border-0 hover:bg-muted/20">
+                        <tr key={mealType.value} className="border-b last:border-0 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30">
                           <td className="p-3">
                             <div className="flex items-center gap-2">
                               <div className={`p-1.5 rounded-lg ${mealType.bg}`}>
@@ -484,16 +484,16 @@ export default function CanteenPage() {
                                       </p>
                                     ))}
                                     {items.length > 3 && (
-                                      <p className="text-xs text-muted-foreground">+{items.length - 3} ta</p>
+                                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">+{items.length - 3} ta</p>
                                     )}
-                                    <div className="flex items-center justify-between mt-1 pt-1 border-t border-black/5">
+                                    <div className="flex items-center justify-between mt-1 pt-1 border-t border-black/[0.05]">
                                       {menu.price ? (
                                         <span className="text-xs opacity-60">{formatCurrency(menu.price)}</span>
                                       ) : <span />}
                                       {canManage && (
                                         <button
                                           onClick={() => removeMutation.mutate(menu.id)}
-                                          className="text-muted-foreground hover:text-destructive"
+                                          className="text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                                         >
                                           <Trash2 className="h-3 w-3" />
                                         </button>
@@ -505,13 +505,13 @@ export default function CanteenPage() {
                                     {canManage ? (
                                       <button
                                         onClick={() => { setSelectedDate(dateStr); resetForm(); setForm(f => ({ ...f, mealType: mealType.value })); setOpen(true); }}
-                                        className="text-xs text-muted-foreground hover:text-primary transition-colors"
+                                        className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-primary transition-colors"
                                       >
                                         <Plus className="h-3 w-3 mx-auto mb-0.5" />
                                         Qo'shish
                                       </button>
                                     ) : (
-                                      <span className="text-xs text-muted-foreground">—</span>
+                                      <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">—</span>
                                     )}
                                   </div>
                                 )}
@@ -530,8 +530,8 @@ export default function CanteenPage() {
           {weekMenu.length === 0 && !isLoading && (
             <Card>
               <CardContent className="py-16 text-center">
-                <UtensilsCrossed className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-30" />
-                <p className="text-muted-foreground">Bu hafta uchun menyu kiritilmagan</p>
+                <UtensilsCrossed className="mx-auto mb-3 h-12 w-12 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-30" />
+                <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Bu hafta uchun menyu kiritilmagan</p>
                 {canManage && (
                   <Button variant="outline" className="mt-4" onClick={() => { resetForm(); setOpen(true); }}>
                     <Plus className="mr-2 h-4 w-4" /> Menyu qo'shish
@@ -556,7 +556,7 @@ export default function CanteenPage() {
           <div className="space-y-4 py-2">
             {/* Meal type */}
             <div className="space-y-1.5">
-              <Label>Ovqat turi <span className="text-destructive">*</span></Label>
+              <Label>Ovqat turi <span className="text-xedu-ruby">*</span></Label>
               <Select value={form.mealType} onValueChange={v => setForm(f => ({ ...f, mealType: v }))}>
                 <SelectTrigger>
                   <SelectValue placeholder="Tanlang..." />
@@ -588,7 +588,7 @@ export default function CanteenPage() {
             {/* Items */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label>Taomlar <span className="text-destructive">*</span></Label>
+                <Label>Taomlar <span className="text-xedu-ruby">*</span></Label>
                 <Button variant="ghost" size="sm" className="h-6 text-xs" onClick={addItem}>
                   <Plus className="mr-1 h-3 w-3" /> Qo'shish
                 </Button>
@@ -597,9 +597,9 @@ export default function CanteenPage() {
                 {form.items.map((item, i) => (
                   <div key={i} className="space-y-2 rounded-lg border p-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium text-muted-foreground">{i + 1}-taom</p>
+                      <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">{i + 1}-taom</p>
                       {form.items.length > 1 && (
-                        <button onClick={() => removeItem(i)} className="text-muted-foreground hover:text-destructive">
+                        <button onClick={() => removeItem(i)} className="text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby">
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       )}

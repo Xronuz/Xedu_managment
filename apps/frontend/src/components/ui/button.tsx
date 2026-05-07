@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils';
 const buttonVariants = cva(
   [
     'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium',
-    'ring-offset-background transition-all duration-150',
-    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+    'ring-offset-white dark:ring-offset-xedu-slate-900 transition-all duration-150',
+    'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary/30 focus-visible:ring-offset-2',
     'disabled:pointer-events-none disabled:opacity-50',
     'active:scale-[0.97]',
     '[&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
@@ -15,11 +15,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        /* Primary CTA — emerald pill with glass glow */
+        /* Primary CTA — primary pill with glass glow */
         default:
-          'bg-xedu-primary text-white shadow-sm shadow-xedu-primary/20 hover:bg-xedu-primary-hover hover:shadow-md hover:shadow-xedu-primary/25',
+          'bg-xedu-primary text-white shadow-sm shadow-xedu-primary/20 hover:bg-xedu-primary-hover hover:shadow-sm hover:shadow-xedu-primary/25',
         destructive:
-          'bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90',
+          'bg-xedu-ruby text-white shadow-sm hover:bg-xedu-ruby/90',
         outline:
           'bg-xedu-bg-elevated text-xedu-slate-700 border border-xedu-slate-200 shadow-xs hover:bg-xedu-slate-50 hover:border-xedu-slate-300 dark:bg-xedu-slate-800 dark:text-xedu-slate-200 dark:border-xedu-slate-700 dark:hover:bg-xedu-slate-700',
         secondary:

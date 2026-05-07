@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ShieldAlert, Plus, Trash2, CheckCircle2, AlertTriangle,
-  Filter, Search, ChevronLeft, ChevronRight, X,
+  Filter, Search, X,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import { classesApi } from '@/lib/api/classes';
 import { usersApi } from '@/lib/api/users';
 import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/ui/use-toast';
+import { Pagination } from '@/components/ui/page-ui';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const TYPE_LABELS: Record<DisciplineType, string> = {
@@ -110,7 +111,7 @@ export default function DisciplinePage() {
   const createMutation = useMutation({
     mutationFn: disciplineApi.create,
     onSuccess: () => {
-      toast({ title: '✅ Hodisa qayd etildi' });
+      toast({ title: ' Hodisa qayd etildi' });
       queryClient.invalidateQueries({ queryKey: ['discipline'] });
       setOpen(false);
       setForm(EMPTY_FORM);
@@ -124,7 +125,7 @@ export default function DisciplinePage() {
   const resolveMutation = useMutation({
     mutationFn: ({ id, notes }: { id: string; notes?: string }) => disciplineApi.resolve(id, notes),
     onSuccess: () => {
-      toast({ title: '✅ Hodisa yechildi' });
+      toast({ title: ' Hodisa yechildi' });
       queryClient.invalidateQueries({ queryKey: ['discipline'] });
     },
   });
@@ -173,7 +174,7 @@ export default function DisciplinePage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <ShieldAlert className="h-6 w-6 text-orange-500" /> Intizom jurnali
           </h1>
-          <p className="text-muted-foreground">O'quvchilar xulq-atvor hodisalari qaydnomasi</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">O'quvchilar xulq-atvor hodisalari qaydnomasi</p>
         </div>
         {canManage && (
           <Button onClick={() => { setForm(EMPTY_FORM); setErrors({}); setOpen(true); }}>
@@ -190,7 +191,7 @@ export default function DisciplinePage() {
               <ShieldAlert className="h-5 w-5 text-orange-500" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Jami hodisalar</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Jami hodisalar</p>
               <p className="text-2xl font-bold">{totalIncidents}</p>
             </div>
           </CardContent>
@@ -201,7 +202,7 @@ export default function DisciplinePage() {
               <AlertTriangle className="h-5 w-5 text-yellow-500" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Yechilmagan</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Yechilmagan</p>
               <p className="text-2xl font-bold">{unresolvedCount}</p>
             </div>
           </CardContent>
@@ -212,7 +213,7 @@ export default function DisciplinePage() {
               <X className="h-5 w-5 text-red-500" />
             </div>
             <div>
-              <p className="text-xs text-muted-foreground">Yuqori darajali</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Yuqori darajali</p>
               <p className="text-2xl font-bold">{highSeverityCount}</p>
             </div>
           </CardContent>
@@ -222,7 +223,7 @@ export default function DisciplinePage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
         <div className="relative">
-          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400" />
           <Input
             className="pl-8 h-8 w-44 text-sm"
             placeholder="O'quvchi qidirish..."
@@ -231,7 +232,7 @@ export default function DisciplinePage() {
           />
         </div>
         <div className="flex items-center gap-1.5">
-          <Filter className="h-4 w-4 text-muted-foreground" />
+          <Filter className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
           <Button variant={!filterClass ? 'secondary' : 'ghost'} size="sm" onClick={() => setFilterClass('')}>Barchasi</Button>
           {classList.slice(0, 6).map((c: any) => (
             <Button key={c.id} variant={filterClass === c.id ? 'secondary' : 'ghost'} size="sm" onClick={() => { setFilterClass(c.id); setPage(1); }}>
@@ -251,7 +252,7 @@ export default function DisciplinePage() {
           {isLoading ? (
             <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14" />)}</div>
           ) : error ? (
-            <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
+            <div className="flex flex-col items-center gap-3 py-12 text-xedu-slate-500 dark:text-xedu-slate-400">
               <ShieldAlert className="h-10 w-10 opacity-30" />
               <p className="text-sm">Intizom jurnali API hali mavjud emas</p>
               <p className="text-xs">Backend moduli keyingi versiyada qo&apos;shiladi</p>
@@ -262,7 +263,7 @@ export default function DisciplinePage() {
               )}
             </div>
           ) : incidents.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
+            <div className="flex flex-col items-center gap-3 py-12 text-xedu-slate-500 dark:text-xedu-slate-400">
               <CheckCircle2 className="h-10 w-10 text-green-400" />
               <p className="text-sm font-medium">Hodisalar yo&apos;q — intizom yaxshi!</p>
               {canManage && (
@@ -276,12 +277,12 @@ export default function DisciplinePage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2.5 font-medium text-muted-foreground pr-3">O&apos;quvchi</th>
-                    <th className="text-left py-2.5 font-medium text-muted-foreground">Tur</th>
-                    <th className="text-center py-2.5 font-medium text-muted-foreground">Daraja</th>
-                    <th className="text-left py-2.5 font-medium text-muted-foreground">Chora</th>
-                    <th className="text-center py-2.5 font-medium text-muted-foreground">Sana</th>
-                    <th className="text-center py-2.5 font-medium text-muted-foreground">Holat</th>
+                    <th className="text-left py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 pr-3">O&apos;quvchi</th>
+                    <th className="text-left py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Tur</th>
+                    <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Daraja</th>
+                    <th className="text-left py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Chora</th>
+                    <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Sana</th>
+                    <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Holat</th>
                     {canManage && <th className="w-16" />}
                   </tr>
                 </thead>
@@ -289,26 +290,26 @@ export default function DisciplinePage() {
                   {incidents
                     .filter(i => !searchStudent || `${i.student?.firstName} ${i.student?.lastName}`.toLowerCase().includes(searchStudent.toLowerCase()))
                     .map((incident: any) => (
-                      <tr key={incident.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors group">
+                      <tr key={incident.id} className="border-b last:border-0 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors group">
                         <td className="py-2.5 pr-3">
                           <div>
                             <p className="font-medium">{incident.student?.firstName} {incident.student?.lastName}</p>
-                            <p className="text-xs text-muted-foreground">{incident.student?.class?.name ?? '—'}</p>
+                            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{incident.student?.class?.name ?? '—'}</p>
                           </div>
                         </td>
                         <td className="py-2.5">{TYPE_LABELS[incident.type as DisciplineType] ?? incident.type}</td>
                         <td className="py-2.5 text-center">
                           <SeverityBadge severity={incident.severity as DisciplineSeverity} />
                         </td>
-                        <td className="py-2.5 text-sm text-muted-foreground">
+                        <td className="py-2.5 text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                           {ACTION_LABELS[incident.action as DisciplineAction] ?? incident.action}
                         </td>
-                        <td className="py-2.5 text-center text-xs text-muted-foreground">
+                        <td className="py-2.5 text-center text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                           {new Date(incident.date).toLocaleDateString('uz-UZ')}
                         </td>
                         <td className="py-2.5 text-center">
                           {incident.resolved ? (
-                            <Badge variant="outline" className="text-green-600 border-green-300 bg-green-50 dark:bg-green-900/20 text-xs">
+                            <Badge variant="outline" className="text-xedu-primary border-xedu-primary/30 bg-xedu-primary-light dark:bg-xedu-primary/15 text-xs">
                               <CheckCircle2 className="mr-1 h-3 w-3" /> Yechildi
                             </Badge>
                           ) : (
@@ -322,7 +323,7 @@ export default function DisciplinePage() {
                                 <Button
                                   variant="ghost"
                                   size="icon"
-                                  className="h-7 w-7 text-green-600 hover:text-green-700 hover:bg-green-50"
+                                  className="h-7 w-7 text-xedu-primary hover:text-xedu-primary-hover hover:bg-xedu-primary-light"
                                   title="Yechildi deb belgilash"
                                   onClick={() => resolveMutation.mutate({ id: incident.id })}
                                 >
@@ -332,7 +333,7 @@ export default function DisciplinePage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                className="h-7 w-7 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                                 title="O'chirish"
                                 onClick={() => deleteMutation.mutate(incident.id)}
                               >
@@ -350,19 +351,7 @@ export default function DisciplinePage() {
 
           {/* Pagination */}
           {meta && meta.totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4 pt-4 border-t">
-              <p className="text-sm text-muted-foreground">
-                {(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, meta.total)} / {meta.total}
-              </p>
-              <div className="flex gap-1">
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))} disabled={page >= meta.totalPages}>
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <Pagination page={page} total={meta.total} perPage={LIMIT} onPage={setPage} />
           )}
         </CardContent>
       </Card>
@@ -389,14 +378,14 @@ export default function DisciplinePage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>O&apos;quvchi <span className="text-destructive">*</span></Label>
+                <Label>O&apos;quvchi <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.studentId} onValueChange={v => { setForm(f => ({ ...f, studentId: v })); setErrors(e => { const n = { ...e }; delete n.studentId; return n; }); }}>
                   <SelectTrigger><SelectValue placeholder="O'quvchi..." /></SelectTrigger>
                   <SelectContent>
                     {allStudents.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.firstName} {s.lastName}</SelectItem>)}
                   </SelectContent>
                 </Select>
-                {errors.studentId && <p className="text-xs text-destructive">{errors.studentId}</p>}
+                {errors.studentId && <p className="text-xs text-xedu-ruby">{errors.studentId}</p>}
               </div>
             </div>
 
@@ -434,22 +423,22 @@ export default function DisciplinePage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>Sana <span className="text-destructive">*</span></Label>
+                <Label>Sana <span className="text-xedu-ruby">*</span></Label>
                 <Input type="date" value={form.date} onChange={e => setForm(f => ({ ...f, date: e.target.value }))} />
-                {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}
+                {errors.date && <p className="text-xs text-xedu-ruby">{errors.date}</p>}
               </div>
             </div>
 
             {/* Description */}
             <div className="space-y-1.5">
-              <Label>Tavsif <span className="text-destructive">*</span></Label>
+              <Label>Tavsif <span className="text-xedu-ruby">*</span></Label>
               <Textarea
                 placeholder="Nima bo'ldi? Batafsil yozing..."
                 value={form.description}
                 onChange={e => { setForm(f => ({ ...f, description: e.target.value })); setErrors(e2 => { const n = { ...e2 }; delete n.description; return n; }); }}
                 rows={3}
               />
-              {errors.description && <p className="text-xs text-destructive">{errors.description}</p>}
+              {errors.description && <p className="text-xs text-xedu-ruby">{errors.description}</p>}
             </div>
 
             {/* Notes */}

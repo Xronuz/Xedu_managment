@@ -168,7 +168,7 @@ export default function SchoolDetailPage() {
   if (!school) {
     return (
       <div className="py-16 text-center">
-        <p className="text-muted-foreground">Maktab topilmadi</p>
+        <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Maktab topilmadi</p>
         <Button asChild className="mt-4">
           <Link href="/dashboard/schools">← Orqaga</Link>
         </Button>
@@ -194,7 +194,7 @@ export default function SchoolDetailPage() {
                 {school.isActive ? 'Aktiv' : 'Bloklangan'}
               </Badge>
             </div>
-            <p className="text-sm text-muted-foreground flex items-center gap-1 mt-0.5">
+            <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1 mt-0.5">
               <Globe className="h-3 w-3" />
               {school.slug}
               {school.createdAt && ` · Qo'shilgan: ${formatDate(school.createdAt)}`}
@@ -234,7 +234,7 @@ export default function SchoolDetailPage() {
             </div>
             <div>
               <p className="text-2xl font-bold">{school._count?.users ?? 0}</p>
-              <p className="text-xs text-muted-foreground">Foydalanuvchilar</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Foydalanuvchilar</p>
             </div>
           </CardContent>
         </Card>
@@ -247,7 +247,7 @@ export default function SchoolDetailPage() {
               <p className="text-2xl font-bold">
                 {Array.isArray(modules) ? modules.filter((m: any) => m.isEnabled).length : '—'}
               </p>
-              <p className="text-xs text-muted-foreground">Aktiv modullar</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Aktiv modullar</p>
             </div>
           </CardContent>
         </Card>
@@ -258,7 +258,7 @@ export default function SchoolDetailPage() {
             </div>
             <div>
               <p className="text-lg font-bold capitalize">{school.subscriptionTier ?? 'basic'}</p>
-              <p className="text-xs text-muted-foreground">Obuna tarifi</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Obuna tarifi</p>
             </div>
           </CardContent>
         </Card>
@@ -273,7 +273,7 @@ export default function SchoolDetailPage() {
             className={`px-4 py-2 text-sm font-medium transition-colors border-b-2 -mb-px ${
               activeTab === tab
                 ? 'border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
+                : 'border-transparent text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground'
             }`}
           >
             {tab === 'info' ? 'Ma\'lumotlar' : 'Modullar'}
@@ -363,9 +363,9 @@ export default function SchoolDetailPage() {
                   { icon: MapPin, label: 'Manzil', value: school.address || '—' },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-start gap-3 rounded-lg bg-muted/40 p-3">
-                    <Icon className="h-4 w-4 text-muted-foreground mt-0.5" />
+                    <Icon className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5" />
                     <div>
-                      <p className="text-xs text-muted-foreground">{label}</p>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{label}</p>
                       <p className="text-sm font-medium">{value}</p>
                     </div>
                   </div>
@@ -391,7 +391,7 @@ export default function SchoolDetailPage() {
               return (
                 <Card key={category}>
                   <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                    <CardTitle className="text-sm font-semibold text-xedu-slate-500 dark:text-xedu-slate-400 uppercase tracking-wider">
                       {category}
                     </CardTitle>
                   </CardHeader>
@@ -407,15 +407,15 @@ export default function SchoolDetailPage() {
                         >
                           <div className="flex items-center gap-3">
                             <div className={`rounded-lg p-2 ${isEnabled ? 'bg-primary/10' : 'bg-muted'}`}>
-                              <Icon className={`h-4 w-4 ${isEnabled ? 'text-primary' : 'text-muted-foreground'}`} />
+                              <Icon className={`h-4 w-4 ${isEnabled ? 'text-primary' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`} />
                             </div>
                             <div>
                               <p className="text-sm font-medium">{meta.label}</p>
-                              <p className="text-xs text-muted-foreground">{meta.description}</p>
+                              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{meta.description}</p>
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className={`text-xs ${isEnabled ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
+                            <span className={`text-xs ${isEnabled ? 'text-green-600 dark:text-green-400' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
                               {isEnabled ? 'Yoqilgan' : 'O\'chirilgan'}
                             </span>
                             <Switch

@@ -171,7 +171,7 @@ export default function LinkParentPage() {
 
     if (successCount > 0) {
       toast({
-        title: `✅ ${successCount} ta o'quvchi bog'landi`,
+        title: ` ${successCount} ta o'quvchi bog'landi`,
         description:
           errorCount > 0 ? `${errorCount} ta bog'lashda xato yuz berdi` : undefined,
       });
@@ -208,7 +208,7 @@ export default function LinkParentPage() {
               <Link2 className="h-6 w-6 text-primary" />
               Ota-ona — O'quvchi bog'lash
             </h1>
-            <p className="text-muted-foreground text-sm">
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">
               Ota-onalarni farzandlari (o'quvchilar) bilan bog'lang
             </p>
           </div>
@@ -230,7 +230,7 @@ export default function LinkParentPage() {
               )}
             </CardTitle>
             <div className="relative mt-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
               <Input
                 placeholder="Ota-ona qidirish..."
                 className="pl-9 h-9 text-sm"
@@ -269,7 +269,7 @@ export default function LinkParentPage() {
               )}
             </CardTitle>
             <div className="relative mt-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
               <Input
                 placeholder="O'quvchi qidirish..."
                 className="pl-9 h-9 text-sm"
@@ -295,13 +295,13 @@ export default function LinkParentPage() {
       {/* ── Bottom Info Section ── */}
       <Card className="border-dashed">
         <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base text-muted-foreground">
+          <CardTitle className="flex items-center gap-2 text-base text-xedu-slate-500 dark:text-xedu-slate-400">
             <Info className="h-4 w-4" />
             Bog'langan juftliklar
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/40 text-sm text-muted-foreground">
+          <div className="flex items-center gap-3 p-4 rounded-lg bg-muted/40 text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
             <CheckCircle2 className="h-5 w-5 shrink-0 text-primary/60" />
             <p>
               Bog'lashni boshqarish uchun yuqorida ota-ona yonidagi{' '}
@@ -340,7 +340,7 @@ export default function LinkParentPage() {
                   <span className="font-medium text-foreground">
                     {selectedParent.firstName} {selectedParent.lastName}
                   </span>
-                  <span className="text-muted-foreground">uchun farzand tanlang</span>
+                  <span className="text-xedu-slate-500 dark:text-xedu-slate-400">uchun farzand tanlang</span>
                 </span>
               )}
             </DialogDescription>
@@ -348,7 +348,7 @@ export default function LinkParentPage() {
 
           {/* Modal student search */}
           <div className="relative my-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
             <Input
               placeholder="O'quvchi qidirish..."
               className="pl-9 h-9 text-sm"
@@ -376,7 +376,7 @@ export default function LinkParentPage() {
                     className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                       checked
                         ? 'border-primary/50 bg-primary/5'
-                        : 'border-border hover:bg-muted/50'
+                        : 'border-xedu-slate-200 dark:border-xedu-slate-700 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-700/30'
                     }`}
                   >
                     <Checkbox
@@ -393,7 +393,7 @@ export default function LinkParentPage() {
                       <p className="text-sm font-medium truncate">
                         {student.firstName} {student.lastName}
                       </p>
-                      <p className="text-xs text-muted-foreground truncate">{student.email}</p>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{student.email}</p>
                     </div>
                     {checked && (
                       <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
@@ -405,7 +405,7 @@ export default function LinkParentPage() {
           </div>
 
           <DialogFooter className="gap-2 pt-2 border-t mt-2">
-            <div className="flex items-center gap-1 mr-auto text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 mr-auto text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
               {checkedStudents.size > 0 && (
                 <Badge variant="secondary">{checkedStudents.size} ta tanlandi</Badge>
               )}
@@ -448,7 +448,7 @@ export default function LinkParentPage() {
 
 function ParentCard({ parent, onLink }: { parent: User; onLink: () => void }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg border hover:shadow-sm transition-shadow bg-card">
+    <div className="flex items-center gap-3 p-3 rounded-lg border hover:shadow-sm transition-shadow bg-white dark:bg-xedu-slate-900">
       <Avatar className="h-9 w-9 shrink-0">
         <AvatarFallback className="text-xs font-medium bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300">
           {getInitials(parent.firstName, parent.lastName)}
@@ -458,7 +458,7 @@ function ParentCard({ parent, onLink }: { parent: User; onLink: () => void }) {
         <p className="text-sm font-medium truncate">
           {parent.firstName} {parent.lastName}
         </p>
-        <p className="text-xs text-muted-foreground truncate">{parent.email}</p>
+        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{parent.email}</p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <Badge
@@ -478,7 +478,7 @@ function ParentCard({ parent, onLink }: { parent: User; onLink: () => void }) {
 
 function StudentCard({ student }: { student: User }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg border bg-card">
+    <div className="flex items-center gap-3 p-3 rounded-lg border bg-white dark:bg-xedu-slate-900">
       <Avatar className="h-9 w-9 shrink-0">
         <AvatarFallback className="text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
           {getInitials(student.firstName, student.lastName)}
@@ -488,7 +488,7 @@ function StudentCard({ student }: { student: User }) {
         <p className="text-sm font-medium truncate">
           {student.firstName} {student.lastName}
         </p>
-        <p className="text-xs text-muted-foreground truncate">{student.email}</p>
+        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{student.email}</p>
       </div>
       <Badge
         variant="outline"
@@ -502,7 +502,7 @@ function StudentCard({ student }: { student: User }) {
 
 function EmptyState({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div className="py-10 flex flex-col items-center gap-2 text-muted-foreground">
+    <div className="py-10 flex flex-col items-center gap-2 text-xedu-slate-500 dark:text-xedu-slate-400">
       {icon}
       <p className="text-sm">{text}</p>
     </div>

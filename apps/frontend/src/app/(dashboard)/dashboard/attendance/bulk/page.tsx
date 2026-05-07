@@ -85,7 +85,7 @@ export default function BulkAttendancePage() {
       return attendanceApi.mark({ classId, date, entries });
     },
     onSuccess: () => {
-      toast({ title: '✅ Davomat saqlandi' });
+      toast({ title: ' Davomat saqlandi' });
       queryClient.invalidateQueries({ queryKey: ['attendance'] });
     },
     onError: (err: any) => {
@@ -109,7 +109,7 @@ export default function BulkAttendancePage() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold">Guruh davomati</h1>
-          <p className="text-muted-foreground">Butun sinf uchun bir vaqtda davomat belgilash</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Butun sinf uchun bir vaqtda davomat belgilash</p>
         </div>
       </div>
 
@@ -137,7 +137,7 @@ export default function BulkAttendancePage() {
                 value={date}
                 max={today}
                 onChange={e => setDate(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                className="flex h-10 w-full rounded-md border border-input bg-white dark:bg-xedu-slate-950 px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary/30"
               />
             </div>
             <div className="space-y-1.5">
@@ -145,7 +145,7 @@ export default function BulkAttendancePage() {
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" onClick={() => markAll(AttendanceStatus.PRESENT)}
                   className="flex-1 border-green-500 text-green-600 hover:bg-green-50 dark:hover:bg-green-950">
-                  ✅ Barchasi keldi
+                   Barchasi keldi
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => markAll(AttendanceStatus.ABSENT)}
                   className="flex-1 border-red-500 text-red-600 hover:bg-red-50 dark:hover:bg-red-950">
@@ -159,14 +159,14 @@ export default function BulkAttendancePage() {
 
       {/* Students */}
       {!classId ? (
-        <Card><CardContent className="py-12 text-center text-muted-foreground">
+        <Card><CardContent className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
           <Users className="mx-auto mb-3 h-10 w-10 opacity-40" />
           <p>Avval sinf tanlang</p>
         </CardContent></Card>
       ) : studentsLoading ? (
         <div className="space-y-2">{[...Array(6)].map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
       ) : studentList.length === 0 ? (
-        <Card><CardContent className="py-12 text-center text-muted-foreground">
+        <Card><CardContent className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
           <Users className="mx-auto mb-3 h-10 w-10 opacity-40" />
           <p>Bu sinfda o'quvchilar yo'q</p>
         </CardContent></Card>
@@ -179,7 +179,7 @@ export default function BulkAttendancePage() {
             return (
               <Card key={id}>
                 <CardContent className="flex items-center gap-3 p-3">
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold text-xedu-slate-500 dark:text-xedu-slate-400">
                     {idx + 1}
                   </span>
                   <Avatar className="h-8 w-8 shrink-0">
@@ -194,7 +194,7 @@ export default function BulkAttendancePage() {
                         key={value}
                         onClick={() => setOne(id, value)}
                         className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium transition-all ${
-                          cur === value ? active : 'border-transparent text-muted-foreground hover:border-border hover:bg-accent'
+                          cur === value ? active : 'border-transparent text-xedu-slate-500 dark:text-xedu-slate-400 hover:border-xedu-slate-200 dark:border-xedu-slate-700 hover:bg-accent'
                         }`}
                       >
                         <Icon className="h-3 w-3" />
@@ -211,12 +211,12 @@ export default function BulkAttendancePage() {
 
       {/* Sticky footer */}
       {studentList.length > 0 && classId && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 rounded-2xl border bg-background/95 backdrop-blur px-5 py-3 shadow-xl">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 rounded-2xl border bg-white/95 dark:bg-xedu-slate-950/95 backdrop-blur px-5 py-3 shadow-md">
           <div className="flex gap-3 text-sm">
-            <span className="text-green-600 font-semibold">✅ {counts[AttendanceStatus.PRESENT] ?? 0}</span>
+            <span className="text-green-600 font-semibold"> {counts[AttendanceStatus.PRESENT] ?? 0}</span>
             <span className="text-red-600 font-semibold">❌ {counts[AttendanceStatus.ABSENT] ?? 0}</span>
             <span className="text-yellow-600 font-semibold">⏰ {counts[AttendanceStatus.LATE] ?? 0}</span>
-            <span className="text-blue-600 font-semibold">📋 {counts[AttendanceStatus.EXCUSED] ?? 0}</span>
+            <span className="text-blue-600 font-semibold"> {counts[AttendanceStatus.EXCUSED] ?? 0}</span>
           </div>
           <Button onClick={() => mutation.mutate()} disabled={mutation.isPending} size="sm" className="gap-2">
             {mutation.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Save className="h-3.5 w-3.5" />}

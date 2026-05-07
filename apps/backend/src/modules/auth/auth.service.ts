@@ -4,6 +4,7 @@ import {
   BadRequestException,
   ForbiddenException,
   ConflictException,
+  NotFoundException,
   Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -12,6 +13,7 @@ import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
+import { NotificationQueueService } from '@/modules/notifications/notification-queue.service';
 import { UserRole, JwtPayload, TokenPair } from '@eduplatform/types';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -37,6 +39,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly redis: RedisService,
     private readonly config: ConfigService,
+    private readonly notificationQueue: NotificationQueueService,
   ) {}
 
   async login(dto: LoginDto): Promise<{ user: object; tokens: TokenPair }> {
@@ -61,6 +64,7 @@ export class AuthService {
       select: {
         id: true, email: true, role: true, schoolId: true, branchId: true,
         passwordHash: true, isActive: true, firstName: true, lastName: true,
+        isFirstLogin: true,
       },
     });
 
@@ -91,6 +95,7 @@ export class AuthService {
         role: user.role,
         schoolId: user.schoolId,
         branchId: user.branchId,
+        isFirstLogin: user.isFirstLogin,
       },
       tokens,
     };
@@ -159,8 +164,29 @@ export class AuthService {
       throw new BadRequestException('Tizimda vaqtinchalik muammo. Iltimos qayta urinib ko\'ring.');
     }
 
-    // TODO: Send SMS/email with reset link
-    this.logger.log(`Parol tiklash tokeni yaratildi: ${user.email}`);
+    // Send password reset email
+    const frontendUrl = this.config.get('ALLOWED_ORIGINS', 'http://localhost:3000').split(',')[0].trim();
+    const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
+    await this.notificationQueue.queueEmail({
+      to: user.email,
+      subject: 'Xedu — Parolni tiklash',
+      html: `
+        <div style="font-family: system-ui, -apple-system, sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #1f2937;">
+          <h2 style="font-size: 18px; font-weight: 700; margin-bottom: 16px;">Xedu — Ta'lim boshqaruv tizimi</h2>
+          <p style="font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+            Parolingizni tiklash uchun quyidagi havolaga bosing. Bu havola 1 soat davomida amal qiladi.
+          </p>
+          <a href="${resetUrl}" style="display: inline-block; padding: 12px 24px; background: #0F7B53; color: #fff; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600;">
+            Parolni tiklash
+          </a>
+          <p style="font-size: 12px; color: #6b7280; margin-top: 24px;">
+            Agar siz parolni tiklashni so'ramagan bo'lsangiz, ushbu xatni e'tiborsiz qoldiring.
+          </p>
+        </div>
+      `,
+      text: `Parolingizni tiklash uchun havola: ${resetUrl}`,
+    });
+    this.logger.log(`Parol tiklash emaili yuborildi: ${user.email}`);
 
     return { message: 'Agar email ro\'yxatdan o\'tgan bo\'lsa, tiklash havolasi yuborildi' };
   }
@@ -253,6 +279,34 @@ export class AuthService {
     await this.redis.del(`${PASSWORD_RESET_PREFIX}${dto.token}`).catch(err =>
       this.logger.warn(`Reset token o'chirishda Redis xato: ${err.message}`),
     );
+    return { message: 'Parol muvaffaqiyatli yangilandi' };
+  }
+
+  /**
+   * Birinchi kirishda parolni o'zgartirish.
+   * Joriy parolni tekshiradi, yangi parolni saqlaydi va isFirstLogin=false qiladi.
+   */
+  async firstLoginPasswordChange(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { passwordHash: true, isFirstLogin: true },
+    });
+    if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+
+    const valid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!valid) throw new UnauthorizedException('Joriy parol noto\'g\'ri');
+
+    const passwordHash = await bcrypt.hash(newPassword, 12);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { passwordHash, isFirstLogin: false },
+    });
+
+    this.logger.log(`Foydalanuvchi birinchi parolni o'zgartirdi: ${userId}`);
     return { message: 'Parol muvaffaqiyatli yangilandi' };
   }
 

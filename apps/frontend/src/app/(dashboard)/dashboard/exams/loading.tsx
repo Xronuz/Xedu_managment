@@ -14,7 +14,7 @@ export default function ExamsLoading() {
       </div>
       <div className="space-y-3">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="rounded-xl border bg-card p-4 flex items-center gap-4">
+          <div key={i} className="rounded-xl border bg-white dark:bg-xedu-slate-900 p-4 flex items-center gap-4">
             <Skeleton className="h-10 w-10 rounded-xl shrink-0" />
             <div className="flex-1 space-y-2">
               <Skeleton className="h-5 w-48" />

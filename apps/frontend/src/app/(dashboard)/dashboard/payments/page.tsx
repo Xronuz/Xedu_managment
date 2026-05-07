@@ -54,7 +54,7 @@ function FeeStructuresTab({ canManage }: { canManage: boolean }) {
   const createMutation = useMutation({
     mutationFn: feeStructuresApi.create,
     onSuccess: () => {
-      toast({ title: '✅ To\'lov tartibi yaratildi' });
+      toast({ title: 'To\'lov tartibi yaratildi' });
       queryClient.invalidateQueries({ queryKey: ['fee-structures'] });
       setFeeOpen(false);
       setFeeForm({ name: '', amount: '', frequency: 'monthly', gradeLevel: '', academicYear: currentYear, description: '' });
@@ -76,7 +76,7 @@ function FeeStructuresTab({ canManage }: { canManage: boolean }) {
   const generateMutation = useMutation({
     mutationFn: feeStructuresApi.generatePayments,
     onSuccess: (data: { created: number }) => {
-      toast({ title: `✅ ${data.created} ta to'lov yozuvi yaratildi` });
+      toast({ title: `${data.created} ta to'lov yozuvi yaratildi` });
       queryClient.invalidateQueries({ queryKey: ['payments'] });
     },
     onError: (err: any) => {
@@ -90,7 +90,7 @@ function FeeStructuresTab({ canManage }: { canManage: boolean }) {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-semibold text-base">To'lov tartiblari</h3>
-          <p className="text-sm text-muted-foreground">Oylik, choraklik yoki boshqa to'lov rejalarini boshqaring</p>
+          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Oylik, choraklik yoki boshqa to'lov rejalarini boshqaring</p>
         </div>
         {canManage && (
           <Button onClick={() => setFeeOpen(true)} size="sm">
@@ -103,7 +103,7 @@ function FeeStructuresTab({ canManage }: { canManage: boolean }) {
         <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
       ) : (fees as FeeStructure[]).length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
+          <CardContent className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
             <CreditCard className="h-10 w-10 mx-auto mb-3 opacity-30" />
             <p>Hali to'lov tartiblari yo'q</p>
             {canManage && <p className="text-xs mt-1">Yangi tartib yaratib to'lovlarni avtomatlashtirying</p>}
@@ -125,8 +125,8 @@ function FeeStructuresTab({ canManage }: { canManage: boolean }) {
                       <Badge variant="outline" className="text-xs">{FREQ_LABELS[fee.frequency] ?? fee.frequency}</Badge>
                       {fee.gradeLevel && <Badge variant="secondary" className="text-xs">{fee.gradeLevel}-sinf</Badge>}
                     </div>
-                    {fee.description && <p className="text-xs text-muted-foreground mt-0.5">{fee.description}</p>}
-                    <p className="text-xs text-muted-foreground">{fee.academicYear} o'quv yili</p>
+                    {fee.description && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">{fee.description}</p>}
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{fee.academicYear} o'quv yili</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
@@ -146,7 +146,7 @@ function FeeStructuresTab({ canManage }: { canManage: boolean }) {
                       </Button>
                       <Button
                         size="icon" variant="ghost"
-                        className="h-8 w-8 text-destructive"
+                        className="h-8 w-8 text-xedu-ruby"
                         onClick={() => deleteMutation.mutate(fee.id)}
                         disabled={deleteMutation.isPending}
                       >
@@ -231,7 +231,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   pending: { label: 'Kutilmoqda',        color: 'border-yellow-500 text-yellow-600' },
   overdue: { label: 'Muddati o\'tgan',  color: 'border-red-500 text-red-600' },
   failed:  { label: 'Muvaffaqiyatsiz',  color: 'border-red-400 text-red-500' },
-  refunded:{ label: 'Qaytarildi',       color: 'border-border text-muted-foreground' },
+  refunded:{ label: 'Qaytarildi',       color: 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 dark:text-xedu-slate-400' },
 };
 
 const STATUSES = [
@@ -338,7 +338,7 @@ export default function PaymentsPage() {
     onSuccess: () => {
       // Server confirmed — now revalidate for fresh data
       queryClient.invalidateQueries({ queryKey: ['payments'] });
-      toast({ title: "✅ To'lov to'landi deb belgilandi" });
+      toast({ title: "To'lov to'landi deb belgilandi" });
     },
     onError: (err: any, _id, context) => {
       // Roll back to snapshot if server rejected
@@ -352,7 +352,7 @@ export default function PaymentsPage() {
   const createMutation = useMutation({
     mutationFn: paymentsApi.create,
     onSuccess: () => {
-      toast({ title: "✅ To'lov qo'shildi" });
+      toast({ title: "To'lov qo'shildi" });
       queryClient.invalidateQueries({ queryKey: ['payments'] });
       setCreateOpen(false);
       setForm(CREATE_EMPTY);
@@ -392,7 +392,7 @@ export default function PaymentsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">To'lovlar</h1>
-          <p className="text-muted-foreground">Moliyaviy holat va sinf bo'yicha statistika</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Moliyaviy holat va sinf bo'yicha statistika</p>
         </div>
         {canCreate && (
           <Button onClick={() => { setCreateOpen(true); setForm(CREATE_EMPTY); setErrors({}); }}>
@@ -405,7 +405,7 @@ export default function PaymentsPage() {
       <div className="grid gap-4 sm:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Bu oy tushumi</CardTitle>
+            <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Bu oy tushumi</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -418,7 +418,7 @@ export default function PaymentsPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Kutilmoqda</CardTitle>
+            <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Kutilmoqda</CardTitle>
             <Clock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
@@ -431,7 +431,7 @@ export default function PaymentsPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Muddati o'tgan</CardTitle>
+            <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Muddati o'tgan</CardTitle>
             <AlertCircle className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
@@ -444,7 +444,7 @@ export default function PaymentsPage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Jami qarzdorlik</CardTitle>
+            <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Jami qarzdorlik</CardTitle>
             <Users className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
@@ -454,7 +454,7 @@ export default function PaymentsPage() {
               </div>
             )}
             {!reportLoading && (
-              <p className="text-xs text-muted-foreground mt-0.5">{totalDebtors} ta qarzdor</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">{totalDebtors} ta qarzdor</p>
             )}
           </CardContent>
         </Card>
@@ -481,7 +481,7 @@ export default function PaymentsPage() {
             </div>
           ) : classStats.length === 0 ? (
             <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
+              <CardContent className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
                 Sinflar topilmadi
               </CardContent>
             </Card>
@@ -499,7 +499,7 @@ export default function PaymentsPage() {
                     </div>
                     <div>
                       <p className="font-semibold">{cls.className}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         {cls.totalStudents} o'quvchi
                         {cls.debtorCount > 0 && (
                           <span className="text-red-500 ml-2">· {cls.debtorCount} ta qarzdor</span>
@@ -511,7 +511,7 @@ export default function PaymentsPage() {
                     {cls.debtorCount > 0 ? (
                       <div className="text-right">
                         <p className="font-bold text-red-600">{formatCurrency(cls.totalDebt)}</p>
-                        <p className="text-xs text-muted-foreground">qarzdorlik</p>
+                        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">qarzdorlik</p>
                       </div>
                     ) : (
                       <Badge variant="outline" className="border-green-500 text-green-600">
@@ -519,8 +519,8 @@ export default function PaymentsPage() {
                       </Badge>
                     )}
                     {expandedClass === cls.classId
-                      ? <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                      : <ChevronRight className="h-4 w-4 text-muted-foreground" />}
+                      ? <ChevronDown className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
+                      : <ChevronRight className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />}
                   </div>
                 </div>
 
@@ -528,18 +528,17 @@ export default function PaymentsPage() {
                 {expandedClass === cls.classId && (
                   <div className="border-t bg-muted/20">
                     {cls.debtors.length === 0 ? (
-                      <div className="py-6 text-center text-sm text-muted-foreground">
-                        Bu sinfda qarzdorlar yo'q ✅
-                      </div>
+                      <div className="py-6 text-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
+                        Bu sinfda qarzdorlar yo'q </div>
                     ) : (
                       <div className="divide-y">
                         {cls.debtors.map((d: any) => {
-                          const cfg = statusConfig[d.status] ?? { label: d.status, color: 'border-border text-muted-foreground' };
+                          const cfg = statusConfig[d.status] ?? { label: d.status, color: 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 dark:text-xedu-slate-400' };
                           return (
                             <div key={d.id} className="flex items-center justify-between px-4 py-3 text-sm">
                               <div className="min-w-0 flex-1">
                                 <p className="font-medium">{d.studentName}</p>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                <div className="flex items-center gap-2 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">
                                   {d.description && <span>{d.description}</span>}
                                   {d.dueDate && (
                                     <span className={new Date(d.dueDate) < new Date() ? 'text-red-500 font-medium' : ''}>
@@ -648,12 +647,12 @@ export default function PaymentsPage() {
               ) : (
                 <div className="divide-y">
                   {(history?.data ?? []).map((p: any) => {
-                    const cfg = statusConfig[p.status] ?? { label: p.status, color: 'border-border text-muted-foreground' };
+                    const cfg = statusConfig[p.status] ?? { label: p.status, color: 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 dark:text-xedu-slate-400' };
                     return (
-                      <div key={p.id} className="flex items-center justify-between px-4 py-3 text-sm hover:bg-muted/30 transition-colors">
+                      <div key={p.id} className="flex items-center justify-between px-4 py-3 text-sm hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
                         <div>
                           <p className="font-medium">{p.student?.firstName} {p.student?.lastName}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                             {p.description ?? "To'lov"} · {formatDate(p.createdAt)}
                             {p.dueDate && (
                               <span className={`ml-2 ${new Date(p.dueDate) < new Date() && p.status !== 'paid' ? 'text-red-500 font-medium' : ''}`}>
@@ -681,7 +680,7 @@ export default function PaymentsPage() {
                     );
                   })}
                   {(!history?.data || history.data.length === 0) && (
-                    <div className="py-12 text-center text-muted-foreground">
+                    <div className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
                       <CreditCard className="mx-auto mb-2 h-10 w-10 opacity-30" />
                       <p>To'lovlar tarixi yo'q</p>
                     </div>
@@ -693,7 +692,7 @@ export default function PaymentsPage() {
 
           {/* Pagination */}
           {history?.meta && history.meta.totalPages > 1 && (
-            <p className="text-xs text-center text-muted-foreground">
+            <p className="text-xs text-center text-xedu-slate-500 dark:text-xedu-slate-400">
               Jami {history.meta.total} ta to'lov
             </p>
           )}
@@ -714,7 +713,7 @@ export default function PaymentsPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>O'quvchi <span className="text-destructive">*</span></Label>
+              <Label>O'quvchi <span className="text-xedu-ruby">*</span></Label>
               <Select value={form.studentId} onValueChange={v => { setForm(f => ({ ...f, studentId: v })); setErrors(e => { const n = { ...e }; delete n.studentId; return n; }); }}>
                 <SelectTrigger>
                   <SelectValue placeholder="O'quvchi tanlang..." />
@@ -725,11 +724,11 @@ export default function PaymentsPage() {
                   ))}
                 </SelectContent>
               </Select>
-              {errors.studentId && <p className="text-xs text-destructive">{errors.studentId}</p>}
+              {errors.studentId && <p className="text-xs text-xedu-ruby">{errors.studentId}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Summa (so'm) <span className="text-destructive">*</span></Label>
+                <Label>Summa (so'm) <span className="text-xedu-ruby">*</span></Label>
                 <Input
                   type="number"
                   min={0}
@@ -737,7 +736,7 @@ export default function PaymentsPage() {
                   value={form.amount}
                   onChange={e => { setForm(f => ({ ...f, amount: e.target.value })); setErrors(er => { const n = { ...er }; delete n.amount; return n; }); }}
                 />
-                {errors.amount && <p className="text-xs text-destructive">{errors.amount}</p>}
+                {errors.amount && <p className="text-xs text-xedu-ruby">{errors.amount}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Muddat</Label>

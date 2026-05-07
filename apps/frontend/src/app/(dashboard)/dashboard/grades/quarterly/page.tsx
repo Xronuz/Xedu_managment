@@ -120,7 +120,7 @@ export default function QuarterlyGradesPage() {
           </Button>
           <div>
             <h1 className="text-2xl font-bold">Choraklik baho hisobi</h1>
-            <p className="text-muted-foreground">Sinf bo'yicha chorak natijalari</p>
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Sinf bo'yicha chorak natijalari</p>
           </div>
         </div>
         <Button variant="outline" size="sm" className="gap-2"
@@ -168,7 +168,7 @@ export default function QuarterlyGradesPage() {
             <CardContent className="pt-6 flex items-center gap-4">
               <div className="p-3 rounded-xl bg-blue-500/10"><Users className="h-5 w-5 text-blue-500" /></div>
               <div>
-                <p className="text-xs text-muted-foreground">O'quvchilar</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">O'quvchilar</p>
                 <p className="text-2xl font-bold">{pivot.length}</p>
               </div>
             </CardContent>
@@ -177,7 +177,7 @@ export default function QuarterlyGradesPage() {
             <CardContent className="pt-6 flex items-center gap-4">
               <div className="p-3 rounded-xl bg-purple-500/10"><BarChart2 className="h-5 w-5 text-purple-500" /></div>
               <div>
-                <p className="text-xs text-muted-foreground">Fanlar soni</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Fanlar soni</p>
                 <p className="text-2xl font-bold">{allSubjects.length}</p>
               </div>
             </CardContent>
@@ -188,7 +188,7 @@ export default function QuarterlyGradesPage() {
                 <TrendingUp className={`h-5 w-5 ${classAvg >= 70 ? 'text-green-500' : 'text-red-500'}`} />
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Sinf o'rtachasi</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Sinf o'rtachasi</p>
                 <p className="text-2xl font-bold">{classAvg}%</p>
               </div>
             </CardContent>
@@ -198,14 +198,14 @@ export default function QuarterlyGradesPage() {
 
       {/* Table */}
       {!classId ? (
-        <Card><CardContent className="py-12 text-center text-muted-foreground">
+        <Card><CardContent className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
           <BarChart2 className="mx-auto mb-3 h-10 w-10 opacity-40" />
           <p>Sinf tanlang</p>
         </CardContent></Card>
       ) : gradesLoading ? (
         <div className="space-y-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-12 rounded-xl" />)}</div>
       ) : pivot.length === 0 ? (
-        <Card><CardContent className="py-12 text-center text-muted-foreground">
+        <Card><CardContent className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
           <BarChart2 className="mx-auto mb-3 h-10 w-10 opacity-40" />
           <p>Bu chorak uchun baholar topilmadi</p>
         </CardContent></Card>
@@ -220,10 +220,10 @@ export default function QuarterlyGradesPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="py-2 pr-3 text-left font-medium text-muted-foreground whitespace-nowrap">#</th>
-                    <th className="py-2 pr-4 text-left font-medium text-muted-foreground whitespace-nowrap">O'quvchi</th>
+                    <th className="py-2 pr-3 text-left font-medium text-xedu-slate-500 dark:text-xedu-slate-400 whitespace-nowrap">#</th>
+                    <th className="py-2 pr-4 text-left font-medium text-xedu-slate-500 dark:text-xedu-slate-400 whitespace-nowrap">O'quvchi</th>
                     {allSubjects.map(s => (
-                      <th key={s.id} className="py-2 px-2 text-center font-medium text-muted-foreground whitespace-nowrap min-w-[80px]">
+                      <th key={s.id} className="py-2 px-2 text-center font-medium text-xedu-slate-500 dark:text-xedu-slate-400 whitespace-nowrap min-w-[80px]">
                         {s.name}
                       </th>
                     ))}
@@ -232,8 +232,8 @@ export default function QuarterlyGradesPage() {
                 </thead>
                 <tbody>
                   {pivot.map((row, idx) => (
-                    <tr key={row.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                      <td className="py-2.5 pr-3 text-muted-foreground">{idx + 1}</td>
+                    <tr key={row.id} className="border-b last:border-0 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
+                      <td className="py-2.5 pr-3 text-xedu-slate-500 dark:text-xedu-slate-400">{idx + 1}</td>
                       <td className="py-2.5 pr-4 font-medium whitespace-nowrap">{row.name}</td>
                       {allSubjects.map(sub => {
                         const found = row.subjects.find((s: any) => s.id === sub.id);
@@ -244,7 +244,7 @@ export default function QuarterlyGradesPage() {
                                 {found.avg}%
                               </span>
                             ) : (
-                              <span className="text-muted-foreground/40">—</span>
+                              <span className="text-xedu-slate-500 dark:text-xedu-slate-400/40">—</span>
                             )}
                           </td>
                         );

@@ -87,7 +87,7 @@ function StaffContent() {
     <div>
       <div className="mb-1">
         <h1 className="text-xl font-bold text-foreground">Xodimlar</h1>
-        <p className="text-sm text-muted-foreground">Foydalanuvchilar, filiallar, CRM va boshqaruv</p>
+        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Foydalanuvchilar, filiallar, CRM va boshqaruv</p>
       </div>
       <div className="mt-3">
         <SectionTabs tabs={TABS} defaultTab={firstVisibleTab} />

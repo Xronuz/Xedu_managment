@@ -194,7 +194,7 @@ export default function BranchesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Filiallar</h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm mt-1">
             Maktab filiallarini boshqarish — yaratish, tahrirlash, ko'rinishni almashtirish
           </p>
         </div>
@@ -207,7 +207,7 @@ export default function BranchesPage() {
       {/* School-wide switch */}
       <Card
         className={cn(
-          'cursor-pointer border-2 transition-all hover:shadow-md',
+          'cursor-pointer border-2 transition-all hover:shadow-sm',
           !activeBranchId ? 'border-primary bg-primary/5' : 'border-transparent',
         )}
         onClick={() => switchBranch(null, null)}
@@ -218,7 +218,7 @@ export default function BranchesPage() {
           </div>
           <div className="flex-1">
             <p className="font-semibold">Barcha filiallar</p>
-            <p className="text-xs text-muted-foreground">School-wide ko'rinish — barcha filiallarning ma'lumotlari</p>
+            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">School-wide ko'rinish — barcha filiallarning ma'lumotlari</p>
           </div>
           {!activeBranchId && (
             <Badge variant="default" className="shrink-0">Aktiv</Badge>
@@ -229,7 +229,7 @@ export default function BranchesPage() {
       {/* Branches grid */}
       {isLoading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+          <Loader2 className="h-8 w-8 animate-spin text-xedu-slate-500 dark:text-xedu-slate-400" />
         </div>
       ) : branches.length === 0 ? (
         <EmptyState
@@ -279,7 +279,7 @@ export default function BranchesPage() {
             <div className="space-y-2">
               <Label htmlFor="code">
                 Qisqa kod
-                <span className="text-muted-foreground text-xs ml-1">(ixtiyoriy, masalan: CHI)</span>
+                <span className="text-xedu-slate-500 dark:text-xedu-slate-400 text-xs ml-1">(ixtiyoriy, masalan: CHI)</span>
               </Label>
               <Input
                 id="code"
@@ -329,7 +329,7 @@ export default function BranchesPage() {
               <div className="flex items-center justify-between rounded-lg border p-3">
                 <div>
                   <p className="text-sm font-medium">Filial holati</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                     O'chirilgan filiallar foydalanuvchilarga ko'rinmaydi
                   </p>
                 </div>
@@ -359,7 +359,7 @@ export default function BranchesPage() {
           <DialogHeader>
             <DialogTitle>Filialni o'chirish</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
             <strong>"{deleteTarget?.name}"</strong> filialni o'chirmoqchimisiz?
             <br />
             Agar filialda xodimlar yoki sinflar bo'lsa, deaktivatsiya qilinadi.
@@ -396,7 +396,7 @@ function BranchCard({ branch, isActive, onSwitch, onEdit, onDelete }: BranchCard
   return (
     <Card
       className={cn(
-        'border-2 transition-all hover:shadow-md',
+        'border-2 transition-all hover:shadow-sm',
         isActive ? 'border-primary bg-primary/5' : 'border-transparent',
         !branch.isActive && 'opacity-60',
       )}
@@ -410,7 +410,7 @@ function BranchCard({ branch, isActive, onSwitch, onEdit, onDelete }: BranchCard
                 branch.isActive ? 'bg-primary/10' : 'bg-muted',
               )}
             >
-              <Building2 className={cn('h-4 w-4', branch.isActive ? 'text-primary' : 'text-muted-foreground')} />
+              <Building2 className={cn('h-4 w-4', branch.isActive ? 'text-primary' : 'text-xedu-slate-500 dark:text-xedu-slate-400')} />
             </div>
             <div className="min-w-0">
               <CardTitle className="text-base truncate">{branch.name}</CardTitle>
@@ -423,7 +423,7 @@ function BranchCard({ branch, isActive, onSwitch, onEdit, onDelete }: BranchCard
             {branch.isActive ? (
               <CheckCircle2 className="h-4 w-4 text-green-500" />
             ) : (
-              <XCircle className="h-4 w-4 text-muted-foreground" />
+              <XCircle className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
             )}
           </div>
         </div>
@@ -431,7 +431,7 @@ function BranchCard({ branch, isActive, onSwitch, onEdit, onDelete }: BranchCard
 
       <CardContent className="space-y-3">
         {/* Meta info */}
-        <div className="space-y-1.5 text-xs text-muted-foreground">
+        <div className="space-y-1.5 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
           {branch.address && (
             <div className="flex items-start gap-1.5">
               <MapPin className="h-3.5 w-3.5 mt-0.5 shrink-0" />
@@ -454,7 +454,7 @@ function BranchCard({ branch, isActive, onSwitch, onEdit, onDelete }: BranchCard
 
         {/* Stats */}
         {(branch as any)._count && (
-          <div className="flex gap-3 text-xs text-muted-foreground border-t pt-2">
+          <div className="flex gap-3 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 border-t pt-2">
             <span className="flex items-center gap-1">
               <Users className="h-3.5 w-3.5" />
               {(branch as any)._count.users} xodim
@@ -488,7 +488,7 @@ function BranchCard({ branch, isActive, onSwitch, onEdit, onDelete }: BranchCard
           <Button
             size="sm"
             variant="ghost"
-            className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+            className="h-8 w-8 p-0 text-xedu-ruby hover:text-xedu-ruby"
             onClick={() => onDelete(branch)}
           >
             <Trash2 className="h-3.5 w-3.5" />

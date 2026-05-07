@@ -156,12 +156,12 @@ export const ALERT_CONFIG = {
 } as const;
 
 export const SOURCE_LABELS: Record<string, { label: string; emoji: string }> = {
-  INSTAGRAM: { label: 'Instagram', emoji: '📸' },
-  TELEGRAM:  { label: 'Telegram',  emoji: '✈️' },
-  FACEBOOK:  { label: 'Facebook',  emoji: '👥' },
+  INSTAGRAM: { label: 'Instagram', emoji: '' },
+  TELEGRAM:  { label: 'Telegram',  emoji: '' },
+  FACEBOOK:  { label: 'Facebook',  emoji: '' },
   WEBSITE:   { label: 'Sayt',      emoji: '🌐' },
   REFERRAL:  { label: 'Tavsiya',   emoji: '🤝' },
   CALL:      { label: "Qo'ng'iroq", emoji: '📞' },
   WALK_IN:   { label: 'Shaxsan',   emoji: '🚶' },
-  OTHER:     { label: 'Boshqa',    emoji: '📋' },
+  OTHER:     { label: 'Boshqa',    emoji: '' },
 };

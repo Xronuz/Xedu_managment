@@ -9,6 +9,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { LogoutDto } from './dto/logout.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { FirstLoginDto } from './dto/first-login.dto';
 import { SwitchBranchDto } from './dto/switch-branch.dto';
 import { Public } from '@/common/decorators/public.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
@@ -105,6 +106,21 @@ export class AuthController {
   @ApiOperation({ summary: 'Yangi parol o\'rnatish' })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
+  }
+
+  @Post('first-login')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({ summary: 'Birinchi kirishda parolni o\'zgartirish' })
+  @ApiResponse({ status: 200, description: 'Parol muvaffaqiyatli yangilandi' })
+  @ApiResponse({ status: 401, description: 'Joriy parol noto\'g\'ri' })
+  async firstLogin(@Body() dto: FirstLoginDto, @CurrentUser() user: JwtPayload) {
+    return this.authService.firstLoginPasswordChange(
+      user.sub,
+      dto.currentPassword,
+      dto.newPassword,
+    );
   }
 
   /**

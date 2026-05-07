@@ -60,7 +60,7 @@ function LangCertRow({
         onChange={e => onChange({ ...cert, expiry: e.target.value })}
         className="w-36 text-sm"
       />
-      <Button variant="ghost" size="icon" onClick={onRemove} className="h-8 w-8 text-red-500">
+      <Button variant="ghost" size="icon" onClick={onRemove} className="h-8 w-8 text-xedu-ruby">
         <Trash2 className="h-3.5 w-3.5" />
       </Button>
     </div>
@@ -165,7 +165,7 @@ export function TariffCalculatorDialog({
                   { key: 'highest', label: 'Oliy toifa', coefficient: 4.20 },
                 ]).map((g: any) => (
                   <SelectItem key={g.key} value={g.key}>
-                    {g.label} <span className="text-muted-foreground ml-1">(×{g.coefficient})</span>
+                    {g.label} <span className="text-xedu-slate-500 dark:text-xedu-slate-400 ml-1">(×{g.coefficient})</span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -188,7 +188,7 @@ export function TariffCalculatorDialog({
                   { key: 'doctoral', label: 'Doktorantura', bonusPct: 20 },
                 ]).map((e: any) => (
                   <SelectItem key={e.key} value={e.key}>
-                    {e.label} {e.bonusPct > 0 && <span className="text-green-600 ml-1">+{e.bonusPct}%</span>}
+                    {e.label} {e.bonusPct > 0 && <span className="text-xedu-primary ml-1">+{e.bonusPct}%</span>}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -209,8 +209,8 @@ export function TariffCalculatorDialog({
               const y = form.workExperienceYears ?? 0;
               const pct = y >= 20 ? 30 : y >= 15 ? 25 : y >= 8 ? 20 : y >= 3 ? 10 : 0;
               return pct > 0
-                ? <p className="text-xs text-green-600">+{pct}% staj ustamasi</p>
-                : <p className="text-xs text-muted-foreground">Ustama yo&apos;q (0–2 yil)</p>;
+                ? <p className="text-xs text-xedu-primary">+{pct}% staj ustamasi</p>
+                : <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Ustama yo&apos;q (0–2 yil)</p>;
             })()}
           </div>
 
@@ -224,7 +224,7 @@ export function TariffCalculatorDialog({
               value={form.weeklyLessonHours ?? 18}
               onChange={e => setForm(f => ({ ...f, weeklyLessonHours: Number(e.target.value) }))}
             />
-            <p className="text-xs text-muted-foreground">Standart: 18 soat/hafta</p>
+            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Standart: 18 soat/hafta</p>
           </div>
 
           {/* ─── Ilmiy daraja ─────────────────── */}
@@ -242,7 +242,7 @@ export function TariffCalculatorDialog({
                   { key: 'doctor', label: 'Fan doktori', bonusPct: 50 },
                 ]).map((d: any) => (
                   <SelectItem key={d.key} value={d.key}>
-                    {d.label} {d.bonusPct > 0 && <span className="text-green-600 ml-1">+{d.bonusPct}%</span>}
+                    {d.label} {d.bonusPct > 0 && <span className="text-xedu-primary ml-1">+{d.bonusPct}%</span>}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -264,7 +264,7 @@ export function TariffCalculatorDialog({
                   { key: 'teacher_of_teachers', label: "O'qituvchilar o'qituvchisi", bonusPct: 20 },
                 ]).map((t: any) => (
                   <SelectItem key={t.key} value={t.key}>
-                    {t.label} {t.bonusPct > 0 && <span className="text-green-600 ml-1">+{t.bonusPct}%</span>}
+                    {t.label} {t.bonusPct > 0 && <span className="text-xedu-primary ml-1">+{t.bonusPct}%</span>}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -285,7 +285,7 @@ export function TariffCalculatorDialog({
             </Button>
           </div>
           {certs.length === 0 && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
               Sertifikat qo&apos;shilmagan. IELTS, CEFR va boshqalar qo&apos;shishingiz mumkin.
             </p>
           )}
@@ -308,7 +308,7 @@ export function TariffCalculatorDialog({
           <div className="flex items-center justify-between">
             <span className="font-semibold text-sm">Hisoblangan oylik maosh</span>
             {loading
-              ? <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+              ? <Loader2 className="h-4 w-4 animate-spin text-xedu-slate-500 dark:text-xedu-slate-400" />
               : (
                 <span className="text-2xl font-bold text-primary">
                   {result ? formatCurrency(result.grossMonthly, 'UZS') : '—'}
@@ -316,7 +316,7 @@ export function TariffCalculatorDialog({
               )}
           </div>
           {result && (
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
               1 dars soati narxi: <strong>{formatCurrency(result.hourlyRate, 'UZS')}</strong>
               <span className="ml-2 text-xs">
                 ({form.weeklyLessonHours ?? 18} soat/hafta × 4.3 hafta)
@@ -338,10 +338,10 @@ export function TariffCalculatorDialog({
                 <div className="mt-2 space-y-1">
                   {result.breakdown.map((item: any, i: number) => (
                     <div key={i} className="flex justify-between text-xs">
-                      <span className="text-muted-foreground">{item.label}</span>
+                      <span className="text-xedu-slate-500 dark:text-xedu-slate-400">{item.label}</span>
                       <span className={i === result.breakdown.length - 1 ? 'font-bold text-foreground' : ''}>
                         {formatCurrency(item.amount, 'UZS')}
-                        {item.percent && <span className="text-green-600 ml-1">(+{item.percent}%)</span>}
+                        {item.percent && <span className="text-xedu-primary ml-1">(+{item.percent}%)</span>}
                       </span>
                     </div>
                   ))}

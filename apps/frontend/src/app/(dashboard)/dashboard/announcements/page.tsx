@@ -42,7 +42,7 @@ export default function AnnouncementsPage() {
   const broadcastMutation = useMutation({
     mutationFn: () => notificationsApi.broadcast({ targetGroup: target, title: title.trim(), body: body.trim() }),
     onSuccess: (data: any) => {
-      toast({ title: "E'lon yuborildi ✓", description: `${data.sent ?? 0} ta foydalanuvchiga yetkazildi` });
+      toast({ title: "E'lon yuborildi ", description: `${data.sent ?? 0} ta foydalanuvchiga yetkazildi` });
       setSentHistory(prev => [{
         title: title.trim(),
         target: TARGET_GROUPS.find(g => g.value === target)?.label ?? target,
@@ -67,7 +67,7 @@ export default function AnnouncementsPage() {
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Bell className="h-6 w-6 text-primary" /> E&apos;lonlar
         </h1>
-        <p className="text-muted-foreground">Maktab xodimlari va ota-onalarga toplu xabar yuborish</p>
+        <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Maktab xodimlari va ota-onalarga toplu xabar yuborish</p>
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
@@ -90,7 +90,7 @@ export default function AnnouncementsPage() {
                   {TARGET_GROUPS.map(g => (
                     <SelectItem key={g.value} value={g.value}>
                       <div className="flex items-center gap-2">
-                        <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                        <Users className="h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400" />
                         {g.label}
                       </div>
                     </SelectItem>
@@ -107,7 +107,7 @@ export default function AnnouncementsPage() {
                 onChange={e => setTitle(e.target.value)}
                 maxLength={100}
               />
-              <p className="text-xs text-muted-foreground text-right">{title.length}/100</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 text-right">{title.length}/100</p>
             </div>
 
             <div className="space-y-1.5">
@@ -120,15 +120,15 @@ export default function AnnouncementsPage() {
                 maxLength={500}
                 className="resize-none"
               />
-              <p className="text-xs text-muted-foreground text-right">{body.length}/500</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 text-right">{body.length}/500</p>
             </div>
 
             {/* Preview */}
             {(title || body) && (
               <div className="rounded-lg border bg-muted/40 p-3 space-y-1">
-                <p className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Ko&apos;rinishi:</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 font-medium uppercase tracking-wide">Ko&apos;rinishi:</p>
                 <p className="text-sm font-semibold">{title || '...'}</p>
-                <p className="text-sm text-muted-foreground">{body || '...'}</p>
+                <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{body || '...'}</p>
                 <Badge variant="secondary" className="text-xs">{targetLabel}</Badge>
               </div>
             )}
@@ -156,7 +156,7 @@ export default function AnnouncementsPage() {
           </CardHeader>
           <CardContent>
             {sentHistory.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-muted-foreground text-sm gap-2">
+              <div className="flex flex-col items-center justify-center py-10 text-xedu-slate-500 dark:text-xedu-slate-400 text-sm gap-2">
                 <Bell className="h-10 w-10 opacity-20" />
                 <p>Hali e&apos;lon yuborilmagan</p>
               </div>
@@ -169,7 +169,7 @@ export default function AnnouncementsPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{item.title}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         {item.target} · {item.count} ta foydalanuvchi · {item.time}
                       </p>
                     </div>

@@ -42,7 +42,7 @@ export default function ProfilePage() {
     mutationFn: (payload: { firstName: string; lastName: string; phone?: string }) =>
       usersApi.update(authUser!.id, payload),
     onSuccess: (updated) => {
-      toast({ title: '✅ Profil yangilandi' });
+      toast({ title: ' Profil yangilandi' });
       updateUser({ firstName: updated.firstName, lastName: updated.lastName });
       queryClient.invalidateQueries({ queryKey: ['profile-me'] });
       setEditMode(false);
@@ -56,7 +56,7 @@ export default function ProfilePage() {
   const pwMutation = useMutation({
     mutationFn: usersApi.changePassword,
     onSuccess: () => {
-      toast({ title: '✅ Parol muvaffaqiyatli o\'zgartirildi' });
+      toast({ title: ' Parol muvaffaqiyatli o\'zgartirildi' });
       setPwOpen(false);
       setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     },
@@ -127,7 +127,7 @@ export default function ProfilePage() {
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Mening profilim</h1>
-        <p className="text-muted-foreground">Shaxsiy ma'lumotlar va xavfsizlik</p>
+        <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Shaxsiy ma'lumotlar va xavfsizlik</p>
       </div>
 
       {/* Profile card */}
@@ -144,12 +144,12 @@ export default function ProfilePage() {
               <h2 className="text-xl font-bold">
                 {p?.firstName} {p?.lastName}
               </h2>
-              <div className={`inline-flex items-center gap-1.5 mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${roleColors[p?.role ?? ''] ?? 'bg-muted text-muted-foreground'}`}>
+              <div className={`inline-flex items-center gap-1.5 mt-1 px-2.5 py-0.5 rounded-full text-xs font-medium ${roleColors[p?.role ?? ''] ?? 'bg-muted text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
                 <Shield className="h-3 w-3" />
                 {getRoleLabel(p?.role ?? '')}
               </div>
               {(p as any)?.createdAt && (
-                <p className="text-xs text-muted-foreground mt-2 flex items-center gap-1">
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-2 flex items-center gap-1">
                   <Calendar className="h-3 w-3" />
                   Qo'shilgan: {formatDate((p as any).createdAt)}
                 </p>
@@ -169,7 +169,7 @@ export default function ProfilePage() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label>Ism <span className="text-destructive">*</span></Label>
+                  <Label>Ism <span className="text-xedu-ruby">*</span></Label>
                   <Input
                     value={editForm.firstName}
                     onChange={e => setEditForm(f => ({ ...f, firstName: e.target.value }))}
@@ -177,7 +177,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Familiya <span className="text-destructive">*</span></Label>
+                  <Label>Familiya <span className="text-xedu-ruby">*</span></Label>
                   <Input
                     value={editForm.lastName}
                     onChange={e => setEditForm(f => ({ ...f, lastName: e.target.value }))}
@@ -242,7 +242,7 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium">Parol</p>
-                <p className="text-xs text-muted-foreground">••••••••••••</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">••••••••••••</p>
               </div>
               <Button variant="outline" size="sm" onClick={() => setPwOpen(true)}>
                 <Key className="mr-1.5 h-3.5 w-3.5" /> Parol o'zgartirish
@@ -251,7 +251,7 @@ export default function ProfilePage() {
           ) : (
             <div className="space-y-4">
               <div className="space-y-1.5">
-                <Label>Joriy parol <span className="text-destructive">*</span></Label>
+                <Label>Joriy parol <span className="text-xedu-ruby">*</span></Label>
                 <div className="relative">
                   <Input
                     type={showCurrent ? 'text' : 'password'}
@@ -259,14 +259,14 @@ export default function ProfilePage() {
                     value={pwForm.currentPassword}
                     onChange={e => { setPwForm(f => ({ ...f, currentPassword: e.target.value })); setPwErrors(er => { const n = { ...er }; delete n.currentPassword; return n; }); }}
                   />
-                  <button type="button" onClick={() => setShowCurrent(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <button type="button" onClick={() => setShowCurrent(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-500 dark:text-xedu-slate-400">
                     {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                {pwErrors.currentPassword && <p className="text-xs text-destructive">{pwErrors.currentPassword}</p>}
+                {pwErrors.currentPassword && <p className="text-xs text-xedu-ruby">{pwErrors.currentPassword}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Yangi parol <span className="text-destructive">*</span></Label>
+                <Label>Yangi parol <span className="text-xedu-ruby">*</span></Label>
                 <div className="relative">
                   <Input
                     type={showNew ? 'text' : 'password'}
@@ -275,21 +275,21 @@ export default function ProfilePage() {
                     value={pwForm.newPassword}
                     onChange={e => { setPwForm(f => ({ ...f, newPassword: e.target.value })); setPwErrors(er => { const n = { ...er }; delete n.newPassword; return n; }); }}
                   />
-                  <button type="button" onClick={() => setShowNew(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+                  <button type="button" onClick={() => setShowNew(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-500 dark:text-xedu-slate-400">
                     {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                {pwErrors.newPassword && <p className="text-xs text-destructive">{pwErrors.newPassword}</p>}
+                {pwErrors.newPassword && <p className="text-xs text-xedu-ruby">{pwErrors.newPassword}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Yangi parolni tasdiqlang <span className="text-destructive">*</span></Label>
+                <Label>Yangi parolni tasdiqlang <span className="text-xedu-ruby">*</span></Label>
                 <Input
                   type="password"
                   placeholder="Takrorlang"
                   value={pwForm.confirmPassword}
                   onChange={e => { setPwForm(f => ({ ...f, confirmPassword: e.target.value })); setPwErrors(er => { const n = { ...er }; delete n.confirmPassword; return n; }); }}
                 />
-                {pwErrors.confirmPassword && <p className="text-xs text-destructive">{pwErrors.confirmPassword}</p>}
+                {pwErrors.confirmPassword && <p className="text-xs text-xedu-ruby">{pwErrors.confirmPassword}</p>}
               </div>
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" size="sm" onClick={() => { setPwOpen(false); setPwErrors({}); }}>
@@ -321,9 +321,9 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-center gap-3 py-2 border-b last:border-0">
-      <span className="text-muted-foreground shrink-0">{icon}</span>
-      <span className="text-sm text-muted-foreground w-28 shrink-0">{label}</span>
-      <span className={`text-sm font-medium ${empty ? 'text-muted-foreground italic' : ''}`}>
+      <span className="text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0">{icon}</span>
+      <span className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 w-28 shrink-0">{label}</span>
+      <span className={`text-sm font-medium ${empty ? 'text-xedu-slate-500 dark:text-xedu-slate-400 italic' : ''}`}>
         {value}
       </span>
     </div>

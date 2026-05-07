@@ -3,12 +3,16 @@
 /**
  * Xedu Premium UI System
  * Shared building blocks for every dashboard page.
- * DNA: Linear + Stripe + Notion — white, clean, emerald accents.
+ * DNA: Linear + Stripe + Notion — white, clean, primary accents.
  */
 
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Search, ChevronLeft, ChevronRight, Inbox } from 'lucide-react';
+import { Skeleton } from './skeleton';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
+} from './dialog';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
 export const DS = {
@@ -78,7 +82,7 @@ export function PCard({ children, className, style, padding = 'md', hoverable, o
       className={cn(
         'rounded-[24px] bg-xedu-bg-elevated dark:bg-xedu-slate-800/50',
         pad,
-        hoverable && 'cursor-pointer transition-all duration-150 hover:-translate-y-[2px] hover:shadow-xl',
+        hoverable && 'cursor-pointer transition-all duration-150 hover:-translate-y-[2px] hover:shadow-md',
         className,
       )}
       style={{ border: '1px solid var(--xedu-border)', boxShadow: DS.shadow, ...style }}
@@ -141,8 +145,8 @@ export function Btn({
     primary:   'bg-xedu-primary text-white hover:bg-xedu-primary-hover active:scale-[0.98] shadow-sm',
     secondary: 'bg-xedu-bg-elevated dark:bg-xedu-slate-800 text-xedu-slate-700 dark:text-xedu-slate-200 border border-xedu-border dark:border-white/[0.08] hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-700 hover:border-xedu-border-hover dark:hover:border-white/[0.12]',
     ghost:     'bg-transparent text-xedu-slate-600 dark:text-xedu-slate-300 hover:bg-xedu-slate-100 dark:hover:bg-xedu-slate-800',
-    danger:    'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:bg-red-100 dark:hover:bg-red-900/30',
-    soft:      'bg-xedu-primary-light dark:bg-emerald-900/30 text-xedu-primary dark:text-emerald-400 hover:bg-xedu-primary-muted dark:hover:bg-emerald-900/50',
+    danger:    'bg-xedu-ruby/10 dark:bg-xedu-ruby/15 text-xedu-ruby dark:text-xedu-ruby border border-xedu-ruby/15 dark:border-xedu-ruby/25 hover:bg-xedu-ruby/15 dark:hover:bg-xedu-ruby/20',
+    soft:      'bg-xedu-primary-light dark:bg-xedu-primary/20 text-xedu-primary dark:text-xedu-primary hover:bg-xedu-primary-muted dark:hover:bg-xedu-primary/30',
   };
   return (
     <button
@@ -161,12 +165,12 @@ export function Btn({
 // ─── StatusBadge ─────────────────────────────────────────────────────────────
 type StatusVariant = 'success' | 'warning' | 'danger' | 'info' | 'neutral' | 'violet';
 const STATUS_CLASSES: Record<StatusVariant, string> = {
-  success: 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
-  warning: 'bg-amber-50  dark:bg-amber-900/30  text-amber-700  dark:text-amber-400',
-  danger:  'bg-red-50    dark:bg-red-900/30    text-red-600    dark:text-red-400',
-  info:    'bg-sky-50    dark:bg-sky-900/30    text-sky-700    dark:text-sky-400',
+  success: 'bg-xedu-primary-light dark:bg-xedu-primary/20 text-xedu-primary dark:text-xedu-primary',
+  warning: 'bg-xedu-amber/10 dark:bg-xedu-amber/15 text-xedu-amber dark:text-xedu-amber',
+  danger:  'bg-xedu-ruby/10 dark:bg-xedu-ruby/15 text-xedu-ruby dark:text-xedu-ruby',
+  info:    'bg-xedu-sky/10 dark:bg-xedu-sky/15 text-xedu-sky dark:text-xedu-sky',
   neutral: 'bg-xedu-slate-100 dark:bg-xedu-slate-700 text-xedu-slate-600 dark:text-xedu-slate-300',
-  violet:  'bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400',
+  violet:  'bg-xedu-violet/10 dark:bg-xedu-violet/15 text-xedu-violet dark:text-xedu-violet',
 };
 interface StatusBadgeProps {
   variant?: StatusVariant;
@@ -222,8 +226,8 @@ export function TR({ children, onClick, className }: { children: React.ReactNode
     <tr
       onClick={onClick}
       className={cn(
-        'border-b border-black/[0.04] dark:border-white/[0.05] transition-colors duration-100',
-        onClick && 'cursor-pointer hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-700/40',
+        'border-b border-black/[0.04] dark:border-white/[0.05] transition-colors duration-[var(--xedu-duration)]',
+        onClick && 'cursor-pointer hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30',
         className,
       )}
     >
@@ -276,8 +280,8 @@ export function EmptyCard({ icon, title, description, action }: EmptyCardProps) 
   return (
     <PCard className="flex flex-col items-center justify-center py-16 text-center gap-3">
       {icon
-        ? <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-1 bg-xedu-primary-light dark:bg-emerald-900/30">
-            <span className="text-xedu-primary dark:text-emerald-400">{icon}</span>
+        ? <div className="h-14 w-14 rounded-2xl flex items-center justify-center mb-1 bg-xedu-primary-light dark:bg-xedu-primary/20">
+            <span className="text-xedu-primary dark:text-xedu-primary">{icon}</span>
           </div>
         : <Inbox className="h-10 w-10 opacity-25 mb-1" />
       }
@@ -374,6 +378,117 @@ export function StatMini({ label, value, color = 'var(--xedu-text)', bg = 'var(-
       <p className="text-[22px] font-black leading-none tracking-tight" style={{ color }}>{value}</p>
       <p className="text-[11px] font-semibold mt-1 uppercase tracking-wide text-xedu-text-muted">{label}</p>
     </div>
+  );
+}
+
+// ─── TableSkeleton ────────────────────────────────────────────────────────────
+export function TableSkeleton({ rows = 6, cols = 5 }: { rows?: number; cols?: number }) {
+  return (
+    <div className="divide-y divide-xedu-slate-50 dark:divide-xedu-slate-800/40">
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex items-center gap-4 px-5 py-3.5">
+          <Skeleton className="h-9 w-9 rounded-full shrink-0" />
+          <div className="flex-1 space-y-1.5 min-w-0">
+            <Skeleton className="h-3.5 w-1/3 max-w-[200px]" />
+            <Skeleton className="h-3 w-1/4 max-w-[140px]" />
+          </div>
+          {Array.from({ length: cols - 2 }).map((_, j) => (
+            <Skeleton key={j} className="h-3.5 w-16 shrink-0" />
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── FormField ────────────────────────────────────────────────────────────────
+/** Consistent form field wrapper with validation feedback */
+interface FormFieldProps {
+  label: string;
+  required?: boolean;
+  helper?: string;
+  error?: string;
+  children: React.ReactNode;
+}
+export function FormField({ label, required, helper, error, children }: FormFieldProps) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-sm font-medium text-xedu-slate-700 dark:text-xedu-slate-300">
+        {label}
+        {required && <span className="text-xedu-ruby ml-0.5">*</span>}
+      </label>
+      {children}
+      {error ? (
+        <p className="text-xs text-xedu-ruby font-medium">{error}</p>
+      ) : helper ? (
+        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{helper}</p>
+      ) : null}
+    </div>
+  );
+}
+
+// ─── TableCard ────────────────────────────────────────────────────────────────
+/** Standardized card wrapper for raw HTML tables */
+export function TableCard({ children, className }: { children: React.ReactNode; className?: string }) {
+  return (
+    <PCard padding="none" className={cn('overflow-hidden', className)}>
+      <div className="overflow-x-auto">
+        <table className="w-full text-[13px]">
+          {children}
+        </table>
+      </div>
+    </PCard>
+  );
+}
+
+// ─── TableEmpty ───────────────────────────────────────────────────────────────
+/** Standardized empty state for tables and lists */
+export function TableEmpty({ icon: Icon, title, description, action }: {
+  icon?: React.ElementType;
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center text-center py-12 px-4">
+      {Icon ? (
+        <div className="h-12 w-12 rounded-2xl flex items-center justify-center mb-3 bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
+          <Icon className="h-6 w-6 text-xedu-slate-400" />
+        </div>
+      ) : null}
+      <p className="text-sm font-semibold text-xedu-slate-700 dark:text-xedu-slate-300">{title}</p>
+      {description && <p className="text-xs mt-1 text-xedu-slate-500 dark:text-xedu-slate-400 max-w-[260px]">{description}</p>}
+      {action && <div className="mt-4">{action}</div>}
+    </div>
+  );
+}
+
+// ─── FormDialog ───────────────────────────────────────────────────────────────
+/** Standardized dialog wrapper for modal forms */
+export function FormDialog({
+  open, onOpenChange, title, description, children, footer,
+  maxWidth = 'md',
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  footer: React.ReactNode;
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl';
+}) {
+  const maxW = { sm: 'max-w-sm', md: 'max-w-md', lg: 'max-w-lg', xl: 'max-w-xl' }[maxWidth];
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className={cn(maxW, 'max-h-[90vh] overflow-y-auto')}>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          {description && <DialogDescription>{description}</DialogDescription>}
+        </DialogHeader>
+        <div className="space-y-4 py-2">{children}</div>
+        <DialogFooter className="gap-2 pt-2">{footer}</DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 

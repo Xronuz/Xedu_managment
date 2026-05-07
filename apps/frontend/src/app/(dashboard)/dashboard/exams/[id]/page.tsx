@@ -96,7 +96,7 @@ function KPI({ label, value, icon: Icon, color, bg }: {
       <CardContent className="p-4 flex items-center gap-3">
         <div className={`p-2.5 rounded-xl ${bg}`}><Icon className={`h-5 w-5 ${color}`} /></div>
         <div>
-          <p className="text-xs text-muted-foreground">{label}</p>
+          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{label}</p>
           <p className="text-xl font-bold">{value}</p>
         </div>
       </CardContent>
@@ -165,7 +165,7 @@ function ScoreEntryTab({ examId, exam, existingGrades }: {
     mutationFn: (results: { studentId: string; score: number; comment?: string }[]) =>
       examsApi.submitBulkResults(examId, results),
     onSuccess: (data: { saved: number }) => {
-      toast({ title: `✅ ${data.saved} ta natija saqlandi` });
+      toast({ title: ` ${data.saved} ta natija saqlandi` });
       queryClient.invalidateQueries({ queryKey: ['exams', examId, 'results'] });
     },
     onError: (err: any) => {
@@ -195,7 +195,7 @@ function ScoreEntryTab({ examId, exam, existingGrades }: {
 
   if (students.length === 0) {
     return (
-      <div className="py-12 text-center text-muted-foreground">
+      <div className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
         <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
         <p>Bu sinfda o'quvchilar topilmadi</p>
       </div>
@@ -207,7 +207,7 @@ function ScoreEntryTab({ examId, exam, existingGrades }: {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
           {filledCount} / {students.length} o'quvchi uchun ball kiritilgan
         </p>
         <Button onClick={handleSave} disabled={submitMutation.isPending}>
@@ -219,14 +219,14 @@ function ScoreEntryTab({ examId, exam, existingGrades }: {
 
       <div className="rounded-lg border overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-muted/50">
+          <thead className="bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
             <tr>
-              <th className="text-left py-2.5 px-4 font-medium text-muted-foreground">#</th>
-              <th className="text-left py-2.5 px-4 font-medium text-muted-foreground">O'quvchi</th>
-              <th className="text-center py-2.5 px-4 font-medium text-muted-foreground w-36">
+              <th className="text-left py-2.5 px-4 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">#</th>
+              <th className="text-left py-2.5 px-4 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">O'quvchi</th>
+              <th className="text-center py-2.5 px-4 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 w-36">
                 Ball (maks: {exam.maxScore})
               </th>
-              <th className="text-left py-2.5 px-4 font-medium text-muted-foreground">Izoh</th>
+              <th className="text-left py-2.5 px-4 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Izoh</th>
             </tr>
           </thead>
           <tbody>
@@ -235,8 +235,8 @@ function ScoreEntryTab({ examId, exam, existingGrades }: {
               const numScore = score !== '' ? Number(score) : null;
               const pct = numScore !== null && exam.maxScore > 0 ? (numScore / exam.maxScore) * 100 : null;
               return (
-                <tr key={s.id} className="border-t hover:bg-muted/20 transition-colors">
-                  <td className="py-2.5 px-4 text-muted-foreground">{i + 1}</td>
+                <tr key={s.id} className="border-t hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
+                  <td className="py-2.5 px-4 text-xedu-slate-500 dark:text-xedu-slate-400">{i + 1}</td>
                   <td className="py-2.5 px-4 font-medium">{s.firstName} {s.lastName}</td>
                   <td className="py-2.5 px-4">
                     <div className="flex items-center gap-2 justify-center">
@@ -341,7 +341,7 @@ function QuestionsTab({ examId }: { examId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{questions.length} ta savol</p>
+        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{questions.length} ta savol</p>
         <Button size="sm" onClick={() => setShowForm(v => !v)}>
           <Plus className="mr-1.5 h-4 w-4" /> Savol qo'shish
         </Button>
@@ -355,7 +355,7 @@ function QuestionsTab({ examId }: { examId: string }) {
               <div>
                 <label className="text-xs font-medium mb-1 block">Savol turi</label>
                 <select
-                  className="w-full h-9 rounded-md border border-input bg-background px-3 text-sm"
+                  className="w-full h-9 rounded-md border border-input bg-white dark:bg-xedu-slate-950 px-3 text-sm"
                   value={newQ.type}
                   onChange={e => setNewQ(p => ({ ...p, type: e.target.value }))}
                 >
@@ -377,7 +377,7 @@ function QuestionsTab({ examId }: { examId: string }) {
             <div>
               <label className="text-xs font-medium mb-1 block">Savol matni</label>
               <textarea
-                className="w-full min-h-[80px] rounded-md border border-input bg-background px-3 py-2 text-sm resize-none"
+                className="w-full min-h-[80px] rounded-md border border-input bg-white dark:bg-xedu-slate-950 px-3 py-2 text-sm resize-none"
                 placeholder="Savol matnini kiriting..."
                 value={newQ.text}
                 onChange={e => setNewQ(p => ({ ...p, text: e.target.value }))}
@@ -390,7 +390,7 @@ function QuestionsTab({ examId }: { examId: string }) {
                 </label>
                 {newQ.options.map((opt, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-muted-foreground w-5">
+                    <span className="text-xs font-bold text-xedu-slate-500 dark:text-xedu-slate-400 w-5">
                       {String.fromCharCode(65 + i)})
                     </span>
                     <Input
@@ -438,7 +438,7 @@ function QuestionsTab({ examId }: { examId: string }) {
 
       {/* Questions list */}
       {questions.length === 0 ? (
-        <div className="text-center py-10 text-muted-foreground">
+        <div className="text-center py-10 text-xedu-slate-500 dark:text-xedu-slate-400">
           <FileQuestion className="h-10 w-10 mx-auto mb-3 opacity-30" />
           <p>Hali savollar qo'shilmagan</p>
           <p className="text-xs mt-1">Yuqoridagi tugma orqali qo'lda qo'shing yoki DocX import qiling</p>
@@ -449,7 +449,7 @@ function QuestionsTab({ examId }: { examId: string }) {
             <Card key={q.id} className="overflow-hidden">
               <CardContent className="p-4">
                 <div className="flex items-start gap-3">
-                  <span className="text-sm font-bold text-muted-foreground min-w-[24px]">{i + 1}.</span>
+                  <span className="text-sm font-bold text-xedu-slate-500 dark:text-xedu-slate-400 min-w-[24px]">{i + 1}.</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <Badge variant="outline" className="text-xs">{QUESTION_TYPE_UZ[q.type] ?? q.type}</Badge>
@@ -459,7 +459,7 @@ function QuestionsTab({ examId }: { examId: string }) {
                     {q.options.length > 0 && (
                       <ul className="mt-2 space-y-1">
                         {q.options.map((o, j) => (
-                          <li key={o.id} className={`text-xs flex items-center gap-1.5 ${o.isCorrect ? 'text-green-600 font-medium' : 'text-muted-foreground'}`}>
+                          <li key={o.id} className={`text-xs flex items-center gap-1.5 ${o.isCorrect ? 'text-green-600 font-medium' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
                             <span className="font-bold">{String.fromCharCode(65 + j)})</span>
                             {o.text}
                             {o.isCorrect && <CheckCircle className="h-3 w-3" />}
@@ -468,12 +468,12 @@ function QuestionsTab({ examId }: { examId: string }) {
                       </ul>
                     )}
                     {q.explanation && (
-                      <p className="text-xs text-muted-foreground mt-1 italic">💡 {q.explanation}</p>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-1 italic">💡 {q.explanation}</p>
                     )}
                   </div>
                   <Button
                     variant="ghost" size="icon"
-                    className="text-destructive hover:text-destructive h-7 w-7 shrink-0"
+                    className="text-xedu-ruby hover:text-xedu-ruby h-7 w-7 shrink-0"
                     onClick={() => deleteMut.mutate(q.id)}
                     disabled={deleteMut.isPending}
                   >
@@ -502,7 +502,7 @@ function DocxImportTab({ examId }: { examId: string }) {
     onSuccess: (data) => {
       setResult({ imported: data.imported });
       queryClient.invalidateQueries({ queryKey: ['online-exam', examId, 'questions'] });
-      toast({ title: `✅ ${data.imported} ta savol import qilindi` });
+      toast({ title: ` ${data.imported} ta savol import qilindi` });
     },
     onError: (e: any) => toast({
       variant: 'destructive',
@@ -527,12 +527,12 @@ function DocxImportTab({ examId }: { examId: string }) {
         <CardContent className="pt-6 pb-6 text-center space-y-4">
           <div className="flex justify-center">
             <div className={`p-4 rounded-full transition-colors ${dragging ? 'bg-primary/20' : 'bg-muted'}`}>
-              <FileUp className="h-8 w-8 text-muted-foreground" />
+              <FileUp className="h-8 w-8 text-xedu-slate-500 dark:text-xedu-slate-400" />
             </div>
           </div>
           <div>
             <p className="font-medium">Word hujjatini yuklang</p>
-            <p className="text-sm text-muted-foreground mt-1">Savollar avtomatik ajratib olinadi (.docx)</p>
+            <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">Savollar avtomatik ajratib olinadi (.docx)</p>
           </div>
           <input
             ref={inputRef}
@@ -564,7 +564,7 @@ function DocxImportTab({ examId }: { examId: string }) {
         <CardHeader className="pb-2">
           <CardTitle className="text-sm">Fayl formati</CardTitle>
         </CardHeader>
-        <CardContent className="text-xs text-muted-foreground space-y-2">
+        <CardContent className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 space-y-2">
           <p className="font-medium text-foreground">Ko'p variantli savol:</p>
           <pre className="bg-muted rounded p-2 text-xs overflow-auto leading-relaxed">{`1. Savol matni?
 A) Birinchi variant
@@ -674,20 +674,20 @@ function StudentExamView({ examId, exam }: {
         </div>
         <div>
           <h2 className="text-xl font-bold">{exam.title}</h2>
-          <p className="text-muted-foreground mt-1">{exam.subject?.name ?? ''}</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">{exam.subject?.name ?? ''}</p>
         </div>
         <div className="flex gap-6 text-sm flex-wrap justify-center">
           {exam.duration && (
-            <div className="flex items-center gap-1.5 text-muted-foreground">
+            <div className="flex items-center gap-1.5 text-xedu-slate-500 dark:text-xedu-slate-400">
               <Clock className="h-4 w-4" /> {exam.duration} daqiqa
             </div>
           )}
-          <div className="flex items-center gap-1.5 text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-xedu-slate-500 dark:text-xedu-slate-400">
             <Trophy className="h-4 w-4" /> Maks: {exam.maxScore} ball
           </div>
         </div>
         <div className="w-full text-sm text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-          ⚠️ Imtihon boshlanganidan so&apos;ng uni to&apos;xtatib bo&apos;lmaydi. Barcha savollarni diqqat bilan o&apos;qing.
+           Imtihon boshlanganidan so&apos;ng uni to&apos;xtatib bo&apos;lmaydi. Barcha savollarni diqqat bilan o&apos;qing.
         </div>
         <Button size="lg" onClick={() => startMutation.mutate()} disabled={startMutation.isPending}>
           {startMutation.isPending
@@ -709,7 +709,7 @@ function StudentExamView({ examId, exam }: {
       <div className="space-y-4">
         {/* Progress header */}
         <div className="flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
             Savol {currentIdx + 1} / {questions.length}
             {' · '}
             <span className="text-foreground font-medium">{answeredCount} ta javob</span>
@@ -742,7 +742,7 @@ function StudentExamView({ examId, exam }: {
               </span>
               <div className="flex-1">
                 <p className="font-medium text-base leading-relaxed whitespace-pre-wrap">{q.text}</p>
-                <p className="text-xs text-muted-foreground mt-1">{q.points} ball</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">{q.points} ball</p>
               </div>
             </div>
 
@@ -757,7 +757,7 @@ function StudentExamView({ examId, exam }: {
                       'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all',
                       currentAnswer.selectedOptionId === opt.id
                         ? 'border-primary bg-primary/10 font-medium'
-                        : 'border-border hover:border-primary/40 hover:bg-muted/50',
+                        : 'border-xedu-slate-200 dark:border-xedu-slate-700 hover:border-primary/40 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-700/30',
                     )}
                   >
                     {opt.text}
@@ -774,7 +774,7 @@ function StudentExamView({ examId, exam }: {
                   onChange={e => handleAnswer(q.id, undefined, e.target.value)}
                   placeholder={q.type === 'essay' ? 'Keng javob yozing...' : 'Qisqa javob...'}
                   rows={q.type === 'essay' ? 6 : 3}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full rounded-lg border border-input bg-white dark:bg-xedu-slate-950 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-xedu-primary/30"
                 />
               </div>
             )}
@@ -804,7 +804,7 @@ function StudentExamView({ examId, exam }: {
                     ? 'bg-primary text-primary-foreground'
                     : answers[qItem.id]
                       ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                      : 'bg-muted text-muted-foreground hover:bg-muted/60',
+                      : 'bg-muted text-xedu-slate-500 dark:text-xedu-slate-400 hover:bg-muted/60',
                 )}
               >
                 {i + 1}
@@ -828,7 +828,7 @@ function StudentExamView({ examId, exam }: {
             >
               {submitMutation.isPending
                 ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Topshirilmoqda...</>
-                : 'Topshirish ✓'}
+                : 'Topshirish '}
             </Button>
           )}
         </div>
@@ -847,30 +847,30 @@ function StudentExamView({ examId, exam }: {
             : <XCircle className="h-16 w-16 text-red-500" />}
         </div>
         <div>
-          <h2 className="text-2xl font-bold">{passed ? 'Tabriklaymiz! 🎉' : "Afsuski..."}</h2>
-          <p className="text-muted-foreground mt-1">{result.message}</p>
+          <h2 className="text-2xl font-bold">{passed ? 'Tabriklaymiz! ' : "Afsuski..."}</h2>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">{result.message}</p>
         </div>
         <div className="flex gap-10 text-center flex-wrap justify-center">
           <div>
             <p className="text-4xl font-bold" style={{ color: scoreColor(result.percentage) }}>
               {result.score}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">/ {result.total} ball</p>
+            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">/ {result.total} ball</p>
           </div>
           <div>
             <p className="text-4xl font-bold" style={{ color: scoreColor(result.percentage) }}>
               {result.percentage}%
             </p>
-            <p className="text-xs text-muted-foreground mt-1">Foiz</p>
+            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">Foiz</p>
           </div>
           <div>
             <p className={cn('text-4xl font-bold', passed ? 'text-green-600' : 'text-red-500')}>
               {passed ? "O'tdi" : "O'tmadi"}
             </p>
-            <p className="text-xs text-muted-foreground mt-1">Natija</p>
+            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">Natija</p>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
           O&apos;qituvchingiz natijalaringizni tekshirgach, to&apos;liq ball ko&apos;rsatiladi.
         </p>
       </div>
@@ -908,11 +908,11 @@ function SessionMonitorTab({ examId }: { examId: string }) {
         <div className="flex gap-3">
           <div className="text-sm">
             <span className="font-bold text-blue-600">{inProgress.length}</span>
-            <span className="text-muted-foreground ml-1">jarayonda</span>
+            <span className="text-xedu-slate-500 dark:text-xedu-slate-400 ml-1">jarayonda</span>
           </div>
           <div className="text-sm">
             <span className="font-bold text-green-600">{submitted.length}</span>
-            <span className="text-muted-foreground ml-1">topshirildi</span>
+            <span className="text-xedu-slate-500 dark:text-xedu-slate-400 ml-1">topshirildi</span>
           </div>
         </div>
         <Button
@@ -924,29 +924,29 @@ function SessionMonitorTab({ examId }: { examId: string }) {
       </div>
 
       {sessions.length === 0 ? (
-        <div className="text-center py-10 text-muted-foreground">
+        <div className="text-center py-10 text-xedu-slate-500 dark:text-xedu-slate-400">
           <MonitorPlay className="h-10 w-10 mx-auto mb-3 opacity-30" />
           <p>Hali birorta o'quvchi imtihon boshlamagan</p>
         </div>
       ) : (
         <div className="rounded-lg border overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-muted/50">
+            <thead className="bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
               <tr>
-                <th className="text-left py-2.5 px-4 font-medium text-muted-foreground">#</th>
-                <th className="text-left py-2.5 px-4 font-medium text-muted-foreground">O'quvchi</th>
-                <th className="text-center py-2.5 px-4 font-medium text-muted-foreground">Holat</th>
-                <th className="text-center py-2.5 px-4 font-medium text-muted-foreground">Ball</th>
-                <th className="text-center py-2.5 px-4 font-medium text-muted-foreground">%</th>
-                <th className="text-left py-2.5 px-4 font-medium text-muted-foreground">Vaqt</th>
+                <th className="text-left py-2.5 px-4 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">#</th>
+                <th className="text-left py-2.5 px-4 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">O'quvchi</th>
+                <th className="text-center py-2.5 px-4 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Holat</th>
+                <th className="text-center py-2.5 px-4 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Ball</th>
+                <th className="text-center py-2.5 px-4 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">%</th>
+                <th className="text-left py-2.5 px-4 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Vaqt</th>
               </tr>
             </thead>
             <tbody>
               {sessions.map((s, i) => {
                 const st = SESSION_STATUS_UZ[s.status] ?? { label: s.status, color: '' };
                 return (
-                  <tr key={s.id} className="border-t hover:bg-muted/20 transition-colors">
-                    <td className="py-3 px-4 text-muted-foreground">{i + 1}</td>
+                  <tr key={s.id} className="border-t hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
+                    <td className="py-3 px-4 text-xedu-slate-500 dark:text-xedu-slate-400">{i + 1}</td>
                     <td className="py-3 px-4 font-medium">
                       {s.student ? `${s.student.firstName} ${s.student.lastName}` : s.studentId}
                     </td>
@@ -959,7 +959,7 @@ function SessionMonitorTab({ examId }: { examId: string }) {
                     <td className="py-3 px-4 text-center">
                       {s.percentage != null ? `${s.percentage}%` : '—'}
                     </td>
-                    <td className="py-3 px-4 text-xs text-muted-foreground">
+                    <td className="py-3 px-4 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                       {s.submittedAt
                         ? new Date(s.submittedAt).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })
                         : new Date(s.createdAt).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
@@ -1031,7 +1031,7 @@ export default function ExamResultsPage() {
               </Badge>
               <Badge variant="outline">{FREQ_UZ[exam.frequency] ?? exam.frequency}</Badge>
             </div>
-            <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
+            <div className="flex items-center gap-4 mt-1 text-sm text-xedu-slate-500 dark:text-xedu-slate-400 flex-wrap">
               <span className="flex items-center gap-1.5">
                 <BookOpen className="h-3.5 w-3.5" /> {exam.subject.name}
               </span>
@@ -1188,7 +1188,7 @@ export default function ExamResultsPage() {
                     <Trophy className="h-5 w-5 text-green-500" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Eng yuqori ball</p>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Eng yuqori ball</p>
                     <p className="text-xl font-bold text-green-600">{stats.max} / {exam.maxScore}</p>
                   </div>
                 </CardContent>
@@ -1199,10 +1199,10 @@ export default function ExamResultsPage() {
                     <TrendingUp className="h-5 w-5 text-blue-500" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">O'rtacha</p>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">O'rtacha</p>
                     <p className="text-xl font-bold text-blue-600">
                       {stats.avg} / {exam.maxScore}
-                      <span className="text-sm font-normal text-muted-foreground ml-1">
+                      <span className="text-sm font-normal text-xedu-slate-500 dark:text-xedu-slate-400 ml-1">
                         ({exam.maxScore > 0 ? Math.round((stats.avg / exam.maxScore) * 100) : 0}%)
                       </span>
                     </p>
@@ -1215,7 +1215,7 @@ export default function ExamResultsPage() {
                     <TrendingDown className="h-5 w-5 text-red-500" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground">Eng past ball</p>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Eng past ball</p>
                     <p className="text-xl font-bold text-red-600">{stats.min} / {exam.maxScore}</p>
                   </div>
                 </CardContent>
@@ -1232,7 +1232,7 @@ export default function ExamResultsPage() {
               </CardHeader>
               <CardContent>
                 {grades.length === 0 ? (
-                  <div className="text-center py-10 text-muted-foreground">
+                  <div className="text-center py-10 text-xedu-slate-500 dark:text-xedu-slate-400">
                     <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" />
                     <p>Hali natijalar kiritilmagan</p>
                     {canEdit && (
@@ -1246,13 +1246,13 @@ export default function ExamResultsPage() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left py-2.5 font-medium text-muted-foreground pr-4">#</th>
-                          <th className="text-left py-2.5 font-medium text-muted-foreground">O&apos;quvchi</th>
-                          <th className="text-center py-2.5 font-medium text-muted-foreground">Ball</th>
-                          <th className="text-center py-2.5 font-medium text-muted-foreground">%</th>
-                          <th className="text-center py-2.5 font-medium text-muted-foreground">Holat</th>
+                          <th className="text-left py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 pr-4">#</th>
+                          <th className="text-left py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">O&apos;quvchi</th>
+                          <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Ball</th>
+                          <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">%</th>
+                          <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Holat</th>
                           {grades.some(g => g.comment) && (
-                            <th className="text-left py-2.5 font-medium text-muted-foreground">Izoh</th>
+                            <th className="text-left py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Izoh</th>
                           )}
                         </tr>
                       </thead>
@@ -1261,8 +1261,8 @@ export default function ExamResultsPage() {
                           const pct = exam.maxScore > 0 ? Math.round((g.score / exam.maxScore) * 100) : 0;
                           const passed = g.score >= exam.maxScore * 0.5;
                           return (
-                            <tr key={g.id} className="border-b last:border-0 hover:bg-muted/30 transition-colors">
-                              <td className="py-3 text-muted-foreground pr-4">{i + 1}</td>
+                            <tr key={g.id} className="border-b last:border-0 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
+                              <td className="py-3 text-xedu-slate-500 dark:text-xedu-slate-400 pr-4">{i + 1}</td>
                               <td className="py-3 font-medium">
                                 {g.student.firstName} {g.student.lastName}
                               </td>
@@ -1270,7 +1270,7 @@ export default function ExamResultsPage() {
                                 <span className="font-bold text-base" style={{ color: scoreColor(pct) }}>
                                   {g.score}
                                 </span>
-                                <span className="text-muted-foreground text-xs">/{exam.maxScore}</span>
+                                <span className="text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">/{exam.maxScore}</span>
                               </td>
                               <td className="py-3 text-center">
                                 <Badge variant={scoreBadgeVariant(pct)} className="text-xs">
@@ -1289,7 +1289,7 @@ export default function ExamResultsPage() {
                                 )}
                               </td>
                               {grades.some(g2 => g2.comment) && (
-                                <td className="py-3 text-muted-foreground text-xs max-w-[200px] truncate">
+                                <td className="py-3 text-xedu-slate-500 dark:text-xedu-slate-400 text-xs max-w-[200px] truncate">
                                   {g.comment ?? '—'}
                                 </td>
                               )}

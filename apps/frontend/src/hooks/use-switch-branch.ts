@@ -104,7 +104,7 @@ export function useSwitchBranch() {
         queryClient.clear();
 
         toast({
-          title: `✅ Filial almashtirildi: ${branchMeta?.name ?? branchId}`,
+          title: `Filial almashtirildi: ${branchMeta?.name ?? branchId}`,
           description: 'Ma\'lumotlar yangilanmoqda...',
         });
 

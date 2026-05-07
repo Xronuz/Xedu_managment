@@ -104,7 +104,7 @@ function FeeFormDialog({
           amount:      values.amount,
           frequency:   values.frequency,
         });
-        toast({ title: '✅ To\'lov tartibi yangilandi' });
+        toast({ title: ' To\'lov tartibi yangilandi' });
       } else {
         await feeStructuresApi.create({
           name:         values.name,
@@ -115,7 +115,7 @@ function FeeFormDialog({
           gradeLevel:   values.gradeLevel || undefined,
           academicYear: values.academicYear,
         });
-        toast({ title: '✅ To\'lov tartibi qo\'shildi' });
+        toast({ title: ' To\'lov tartibi qo\'shildi' });
       }
       queryClient.invalidateQueries({ queryKey: ['fee-structures'] });
       onClose();
@@ -136,9 +136,9 @@ function FeeFormDialog({
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-1">
           {/* Name */}
           <div className="space-y-1.5">
-            <Label>Nomi <span className="text-destructive">*</span></Label>
+            <Label>Nomi <span className="text-xedu-ruby">*</span></Label>
             <Input placeholder="Oylik ta'lim to'lovi" {...register('name')} />
-            {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+            {errors.name && <p className="text-xs text-xedu-ruby">{errors.name.message}</p>}
           </div>
 
           {/* Description */}
@@ -150,9 +150,9 @@ function FeeFormDialog({
           {/* Amount + Currency */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Miqdor <span className="text-destructive">*</span></Label>
+              <Label>Miqdor <span className="text-xedu-ruby">*</span></Label>
               <Input type="number" min={0} placeholder="500000" {...register('amount')} />
-              {errors.amount && <p className="text-xs text-destructive">{errors.amount.message}</p>}
+              {errors.amount && <p className="text-xs text-xedu-ruby">{errors.amount.message}</p>}
             </div>
             <div className="space-y-1.5">
               <Label>Valyuta</Label>
@@ -184,7 +184,7 @@ function FeeFormDialog({
           {!editItem && (
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>O'quv yili <span className="text-destructive">*</span></Label>
+                <Label>O'quv yili <span className="text-xedu-ruby">*</span></Label>
                 <Controller name="academicYear" control={control} render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
@@ -193,7 +193,7 @@ function FeeFormDialog({
                     </SelectContent>
                   </Select>
                 )} />
-                {errors.academicYear && <p className="text-xs text-destructive">{errors.academicYear.message}</p>}
+                {errors.academicYear && <p className="text-xs text-xedu-ruby">{errors.academicYear.message}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Sinf darajasi</Label>
@@ -267,7 +267,7 @@ export default function FeeStructuresPage() {
   const generateMutation = useMutation({
     mutationFn: (id: string) => feeStructuresApi.generatePayments(id),
     onSuccess: (res) => {
-      toast({ title: `✅ ${res.created} ta to'lov yaratildi` });
+      toast({ title: ` ${res.created} ta to'lov yaratildi` });
       setConfirmGenerate(null);
     },
     onError: (err: any) => {
@@ -289,9 +289,9 @@ export default function FeeStructuresPage() {
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Banknote className="h-6 w-6 text-emerald-500" /> To'lov Tartiblari
+            <Banknote className="h-6 w-6 text-xedu-primary" /> To'lov Tartiblari
           </h1>
-          <p className="text-muted-foreground">To'lov tuzilmalari va avtomatik to'lov yaratish</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">To'lov tuzilmalari va avtomatik to'lov yaratish</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1.5">
@@ -316,7 +316,7 @@ export default function FeeStructuresPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>Faol tartiblar</CardDescription>
-            <CardTitle className="text-2xl text-emerald-600">{activeFees.length}</CardTitle>
+            <CardTitle className="text-2xl text-xedu-primary">{activeFees.length}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -329,7 +329,7 @@ export default function FeeStructuresPage() {
 
       {/* Year filter */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="text-sm text-muted-foreground">O'quv yili:</span>
+        <span className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">O'quv yili:</span>
         {ACADEMIC_YEARS.map(y => (
           <button
             key={y}
@@ -337,7 +337,7 @@ export default function FeeStructuresPage() {
             className={`px-3 py-1 rounded-full text-sm font-medium transition-colors border ${
               yearFilter === y
                 ? 'bg-primary text-primary-foreground border-primary'
-                : 'border-border text-muted-foreground hover:border-primary/60'
+                : 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 dark:text-xedu-slate-400 hover:border-primary/60'
             }`}
           >
             {y}
@@ -354,7 +354,7 @@ export default function FeeStructuresPage() {
         <Card>
           <CardContent className="py-16 text-center">
             <Banknote className="h-12 w-12 mx-auto mb-3 opacity-20" />
-            <p className="text-muted-foreground">Bu o'quv yili uchun to'lov tartiblari yo'q</p>
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Bu o'quv yili uchun to'lov tartiblari yo'q</p>
             {canManage && (
               <Button className="mt-4" onClick={() => { setEditItem(null); setFormOpen(true); }}>
                 <Plus className="mr-2 h-4 w-4" /> Tartib qo'shish
@@ -370,8 +370,8 @@ export default function FeeStructuresPage() {
               <Card key={fee.id} className={`transition-opacity ${fee.isActive ? '' : 'opacity-60'}`}>
                 <CardContent className="flex items-center gap-4 p-4">
                   {/* Icon */}
-                  <div className={`p-2.5 rounded-lg shrink-0 ${fee.isActive ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-muted'}`}>
-                    <Banknote className={`h-5 w-5 ${fee.isActive ? 'text-emerald-600' : 'text-muted-foreground'}`} />
+                  <div className={`p-2.5 rounded-lg shrink-0 ${fee.isActive ? 'bg-xedu-primary-light dark:bg-xedu-primary/30' : 'bg-muted'}`}>
+                    <Banknote className={`h-5 w-5 ${fee.isActive ? 'text-xedu-primary' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`} />
                   </div>
 
                   {/* Info */}
@@ -383,18 +383,18 @@ export default function FeeStructuresPage() {
                         <Badge variant="secondary" className="text-xs">{fee.gradeLevel}-sinf</Badge>
                       )}
                       {!fee.isActive && (
-                        <Badge variant="outline" className="text-xs text-muted-foreground">Nofaol</Badge>
+                        <Badge variant="outline" className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Nofaol</Badge>
                       )}
                     </div>
                     {fee.description && (
-                      <p className="text-sm text-muted-foreground mt-0.5 truncate">{fee.description}</p>
+                      <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5 truncate">{fee.description}</p>
                     )}
-                    <p className="text-sm text-muted-foreground mt-0.5">{fee.academicYear}</p>
+                    <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">{fee.academicYear}</p>
                   </div>
 
                   {/* Amount */}
                   <div className="text-right shrink-0">
-                    <p className="text-lg font-bold text-emerald-600">{formatAmount(fee.amount, fee.currency)}</p>
+                    <p className="text-lg font-bold text-xedu-primary">{formatAmount(fee.amount, fee.currency)}</p>
                   </div>
 
                   {/* Actions */}
@@ -402,7 +402,7 @@ export default function FeeStructuresPage() {
                     <div className="flex items-center gap-1 shrink-0">
                       {/* Generate payments */}
                       <Button
-                        variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30"
+                        variant="ghost" size="icon" className="h-8 w-8 text-blue-500 hover:text-xedu-sky hover:bg-xedu-sky/5 dark:hover:bg-blue-950/30"
                         title="To'lovlarni yaratish"
                         onClick={() => setConfirmGenerate(fee)}
                       >
@@ -410,13 +410,13 @@ export default function FeeStructuresPage() {
                       </Button>
                       {/* Toggle active */}
                       <Button
-                        variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        variant="ghost" size="icon" className="h-8 w-8 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground"
                         title={fee.isActive ? 'Nofaol qilish' : 'Faollashtirish'}
                         onClick={() => toggleMutation.mutate(fee)}
                         disabled={toggleMutation.isPending}
                       >
                         {fee.isActive
-                          ? <ToggleRight className="h-4 w-4 text-emerald-500" />
+                          ? <ToggleRight className="h-4 w-4 text-xedu-primary" />
                           : <ToggleLeft className="h-4 w-4" />}
                       </Button>
                       {/* Edit */}
@@ -428,7 +428,7 @@ export default function FeeStructuresPage() {
                       </Button>
                       {/* Delete */}
                       <Button
-                        variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        variant="ghost" size="icon" className="h-8 w-8 text-xedu-ruby hover:text-xedu-ruby hover:bg-xedu-ruby/10"
                         onClick={() => setConfirmDelete(fee)}
                       >
                         <Trash2 className="h-4 w-4" />

@@ -116,14 +116,14 @@ function WeeklyGrid({
         {/* Header row */}
         <div className="grid grid-cols-7 gap-1 mb-1">
           {/* Time column header */}
-          <div className="flex items-center justify-center text-xs font-medium text-muted-foreground py-2">
+          <div className="flex items-center justify-center text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 py-2">
             Soat
           </div>
           {DAYS.map(({ key, label, short }) => (
             <div
               key={key}
               className={`text-center py-2 rounded-lg text-sm font-semibold ${
-                key === todayKey ? 'bg-primary text-primary-foreground' : 'bg-muted/50 text-muted-foreground'
+                key === todayKey ? 'bg-primary text-primary-foreground' : 'bg-xedu-slate-50 dark:bg-xedu-slate-800/60 text-xedu-slate-500 dark:text-xedu-slate-400'
               }`}
             >
               <span className="hidden sm:block">{label}</span>
@@ -137,8 +137,8 @@ function WeeklyGrid({
           <div key={slot} className="grid grid-cols-7 gap-1 mb-1">
             {/* Time label */}
             <div className="flex flex-col items-center justify-center py-2 px-1">
-              <span className="text-xs font-bold text-muted-foreground">{slot}</span>
-              <span className="text-[10px] text-muted-foreground">{SLOT_TIMES[slot].start}</span>
+              <span className="text-xs font-bold text-xedu-slate-500 dark:text-xedu-slate-400">{slot}</span>
+              <span className="text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400">{SLOT_TIMES[slot].start}</span>
             </div>
 
             {/* Day cells */}
@@ -152,12 +152,12 @@ function WeeklyGrid({
                     key={day}
                     onClick={() => canManage && onAdd(day, slot)}
                     className={`min-h-[72px] rounded-lg border-2 border-dashed flex items-center justify-center cursor-pointer transition-colors group
-                      ${isToday ? 'border-primary/20 bg-primary/5' : 'border-muted hover:border-primary/30 hover:bg-muted/30'}
+                      ${isToday ? 'border-primary/20 bg-primary/5' : 'border-muted hover:border-primary/30 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30'}
                       ${canManage ? 'cursor-pointer' : 'cursor-default'}
                     `}
                   >
                     {canManage && (
-                      <Plus className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <Plus className="h-3 w-3 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                     )}
                   </div>
                 );
@@ -185,7 +185,7 @@ function WeeklyGrid({
                     // Cross-branch slotlar: kulrang + qorishtirilgan (greyed-out)
                     const isCross = cell.isCrossBranch === true;
                     const colorCls = isCross
-                      ? 'bg-muted/40 border-muted-foreground/20 text-muted-foreground opacity-60'
+                      ? 'bg-muted/40 border-muted-foreground/20 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-60'
                       : SUBJECT_COLORS[cIdx];
 
                     return (
@@ -193,12 +193,12 @@ function WeeklyGrid({
                         key={cell.id}
                         title={isCross ? `Boshqa filial: ${cell.branch?.name ?? ''}` : undefined}
                         className={`relative rounded-lg border p-2 text-xs group transition-shadow
-                          ${isCross ? 'cursor-not-allowed' : 'hover:shadow-md'}
+                          ${isCross ? 'cursor-not-allowed' : 'hover:shadow-sm'}
                           ${colorCls}
                           ${hasConflict && !isCross ? 'ring-1 ring-red-400 dark:ring-red-600' : ''}`}
                       >
                         {isCross && (
-                          <span className="absolute top-0.5 right-0.5 rounded text-[8px] px-1 bg-muted-foreground/20 text-muted-foreground">
+                          <span className="absolute top-0.5 right-0.5 rounded text-[8px] px-1 bg-muted-foreground/20 text-xedu-slate-500 dark:text-xedu-slate-400">
                             {cell.branch?.code ?? 'boshqa'}
                           </span>
                         )}
@@ -302,7 +302,7 @@ function ListView({
 
       {slots.length === 0 ? (
         <Card>
-          <CardContent className="py-12 text-center text-muted-foreground">
+          <CardContent className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
             <Calendar className="mx-auto mb-3 h-10 w-10 opacity-40" />
             <p>Bu kun uchun darslar yo'q</p>
             {canManage && <p className="text-sm mt-1">Yuqoridagi "Dars qo'shish" tugmasini bosing</p>}
@@ -326,30 +326,30 @@ function ListView({
                   <div className="flex items-center gap-2">
                     <p className="font-semibold">{slot.subject?.name}</p>
                     {isCross && (
-                      <Badge variant="outline" className="text-[10px] h-4 px-1 border-muted-foreground/40 text-muted-foreground">
+                      <Badge variant="outline" className="text-[10px] h-4 px-1 border-muted-foreground/40 text-xedu-slate-500 dark:text-xedu-slate-400">
                         {slot.branch?.name ?? 'boshqa filial'}
                       </Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                     {slot.class?.name}
                     {slot.subject?.teacher && <> · {slot.subject.teacher.firstName} {slot.subject.teacher.lastName}</>}
                   </p>
                 </div>
                 <div className="text-right text-sm flex items-center gap-3">
                   <div>
-                    <div className="flex items-center gap-1 text-muted-foreground">
+                    <div className="flex items-center gap-1 text-xedu-slate-500 dark:text-xedu-slate-400">
                       <Clock className="h-3 w-3" />
                       {slot.startTime} – {slot.endTime}
                     </div>
                     {(slot.roomNumber || slot.room?.name) && (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         Xona: {slot.room?.name ?? slot.roomNumber}
                       </p>
                     )}
                   </div>
                   {canManage && !isCross && (
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-destructive" onClick={() => onDelete(slot.id)}>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby" onClick={() => onDelete(slot.id)}>
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   )}
@@ -409,9 +409,9 @@ function StudentScheduleView() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">Dars jadvali</h1>
-          <p className="text-muted-foreground flex items-center gap-2">
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-2">
             Haftalik dars jadvali
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground bg-muted border border-border rounded-full px-2 py-0.5">
+            <span className="inline-flex items-center gap-1 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 bg-muted border border-xedu-slate-200 dark:border-xedu-slate-700 rounded-full px-2 py-0.5">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
               Faqat ko&apos;rish
             </span>
@@ -437,7 +437,7 @@ function StudentScheduleView() {
         </div>
       ) : schedule.length === 0 ? (
         <Card>
-          <CardContent className="py-16 text-center text-muted-foreground">
+          <CardContent className="py-16 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
             <Calendar className="h-10 w-10 mx-auto mb-3 opacity-30" />
             <p>Bu sinf uchun dars jadvali tuzilmagan</p>
           </CardContent>
@@ -468,8 +468,8 @@ function StudentScheduleView() {
                       const [eh, em] = (slot.endTime ?? SLOT_TIMES[slot.timeSlot]?.end ?? '0:0').split(':').map(Number);
                       const isNow = isToday && nowMins >= sh * 60 + sm && nowMins < eh * 60 + em;
                       return (
-                        <div key={slot.id} className={`flex items-center gap-4 px-4 py-3 transition-colors ${isNow ? 'bg-primary/5' : 'hover:bg-muted/30'}`}>
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
+                        <div key={slot.id} className={`flex items-center gap-4 px-4 py-3 transition-colors ${isNow ? 'bg-primary/5' : 'hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30'}`}>
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-bold text-xedu-slate-500 dark:text-xedu-slate-400">
                             {slot.timeSlot}
                           </div>
                           <div className={`flex-1 rounded-lg border px-3 py-2 text-sm ${colorClass}`}>
@@ -481,7 +481,7 @@ function StudentScheduleView() {
                               {slot.roomNumber && ` · ${slot.roomNumber}-xona`}
                             </p>
                           </div>
-                          <span className="text-xs text-muted-foreground font-mono shrink-0">
+                          <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 font-mono shrink-0">
                             {slot.startTime ?? SLOT_TIMES[slot.timeSlot]?.start ?? ''}–
                             {slot.endTime ?? SLOT_TIMES[slot.timeSlot]?.end ?? ''}
                           </span>
@@ -550,7 +550,7 @@ export default function SchedulePage() {
   const createMutation = useMutation({
     mutationFn: scheduleApi.create,
     onSuccess: () => {
-      toast({ title: '✅ Dars jadvali qo\'shildi' });
+      toast({ title: 'Dars jadvali qo\'shildi' });
       queryClient.invalidateQueries({ queryKey: ['schedule'] });
       setOpen(false);
       setForm(EMPTY);
@@ -627,9 +627,9 @@ export default function SchedulePage() {
   return (
     <div className="space-y-6">
       {crossBranchCount > 0 && (
-        <div className="flex items-center gap-3 rounded-lg border border-muted bg-muted/30 px-4 py-2.5">
+        <div className="flex items-center gap-3 rounded-lg border border-muted bg-xedu-slate-50 dark:bg-xedu-slate-800/60 px-4 py-2.5">
           <div className="h-3 w-3 rounded-sm bg-muted-foreground/30 border border-muted-foreground/30 shrink-0" />
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
             <span className="font-medium">{crossBranchCount} ta dars</span> boshqa filiallardan ko&apos;rsatilmoqda
             — kulrang rangda, o&apos;qituvchi bandligi uchun.
           </p>
@@ -651,7 +651,7 @@ export default function SchedulePage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Dars jadvali</h1>
-          <p className="text-muted-foreground">
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">
             Haftalik dars jadvali · {totalSlots - crossBranchCount} ta slot
             {crossBranchCount > 0 && ` (+${crossBranchCount} boshqa filial)`}
           </p>
@@ -732,41 +732,41 @@ export default function SchedulePage() {
           <div className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Sinf <span className="text-destructive">*</span></Label>
+                <Label>Sinf <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.classId} onValueChange={sel('classId')}>
                   <SelectTrigger><SelectValue placeholder="Sinf..." /></SelectTrigger>
                   <SelectContent>{(classes as any[]).map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
-                {errors.classId && <p className="text-xs text-destructive">{errors.classId}</p>}
+                {errors.classId && <p className="text-xs text-xedu-ruby">{errors.classId}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Fan <span className="text-destructive">*</span></Label>
+                <Label>Fan <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.subjectId} onValueChange={sel('subjectId')}>
                   <SelectTrigger><SelectValue placeholder="Fan..." /></SelectTrigger>
                   <SelectContent>{(subjects as any[]).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                 </Select>
-                {errors.subjectId && <p className="text-xs text-destructive">{errors.subjectId}</p>}
+                {errors.subjectId && <p className="text-xs text-xedu-ruby">{errors.subjectId}</p>}
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>O'qituvchi <span className="text-destructive">*</span></Label>
+              <Label>O'qituvchi <span className="text-xedu-ruby">*</span></Label>
               <Select value={form.teacherId} onValueChange={sel('teacherId')}>
                 <SelectTrigger><SelectValue placeholder="O'qituvchi..." /></SelectTrigger>
                 <SelectContent>{teachers.map((t: any) => <SelectItem key={t.id} value={t.id}>{t.firstName} {t.lastName}</SelectItem>)}</SelectContent>
               </Select>
-              {errors.teacherId && <p className="text-xs text-destructive">{errors.teacherId}</p>}
+              {errors.teacherId && <p className="text-xs text-xedu-ruby">{errors.teacherId}</p>}
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Kun <span className="text-destructive">*</span></Label>
+                <Label>Kun <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.dayOfWeek} onValueChange={sel('dayOfWeek')}>
                   <SelectTrigger><SelectValue placeholder="Kun..." /></SelectTrigger>
                   <SelectContent>{DAYS.map(d => <SelectItem key={d.key} value={d.key}>{d.label}</SelectItem>)}</SelectContent>
                 </Select>
-                {errors.dayOfWeek && <p className="text-xs text-destructive">{errors.dayOfWeek}</p>}
+                {errors.dayOfWeek && <p className="text-xs text-xedu-ruby">{errors.dayOfWeek}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Dars raqami <span className="text-destructive">*</span></Label>
+                <Label>Dars raqami <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.timeSlot} onValueChange={(v) => {
                   const times = SLOT_TIMES[Number(v)];
                   setForm(f => ({ ...f, timeSlot: v, startTime: times?.start ?? f.startTime, endTime: times?.end ?? f.endTime }));
@@ -775,7 +775,7 @@ export default function SchedulePage() {
                   <SelectTrigger><SelectValue placeholder="1-7..." /></SelectTrigger>
                   <SelectContent>{[1,2,3,4,5,6,7].map(n => <SelectItem key={n} value={String(n)}>{n}-dars ({SLOT_TIMES[n]?.start})</SelectItem>)}</SelectContent>
                 </Select>
-                {errors.timeSlot && <p className="text-xs text-destructive">{errors.timeSlot}</p>}
+                {errors.timeSlot && <p className="text-xs text-xedu-ruby">{errors.timeSlot}</p>}
               </div>
             </div>
             <div className="grid grid-cols-3 gap-3">

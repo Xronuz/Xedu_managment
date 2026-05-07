@@ -69,7 +69,7 @@ export default function SchoolsPage() {
             <Building2 className="h-6 w-6 text-primary" />
             Maktablar boshqaruvi
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">
             Platformdagi barcha maktablar — jami: <span className="font-medium">{meta?.total ?? 0}</span> ta
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function SchoolsPage() {
       {/* Search */}
       <form onSubmit={handleSearch} className="flex gap-2">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
           <Input
             placeholder="Maktab nomi yoki slug bo'yicha qidirish..."
             className="pl-9"
@@ -112,9 +112,9 @@ export default function SchoolsPage() {
       ) : error ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <AlertTriangle className="mx-auto mb-3 h-12 w-12 text-destructive/40" />
-            <p className="text-muted-foreground">Ma\'lumotlarni yuklashda xatolik yuz berdi</p>
-            <p className="text-sm text-destructive mt-1">{(error as any)?.response?.data?.message ?? (error as Error)?.message}</p>
+            <AlertTriangle className="mx-auto mb-3 h-12 w-12 text-xedu-ruby/40" />
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Ma\'lumotlarni yuklashda xatolik yuz berdi</p>
+            <p className="text-sm text-xedu-ruby mt-1">{(error as any)?.response?.data?.message ?? (error as Error)?.message}</p>
             <Button
               variant="outline"
               className="mt-4"
@@ -127,8 +127,8 @@ export default function SchoolsPage() {
       ) : schools.length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <Building2 className="mx-auto mb-3 h-12 w-12 text-muted-foreground/40" />
-            <p className="text-muted-foreground">
+            <Building2 className="mx-auto mb-3 h-12 w-12 text-xedu-slate-500 dark:text-xedu-slate-400/40" />
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400">
               {search ? `"${search}" bo'yicha maktab topilmadi` : 'Hali maktab yo\'q'}
             </p>
             <Button asChild className="mt-4">
@@ -167,7 +167,7 @@ export default function SchoolsPage() {
                         {tier.label}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
+                    <div className="flex items-center gap-4 mt-1 text-sm text-xedu-slate-500 dark:text-xedu-slate-400 flex-wrap">
                       <span className="flex items-center gap-1">
                         <Globe className="h-3 w-3" />
                         {school.slug}
@@ -207,7 +207,7 @@ export default function SchoolsPage() {
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => toggleStatus(school)}
-                          className={school.isActive ? 'text-destructive' : 'text-green-600'}
+                          className={school.isActive ? 'text-xedu-ruby' : 'text-green-600'}
                         >
                           {school.isActive ? (
                             <>
@@ -242,7 +242,7 @@ export default function SchoolsPage() {
           >
             ← Oldingi
           </Button>
-          <span className="text-sm text-muted-foreground px-2">
+          <span className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 px-2">
             {page} / {meta.totalPages} sahifa
           </span>
           <Button

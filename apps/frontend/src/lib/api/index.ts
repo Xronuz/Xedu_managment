@@ -17,3 +17,4 @@ export { payrollApi } from './payroll';
 export { superAdminApi } from './super-admin';
 export { parentApi } from './parent';
 export { learningCenterApi } from './learning-center';
+export { invitationsApi } from './invitations';

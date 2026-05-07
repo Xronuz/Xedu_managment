@@ -38,7 +38,7 @@ export default function SubjectsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => subjectsApi.remove(id),
     onSuccess: () => {
-      toast({ title: "✅ Fan o'chirildi" });
+      toast({ title: " Fan o'chirildi" });
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
     },
     onError: (err: any) => {
@@ -76,7 +76,7 @@ export default function SubjectsPage() {
         classIds: form.classIds,
         teacherId: form.teacherId,
       });
-      toast({ title: `✅ Fan ${form.classIds.length > 1 ? `${form.classIds.length} sinfga` : ''} qo'shildi` });
+      toast({ title: ` Fan ${form.classIds.length > 1 ? `${form.classIds.length} sinfga` : ''} qo'shildi` });
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
       setOpen(false);
       setForm(EMPTY);
@@ -93,7 +93,7 @@ export default function SubjectsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2"><BookOpen className="h-6 w-6 text-primary" /> Fanlar</h1>
-          <p className="text-muted-foreground">Maktab fanlarini boshqarish</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Maktab fanlarini boshqarish</p>
         </div>
         {canManage && (
           <Button onClick={() => { setOpen(true); setForm(EMPTY); setErrors({}); }}>
@@ -112,14 +112,14 @@ export default function SubjectsPage() {
         </div>
       ) : (subjects as any[]).length === 0 ? (
         <Card><CardContent className="p-12 text-center">
-          <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-40" />
-          <p className="text-muted-foreground">Hali fanlar qo'shilmagan</p>
-          {canManage && <p className="text-sm mt-1 text-muted-foreground">Yuqoridagi "Yangi fan" tugmasini bosing</p>}
+          <BookOpen className="h-12 w-12 text-xedu-slate-500 dark:text-xedu-slate-400 mx-auto mb-3 opacity-40" />
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Hali fanlar qo'shilmagan</p>
+          {canManage && <p className="text-sm mt-1 text-xedu-slate-500 dark:text-xedu-slate-400">Yuqoridagi "Yangi fan" tugmasini bosing</p>}
         </CardContent></Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {(subjects as any[]).map((subject: any) => (
-            <Card key={subject.id} className="hover:shadow-md transition-shadow">
+            <Card key={subject.id} className="hover:shadow-sm transition-shadow">
               <CardContent className="p-4 space-y-3">
                 <div className="flex items-start justify-between">
                   <h3 className="font-semibold text-base">{subject.name}</h3>
@@ -128,7 +128,7 @@ export default function SubjectsPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                        className="h-8 w-8 text-xedu-ruby hover:text-xedu-ruby hover:bg-xedu-ruby/10"
                         disabled={deleteMutation.isPending}
                         onClick={async () => {
                           if (await ask({ title: `"${subject.name}" fanini o'chirishni tasdiqlaysizmi?`, variant: 'destructive', confirmText: "O'chirish" })) {
@@ -148,7 +148,7 @@ export default function SubjectsPage() {
                   </Badge>
                 )}
                 {subject.teacher && (
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2 text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                     <Users className="h-3.5 w-3.5" />
                     {subject.teacher.firstName} {subject.teacher.lastName}
                   </div>
@@ -168,20 +168,20 @@ export default function SubjectsPage() {
           <div className="space-y-4 py-2">
             {/* Fan nomi */}
             <div className="space-y-1.5">
-              <Label>Fan nomi <span className="text-destructive">*</span></Label>
+              <Label>Fan nomi <span className="text-xedu-ruby">*</span></Label>
               <Input
                 placeholder="Masalan: Matematika"
                 value={form.name}
                 onChange={e => { setForm(f => ({ ...f, name: e.target.value })); setErrors(er => { const n = { ...er }; delete n.name; return n; }); }}
               />
-              {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+              {errors.name && <p className="text-xs text-xedu-ruby">{errors.name}</p>}
             </div>
 
             {/* Sinflar - checkbox list */}
             <div className="space-y-1.5">
-              <Label>Sinflar <span className="text-destructive">*</span></Label>
+              <Label>Sinflar <span className="text-xedu-ruby">*</span></Label>
               {(classes as any[]).length === 0 ? (
-                <p className="text-xs text-muted-foreground italic">Sinflar yuklanmoqda...</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 italic">Sinflar yuklanmoqda...</p>
               ) : (
                 <div className="max-h-40 overflow-y-auto rounded-lg border p-2 space-y-1">
                   {(classes as any[]).map((c: any) => (
@@ -197,14 +197,14 @@ export default function SubjectsPage() {
                 </div>
               )}
               {form.classIds.length > 0 && (
-                <p className="text-xs text-muted-foreground">{form.classIds.length} ta sinf tanlandi</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{form.classIds.length} ta sinf tanlandi</p>
               )}
-              {errors.classIds && <p className="text-xs text-destructive">{errors.classIds}</p>}
+              {errors.classIds && <p className="text-xs text-xedu-ruby">{errors.classIds}</p>}
             </div>
 
             {/* O'qituvchi */}
             <div className="space-y-1.5">
-              <Label>O'qituvchi <span className="text-destructive">*</span></Label>
+              <Label>O'qituvchi <span className="text-xedu-ruby">*</span></Label>
               <Select value={form.teacherId} onValueChange={v => { setForm(f => ({ ...f, teacherId: v })); setErrors(e => { const n = { ...e }; delete n.teacherId; return n; }); }}>
                 <SelectTrigger><SelectValue placeholder="O'qituvchi tanlang..." /></SelectTrigger>
                 <SelectContent>
@@ -213,7 +213,7 @@ export default function SubjectsPage() {
                   ))}
                 </SelectContent>
               </Select>
-              {errors.teacherId && <p className="text-xs text-destructive">{errors.teacherId}</p>}
+              {errors.teacherId && <p className="text-xs text-xedu-ruby">{errors.teacherId}</p>}
             </div>
           </div>
           <DialogFooter className="gap-2">

@@ -52,18 +52,18 @@ import { useSocket } from '@/hooks/use-socket';
 // ─── Config maps ────────────────────────────────────────────────────────────
 
 const attendanceStatusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
-  present:  { label: 'Keldi',    color: 'border-green-500 text-green-600',  icon: CheckCircle2 },
-  absent:   { label: 'Kelmadi', color: 'border-red-500 text-red-600',     icon: XCircle },
-  late:     { label: 'Kechikdi',color: 'border-yellow-500 text-yellow-600',icon: Clock },
-  excused:  { label: 'Uzrli',   color: 'border-blue-500 text-blue-600',   icon: AlertCircle },
+  present:  { label: 'Keldi',    color: 'border-xedu-primary text-xedu-primary',  icon: CheckCircle2 },
+  absent:   { label: 'Kelmadi', color: 'border-xedu-ruby text-xedu-ruby',     icon: XCircle },
+  late:     { label: 'Kechikdi',color: 'border-xedu-amber text-xedu-amber',icon: Clock },
+  excused:  { label: 'Uzrli',   color: 'border-xedu-sky text-xedu-sky',   icon: AlertCircle },
 };
 
 const paymentStatusConfig: Record<string, { label: string; color: string }> = {
-  paid:     { label: "To'landi",          color: 'border-green-500 text-green-600' },
-  pending:  { label: 'Kutilmoqda',        color: 'border-yellow-500 text-yellow-600' },
-  overdue:  { label: "Muddati o'tgan",    color: 'border-red-500 text-red-600' },
-  failed:   { label: 'Muvaffaqiyatsiz',   color: 'border-red-400 text-red-500' },
-  refunded: { label: 'Qaytarildi',        color: 'border-border text-muted-foreground' },
+  paid:     { label: "To'landi",          color: 'border-xedu-primary text-xedu-primary' },
+  pending:  { label: 'Kutilmoqda',        color: 'border-xedu-amber text-xedu-amber' },
+  overdue:  { label: "Muddati o'tgan",    color: 'border-xedu-ruby text-xedu-ruby' },
+  failed:   { label: 'Muvaffaqiyatsiz',   color: 'border-xedu-ruby/70 text-xedu-ruby' },
+  refunded: { label: 'Qaytarildi',        color: 'border-xedu-slate-200 text-xedu-slate-500' },
 };
 
 const DAY_LABELS: Record<string, string> = {
@@ -109,7 +109,7 @@ function ListSkeleton({ rows = 5 }: { rows?: number }) {
 
 function EmptyState({ icon: Icon, title, description }: { icon: React.ElementType; title: string; description?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-14 text-muted-foreground">
+    <div className="flex flex-col items-center justify-center py-14 text-xedu-slate-500 dark:text-xedu-slate-400">
       <Icon className="mb-3 h-10 w-10 opacity-30" />
       <p className="font-medium">{title}</p>
       {description && <p className="mt-1 text-sm opacity-70">{description}</p>}
@@ -198,7 +198,7 @@ export default function ParentPage() {
     handlers: {
       'attendance:alert': (payload: any) => {
         toast({
-          title: `⚠️ ${payload.studentName} ${payload.statusText}`,
+          title: ` ${payload.studentName} ${payload.statusText}`,
           description: `${payload.date} — ${payload.schoolName}`,
           variant: 'destructive',
         });
@@ -213,7 +213,7 @@ export default function ParentPage() {
       reason: leaveForm.reason,
     }),
     onSuccess: () => {
-      toast({ title: "✅ Ta'til so'rovi yuborildi" });
+      toast({ title: " Ta'til so'rovi yuborildi" });
       setLeaveForm({ startDate: '', endDate: '', reason: '' });
       setLeaveErrors({});
       queryClient.invalidateQueries({ queryKey: ['parent', 'leave-requests', childId] });
@@ -313,7 +313,7 @@ export default function ParentPage() {
       {/* ── Header ── */}
       <div>
         <h1 className="text-2xl font-bold">Ota-ona portali</h1>
-        <p className="text-muted-foreground">Farzandingiz haqida to'liq ma'lumot</p>
+        <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Farzandingiz haqida to'liq ma'lumot</p>
       </div>
 
       {/* ── Children selector ── */}
@@ -343,7 +343,7 @@ export default function ParentPage() {
                 {selectedChild?.firstName ?? selectedChild?.student?.firstName}{' '}
                 {selectedChild?.lastName ?? selectedChild?.student?.lastName}
               </p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                 {selectedChild?.class?.name ?? selectedChild?.className ?? selectedChild?.student?.class?.name ?? '—'}
               </p>
             </div>
@@ -354,8 +354,8 @@ export default function ParentPage() {
         <Card>
           <CardContent className="flex flex-wrap items-center gap-4 py-4">
             <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-medium text-muted-foreground">Farzand:</span>
+              <Users className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
+              <span className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Farzand:</span>
             </div>
             <Select value={childId} onValueChange={setSelectedChildId}>
               <SelectTrigger className="w-56">
@@ -385,7 +385,7 @@ export default function ParentPage() {
                     {selectedChild?.firstName ?? selectedChild?.student?.firstName}{' '}
                     {selectedChild?.lastName ?? selectedChild?.student?.lastName}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                     {selectedChild?.class?.name ?? selectedChild?.className ?? selectedChild?.student?.class?.name ?? '—'}
                   </p>
                 </div>
@@ -421,7 +421,7 @@ export default function ParentPage() {
             {/* Davomat */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Davomat</CardTitle>
+                <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Davomat</CardTitle>
                 <Calendar className="h-4 w-4 text-blue-500" />
               </CardHeader>
               <CardContent>
@@ -429,13 +429,13 @@ export default function ParentPage() {
                   <Skeleton className="h-7 w-16" />
                 ) : attendancePct !== null ? (
                   <>
-                    <div className={`text-2xl font-bold ${attendancePct >= 80 ? 'text-green-600' : attendancePct >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    <div className={`text-2xl font-bold ${attendancePct >= 80 ? 'text-xedu-primary' : attendancePct >= 60 ? 'text-xedu-amber' : 'text-xedu-ruby'}`}>
                       {attendancePct}%
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{attendanceList.length} ta dars</p>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">{attendanceList.length} ta dars</p>
                   </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Ma'lumot yo'q</p>
+                  <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Ma'lumot yo'q</p>
                 )}
               </CardContent>
             </Card>
@@ -443,7 +443,7 @@ export default function ParentPage() {
             {/* O'rtacha baho */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">O'rtacha baho</CardTitle>
+                <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">O'rtacha baho</CardTitle>
                 <TrendingUp className="h-4 w-4 text-purple-500" />
               </CardHeader>
               <CardContent>
@@ -451,13 +451,13 @@ export default function ParentPage() {
                   <Skeleton className="h-7 w-16" />
                 ) : avgGrade !== null ? (
                   <>
-                    <div className={`text-2xl font-bold ${Number(avgGrade) >= 80 ? 'text-green-600' : Number(avgGrade) >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    <div className={`text-2xl font-bold ${Number(avgGrade) >= 80 ? 'text-xedu-primary' : Number(avgGrade) >= 60 ? 'text-xedu-amber' : 'text-xedu-ruby'}`}>
                       {avgGrade}
                     </div>
-                    <p className="text-xs text-muted-foreground mt-0.5">{gradesList.length} ta baho</p>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">{gradesList.length} ta baho</p>
                   </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Ma'lumot yo'q</p>
+                  <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Ma'lumot yo'q</p>
                 )}
               </CardContent>
             </Card>
@@ -465,7 +465,7 @@ export default function ParentPage() {
             {/* So'nggi to'lov */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">So'nggi to'lov</CardTitle>
+                <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">So'nggi to'lov</CardTitle>
                 <CreditCard className="h-4 w-4 text-orange-500" />
               </CardHeader>
               <CardContent>
@@ -478,7 +478,7 @@ export default function ParentPage() {
                     </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
                       {(() => {
-                        const cfg = paymentStatusConfig[lastPayment.status] ?? { label: lastPayment.status, color: 'border-border text-muted-foreground' };
+                        const cfg = paymentStatusConfig[lastPayment.status] ?? { label: lastPayment.status, color: 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 dark:text-xedu-slate-400' };
                         return (
                           <Badge variant="outline" className={`text-xs px-1.5 py-0 ${cfg.color}`}>
                             {cfg.label}
@@ -488,7 +488,7 @@ export default function ParentPage() {
                     </div>
                   </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">To'lov yo'q</p>
+                  <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">To'lov yo'q</p>
                 )}
               </CardContent>
             </Card>
@@ -496,7 +496,7 @@ export default function ParentPage() {
             {/* Bugungi darslar */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">Bugungi darslar</CardTitle>
+                <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Bugungi darslar</CardTitle>
                 <BookOpen className="h-4 w-4 text-teal-500" />
               </CardHeader>
               <CardContent>
@@ -505,7 +505,7 @@ export default function ParentPage() {
                 ) : (
                   <>
                     <div className="text-2xl font-bold text-teal-600">{todayLessons.length}</div>
-                    <p className="text-xs text-muted-foreground mt-0.5">ta dars bugun</p>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">ta dars bugun</p>
                   </>
                 )}
               </CardContent>
@@ -513,11 +513,11 @@ export default function ParentPage() {
 
             {/* EduCoin */}
             <Card
-              className="cursor-pointer hover:shadow-md transition-shadow border-amber-200 dark:border-amber-800/50"
+              className="cursor-pointer hover:shadow-sm transition-shadow border-amber-200 dark:border-amber-800/50"
               onClick={() => setActiveTab('coins')}
             >
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">EduCoin</CardTitle>
+                <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">EduCoin</CardTitle>
                 <Coins className="h-4 w-4 text-amber-500" />
               </CardHeader>
               <CardContent>
@@ -526,10 +526,10 @@ export default function ParentPage() {
                 ) : coinsData ? (
                   <>
                     <div className="text-2xl font-bold text-amber-600">{coinsData.balance.toLocaleString()} 🪙</div>
-                    <p className="text-xs text-muted-foreground mt-0.5">Reyting: #{coinsData.rank}</p>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">Reyting: #{coinsData.rank}</p>
                   </>
                 ) : (
-                  <p className="text-sm text-muted-foreground">—</p>
+                  <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">—</p>
                 )}
               </CardContent>
             </Card>
@@ -590,14 +590,14 @@ export default function ParentPage() {
                       {attendanceList.slice(0, 30).map((record: any, idx: number) => {
                         const cfg = attendanceStatusConfig[record.status] ?? {
                           label: record.status,
-                          color: 'border-border text-muted-foreground',
+                          color: 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 dark:text-xedu-slate-400',
                           icon: AlertCircle,
                         };
                         const Icon = cfg.icon;
                         return (
                           <div
                             key={record.id ?? idx}
-                            className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors"
+                            className="flex items-center justify-between px-4 py-3 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors"
                           >
                             <div className="flex items-center gap-3">
                               <Icon className={`h-4 w-4 ${cfg.color.split(' ')[1]}`} />
@@ -605,7 +605,7 @@ export default function ParentPage() {
                                 <p className="text-sm font-medium">
                                   {record.subject?.name ?? record.subjectName ?? record.lessonName ?? 'Dars'}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                                   {record.date ? formatDate(record.date) : '—'}
                                   {record.period && <span className="ml-1.5">{record.period}-dars</span>}
                                 </p>
@@ -628,7 +628,7 @@ export default function ParentPage() {
               {/* Subject filter */}
               {!gradesLoading && gradesList.length > 0 && (
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-muted-foreground shrink-0">Fan bo&apos;yicha:</span>
+                  <span className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0">Fan bo&apos;yicha:</span>
                   <Select value={subjectFilter} onValueChange={setSubjectFilter}>
                     <SelectTrigger className="h-8 w-52 text-sm">
                       <SelectValue />
@@ -678,14 +678,14 @@ export default function ParentPage() {
                     subjectGrades.reduce((s: number, g: any) => s + (g.score ?? 0), 0) / subjectGrades.length
                   ).toFixed(1);
                   const avgNum = Number(subjectAvg);
-                  const avgColor = avgNum >= 80 ? 'text-green-600' : avgNum >= 60 ? 'text-yellow-600' : 'text-red-600';
+                  const avgColor = avgNum >= 80 ? 'text-xedu-primary' : avgNum >= 60 ? 'text-xedu-amber' : 'text-xedu-ruby';
 
                   return (
                     <Card key={subjectName}>
                       <CardHeader className="pb-2 flex flex-row items-center justify-between">
                         <CardTitle className="text-base">{subjectName}</CardTitle>
                         <div className="flex items-center gap-2">
-                          <span className="text-xs text-muted-foreground">O'rtacha:</span>
+                          <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">O'rtacha:</span>
                           <span className={`font-bold text-lg ${avgColor}`}>{subjectAvg}</span>
                         </div>
                       </CardHeader>
@@ -693,17 +693,17 @@ export default function ParentPage() {
                         <div className="divide-y">
                           {subjectGrades.map((grade: any, idx: number) => {
                             const pct = grade.maxScore ? (grade.score / grade.maxScore) * 100 : grade.score;
-                            const scoreColor = pct >= 80 ? 'text-green-600' : pct >= 60 ? 'text-yellow-600' : 'text-red-600';
+                            const scoreColor = pct >= 80 ? 'text-xedu-primary' : pct >= 60 ? 'text-xedu-amber' : 'text-xedu-ruby';
                             return (
                               <div
                                 key={grade.id ?? idx}
-                                className="flex items-center justify-between px-4 py-2.5 hover:bg-muted/30 transition-colors"
+                                className="flex items-center justify-between px-4 py-2.5 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors"
                               >
                                 <div>
                                   <p className="text-sm font-medium">
                                     {getGradeTypeLabel(grade.type ?? grade.gradeType ?? '')}
                                   </p>
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                                     {grade.date ? formatDate(grade.date) : grade.createdAt ? formatDate(grade.createdAt) : '—'}
                                     {grade.comment && <span className="ml-1.5 italic">{grade.comment}</span>}
                                   </p>
@@ -711,7 +711,7 @@ export default function ParentPage() {
                                 <div className={`text-lg font-bold ${scoreColor}`}>
                                   {grade.score}
                                   {grade.maxScore && (
-                                    <span className="text-xs text-muted-foreground font-normal">/{grade.maxScore}</span>
+                                    <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 font-normal">/{grade.maxScore}</span>
                                   )}
                                 </div>
                               </div>
@@ -751,7 +751,7 @@ export default function ParentPage() {
                       {paymentsList.map((payment: any, idx: number) => {
                         const cfg = paymentStatusConfig[payment.status] ?? {
                           label: payment.status,
-                          color: 'border-border text-muted-foreground',
+                          color: 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 dark:text-xedu-slate-400',
                         };
                         const isOverdue =
                           payment.dueDate &&
@@ -761,13 +761,13 @@ export default function ParentPage() {
                         return (
                           <div
                             key={payment.id ?? idx}
-                            className="flex items-center justify-between px-4 py-3 hover:bg-muted/30 transition-colors"
+                            className="flex items-center justify-between px-4 py-3 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors"
                           >
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium">
                                 {payment.description ?? "O'quv to'lovi"}
                               </p>
-                              <p className="text-xs text-muted-foreground mt-0.5">
+                              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">
                                 {payment.createdAt ? formatDate(payment.createdAt) : payment.date ? formatDate(payment.date) : '—'}
                                 {payment.dueDate && (
                                   <span className={`ml-2 ${isOverdue ? 'text-red-500 font-medium' : ''}`}>
@@ -833,7 +833,7 @@ export default function ParentPage() {
                     <Card key={day}>
                       <CardHeader className="pb-2">
                         <CardTitle className="text-base flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <Calendar className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
                           {DAY_LABELS[day] ?? day}
                           <Badge variant="secondary" className="ml-1 text-xs">
                             {lessons.length} ta dars
@@ -845,7 +845,7 @@ export default function ParentPage() {
                           {lessons.map((lesson: any, idx: number) => (
                             <div
                               key={lesson.id ?? idx}
-                              className="flex items-center gap-4 px-4 py-3 hover:bg-muted/30 transition-colors"
+                              className="flex items-center gap-4 px-4 py-3 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors"
                             >
                               {/* Period number or time */}
                               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-sm font-bold">
@@ -855,7 +855,7 @@ export default function ParentPage() {
                                 <p className="text-sm font-medium">
                                   {lesson.subject?.name ?? lesson.subjectName ?? lesson.lessonName ?? 'Fan'}
                                 </p>
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                                   {lesson.teacher
                                     ? `${lesson.teacher.firstName ?? ''} ${lesson.teacher.lastName ?? ''}`.trim()
                                     : lesson.teacherName ?? ''}
@@ -868,7 +868,7 @@ export default function ParentPage() {
                                 </p>
                               </div>
                               {lesson.teacher?.id && (
-                                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-muted-foreground hover:text-blue-500"
+                                <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-blue-500"
                                   onClick={() => router.push(`/dashboard/messages?userId=${lesson.teacher.id}`)}
                                   title="Muallimga xabar yuborish">
                                   <MessageSquare className="h-3.5 w-3.5" />
@@ -905,7 +905,7 @@ export default function ParentPage() {
                         min={new Date().toISOString().slice(0, 10)}
                       />
                       {leaveErrors.startDate && (
-                        <p className="text-xs text-destructive">{leaveErrors.startDate}</p>
+                        <p className="text-xs text-xedu-ruby">{leaveErrors.startDate}</p>
                       )}
                     </div>
                     <div className="space-y-1.5">
@@ -918,7 +918,7 @@ export default function ParentPage() {
                         min={leaveForm.startDate || new Date().toISOString().slice(0, 10)}
                       />
                       {leaveErrors.endDate && (
-                        <p className="text-xs text-destructive">{leaveErrors.endDate}</p>
+                        <p className="text-xs text-xedu-ruby">{leaveErrors.endDate}</p>
                       )}
                     </div>
                   </div>
@@ -932,9 +932,9 @@ export default function ParentPage() {
                       rows={3}
                       maxLength={500}
                     />
-                    <p className="text-xs text-muted-foreground text-right">{leaveForm.reason.length}/500</p>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 text-right">{leaveForm.reason.length}/500</p>
                     {leaveErrors.reason && (
-                      <p className="text-xs text-destructive">{leaveErrors.reason}</p>
+                      <p className="text-xs text-xedu-ruby">{leaveErrors.reason}</p>
                     )}
                   </div>
                   <div className="flex justify-end">
@@ -983,17 +983,17 @@ export default function ParentPage() {
                           : 'border-yellow-500 text-yellow-600';
 
                         return (
-                          <div key={req.id} className="px-4 py-3 hover:bg-muted/30 transition-colors">
+                          <div key={req.id} className="px-4 py-3 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
                             <div className="flex items-start justify-between gap-3">
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate">
                                   {new Date(req.startDate).toLocaleDateString('uz-UZ')} —{' '}
                                   {new Date(req.endDate).toLocaleDateString('uz-UZ')}
                                 </p>
-                                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5 line-clamp-2">
                                   {req.reason}
                                 </p>
-                                <p className="text-xs text-muted-foreground mt-1">
+                                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
                                   {new Date(req.createdAt).toLocaleString('uz-UZ')}
                                 </p>
                               </div>
@@ -1030,9 +1030,9 @@ export default function ParentPage() {
                           <Coins className="h-8 w-8 text-amber-600" />
                         </div>
                         <div>
-                          <p className="text-sm text-muted-foreground">Joriy balans</p>
+                          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Joriy balans</p>
                           <p className="text-4xl font-bold text-amber-600">{coinsData.balance.toLocaleString()}</p>
-                          <p className="text-xs text-muted-foreground mt-0.5">🪙 EduCoin</p>
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">🪙 EduCoin</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -1040,7 +1040,7 @@ export default function ParentPage() {
                       <CardContent className="flex flex-col items-center justify-center gap-1 py-5">
                         <Trophy className="h-7 w-7 text-yellow-500" />
                         <p className="text-3xl font-bold">{coinsData.rank}</p>
-                        <p className="text-xs text-muted-foreground text-center">
+                        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 text-center">
                           {coinsData.total} o&apos;quvchi ichida<br />maktab reytingi
                         </p>
                       </CardContent>
@@ -1064,8 +1064,8 @@ export default function ParentPage() {
                               attendance_weekly: '📅 Haftalik 100% davomat',
                               discipline_praise: '🏅 O\'qituvchi maqtovi',
                               manual_award:      '🎁 Qo\'lda berildi',
-                              discipline_warning:'⚠️ Intizom buzilishi',
-                              shop_purchase:     '🛍️ Do\'konda xarid',
+                              discipline_warning:' Intizom buzilishi',
+                              shop_purchase:     '🛍 Do\'konda xarid',
                               manual_deduct:     '📉 Qo\'lda ayirildi',
                             };
                             const label = reasonLabels[tx.reason] ?? tx.reason;
@@ -1078,15 +1078,15 @@ export default function ParentPage() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm font-medium truncate">{label}</p>
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                                     {new Date(tx.createdAt).toLocaleString('uz-UZ')}
                                   </p>
                                 </div>
                                 <div className="text-right shrink-0">
-                                  <p className={`font-bold ${isEarn ? 'text-green-600' : 'text-red-500'}`}>
+                                  <p className={`font-bold ${isEarn ? 'text-xedu-primary' : 'text-red-500'}`}>
                                     {isEarn ? '+' : ''}{tx.amount} 🪙
                                   </p>
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                                     Balans: {tx.balance}
                                   </p>
                                 </div>

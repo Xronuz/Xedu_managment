@@ -4,7 +4,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   BarChart2, Plus, Loader2, Trash2, TrendingUp, Filter,
-  BookOpen, Award, ChevronLeft, ChevronRight, Search, LayoutList, Save, Pencil, Check, X as XIcon,
+  BookOpen, Award, Search, LayoutList, Save, Pencil, Check, X as XIcon,
   Download, AlertCircle,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Pagination } from '@/components/ui/page-ui';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -99,7 +100,7 @@ function InlineScoreEdit({
     try {
       await gradesApi.update(gradeId, { score: n });
       queryClient.invalidateQueries({ queryKey: ['grades'] });
-      toast({ title: '✅ Ball yangilandi' });
+      toast({ title: ' Ball yangilandi' });
       setEditing(false);
     } catch {
       toast({ variant: 'destructive', title: 'Xato', description: 'Saqlashda xato yuz berdi' });
@@ -126,9 +127,9 @@ function InlineScoreEdit({
           onChange={e => setDraft(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') cancel(); }}
           autoFocus
-          className="w-14 rounded border border-primary px-1.5 py-0.5 text-xs font-bold text-center bg-background focus:outline-none focus:ring-1 focus:ring-primary"
+          className="w-14 rounded border border-primary px-1.5 py-0.5 text-xs font-bold text-center bg-white dark:bg-xedu-slate-950 focus:outline-none focus:ring-1 focus:ring-primary"
         />
-        <span className="text-xs text-muted-foreground">/{maxScore}</span>
+        <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">/{maxScore}</span>
         <button
           onClick={save}
           disabled={saving}
@@ -139,7 +140,7 @@ function InlineScoreEdit({
         </button>
         <button
           onClick={cancel}
-          className="rounded p-0.5 text-muted-foreground hover:bg-muted"
+          className="rounded p-0.5 text-xedu-slate-500 dark:text-xedu-slate-400 hover:bg-muted"
           title="Bekor"
         >
           <XIcon className="h-3.5 w-3.5" />
@@ -155,7 +156,7 @@ function InlineScoreEdit({
       title="Tahrirlash uchun bosing"
     >
       <ScoreBadge score={score} max={maxScore} />
-      <Pencil className="h-3 w-3 text-muted-foreground opacity-0 group-hover/score:opacity-60 transition-opacity" />
+      <Pencil className="h-3 w-3 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-0 group-hover/score:opacity-60 transition-opacity" />
     </button>
   );
 }
@@ -215,7 +216,7 @@ function BulkGradeDialog({ open, onClose }: { open: boolean; onClose: () => void
   const bulkMutation = useMutation({
     mutationFn: gradesApi.bulkCreate,
     onSuccess: (data: { saved: number }) => {
-      toast({ title: `✅ ${data.saved} ta baho saqlandi` });
+      toast({ title: ` ${data.saved} ta baho saqlandi` });
       queryClient.invalidateQueries({ queryKey: ['grades'] });
       onClose();
       setBulkScores({});
@@ -307,10 +308,10 @@ function BulkGradeDialog({ open, onClose }: { open: boolean; onClose: () => void
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <Label className="text-xs text-muted-foreground shrink-0">Maks. ball:</Label>
+            <Label className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0">Maks. ball:</Label>
             <Input type="number" min={1} max={1000} value={bulkMaxScore} onChange={e => setBulkMaxScore(e.target.value)} className="w-24 h-8 text-xs" />
             {filledCount > 0 && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                 {filledCount} / {students.length} ta kiritilgan
               </span>
             )}
@@ -318,18 +319,18 @@ function BulkGradeDialog({ open, onClose }: { open: boolean; onClose: () => void
 
           {/* Students table */}
           {!bulkClassId ? (
-            <div className="py-8 text-center text-muted-foreground text-sm">Sinf tanlang</div>
+            <div className="py-8 text-center text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">Sinf tanlang</div>
           ) : students.length === 0 ? (
-            <div className="py-8 text-center text-muted-foreground text-sm">Bu sinfda o'quvchilar yo'q</div>
+            <div className="py-8 text-center text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">Bu sinfda o'quvchilar yo'q</div>
           ) : (
             <div className="rounded-lg border overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-muted/50">
+                <thead className="bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
                   <tr>
-                    <th className="text-left py-2 px-3 font-medium text-muted-foreground text-xs">#</th>
-                    <th className="text-left py-2 px-3 font-medium text-muted-foreground text-xs">O'quvchi</th>
-                    <th className="text-center py-2 px-3 font-medium text-muted-foreground text-xs w-28">Ball</th>
-                    <th className="text-left py-2 px-3 font-medium text-muted-foreground text-xs">Izoh</th>
+                    <th className="text-left py-2 px-3 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">#</th>
+                    <th className="text-left py-2 px-3 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">O'quvchi</th>
+                    <th className="text-center py-2 px-3 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 text-xs w-28">Ball</th>
+                    <th className="text-left py-2 px-3 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">Izoh</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -340,8 +341,8 @@ function BulkGradeDialog({ open, onClose }: { open: boolean; onClose: () => void
                       ? Math.round((Number(score) / Number(bulkMaxScore)) * 100)
                       : null;
                     return (
-                      <tr key={student.id} className="border-t hover:bg-muted/20 transition-colors">
-                        <td className="py-2 px-3 text-muted-foreground text-xs">{i + 1}</td>
+                      <tr key={student.id} className="border-t hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
+                        <td className="py-2 px-3 text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">{i + 1}</td>
                         <td className="py-2 px-3 font-medium text-sm">{student.firstName} {student.lastName}</td>
                         <td className="py-2 px-3">
                           <div className="flex items-center gap-1.5 justify-center">
@@ -485,7 +486,7 @@ export default function GradesPage() {
   const createMutation = useMutation({
     mutationFn: gradesApi.create,
     onSuccess: () => {
-      toast({ title: "✅ Baho qo'shildi" });
+      toast({ title: " Baho qo'shildi" });
       queryClient.invalidateQueries({ queryKey: ['grades'] });
       setOpen(false);
       setForm(EMPTY);
@@ -565,7 +566,7 @@ export default function GradesPage() {
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <BarChart2 className="h-6 w-6 text-primary" /> Mening baholarim
             </h1>
-            <p className="text-muted-foreground">O'quv yili natijalari</p>
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400">O'quv yili natijalari</p>
           </div>
           {myGrades.length > 0 && (
             <Button variant="outline" size="sm" onClick={handlePrint}>
@@ -585,12 +586,12 @@ export default function GradesPage() {
                   <Award className="h-7 w-7 text-primary" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm text-muted-foreground">Umumiy o'rtacha ball</p>
+                  <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Umumiy o'rtacha ball</p>
                   <GpaBar gpa={gpa} />
                 </div>
                 <div className="text-right">
                   <p className="text-3xl font-bold text-primary">{gpa}%</p>
-                  <p className="text-xs text-muted-foreground">{myGrades.length} ta baho</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{myGrades.length} ta baho</p>
                 </div>
               </div>
             </CardContent>
@@ -683,7 +684,7 @@ export default function GradesPage() {
                         <BookOpen className="h-4 w-4 text-primary" /> {name}
                       </CardTitle>
                       <div className="flex items-center gap-3">
-                        <span className="text-sm text-muted-foreground">{gs.length} ta baho</span>
+                        <span className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{gs.length} ta baho</span>
                         <ScoreBadge score={avg} max={100} />
                       </div>
                     </div>
@@ -697,8 +698,8 @@ export default function GradesPage() {
                             <span className={`text-xs px-2 py-0.5 rounded-full ${TYPE_COLORS[g.type] ?? ''}`}>
                               {GRADE_TYPES.find(t => t.value === g.type)?.label ?? g.type}
                             </span>
-                            <span className="text-muted-foreground text-xs">{formatDate(g.date)}</span>
-                            {g.comment && <span className="text-xs italic text-muted-foreground">"{g.comment}"</span>}
+                            <span className="text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">{formatDate(g.date)}</span>
+                            {g.comment && <span className="text-xs italic text-xedu-slate-500 dark:text-xedu-slate-400">"{g.comment}"</span>}
                           </div>
                           <ScoreBadge score={g.score} max={g.maxScore} />
                         </div>
@@ -710,7 +711,7 @@ export default function GradesPage() {
             })}
             {!myGrades.length && (
               <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
+                <CardContent className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
                   <BarChart2 className="h-10 w-10 mx-auto mb-3 opacity-30" />
                   <p>Baholar yo'q</p>
                 </CardContent>
@@ -732,11 +733,11 @@ export default function GradesPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <BarChart2 className="h-6 w-6 text-primary" /> Baholar jurnali
           </h1>
-          <p className="text-muted-foreground">Sinf bo'yicha baholar</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Sinf bo'yicha baholar</p>
         </div>
         {selectedClass && grades.length > 0 && (
           <Button variant="outline" size="sm" onClick={handlePrint}>
-            🖨️ Chop etish
+            🖨 Chop etish
           </Button>
         )}
       </div>
@@ -767,7 +768,7 @@ export default function GradesPage() {
 
           {selectedClass && (
             <div className="flex flex-wrap gap-2 items-center">
-              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Filter className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
               <Button
                 variant={!selectedSubject ? 'secondary' : 'ghost'}
                 size="sm"
@@ -791,9 +792,9 @@ export default function GradesPage() {
           {!selectedClass ? (
             <Card>
               <CardContent className="py-16 text-center">
-                <BarChart2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-30" />
-                <p className="text-lg font-medium text-muted-foreground">Sinf tanlang</p>
-                <p className="text-sm text-muted-foreground mt-1">Baholarni ko'rish uchun yuqoridan sinf tanlang</p>
+                <BarChart2 className="h-12 w-12 mx-auto mb-4 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-30" />
+                <p className="text-lg font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Sinf tanlang</p>
+                <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">Baholarni ko'rish uchun yuqoridan sinf tanlang</p>
               </CardContent>
             </Card>
           ) : classLoading ? (
@@ -834,13 +835,13 @@ export default function GradesPage() {
                   </Card>
                   <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                     {subjectStats.map(s => (
-                      <Card key={s.name} className="cursor-pointer hover:shadow-md transition-shadow"
+                      <Card key={s.name} className="cursor-pointer hover:shadow-sm transition-shadow"
                         onClick={() => {
                           const found = subjectList.find(sub => sub.name === s.name);
                           if (found) { setSelectedSubject(found.id); setPage(1); }
                         }}>
                         <CardContent className="p-3">
-                          <p className="text-xs text-muted-foreground truncate">{s.name}</p>
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{s.name}</p>
                           <p className="text-xl font-bold" style={{ color: getScoreColor(s.avg) }}>
                             {s.avg}%
                           </p>
@@ -872,7 +873,7 @@ export default function GradesPage() {
                       )}
                     </div>
                     <div className="relative">
-                      <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+                      <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400" />
                       <Input
                         className="pl-8 h-8 w-44 text-sm"
                         placeholder="O'quvchi qidirish..."
@@ -884,7 +885,7 @@ export default function GradesPage() {
                 </CardHeader>
                 <CardContent>
                   {filteredGrades.length === 0 ? (
-                    <div className="text-center py-10 text-muted-foreground">
+                    <div className="text-center py-10 text-xedu-slate-500 dark:text-xedu-slate-400">
                       <BarChart2 className="h-8 w-8 mx-auto mb-2 opacity-30" />
                       <p>Bu sinf uchun baholar yo'q</p>
                       {canManage && (
@@ -898,27 +899,27 @@ export default function GradesPage() {
                       <table className="w-full text-sm">
                         <thead>
                           <tr className="border-b">
-                            <th className="text-left py-2.5 font-medium text-muted-foreground pr-4">O'quvchi</th>
-                            <th className="text-left py-2.5 font-medium text-muted-foreground">Fan</th>
-                            <th className="text-center py-2.5 font-medium text-muted-foreground">Tur</th>
-                            <th className="text-center py-2.5 font-medium text-muted-foreground">Sana</th>
-                            <th className="text-right py-2.5 font-medium text-muted-foreground">Ball</th>
+                            <th className="text-left py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 pr-4">O'quvchi</th>
+                            <th className="text-left py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Fan</th>
+                            <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Tur</th>
+                            <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Sana</th>
+                            <th className="text-right py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Ball</th>
                             {canManage && <th className="w-8" />}
                           </tr>
                         </thead>
                         <tbody>
                           {filteredGrades.map((g: any) => (
-                            <tr key={g.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors group">
+                            <tr key={g.id} className="border-b last:border-0 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors group">
                               <td className="py-2.5 font-medium pr-4">
                                 {g.student?.firstName} {g.student?.lastName}
                               </td>
-                              <td className="py-2.5 text-muted-foreground">{g.subject?.name}</td>
+                              <td className="py-2.5 text-xedu-slate-500 dark:text-xedu-slate-400">{g.subject?.name}</td>
                               <td className="py-2.5 text-center">
                                 <span className={`text-xs px-2 py-0.5 rounded-full ${TYPE_COLORS[g.type] ?? ''}`}>
                                   {GRADE_TYPES.find(t => t.value === g.type)?.label ?? g.type}
                                 </span>
                               </td>
-                              <td className="py-2.5 text-center text-muted-foreground text-xs">
+                              <td className="py-2.5 text-center text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">
                                 {formatDate(g.date)}
                               </td>
                               <td className="py-2.5 text-right">
@@ -934,7 +935,7 @@ export default function GradesPage() {
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                                     onClick={() => deleteMutation.mutate(g.id)}
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
@@ -950,19 +951,7 @@ export default function GradesPage() {
 
                   {/* Pagination */}
                   {meta && meta.totalPages > 1 && (
-                    <div className="flex items-center justify-between mt-4 pt-4 border-t">
-                      <p className="text-sm text-muted-foreground">
-                        {(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, meta.total)} / {meta.total} ta
-                      </p>
-                      <div className="flex gap-1">
-                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))} disabled={page >= meta.totalPages}>
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+                    <Pagination page={page} total={meta.total} perPage={LIMIT} onPage={setPage} />
                   )}
                 </CardContent>
               </Card>
@@ -975,7 +964,7 @@ export default function GradesPage() {
           <TabsContent value="entry" className="space-y-4 mt-4">
             <div className="grid gap-4 sm:grid-cols-2">
               {/* Single grade entry */}
-              <Card className="cursor-pointer hover:shadow-md hover:border-primary/40 transition-all group"
+              <Card className="cursor-pointer hover:shadow-sm hover:border-primary/40 transition-all group"
                 onClick={() => { setOpen(true); setForm(EMPTY); setErrors({}); }}>
                 <CardContent className="flex items-start gap-4 p-6">
                   <div className="rounded-xl bg-primary/10 p-3 shrink-0 group-hover:bg-primary/20 transition-colors">
@@ -983,7 +972,7 @@ export default function GradesPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-base">Yakka baho kiritish</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
                       Bitta o'quvchiga baho qo'shish — sinf, fan, ball va izoh bilan
                     </p>
                   </div>
@@ -991,7 +980,7 @@ export default function GradesPage() {
               </Card>
 
               {/* Bulk grade entry */}
-              <Card className="cursor-pointer hover:shadow-md hover:border-primary/40 transition-all group"
+              <Card className="cursor-pointer hover:shadow-sm hover:border-primary/40 transition-all group"
                 onClick={() => setBulkOpen(true)}>
                 <CardContent className="flex items-start gap-4 p-6">
                   <div className="rounded-xl bg-blue-500/10 p-3 shrink-0 group-hover:bg-blue-500/20 transition-colors">
@@ -999,7 +988,7 @@ export default function GradesPage() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-base">Toplu baho kiritish</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
                       Butun sinf uchun bir vaqtda baho kiriting — jadval ko'rinishida
                     </p>
                   </div>
@@ -1018,7 +1007,7 @@ export default function GradesPage() {
                   {GRADE_TYPES.map(t => (
                     <div key={t.value} className="flex items-center gap-2 py-1">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${TYPE_COLORS[t.value] ?? ''}`}>{t.label}</span>
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         {t.value === GradeType.CLASSWORK && 'Darsda bajarish'}
                         {t.value === GradeType.HOMEWORK && 'Uy vazifasi natijasi'}
                         {t.value === GradeType.TEST && 'Test yoki nazorat ishi'}
@@ -1038,7 +1027,7 @@ export default function GradesPage() {
         {canManage && (
           <TabsContent value="quarterly" className="mt-4">
             <Card className="overflow-hidden">
-              <div className="h-2 bg-gradient-to-r from-green-500 to-emerald-400" />
+              <div className="h-2 bg-gradient-to-r from-xedu-primary to-xedu-primary/60" />
               <CardContent className="flex items-start gap-5 p-6">
                 <div className="rounded-xl bg-green-500/10 p-4 shrink-0">
                   <TrendingUp className="h-8 w-8 text-green-600" />
@@ -1046,7 +1035,7 @@ export default function GradesPage() {
                 <div className="flex-1 space-y-3">
                   <div>
                     <h3 className="text-lg font-semibold">Choraklik baholar</h3>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
                       Har chorak uchun yakuniy baholarni ko'rish, kiritish va tasdiqlash.
                       O'quvchilar reytingi, o'rtacha ball va taqqoslash grafiklari.
                     </p>
@@ -1081,24 +1070,24 @@ export default function GradesPage() {
           <div className="space-y-4 py-2">
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Sinf <span className="text-destructive">*</span></Label>
+                <Label>Sinf <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.classId} onValueChange={v => { sel('classId')(v); setForm(f => ({ ...f, studentId: '', subjectId: '' })); }}>
                   <SelectTrigger><SelectValue placeholder="Sinf..." /></SelectTrigger>
                   <SelectContent>{classList.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>
-                {errors.classId && <p className="text-xs text-destructive">{errors.classId}</p>}
+                {errors.classId && <p className="text-xs text-xedu-ruby">{errors.classId}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Fan <span className="text-destructive">*</span></Label>
+                <Label>Fan <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.subjectId} onValueChange={sel('subjectId')}>
                   <SelectTrigger><SelectValue placeholder="Fan..." /></SelectTrigger>
                   <SelectContent>{subjectList.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
                 </Select>
-                {errors.subjectId && <p className="text-xs text-destructive">{errors.subjectId}</p>}
+                {errors.subjectId && <p className="text-xs text-xedu-ruby">{errors.subjectId}</p>}
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>O'quvchi <span className="text-destructive">*</span></Label>
+              <Label>O'quvchi <span className="text-xedu-ruby">*</span></Label>
               <Select value={form.studentId} onValueChange={sel('studentId')}>
                 <SelectTrigger><SelectValue placeholder="O'quvchi tanlang..." /></SelectTrigger>
                 <SelectContent>
@@ -1107,7 +1096,7 @@ export default function GradesPage() {
                   ))}
                 </SelectContent>
               </Select>
-              {errors.studentId && <p className="text-xs text-destructive">{errors.studentId}</p>}
+              {errors.studentId && <p className="text-xs text-xedu-ruby">{errors.studentId}</p>}
             </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-1.5">
@@ -1118,13 +1107,13 @@ export default function GradesPage() {
                 </Select>
               </div>
               <div className="space-y-1.5">
-                <Label>Ball <span className="text-destructive">*</span></Label>
+                <Label>Ball <span className="text-xedu-ruby">*</span></Label>
                 <Input
                   type="number" min={0} placeholder="85"
                   value={form.score}
                   onChange={e => { setForm(f => ({ ...f, score: e.target.value })); setErrors(er => { const n = { ...er }; delete n.score; return n; }); }}
                 />
-                {errors.score && <p className="text-xs text-destructive">{errors.score}</p>}
+                {errors.score && <p className="text-xs text-xedu-ruby">{errors.score}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Maks.</Label>
@@ -1132,9 +1121,9 @@ export default function GradesPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Sana <span className="text-destructive">*</span></Label>
+              <Label>Sana <span className="text-xedu-ruby">*</span></Label>
               <Input type="date" value={form.date} onChange={e => { setForm(f => ({ ...f, date: e.target.value })); setErrors(er => { const n = { ...er }; delete n.date; return n; }); }} />
-              {errors.date && <p className="text-xs text-destructive">{errors.date}</p>}
+              {errors.date && <p className="text-xs text-xedu-ruby">{errors.date}</p>}
             </div>
             <div className="space-y-1.5">
               <Label>Izoh</Label>

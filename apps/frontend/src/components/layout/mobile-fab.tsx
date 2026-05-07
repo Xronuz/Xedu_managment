@@ -98,7 +98,7 @@ export function MobileFab() {
             </span>
             <button
               onClick={() => { router.push(href); setOpen(false); }}
-              className={`flex h-11 w-11 items-center justify-center rounded-full text-white shadow-lg ${color} transition-transform active:scale-95`}
+              className={`flex h-11 w-11 items-center justify-center rounded-full text-white shadow-md ${color} transition-transform active:scale-95`}
             >
               <Icon className="h-5 w-5" />
             </button>

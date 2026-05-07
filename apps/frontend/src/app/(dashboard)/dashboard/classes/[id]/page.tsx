@@ -73,7 +73,7 @@ export default function ClassDetailPage() {
   const addMutation = useMutation({
     mutationFn: (studentId: string) => classesApi.addStudent(id, studentId),
     onSuccess: () => {
-      toast({ title: "✅ O'quvchi qo'shildi" });
+      toast({ title: " O'quvchi qo'shildi" });
       queryClient.invalidateQueries({ queryKey: ['class-students', id] });
       queryClient.invalidateQueries({ queryKey: ['classes'] });
     },
@@ -121,7 +121,7 @@ export default function ClassDetailPage() {
       // 2) Add to this class
       await classesApi.addStudent(id, created.id);
 
-      toast({ title: `✅ ${created.firstName} ${created.lastName} sinfga qo'shildi` });
+      toast({ title: ` ${created.firstName} ${created.lastName} sinfga qo'shildi` });
       queryClient.invalidateQueries({ queryKey: ['class-students', id] });
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -157,7 +157,7 @@ export default function ClassDetailPage() {
   if (!cls) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">Sinf topilmadi</p>
+        <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Sinf topilmadi</p>
         <Button variant="outline" className="mt-4" onClick={() => router.push('/dashboard/classes')}>
           <ArrowLeft className="mr-2 h-4 w-4" /> Orqaga
         </Button>
@@ -177,7 +177,7 @@ export default function ClassDetailPage() {
             <School className="h-6 w-6 text-primary" />
             {cls.name}
           </h1>
-          <p className="text-muted-foreground">{cls.academicYear} • {cls.gradeLevel}-sinf</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">{cls.academicYear} • {cls.gradeLevel}-sinf</p>
         </div>
         {canManage && (
           <Button onClick={() => { setAddOpen(true); setAddSearch(''); setTab('existing'); setNewForm(NEW_STUDENT_EMPTY); setNewErrors({}); }}>
@@ -195,7 +195,7 @@ export default function ClassDetailPage() {
             </div>
             <div>
               <p className="text-2xl font-bold">{(students as any[]).length}</p>
-              <p className="text-xs text-muted-foreground">O'quvchilar</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">O'quvchilar</p>
             </div>
           </CardContent>
         </Card>
@@ -206,14 +206,14 @@ export default function ClassDetailPage() {
             </div>
             <div>
               <p className="text-2xl font-bold">{cls.gradeLevel}</p>
-              <p className="text-xs text-muted-foreground">Sinf darajasi</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Sinf darajasi</p>
             </div>
           </CardContent>
         </Card>
         {cls.classTeacher && (
           <Card className="col-span-2 sm:col-span-1">
             <CardContent className="p-4">
-              <p className="text-xs text-muted-foreground mb-1">Sinf rahbari</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-1">Sinf rahbari</p>
               <p className="font-medium text-sm">{cls.classTeacher.firstName} {cls.classTeacher.lastName}</p>
             </CardContent>
           </Card>
@@ -228,7 +228,7 @@ export default function ClassDetailPage() {
         </CardHeader>
         <CardContent className="space-y-3">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
             <Input
               placeholder="Ism bo'yicha qidirish..."
               className="pl-9"
@@ -243,8 +243,8 @@ export default function ClassDetailPage() {
             </div>
           ) : filteredStudents.length === 0 ? (
             <div className="text-center py-10">
-              <Users className="h-10 w-10 text-muted-foreground mx-auto mb-2 opacity-40" />
-              <p className="text-sm text-muted-foreground">
+              <Users className="h-10 w-10 text-xedu-slate-500 dark:text-xedu-slate-400 mx-auto mb-2 opacity-40" />
+              <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                 {search ? "Qidiruv bo'yicha topilmadi" : "Hali o'quvchilar qo'shilmagan"}
               </p>
               {canManage && !search && (
@@ -258,15 +258,15 @@ export default function ClassDetailPage() {
               {filteredStudents.map((student: any, idx: number) => (
                 <div
                   key={student.id}
-                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-muted/50 group transition-colors"
+                  className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-700/30 group transition-colors"
                 >
-                  <span className="w-6 text-xs text-muted-foreground text-right">{idx + 1}</span>
+                  <span className="w-6 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 text-right">{idx + 1}</span>
                   <Avatar className="h-8 w-8">
                     <AvatarFallback className="text-xs">{getInitials(student.firstName, student.lastName)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium">{student.firstName} {student.lastName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{student.email}</p>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{student.email}</p>
                   </div>
                   {student.isActive !== false && (
                     <Badge variant="outline" className="border-green-500 text-green-600 text-xs">Aktiv</Badge>
@@ -275,7 +275,7 @@ export default function ClassDetailPage() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-destructive hover:text-destructive hover:bg-destructive/10"
+                      className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-xedu-ruby hover:text-xedu-ruby hover:bg-xedu-ruby/10"
                       onClick={() => removeMutation.mutate(student.id)}
                       disabled={removeMutation.isPending}
                     >
@@ -306,7 +306,7 @@ export default function ClassDetailPage() {
             {/* TAB 1 — Mavjud o'quvchilar */}
             <TabsContent value="existing" className="space-y-3 mt-0">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
                 <Input
                   placeholder="Ism bo'yicha qidirish..."
                   className="pl-9"
@@ -317,14 +317,14 @@ export default function ClassDetailPage() {
               </div>
               <div className="max-h-64 overflow-y-auto space-y-1 border rounded-lg p-1">
                 {availableStudents.length === 0 ? (
-                  <div className="text-center py-8 text-sm text-muted-foreground">
+                  <div className="text-center py-8 text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                     {addSearch ? 'Topilmadi' : "Qo'shuvchan o'quvchilar yo'q"}
                   </div>
                 ) : (
                   availableStudents.map((s: any) => (
                     <div
                       key={s.id}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors"
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-700/30 cursor-pointer transition-colors"
                       onClick={() => {
                         addMutation.mutate(s.id);
                         setAddOpen(false);
@@ -335,14 +335,14 @@ export default function ClassDetailPage() {
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium">{s.firstName} {s.lastName}</p>
-                        <p className="text-xs text-muted-foreground truncate">{s.email}</p>
+                        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{s.email}</p>
                       </div>
                       <Plus className="h-4 w-4 text-primary shrink-0" />
                     </div>
                   ))
                 )}
               </div>
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 text-center">
                 Yangi o'quvchi yaratmoqchi bo'lsangiz → "Yangi o'quvchi" tabini bosing
               </p>
             </TabsContent>
@@ -351,23 +351,23 @@ export default function ClassDetailPage() {
             <TabsContent value="new" className="space-y-4 mt-0">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <Label>Ism <span className="text-destructive">*</span></Label>
+                  <Label>Ism <span className="text-xedu-ruby">*</span></Label>
                   <Input placeholder="Ali" value={newForm.firstName} onChange={setNew('firstName')} />
-                  {newErrors.firstName && <p className="text-xs text-destructive">{newErrors.firstName}</p>}
+                  {newErrors.firstName && <p className="text-xs text-xedu-ruby">{newErrors.firstName}</p>}
                 </div>
                 <div className="space-y-1.5">
-                  <Label>Familiya <span className="text-destructive">*</span></Label>
+                  <Label>Familiya <span className="text-xedu-ruby">*</span></Label>
                   <Input placeholder="Valiyev" value={newForm.lastName} onChange={setNew('lastName')} />
-                  {newErrors.lastName && <p className="text-xs text-destructive">{newErrors.lastName}</p>}
+                  {newErrors.lastName && <p className="text-xs text-xedu-ruby">{newErrors.lastName}</p>}
                 </div>
               </div>
               <div className="space-y-1.5">
-                <Label>Email <span className="text-destructive">*</span></Label>
+                <Label>Email <span className="text-xedu-ruby">*</span></Label>
                 <Input type="email" placeholder="ali@maktab.uz" value={newForm.email} onChange={setNew('email')} />
-                {newErrors.email && <p className="text-xs text-destructive">{newErrors.email}</p>}
+                {newErrors.email && <p className="text-xs text-xedu-ruby">{newErrors.email}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Parol <span className="text-destructive">*</span></Label>
+                <Label>Parol <span className="text-xedu-ruby">*</span></Label>
                 <div className="relative">
                   <Input
                     type={showPass ? 'text' : 'password'}
@@ -379,12 +379,12 @@ export default function ClassDetailPage() {
                   <button
                     type="button"
                     onClick={() => setShowPass(s => !s)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-500 dark:text-xedu-slate-400"
                   >
                     {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                {newErrors.password && <p className="text-xs text-destructive">{newErrors.password}</p>}
+                {newErrors.password && <p className="text-xs text-xedu-ruby">{newErrors.password}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Telefon</Label>

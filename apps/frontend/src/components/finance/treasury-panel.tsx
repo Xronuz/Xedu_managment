@@ -78,7 +78,7 @@ export function TreasuryPanel() {
       <Card className="border-2 border-primary/20 bg-primary/5">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
               Umumiy g'azna balansi
             </CardTitle>
             <div className="flex items-center gap-2">
@@ -88,7 +88,7 @@ export function TreasuryPanel() {
                   'text-xs font-semibold gap-1',
                   isDecentralized
                     ? 'border-orange-400 text-orange-600 bg-orange-50 dark:bg-orange-900/20'
-                    : 'border-blue-400 text-blue-600 bg-blue-50 dark:bg-blue-900/20',
+                    : 'border-blue-400 text-xedu-sky bg-blue-50 dark:bg-blue-900/20',
                 )}
               >
                 {isDecentralized ? (
@@ -121,9 +121,9 @@ export function TreasuryPanel() {
         <CardContent>
           <p className="text-3xl font-bold tracking-tight">
             {formatUZS(summary.totalBalance)}
-            <span className="text-sm font-normal text-muted-foreground ml-1">UZS</span>
+            <span className="text-sm font-normal text-xedu-slate-500 dark:text-xedu-slate-400 ml-1">UZS</span>
           </p>
-          <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
+          <div className="flex gap-4 mt-2 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
             <span className="flex items-center gap-1">
               <Banknote className="h-3.5 w-3.5" />
               Naqd: {formatUZS(summary.totalCash)}
@@ -138,7 +138,7 @@ export function TreasuryPanel() {
 
       {/* Har bir g'azna kartasi */}
       {summary.treasuries.length === 0 ? (
-        <div className="flex flex-col items-center py-6 text-center text-muted-foreground text-sm border rounded-lg border-dashed gap-2">
+        <div className="flex flex-col items-center py-6 text-center text-xedu-slate-500 dark:text-xedu-slate-400 text-sm border rounded-lg border-dashed gap-2">
           <Banknote className="h-8 w-8 opacity-30" />
           <p>G'aznalar hali yaratilmagan</p>
           <Button
@@ -168,7 +168,7 @@ function TreasuryCard({ treasury }: { treasury: Treasury }) {
 
   return (
     <Card className={cn(
-      'border transition-shadow hover:shadow-md',
+      'border transition-shadow hover:shadow-sm',
       !treasury.isActive && 'opacity-50',
     )}>
       <CardContent className="p-4">
@@ -180,11 +180,11 @@ function TreasuryCard({ treasury }: { treasury: Treasury }) {
             )}>
               {isCash
                 ? <Banknote className="h-4 w-4 text-green-600" />
-                : <CreditCard className="h-4 w-4 text-blue-600" />}
+                : <CreditCard className="h-4 w-4 text-xedu-sky" />}
             </div>
             <div className="min-w-0">
               <p className="font-semibold text-sm truncate">{treasury.name}</p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                 {treasury.branch?.name ?? (
                   <span className="flex items-center gap-0.5">
                     <Layers className="h-3 w-3" /> Markaziy
@@ -204,12 +204,12 @@ function TreasuryCard({ treasury }: { treasury: Treasury }) {
         <div className="mt-3 border-t pt-2.5">
           <p className="text-xl font-bold">
             {formatUZS(treasury.balance)}
-            <span className="text-xs font-normal text-muted-foreground ml-1">
+            <span className="text-xs font-normal text-xedu-slate-500 dark:text-xedu-slate-400 ml-1">
               {treasury.currency}
             </span>
           </p>
           {treasury.branch?.code && (
-            <p className="text-xs text-muted-foreground">{treasury.branch.code}</p>
+            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{treasury.branch.code}</p>
           )}
         </div>
       </CardContent>

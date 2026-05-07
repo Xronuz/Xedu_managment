@@ -30,7 +30,7 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; icon: React.
   pending:   { label: 'Kutilmoqda',    color: 'border-yellow-500 text-yellow-600', icon: <Clock className="h-3 w-3" /> },
   approved:  { label: 'Tasdiqlandi',   color: 'border-green-500 text-green-600',   icon: <CheckCircle2 className="h-3 w-3" /> },
   rejected:  { label: 'Rad etildi',    color: 'border-red-500 text-red-600',       icon: <XCircle className="h-3 w-3" /> },
-  cancelled: { label: 'Bekor qilindi', color: 'border-border text-muted-foreground',     icon: <XCircle className="h-3 w-3" /> },
+  cancelled: { label: 'Bekor qilindi', color: 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 dark:text-xedu-slate-400',     icon: <XCircle className="h-3 w-3" /> },
 };
 
 const STATUS_FILTERS = [
@@ -45,7 +45,7 @@ const LEAVE_TYPES = [
   { value: 'sick',     label: '🤒 Kasallik' },
   { value: 'personal', label: '👤 Shaxsiy' },
   { value: 'family',   label: '👨‍👩‍👧 Oilaviy' },
-  { value: 'other',    label: '📋 Boshqa' },
+  { value: 'other',    label: ' Boshqa' },
 ] as const;
 
 const EMPTY_FORM = { reason: '', startDate: '', endDate: '', type: 'personal' as 'sick' | 'personal' | 'family' | 'other' };
@@ -80,7 +80,7 @@ export default function LeaveRequestsPage() {
   const createMutation = useMutation({
     mutationFn: leaveRequestsApi.create,
     onSuccess: () => {
-      toast({ title: "✅ Ta'til so'rovi yuborildi. Tasdiqlash kutilmoqda." });
+      toast({ title: " Ta'til so'rovi yuborildi. Tasdiqlash kutilmoqda." });
       queryClient.invalidateQueries({ queryKey: ['leave-requests'] });
       setCreateOpen(false);
       setForm(EMPTY_FORM);
@@ -95,7 +95,7 @@ export default function LeaveRequestsPage() {
     mutationFn: ({ id, action, comment }: { id: string; action: 'approve' | 'reject'; comment?: string }) =>
       leaveRequestsApi.review(id, { action, comment }),
     onSuccess: (_, vars) => {
-      toast({ title: vars.action === 'approve' ? "✅ So'rov tasdiqlandi" : "❌ So'rov rad etildi" });
+      toast({ title: vars.action === 'approve' ? " So'rov tasdiqlandi" : "❌ So'rov rad etildi" });
       queryClient.invalidateQueries({ queryKey: ['leave-requests'] });
       setReviewOpen(false);
     },
@@ -149,7 +149,7 @@ export default function LeaveRequestsPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <CalendarOff className="h-6 w-6" /> Ta'til so'rovlari
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">
             {isApprover
               ? `Xodimlarning ta'til so'rovlari • ${pendingCount > 0 ? `${pendingCount} ta yangi` : 'Yangi so\'rov yo\'q'}`
               : isStudent
@@ -228,15 +228,15 @@ export default function LeaveRequestsPage() {
                           <p className="font-semibold text-sm">
                             {req.requester?.firstName} {req.requester?.lastName}
                           </p>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                             {getRoleLabel(req.requester?.role ?? '')}
                           </span>
                           {isMine && (
                             <Badge variant="outline" className="text-xs px-1.5 py-0">Mening so'rovim</Badge>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{req.reason}</p>
-                        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground flex-wrap">
+                        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1 line-clamp-2">{req.reason}</p>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 flex-wrap">
                           <span className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
                             {formatDate(req.startDate)} – {formatDate(req.endDate)}
@@ -253,7 +253,7 @@ export default function LeaveRequestsPage() {
                       </Badge>
                       <button
                         onClick={() => setExpandedId(isExpanded ? null : req.id)}
-                        className="text-muted-foreground hover:text-foreground transition-colors"
+                        className="text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground transition-colors"
                       >
                         {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                       </button>
@@ -285,7 +285,7 @@ export default function LeaveRequestsPage() {
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="h-7 text-xs text-muted-foreground"
+                        className="h-7 text-xs text-xedu-slate-500 dark:text-xedu-slate-400"
                         onClick={() => cancelMutation.mutate(req.id)}
                         disabled={cancelMutation.isPending}
                       >
@@ -298,11 +298,11 @@ export default function LeaveRequestsPage() {
                 {/* Expanded: approvals */}
                 {isExpanded && (
                   <div className="border-t bg-muted/20 px-4 py-3">
-                    <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+                    <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 mb-2 flex items-center gap-1.5">
                       <User className="h-3 w-3" /> Tasdiqlovchilar
                     </p>
                     {req.approvals?.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">Tasdiqlovchi tayinlanmagan</p>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Tasdiqlovchi tayinlanmagan</p>
                     ) : (
                       <div className="space-y-2">
                         {req.approvals.map((approval: any) => {
@@ -317,17 +317,17 @@ export default function LeaveRequestsPage() {
                               <span className="font-medium">
                                 {approval.approver?.firstName} {approval.approver?.lastName}
                               </span>
-                              <span className="text-muted-foreground">{getRoleLabel(approval.approver?.role ?? '')}</span>
+                              <span className="text-xedu-slate-500 dark:text-xedu-slate-400">{getRoleLabel(approval.approver?.role ?? '')}</span>
                               <Badge variant="outline" className={`${aCfg.color} flex items-center gap-0.5 text-[10px] px-1.5`}>
                                 {aCfg.icon} {aCfg.label}
                               </Badge>
                               {approval.comment && (
-                                <span className="text-muted-foreground italic flex items-center gap-1">
+                                <span className="text-xedu-slate-500 dark:text-xedu-slate-400 italic flex items-center gap-1">
                                   <MessageSquare className="h-3 w-3" /> {approval.comment}
                                 </span>
                               )}
                               {approval.decidedAt && (
-                                <span className="text-muted-foreground">{formatDate(approval.decidedAt)}</span>
+                                <span className="text-xedu-slate-500 dark:text-xedu-slate-400">{formatDate(approval.decidedAt)}</span>
                               )}
                             </div>
                           );
@@ -367,26 +367,26 @@ export default function LeaveRequestsPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Boshlanish sanasi <span className="text-destructive">*</span></Label>
+                <Label>Boshlanish sanasi <span className="text-xedu-ruby">*</span></Label>
                 <Input
                   type="date"
                   value={form.startDate}
                   onChange={e => { setForm(f => ({ ...f, startDate: e.target.value })); setFormErrors(er => { const n = { ...er }; delete n.startDate; return n; }); }}
                 />
-                {formErrors.startDate && <p className="text-xs text-destructive">{formErrors.startDate}</p>}
+                {formErrors.startDate && <p className="text-xs text-xedu-ruby">{formErrors.startDate}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Tugash sanasi <span className="text-destructive">*</span></Label>
+                <Label>Tugash sanasi <span className="text-xedu-ruby">*</span></Label>
                 <Input
                   type="date"
                   value={form.endDate}
                   onChange={e => { setForm(f => ({ ...f, endDate: e.target.value })); setFormErrors(er => { const n = { ...er }; delete n.endDate; return n; }); }}
                 />
-                {formErrors.endDate && <p className="text-xs text-destructive">{formErrors.endDate}</p>}
+                {formErrors.endDate && <p className="text-xs text-xedu-ruby">{formErrors.endDate}</p>}
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Sabab <span className="text-destructive">*</span></Label>
+              <Label>Sabab <span className="text-xedu-ruby">*</span></Label>
               <Textarea
                 placeholder="Ta'tilga chiqish sababini kiriting..."
                 rows={4}
@@ -394,10 +394,10 @@ export default function LeaveRequestsPage() {
                 onChange={e => { setForm(f => ({ ...f, reason: e.target.value })); setFormErrors(er => { const n = { ...er }; delete n.reason; return n; }); }}
                 className="resize-none"
               />
-              {formErrors.reason && <p className="text-xs text-destructive">{formErrors.reason}</p>}
+              {formErrors.reason && <p className="text-xs text-xedu-ruby">{formErrors.reason}</p>}
             </div>
             <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-3 text-xs text-amber-700 dark:text-amber-400 space-y-1">
-              <p className="font-medium">⚠️ Diqqat</p>
+              <p className="font-medium"> Diqqat</p>
               <p>So'rovingiz direktor va o'quv ishlari bo'yicha direktorga yuboriladi. Ikkalasi ham tasdiqlasa so'rovingiz qabul qilinadi.</p>
             </div>
           </div>
@@ -416,7 +416,7 @@ export default function LeaveRequestsPage() {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {reviewAction === 'approve' ? "✅ So'rovni tasdiqlash" : "❌ So'rovni rad etish"}
+              {reviewAction === 'approve' ? " So'rovni tasdiqlash" : "❌ So'rovni rad etish"}
             </DialogTitle>
             {reviewTarget && (
               <DialogDescription>
@@ -428,7 +428,7 @@ export default function LeaveRequestsPage() {
           <div className="space-y-3 py-2">
             {reviewTarget && (
               <div className="rounded-lg bg-muted p-3 text-sm">
-                <p className="font-medium text-xs text-muted-foreground mb-1">Sabab:</p>
+                <p className="font-medium text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-1">Sabab:</p>
                 <p>{reviewTarget.reason}</p>
               </div>
             )}

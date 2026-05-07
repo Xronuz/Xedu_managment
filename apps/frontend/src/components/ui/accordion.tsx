@@ -113,7 +113,7 @@ function AccordionTrigger({ children, className, ...props }: AccordionTriggerPro
       {children}
       <ChevronDown
         className={cn(
-          'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+          'h-4 w-4 shrink-0 text-xedu-slate-400 dark:text-xedu-slate-500 transition-transform duration-200',
           isOpen && 'rotate-180',
         )}
       />

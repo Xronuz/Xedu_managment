@@ -52,7 +52,7 @@ const ACTION_CFG: Record<AuditAction, { label: string; color: string; icon: Reac
   },
   logout: {
     label: 'Chiqdi',
-    color: 'bg-muted text-muted-foreground border-border',
+    color: 'bg-muted text-xedu-slate-500 dark:text-xedu-slate-400 border-xedu-slate-200 dark:border-xedu-slate-700',
     icon: <LogOut className="h-3 w-3" />,
   },
   export: {
@@ -63,10 +63,10 @@ const ACTION_CFG: Record<AuditAction, { label: string; color: string; icon: Reac
 };
 
 const ENTITY_EMOJI: Record<string, string> = {
-  User: '👤', Grade: '📊', Attendance: '✅', Payment: '💳',
+  User: '👤', Grade: '📊', Attendance: '', Payment: '💳',
   Exam: '📝', Homework: '📚', Schedule: '📅', Class: '🏫',
-  Subject: '📖', FeeStructure: '💰', LeaveRequest: '🏖️',
-  StaffSalary: '💵', MonthlyPayroll: '📋', Notification: '🔔',
+  Subject: '📖', FeeStructure: '💰', LeaveRequest: '🏖',
+  StaffSalary: '💵', MonthlyPayroll: '', Notification: '🔔',
 };
 
 const ENTITIES = [
@@ -83,7 +83,7 @@ function DiffViewer({ oldData, newData }: { oldData?: Record<string, any>; newDa
     ...Object.keys(newData ?? {}),
   ]));
 
-  if (allKeys.length === 0) return <p className="text-xs text-muted-foreground">Ma'lumot yo'q</p>;
+  if (allKeys.length === 0) return <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Ma'lumot yo'q</p>;
 
   return (
     <div className="text-xs font-mono space-y-0.5">
@@ -104,10 +104,10 @@ function DiffViewer({ oldData, newData }: { oldData?: Record<string, any>; newDa
             `}
           >
             <span className="font-semibold text-foreground/70 truncate">{key}</span>
-            <span className={`truncate ${removed || (changed && !added) ? 'line-through text-red-500' : 'text-muted-foreground'}`}>
+            <span className={`truncate ${removed || (changed && !added) ? 'line-through text-red-500' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
               {oldVal !== undefined ? String(JSON.stringify(oldVal)).slice(0, 60) : '—'}
             </span>
-            <span className={`truncate ${added || changed ? 'text-green-700 font-medium' : 'text-muted-foreground'}`}>
+            <span className={`truncate ${added || changed ? 'text-green-700 font-medium' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
               {newVal !== undefined ? String(JSON.stringify(newVal)).slice(0, 60) : '—'}
             </span>
           </div>
@@ -128,7 +128,7 @@ function LogDetailModal({ log, onClose }: { log: AuditLog | null; onClose: () =>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <span className="text-lg">{ENTITY_EMOJI[log.entity] ?? '📋'}</span>
+            <span className="text-lg">{ENTITY_EMOJI[log.entity] ?? ''}</span>
             {log.entity} — {cfg.label}
           </DialogTitle>
           <DialogDescription>
@@ -148,10 +148,10 @@ function LogDetailModal({ log, onClose }: { log: AuditLog | null; onClose: () =>
               </Avatar>
               <div>
                 <div className="font-medium text-sm">{log.user.firstName} {log.user.lastName}</div>
-                <div className="text-xs text-muted-foreground">{log.user.email} • {log.user.role}</div>
+                <div className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{log.user.email} • {log.user.role}</div>
               </div>
               {log.ipAddress && (
-                <div className="ml-auto text-xs text-muted-foreground font-mono">{log.ipAddress}</div>
+                <div className="ml-auto text-xs text-xedu-slate-500 dark:text-xedu-slate-400 font-mono">{log.ipAddress}</div>
               )}
             </div>
           )}
@@ -159,7 +159,7 @@ function LogDetailModal({ log, onClose }: { log: AuditLog | null; onClose: () =>
           {/* Diff view */}
           {(log.oldData || log.newData) && (
             <div className="space-y-2">
-              <div className="grid grid-cols-[120px_1fr_1fr] gap-2 text-xs text-muted-foreground font-medium px-2">
+              <div className="grid grid-cols-[120px_1fr_1fr] gap-2 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 font-medium px-2">
                 <span>Maydon</span>
                 <span className="text-red-600">Eski qiymat</span>
                 <span className="text-green-600">Yangi qiymat</span>
@@ -171,7 +171,7 @@ function LogDetailModal({ log, onClose }: { log: AuditLog | null; onClose: () =>
 
           {/* Raw JSON */}
           <details className="text-xs">
-            <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+            <summary className="cursor-pointer text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground">
               Raw JSON ko'rish
             </summary>
             <div className="mt-2 grid grid-cols-2 gap-2">
@@ -270,7 +270,7 @@ export default function AuditLogPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" /> Audit Log
           </h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm mt-0.5">
             Tizimda kim, nima, qachon o&apos;zgartirdi — to&apos;liq tarix
           </p>
         </div>
@@ -293,7 +293,7 @@ export default function AuditLogPage() {
         <CardContent className="p-4">
           <div className="flex items-center gap-2">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
               <Input
                 placeholder="Foydalanuvchi ID bo'yicha izlash..."
                 className="pl-9"
@@ -383,7 +383,7 @@ export default function AuditLogPage() {
               {isLoading ? 'Yuklanmoqda...' : `${meta?.total ?? 0} ta yozuv`}
             </CardTitle>
             {meta && meta.totalPages > 1 && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2 text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                 <Button
                   variant="ghost" size="icon" className="h-7 w-7"
                   disabled={page <= 1}
@@ -419,8 +419,8 @@ export default function AuditLogPage() {
             </div>
           ) : logs.length === 0 ? (
             <div className="py-16 text-center">
-              <Shield className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-              <p className="text-muted-foreground">Audit log topilmadi</p>
+              <Shield className="h-12 w-12 text-xedu-slate-500 dark:text-xedu-slate-400/30 mx-auto mb-3" />
+              <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Audit log topilmadi</p>
               {hasFilters && (
                 <Button variant="link" onClick={resetFilters} className="mt-2">Filtrlarni tozalash</Button>
               )}
@@ -429,13 +429,13 @@ export default function AuditLogPage() {
             <div className="divide-y">
               {logs.map(log => {
                 const cfg = ACTION_CFG[log.action] ?? ACTION_CFG.update;
-                const emoji = ENTITY_EMOJI[log.entity] ?? '📋';
+                const emoji = ENTITY_EMOJI[log.entity] ?? '';
                 const hasData = log.oldData || log.newData;
 
                 return (
                   <div
                     key={log.id}
-                    className="flex items-start gap-3 px-4 py-3 hover:bg-muted/30 transition-colors cursor-pointer group"
+                    className="flex items-start gap-3 px-4 py-3 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors cursor-pointer group"
                     onClick={() => setSelectedLog(log)}
                   >
                     {/* Avatar */}
@@ -465,22 +465,22 @@ export default function AuditLogPage() {
                         <span className="text-sm">
                           {emoji} <span className="font-medium">{log.entity}</span>
                           {log.entityId && (
-                            <span className="text-muted-foreground text-xs ml-1">
+                            <span className="text-xedu-slate-500 dark:text-xedu-slate-400 text-xs ml-1">
                               #{log.entityId.slice(-6)}
                             </span>
                           )}
                         </span>
                       </div>
                       <div className="flex items-center gap-3 mt-0.5">
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
+                        <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {new Date(log.createdAt).toLocaleString('uz-UZ')}
                         </span>
                         {log.user?.role && (
-                          <span className="text-xs text-muted-foreground">{log.user.role}</span>
+                          <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{log.user.role}</span>
                         )}
                         {log.ipAddress && (
-                          <span className="text-xs text-muted-foreground font-mono">{log.ipAddress}</span>
+                          <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 font-mono">{log.ipAddress}</span>
                         )}
                       </div>
                     </div>
@@ -507,7 +507,7 @@ export default function AuditLogPage() {
           <Button variant="outline" size="sm" disabled={page <= 1} onClick={() => setPage(p => p - 1)}>
             <ChevronLeft className="h-4 w-4 mr-1" /> Oldingisi
           </Button>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
             {page} / {meta.totalPages} sahifa ({meta.total} ta yozuv)
           </span>
           <Button variant="outline" size="sm" disabled={page >= meta.totalPages} onClick={() => setPage(p => p + 1)}>

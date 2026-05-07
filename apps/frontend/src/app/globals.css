@@ -55,6 +55,11 @@
     --xedu-border-hover:   rgba(0, 0, 0, 0.10);
     --xedu-border-strong:  rgba(0, 0, 0, 0.14);
 
+    /* ── Layout ── */
+    --sidebar-width:       272px;
+    --sidebar-collapsed:   84px;
+    --header-height:       60px;
+
     /* ── Accents (limited palette) ── */
     --xedu-gold:   #D4A843;
     --xedu-ruby:   #DC2626;

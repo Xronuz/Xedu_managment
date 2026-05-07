@@ -76,7 +76,7 @@ export function BreadcrumbNav() {
     >
       <Link
         href="/dashboard"
-        className="flex h-7 w-7 items-center justify-center rounded-lg bg-white shadow-pill text-slate-500 hover:text-slate-900 hover:shadow-md transition-all dark:bg-slate-900 dark:text-slate-400 dark:hover:text-white"
+        className="flex h-7 w-7 items-center justify-center rounded-lg bg-white shadow-pill text-slate-500 hover:text-slate-900 hover:shadow-sm transition-all dark:bg-slate-900 dark:text-slate-400 dark:hover:text-white"
       >
         <Home className="h-3.5 w-3.5 shrink-0" />
       </Link>

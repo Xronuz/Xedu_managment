@@ -156,23 +156,23 @@ const ATTENDANCE_CONFIG: Record<
 > = {
   [AttendanceStatus.PRESENT]: {
     label: 'Keldi',
-    color: 'text-green-600',
-    icon: <CheckCircle2 className="h-4 w-4 text-green-600" />,
+    color: 'text-xedu-primary',
+    icon: <CheckCircle2 className="h-4 w-4 text-xedu-primary" />,
   },
   [AttendanceStatus.ABSENT]: {
     label: 'Kelmadi',
-    color: 'text-red-600',
-    icon: <XCircle className="h-4 w-4 text-red-600" />,
+    color: 'text-xedu-ruby',
+    icon: <XCircle className="h-4 w-4 text-xedu-ruby" />,
   },
   [AttendanceStatus.LATE]: {
     label: 'Kechikdi',
-    color: 'text-yellow-600',
-    icon: <Clock className="h-4 w-4 text-yellow-600" />,
+    color: 'text-xedu-amber',
+    icon: <Clock className="h-4 w-4 text-xedu-amber" />,
   },
   [AttendanceStatus.EXCUSED]: {
     label: 'Uzrli',
-    color: 'text-blue-600',
-    icon: <AlertCircle className="h-4 w-4 text-blue-600" />,
+    color: 'text-xedu-sky',
+    icon: <AlertCircle className="h-4 w-4 text-xedu-sky" />,
   },
 };
 
@@ -180,10 +180,10 @@ const ATTENDANCE_CONFIG: Record<
 
 function getGradeColor(score: number, maxScore: number): string {
   const pct = (score / maxScore) * 100;
-  if (pct >= 85) return 'text-green-600';
-  if (pct >= 70) return 'text-blue-600';
-  if (pct >= 55) return 'text-yellow-600';
-  return 'text-red-600';
+  if (pct >= 85) return 'text-xedu-primary';
+  if (pct >= 70) return 'text-xedu-sky';
+  if (pct >= 55) return 'text-xedu-amber';
+  return 'text-xedu-ruby';
 }
 
 function getGradeTypeBadgeVariant(
@@ -308,7 +308,7 @@ function ScheduleTab({ studentId }: { studentId: string }) {
 
   if (!schedule || schedule.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+      <div className="flex flex-col items-center justify-center py-12 text-xedu-slate-500 dark:text-xedu-slate-400">
         <Calendar className="h-12 w-12 mb-3 opacity-40" />
         <p className="text-sm">Dars jadvali topilmadi</p>
       </div>
@@ -327,14 +327,14 @@ function ScheduleTab({ studentId }: { studentId: string }) {
     <div className="space-y-6">
       {Object.entries(grouped).map(([day, lessons]) => (
         <div key={day}>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-2">
+          <h3 className="text-sm font-semibold text-xedu-slate-500 dark:text-xedu-slate-400 uppercase tracking-wide mb-2">
             {DAY_LABELS[day as DayOfWeek]}
           </h3>
           <div className="space-y-2">
             {lessons.map((lesson) => (
               <div
                 key={lesson.id}
-                className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg border bg-white dark:bg-xedu-slate-900 hover:bg-accent/50 transition-colors"
               >
                 <Avatar className="h-10 w-10 shrink-0">
                   <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
@@ -343,13 +343,13 @@ function ScheduleTab({ studentId }: { studentId: string }) {
                 </Avatar>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium truncate">{lesson.subject.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">
                     {lesson.teacher?.firstName} {lesson.teacher?.lastName}
                     {lesson.room ? ` • ${lesson.room}-xona` : ''}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-xs font-medium text-muted-foreground">
+                  <span className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
                     {lesson.startTime} – {lesson.endTime}
                   </span>
                 </div>
@@ -378,7 +378,7 @@ function GradesTab({ studentId }: { studentId: string }) {
 
   if (grades.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+      <div className="flex flex-col items-center justify-center py-12 text-xedu-slate-500 dark:text-xedu-slate-400">
         <TrendingUp className="h-12 w-12 mb-3 opacity-40" />
         <p className="text-sm">Baholar mavjud emas</p>
       </div>
@@ -441,12 +441,12 @@ function GradesTab({ studentId }: { studentId: string }) {
                       <Badge variant={getGradeTypeBadgeVariant(grade.type)} className="text-xs">
                         {GRADE_TYPE_LABELS[grade.type]}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">{formatDate(grade.date)}</span>
+                      <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{formatDate(grade.date)}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       {grade.comment && (
                         <span
-                          className="text-xs text-muted-foreground max-w-[120px] truncate"
+                          className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 max-w-[120px] truncate"
                           title={grade.comment}
                         >
                           {grade.comment}
@@ -484,7 +484,7 @@ function HomeworkTab({ studentId }: { studentId: string }) {
 
   if (homework.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+      <div className="flex flex-col items-center justify-center py-12 text-xedu-slate-500 dark:text-xedu-slate-400">
         <ClipboardList className="h-12 w-12 mb-3 opacity-40" />
         <p className="text-sm">Uy vazifalari topilmadi</p>
       </div>
@@ -501,15 +501,15 @@ function HomeworkTab({ studentId }: { studentId: string }) {
     return (
       <div
         className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
-          overdue ? 'border-red-200 bg-red-50/50' : 'bg-card hover:bg-accent/50'
+          overdue ? 'border-xedu-ruby/20 bg-xedu-ruby/5' : 'bg-white dark:bg-xedu-slate-900 hover:bg-accent/50'
         }`}
       >
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
             submitted
-              ? 'bg-green-100 text-green-600'
+              ? 'bg-xedu-primary-light text-xedu-primary'
               : overdue
-              ? 'bg-red-100 text-red-600'
+              ? 'bg-xedu-ruby/10 text-xedu-ruby'
               : 'bg-primary/10 text-primary'
           }`}
         >
@@ -523,20 +523,20 @@ function HomeworkTab({ studentId }: { studentId: string }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium truncate">{hw.title}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
             {hw.subject.name} •{' '}
             {hw.teacher.firstName} {hw.teacher.lastName}
           </p>
           <p className="text-xs mt-0.5">
-            <span className="text-muted-foreground">Muddati: </span>
-            <span className={overdue ? 'text-red-600 font-medium' : 'text-foreground'}>
+            <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Muddati: </span>
+            <span className={overdue ? 'text-xedu-ruby font-medium' : 'text-foreground'}>
               {formatDate(hw.dueDate)}
             </span>
           </p>
         </div>
         <div className="shrink-0">
           {submitted ? (
-            <Badge variant="outline" className="text-xs text-green-600 border-green-300 bg-green-50">
+            <Badge variant="outline" className="text-xs text-xedu-primary border-xedu-primary/30 bg-xedu-primary-light">
               Topshirildi
             </Badge>
           ) : overdue ? (
@@ -574,7 +574,7 @@ function HomeworkTab({ studentId }: { studentId: string }) {
 
       {past.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
+          <h3 className="text-sm font-semibold text-xedu-slate-500 dark:text-xedu-slate-400 mb-2 flex items-center gap-1.5">
             <CheckCircle2 className="h-4 w-4" />
             O'tgan uy vazifalari
             <Badge variant="outline" className="ml-1">{past.length}</Badge>
@@ -667,7 +667,7 @@ function StudentUpcomingExams({ studentId }: { studentId: string }) {
             >
               <div>
                 <p className="font-medium">{exam.subject?.name ?? exam.title}</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                   {d.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'long' })} — {exam.maxScore ?? exam.totalMarks} ball
                 </p>
               </div>
@@ -730,7 +730,7 @@ function computeAchievements(opts: {
       label: "A'lochi",
       description: 'GPA 90% dan yuqori',
       icon: <Trophy className="h-4 w-4" />,
-      color: 'text-yellow-600 bg-yellow-50 border-yellow-200',
+      color: 'text-xedu-amber bg-amber-50 border-xedu-amber/20',
       earned: gpa >= 90,
     },
     {
@@ -738,7 +738,7 @@ function computeAchievements(opts: {
       label: 'Devoniy',
       description: 'So\'nggi 30 kunda 100% davomat',
       icon: <Star className="h-4 w-4" />,
-      color: 'text-green-600 bg-green-50 border-green-200',
+      color: 'text-xedu-primary bg-xedu-primary-light border-xedu-primary/20',
       earned: attendancePct === 100,
     },
     {
@@ -754,7 +754,7 @@ function computeAchievements(opts: {
       label: '30 kunlik streak',
       description: '30 kun ketma-ket keldi',
       icon: <Zap className="h-4 w-4" />,
-      color: 'text-purple-600 bg-purple-50 border-purple-200',
+      color: 'text-xedu-violet bg-violet-50 border-xedu-violet/20',
       earned: streak >= 30,
     },
     {
@@ -762,7 +762,7 @@ function computeAchievements(opts: {
       label: 'Faol o\'quvchi',
       description: 'Barcha uy vazifalar topshirildi',
       icon: <Target className="h-4 w-4" />,
-      color: 'text-blue-600 bg-blue-50 border-blue-200',
+      color: 'text-xedu-sky bg-sky-50 border-xedu-sky/20',
       earned: totalHomework > 0 && pendingHomework === 0,
     },
     {
@@ -792,23 +792,23 @@ function GamificationSection({ records, gpa, attendancePct, pendingHomework, tot
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-sm flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-yellow-500" />
+          <Trophy className="h-4 w-4 text-xedu-gold" />
           Yutuqlar va streak
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Streak counter */}
-        <div className="flex items-center gap-3 rounded-xl bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-950/30 dark:to-amber-950/30 border border-orange-200 dark:border-orange-800 px-4 py-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/50">
-            <Flame className="h-6 w-6 text-orange-500" />
+        <div className="flex items-center gap-3 rounded-xl bg-xedu-amber/5 border border-xedu-amber/20 dark:border-xedu-amber/30 px-4 py-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-xedu-amber/10 dark:bg-xedu-amber/20">
+            <Flame className="h-6 w-6 text-xedu-amber" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-orange-600 dark:text-orange-400">{streak} kun</p>
-            <p className="text-xs text-muted-foreground">Ketma-ket davomat streaki</p>
+            <p className="text-2xl font-bold text-xedu-amber dark:text-xedu-amber">{streak} kun</p>
+            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Ketma-ket davomat streaki</p>
           </div>
           {streak >= 7 && (
             <div className="ml-auto">
-              <Badge className="bg-orange-100 text-orange-700 border-orange-300 dark:bg-orange-900 dark:text-orange-300">
+              <Badge className="bg-xedu-amber/10 text-xedu-amber border-xedu-amber/30 dark:bg-xedu-amber/20 dark:text-xedu-amber">
                 🔥 Ajoyib!
               </Badge>
             </div>
@@ -818,7 +818,7 @@ function GamificationSection({ records, gpa, attendancePct, pendingHomework, tot
         {/* Earned badges */}
         {earned.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2">Qo'lga kiritilgan yutuqlar ({earned.length})</p>
+            <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 mb-2">Qo'lga kiritilgan yutuqlar ({earned.length})</p>
             <div className="flex flex-wrap gap-2">
               {earned.map(a => (
                 <div key={a.id} className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${a.color}`} title={a.description}>
@@ -833,10 +833,10 @@ function GamificationSection({ records, gpa, attendancePct, pendingHomework, tot
         {/* Locked badges */}
         {notEarned.length > 0 && (
           <div>
-            <p className="text-xs font-medium text-muted-foreground mb-2">Ochilmagan yutuqlar</p>
+            <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 mb-2">Ochilmagan yutuqlar</p>
             <div className="flex flex-wrap gap-2">
               {notEarned.map(a => (
-                <div key={a.id} className="flex items-center gap-1.5 rounded-full border border-dashed px-3 py-1.5 text-xs font-medium text-muted-foreground opacity-50" title={a.description}>
+                <div key={a.id} className="flex items-center gap-1.5 rounded-full border border-dashed px-3 py-1.5 text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 opacity-50" title={a.description}>
                   {a.icon}
                   {a.label}
                 </div>
@@ -971,7 +971,7 @@ export default function StudentPortalPage() {
             Talaba kabineti
           </h1>
           {user && (
-            <p className="text-muted-foreground mt-0.5">
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">
               Xush kelibsiz, {user.firstName} {user.lastName}
             </p>
           )}
@@ -1010,11 +1010,11 @@ export default function StudentPortalPage() {
         {/* Today's lessons */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
               Bugungi darslar
             </CardTitle>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-100">
-              <BookOpen className="h-4 w-4 text-blue-600" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-xedu-primary-light">
+              <BookOpen className="h-4 w-4 text-xedu-primary" />
             </div>
           </CardHeader>
           <CardContent>
@@ -1026,7 +1026,7 @@ export default function StudentPortalPage() {
             ) : (
               <>
                 <div className="text-2xl font-bold">{todayLessonsCount}</div>
-                <p className="text-xs text-muted-foreground mt-0.5">ta dars bugun</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">ta dars bugun</p>
               </>
             )}
           </CardContent>
@@ -1035,11 +1035,11 @@ export default function StudentPortalPage() {
         {/* GPA */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
               O'rtacha baho
             </CardTitle>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100">
-              <TrendingUp className="h-4 w-4 text-green-600" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-xedu-primary-light">
+              <TrendingUp className="h-4 w-4 text-xedu-primary" />
             </div>
           </CardHeader>
           <CardContent>
@@ -1051,7 +1051,7 @@ export default function StudentPortalPage() {
             ) : (
               <>
                 <div className="text-2xl font-bold">{gpa.toFixed(1)}</div>
-                <p className="text-xs text-muted-foreground mt-0.5">GPA ball</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">GPA ball</p>
               </>
             )}
           </CardContent>
@@ -1060,11 +1060,11 @@ export default function StudentPortalPage() {
         {/* Attendance */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
               Davomat %
             </CardTitle>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-purple-100">
-              <Calendar className="h-4 w-4 text-purple-600" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-50">
+              <Calendar className="h-4 w-4 text-xedu-violet" />
             </div>
           </CardHeader>
           <CardContent>
@@ -1076,7 +1076,7 @@ export default function StudentPortalPage() {
             ) : (
               <>
                 <div className="text-2xl font-bold">{attendancePct}%</div>
-                <p className="text-xs text-muted-foreground mt-0.5">So'nggi 30 kun</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">So'nggi 30 kun</p>
               </>
             )}
           </CardContent>
@@ -1085,7 +1085,7 @@ export default function StudentPortalPage() {
         {/* Pending homework */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
               Topshirilmagan uy vazifalari
             </CardTitle>
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-100">
@@ -1101,16 +1101,16 @@ export default function StudentPortalPage() {
             ) : (
               <>
                 <div className="text-2xl font-bold">{unpaidHomework}</div>
-                <p className="text-xs text-muted-foreground mt-0.5">ta topshirish kerak</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">ta topshirish kerak</p>
               </>
             )}
           </CardContent>
         </Card>
 
         {/* EduCoin balance */}
-        <Card className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => router.push('/dashboard/student/shop')}>
+        <Card className="cursor-pointer hover:shadow-sm transition-shadow" onClick={() => router.push('/dashboard/student/shop')}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
               EduCoin balans
             </CardTitle>
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100">
@@ -1126,7 +1126,7 @@ export default function StudentPortalPage() {
             ) : (
               <>
                 <div className="text-2xl font-bold">{coinsData?.coins ?? 0}</div>
-                <p className="text-xs text-muted-foreground mt-0.5">Do'konga o'tish →</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">Do'konga o'tish →</p>
               </>
             )}
           </CardContent>
@@ -1247,7 +1247,7 @@ export default function StudentPortalPage() {
                   <Calendar className="h-5 w-5 text-purple-500" />
                   Davomat grafigi (6 oy)
                 </CardTitle>
-                <span className={`text-sm font-bold ${yearPct >= 80 ? 'text-green-600' : yearPct >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+                <span className={`text-sm font-bold ${yearPct >= 80 ? 'text-xedu-primary' : yearPct >= 60 ? 'text-xedu-amber' : 'text-xedu-ruby'}`}>
                   Jami: {yearPct}%
                 </span>
               </div>
@@ -1298,7 +1298,7 @@ export default function StudentPortalPage() {
                         <div>
                           <span className="text-sm font-medium">{formatDate(record.date)}</span>
                           {record.subject && (
-                            <span className="text-xs text-muted-foreground ml-2">
+                            <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 ml-2">
                               {record.subject.name}
                             </span>
                           )}
@@ -1306,7 +1306,7 @@ export default function StudentPortalPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         {record.comment && (
-                          <span className="text-xs text-muted-foreground">{record.comment}</span>
+                          <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{record.comment}</span>
                         )}
                         <span className={`text-sm font-medium ${config.color}`}>
                           {config.label}
@@ -1318,7 +1318,7 @@ export default function StudentPortalPage() {
             </div>
             {attendanceData.length > 10 && (
               <div className="mt-3 text-center">
-                <Button variant="ghost" size="sm" className="text-xs text-muted-foreground">
+                <Button variant="ghost" size="sm" className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                   Barchasini ko'rish ({attendanceData.length} ta yozuv)
                 </Button>
               </div>

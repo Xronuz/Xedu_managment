@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   School, Users, BookOpen, Calendar, CheckCircle2,
   ChevronRight, ChevronLeft, Loader2, Plus, Trash2,
-  GraduationCap, Clock, Rocket,
+  GraduationCap, Clock, Rocket, AlertCircle,
 } from 'lucide-react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -30,6 +31,8 @@ const STEPS = [
   { id: 5, label: 'Jadval',      icon: Calendar,      desc: 'Dars jadvali' },
 ] as const;
 
+const ONBOARDING_STORAGE_KEY = 'xedu_onboarding_progress';
+
 const DAYS_UZ = [
   { value: 'monday',    label: 'Dushanba' },
   { value: 'tuesday',   label: 'Seshanba' },
@@ -37,6 +40,16 @@ const DAYS_UZ = [
   { value: 'thursday',  label: 'Payshanba' },
   { value: 'friday',    label: 'Juma' },
 ];
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+function generateSecurePassword(): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+  let pw = '';
+  for (let i = 0; i < 12; i++) {
+    pw += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pw;
+}
 
 // ── Step indicator ─────────────────────────────────────────────────────────────
 function StepIndicator({ current, completed }: { current: number; completed: number[] }) {
@@ -50,10 +63,10 @@ function StepIndicator({ current, completed }: { current: number; completed: num
           <div key={step.id} className="flex items-center">
             <div className={`flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
               isActive
-                ? 'bg-primary text-primary-foreground'
+                ? 'bg-xedu-primary text-white'
                 : isDone
-                ? 'bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400'
-                : 'bg-muted text-muted-foreground'
+                ? 'bg-xedu-primary-light/60 text-xedu-primary dark:bg-xedu-primary/15 dark:text-xedu-primary'
+                : 'bg-xedu-slate-100 text-xedu-slate-500 dark:bg-xedu-slate-800/60 dark:text-xedu-slate-400'
             }`}>
               {isDone && !isActive
                 ? <CheckCircle2 className="h-3.5 w-3.5" />
@@ -61,7 +74,7 @@ function StepIndicator({ current, completed }: { current: number; completed: num
               <span className="hidden sm:inline">{step.label}</span>
             </div>
             {i < STEPS.length - 1 && (
-              <div className={`h-0.5 w-4 sm:w-8 mx-0.5 transition-colors ${isDone ? 'bg-green-400' : 'bg-muted'}`} />
+              <div className={`h-0.5 w-4 sm:w-8 mx-0.5 transition-colors ${isDone ? 'bg-xedu-primary/40' : 'bg-xedu-slate-100 dark:bg-xedu-slate-800/60'}`} />
             )}
           </div>
         );
@@ -74,26 +87,29 @@ function StepIndicator({ current, completed }: { current: number; completed: num
 function Step1SchoolInfo({ user }: { user: any }) {
   return (
     <div className="space-y-4 text-center">
-      <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-        <School className="h-8 w-8 text-primary" />
+      <div className="mx-auto w-16 h-16 rounded-full bg-xedu-primary/10 flex items-center justify-center">
+        <School className="h-8 w-8 text-xedu-primary" />
       </div>
       <div>
-        <h2 className="text-xl font-bold">{user?.schoolName ?? 'Maktabingiz'}</h2>
-        <p className="text-muted-foreground text-sm mt-1">EduPlatform maktab boshqaruv tizimiga xush kelibsiz!</p>
+        <h2 className="text-xl font-bold tracking-tight">{user?.schoolName ?? 'Maktabingiz'}</h2>
+        <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm mt-1">Xedu ta'lim boshqaruv tizimiga xush kelibsiz</p>
       </div>
       <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto text-left">
-        <div className="bg-muted/50 rounded-lg p-3">
-          <p className="text-xs text-muted-foreground">Administrator</p>
+        <div className="bg-xedu-slate-50 dark:bg-xedu-slate-800/60 rounded-xl p-3">
+          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Administrator</p>
           <p className="font-medium text-sm">{user?.firstName} {user?.lastName}</p>
         </div>
-        <div className="bg-muted/50 rounded-lg p-3">
-          <p className="text-xs text-muted-foreground">Email</p>
+        <div className="bg-xedu-slate-50 dark:bg-xedu-slate-800/60 rounded-xl p-3">
+          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Email</p>
           <p className="font-medium text-sm truncate">{user?.email}</p>
         </div>
       </div>
-      <div className="bg-blue-50 dark:bg-blue-950/30 rounded-xl p-4 max-w-sm mx-auto text-sm text-blue-700 dark:text-blue-400 text-left">
-        <p className="font-medium mb-1">📋 Keyingi 4 qadamda nimalar qilasiz?</p>
-        <ul className="space-y-1 text-xs list-disc list-inside">
+      <div className="bg-xedu-sky/5 dark:bg-xedu-sky/5 rounded-xl p-4 max-w-sm mx-auto text-sm text-xedu-sky dark:text-xedu-sky text-left border border-xedu-sky/10">
+        <p className="font-semibold mb-1.5 flex items-center gap-1.5">
+          <AlertCircle className="h-4 w-4" />
+          Keyingi 4 qadamda nimalar qilasiz?
+        </p>
+        <ul className="space-y-1 text-xs list-disc list-inside opacity-90">
           <li>Maktab sinflarini yaratish</li>
           <li>O'quv fanlarini belgilash</li>
           <li>O'qituvchi va xodimlar qo'shish</li>
@@ -124,7 +140,7 @@ function Step2Classes({ onDone }: { onDone: (classIds: string[]) => void }) {
   const addMut = useMutation({
     mutationFn: () => classesApi.create({ name, gradeLevel: Number(gradeLevel) || undefined, academicYear }),
     onSuccess: (data) => {
-      toast({ title: `✅ "${name}" sinfi yaratildi` });
+      toast({ title: `"${name}" sinfi yaratildi` });
       setCreatedIds(p => [...p, data.id]);
       setName('');
       queryClient.invalidateQueries({ queryKey: ['classes'] });
@@ -136,7 +152,7 @@ function Step2Classes({ onDone }: { onDone: (classIds: string[]) => void }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">Maktabdagi sinflarni qo'shing. Har bir sinf alohida yaratiladi.</p>
+      <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Maktabdagi sinflarni qo'shing. Har bir sinf alohida yaratiladi.</p>
 
       {/* Quick add */}
       <div className="flex gap-2">
@@ -160,11 +176,17 @@ function Step2Classes({ onDone }: { onDone: (classIds: string[]) => void }) {
         </Button>
       </div>
 
-      <div className="text-xs text-muted-foreground">O'quv yili: <span className="font-medium">{academicYear}</span></div>
+      <div className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">O'quv yili: <span className="font-medium">{academicYear}</span></div>
 
       {/* List */}
-      {isLoading ? null : classList.length === 0 ? (
-        <div className="text-center py-6 text-muted-foreground text-sm">
+      {isLoading ? (
+        <div className="space-y-2">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-8 rounded-lg bg-xedu-slate-100 dark:bg-xedu-slate-800/40 animate-pulse" />
+          ))}
+        </div>
+      ) : classList.length === 0 ? (
+        <div className="text-center py-6 text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">
           <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-30" />
           Hali sinflar qo'shilmagan
         </div>
@@ -173,7 +195,7 @@ function Step2Classes({ onDone }: { onDone: (classIds: string[]) => void }) {
           {classList.map((c: any) => (
             <Badge key={c.id} variant="secondary" className="text-sm py-1 px-3">
               {c.name}
-              {c.gradeLevel && <span className="ml-1 text-muted-foreground">({c.gradeLevel}-sinf)</span>}
+              {c.gradeLevel && <span className="ml-1 text-xedu-slate-500 dark:text-xedu-slate-400">({c.gradeLevel}-sinf)</span>}
             </Badge>
           ))}
         </div>
@@ -206,7 +228,7 @@ function Step3Subjects({ onDone }: { onDone: () => void }) {
   const addMut = useMutation({
     mutationFn: () => subjectsApi.create({ name, code: code || undefined }),
     onSuccess: () => {
-      toast({ title: `✅ "${name}" fani qo'shildi` });
+      toast({ title: `"${name}" fani qo'shildi` });
       setName('');
       setCode('');
       queryClient.invalidateQueries({ queryKey: ['subjects'] });
@@ -224,7 +246,7 @@ function Step3Subjects({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">O'tiladigan fanlarni qo'shing.</p>
+      <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">O'tiladigan fanlarni qo'shing.</p>
 
       <div className="flex gap-2">
         <Input
@@ -247,7 +269,7 @@ function Step3Subjects({ onDone }: { onDone: () => void }) {
 
       {/* Quick add chips */}
       <div>
-        <p className="text-xs text-muted-foreground mb-2">Tezkor qo'shish:</p>
+        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-2">Tezkor qo'shish:</p>
         <div className="flex flex-wrap gap-1.5">
           {TEMPLATES.map(t => (
             <button
@@ -256,8 +278,8 @@ function Step3Subjects({ onDone }: { onDone: () => void }) {
               onClick={() => { setName(t); }}
               className={`text-xs px-2.5 py-1 rounded-full border transition-colors ${
                 alreadyAdded.has(t)
-                  ? 'border-green-300 bg-green-50 text-green-600 dark:border-green-800 dark:bg-green-950/30 cursor-default'
-                  : 'border-border hover:border-primary hover:bg-accent cursor-pointer'
+                  ? 'border-xedu-primary/20 bg-xedu-primary-light/40 text-xedu-primary dark:border-xedu-primary/20 dark:bg-xedu-primary/10 cursor-default'
+                  : 'border-xedu-slate-200 dark:border-xedu-slate-700 hover:border-xedu-primary hover:bg-xedu-primary-light/20 cursor-pointer'
               }`}
             >
               {alreadyAdded.has(t) ? <CheckCircle2 className="inline h-3 w-3 mr-0.5" /> : null}
@@ -298,10 +320,10 @@ function Step4Teachers({ onDone }: { onDone: () => void }) {
     mutationFn: () => usersApi.create({
       ...form,
       role: 'teacher',
-      password: 'EduPass123!', // Default parol — user keyinroq o'zgartiradi
+      password: generateSecurePassword(),
     }),
     onSuccess: () => {
-      toast({ title: `✅ ${form.firstName} ${form.lastName} qo'shildi` });
+      toast({ title: `${form.firstName} ${form.lastName} qo'shildi` });
       setForm({ firstName: '', lastName: '', email: '', phone: '' });
       queryClient.invalidateQueries({ queryKey: ['users'] });
     },
@@ -310,9 +332,13 @@ function Step4Teachers({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
-        O'qituvchilar qo'shing. Standart parol: <code className="bg-muted px-1 py-0.5 rounded text-xs">EduPass123!</code> — keyinroq o'zgartiring.
-      </p>
+      <div className="bg-xedu-amber/5 border border-xedu-amber/10 rounded-xl p-3 text-xs text-xedu-amber dark:text-xedu-amber flex items-start gap-2">
+        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+        <p>
+          Yangi xodimlar qo'shilganda ularga avtomatik xavfsiz parol yaratiladi.
+          Biroq, ularga alohida xabar yuborish va parolni o'zgartirishni tavsiya etamiz.
+        </p>
+      </div>
 
       <div className="grid grid-cols-2 gap-2">
         <Input
@@ -351,26 +377,26 @@ function Step4Teachers({ onDone }: { onDone: () => void }) {
       {teachers.length > 0 && (
         <div className="space-y-1.5">
           {teachers.slice(0, 5).map((t: any) => (
-            <div key={t.id} className="flex items-center gap-3 rounded-lg border p-2.5 text-sm">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
+            <div key={t.id} className="flex items-center gap-3 rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 p-2.5 text-sm">
+              <div className="w-8 h-8 rounded-full bg-xedu-primary/10 flex items-center justify-center text-xs font-bold text-xedu-primary">
                 {t.firstName[0]}{t.lastName[0]}
               </div>
               <div>
                 <p className="font-medium">{t.firstName} {t.lastName}</p>
-                <p className="text-xs text-muted-foreground">{t.email}</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{t.email}</p>
               </div>
-              <CheckCircle2 className="ml-auto h-4 w-4 text-green-500" />
+              <CheckCircle2 className="ml-auto h-4 w-4 text-xedu-primary" />
             </div>
           ))}
           {teachers.length > 5 && (
-            <p className="text-xs text-center text-muted-foreground">+{teachers.length - 5} ta yana</p>
+            <p className="text-xs text-center text-xedu-slate-500 dark:text-xedu-slate-400">+{teachers.length - 5} ta yana</p>
           )}
         </div>
       )}
 
       <Button className="w-full" onClick={onDone}>
         {teachers.length === 0
-          ? 'Bu qadamni o\'tkazib yuborish'
+          ? "Bu qadamni o'tkazib yuborish"
           : `Davom etish (${teachers.length} o'qituvchi)`}
         <ChevronRight className="ml-1.5 h-4 w-4" />
       </Button>
@@ -408,7 +434,7 @@ function Step5Schedule({ onDone }: { onDone: () => void }) {
       return valid.length;
     },
     onSuccess: (count) => {
-      toast({ title: `✅ ${count} ta dars jadvalga qo'shildi` });
+      toast({ title: `${count} ta dars jadvalga qo'shildi` });
       onDone();
     },
     onError: (e: any) => toast({ variant: 'destructive', title: e?.message ?? e?.response?.data?.message ?? 'Xato' }),
@@ -416,7 +442,7 @@ function Step5Schedule({ onDone }: { onDone: () => void }) {
 
   return (
     <div className="space-y-4">
-      <p className="text-sm text-muted-foreground">
+      <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
         Bir necha namunaviy dars qo'shing. Keyinroq to'liq jadval tuzishingiz mumkin.
       </p>
 
@@ -424,14 +450,14 @@ function Step5Schedule({ onDone }: { onDone: () => void }) {
         {entries.map((e, i) => (
           <div key={i} className="grid grid-cols-6 gap-1.5 items-center">
             <select
-              className="col-span-2 h-8 rounded-md border border-input bg-background px-2 text-xs"
+              className="col-span-2 h-8 rounded-md border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-950 px-2 text-xs"
               value={e.dayOfWeek}
               onChange={ev => setEntries(p => p.map((r, j) => j === i ? { ...r, dayOfWeek: ev.target.value as DayOfWeek } : r))}
             >
               {DAYS_UZ.map(d => <option key={d.value} value={d.value}>{d.label}</option>)}
             </select>
             <select
-              className="col-span-2 h-8 rounded-md border border-input bg-background px-2 text-xs"
+              className="col-span-2 h-8 rounded-md border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-950 px-2 text-xs"
               value={e.classId}
               onChange={ev => setEntries(p => p.map((r, j) => j === i ? { ...r, classId: ev.target.value } : r))}
             >
@@ -439,7 +465,7 @@ function Step5Schedule({ onDone }: { onDone: () => void }) {
               {classes.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
             <select
-              className="col-span-1 h-8 rounded-md border border-input bg-background px-2 text-xs"
+              className="col-span-1 h-8 rounded-md border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-950 px-2 text-xs"
               value={e.subjectId}
               onChange={ev => setEntries(p => p.map((r, j) => j === i ? { ...r, subjectId: ev.target.value } : r))}
             >
@@ -448,7 +474,7 @@ function Step5Schedule({ onDone }: { onDone: () => void }) {
             </select>
             <Button
               variant="ghost" size="icon"
-              className="h-8 w-8 text-destructive hover:text-destructive"
+              className="h-8 w-8 text-xedu-ruby hover:text-xedu-ruby hover:bg-xedu-ruby/5"
               onClick={() => removeEntry(i)}
             >
               <Trash2 className="h-3.5 w-3.5" />
@@ -486,12 +512,12 @@ function Step5Schedule({ onDone }: { onDone: () => void }) {
 function CompletionScreen({ onGoToDashboard }: { onGoToDashboard: () => void }) {
   return (
     <div className="text-center space-y-5 py-4">
-      <div className="mx-auto w-20 h-20 rounded-full bg-green-100 dark:bg-green-950/40 flex items-center justify-center">
-        <Rocket className="h-10 w-10 text-green-600" />
+      <div className="mx-auto w-20 h-20 rounded-full bg-xedu-primary-light/60 dark:bg-xedu-primary/15 flex items-center justify-center">
+        <Rocket className="h-10 w-10 text-xedu-primary" />
       </div>
       <div>
-        <h2 className="text-2xl font-bold">Maktabingiz tayyor! 🎉</h2>
-        <p className="text-muted-foreground mt-1">Barcha asosiy sozlamalar muvaffaqiyatli amalga oshirildi.</p>
+        <h2 className="text-2xl font-bold tracking-tight">Maktabingiz tayyor</h2>
+        <p className="text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">Barcha asosiy sozlamalar muvaffaqiyatli amalga oshirildi.</p>
       </div>
       <div className="grid grid-cols-2 gap-3 max-w-sm mx-auto text-sm">
         {[
@@ -500,10 +526,14 @@ function CompletionScreen({ onGoToDashboard }: { onGoToDashboard: () => void }) 
           { label: 'Dars jadvali', href: '/dashboard/schedule', icon: Calendar },
           { label: 'Hisobotlar', href: '/dashboard/reports', icon: BookOpen },
         ].map(({ label, href, icon: Icon }) => (
-          <a key={href} href={href} className="flex items-center gap-2 rounded-xl border p-3 hover:bg-accent transition-colors">
-            <Icon className="h-5 w-5 text-primary" />
+          <Link
+            key={href}
+            href={href}
+            className="flex items-center gap-2 rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 p-3 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/60 transition-colors"
+          >
+            <Icon className="h-5 w-5 text-xedu-primary" />
             <span className="font-medium">{label}</span>
-          </a>
+          </Link>
         ))}
       </div>
       <Button size="lg" className="w-full max-w-sm mx-auto" onClick={onGoToDashboard}>
@@ -521,12 +551,33 @@ export default function OnboardingPage() {
   const [completed, setCompleted] = useState<number[]>([]);
   const [done, setDone] = useState(false);
 
+  // Restore progress from localStorage on mount
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(ONBOARDING_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.step) setStep(parsed.step);
+        if (parsed.completed) setCompleted(parsed.completed);
+        if (parsed.done) setDone(parsed.done);
+      }
+    } catch {
+      // Ignore parse errors
+    }
+  }, []);
+
+  // Persist progress to localStorage
+  useEffect(() => {
+    localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify({ step, completed, done }));
+  }, [step, completed, done]);
+
   const markDone = (s: number) => {
     setCompleted(p => Array.from(new Set([...p, s])));
     if (s < STEPS.length) {
       setStep(s + 1);
     } else {
       setDone(true);
+      localStorage.removeItem(ONBOARDING_STORAGE_KEY);
     }
   };
 
@@ -546,8 +597,8 @@ export default function OnboardingPage() {
     <div className="max-w-2xl mx-auto space-y-6 pb-8">
       {/* Header */}
       <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold">Maktabni sozlash</h1>
-        <p className="text-muted-foreground text-sm">
+        <h1 className="text-2xl font-bold tracking-tight">Maktabni sozlash</h1>
+        <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">
           {currentStep.label}: {currentStep.desc}
         </p>
       </div>
@@ -557,25 +608,25 @@ export default function OnboardingPage() {
 
       {/* Progress */}
       <div className="space-y-1">
-        <div className="flex justify-between text-xs text-muted-foreground">
-          <span>{completed.length} / {STEPS.length} qadam</span>
+        <div className="flex justify-between text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
+          <span>Qadam {completed.length} / {STEPS.length}</span>
           <span>{Math.round(progress)}%</span>
         </div>
         <Progress value={progress} className="h-2" />
       </div>
 
       {/* Step content */}
-      <Card>
+      <Card className="border-xedu-slate-100 dark:border-xedu-slate-800">
         <CardHeader className="pb-3">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl bg-primary/10">
-              {(() => { const Icon = currentStep.icon; return <Icon className="h-5 w-5 text-primary" />; })()}
+            <div className="p-2.5 rounded-xl bg-xedu-primary/10">
+              {(() => { const Icon = currentStep.icon; return <Icon className="h-5 w-5 text-xedu-primary" />; })()}
             </div>
             <div>
-              <CardTitle className="text-base">{currentStep.label}</CardTitle>
+              <CardTitle className="text-base font-semibold">{currentStep.label}</CardTitle>
               <CardDescription className="text-xs">{currentStep.desc}</CardDescription>
             </div>
-            <Badge variant="outline" className="ml-auto">
+            <Badge variant="outline" className="ml-auto text-xs">
               {step} / {STEPS.length}
             </Badge>
           </div>

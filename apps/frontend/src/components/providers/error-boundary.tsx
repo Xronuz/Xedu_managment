@@ -39,16 +39,16 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
       return (
         <div className="flex items-center justify-center min-h-[300px] p-6">
-          <Card className="max-w-md w-full border-destructive/30">
+          <Card className="max-w-md w-full border-xedu-ruby/30">
             <CardContent className="pt-8 pb-6 text-center space-y-4">
               <div className="flex justify-center">
-                <div className="rounded-full bg-destructive/10 p-4">
-                  <AlertTriangle className="h-8 w-8 text-destructive" />
+                <div className="rounded-full bg-xedu-ruby/10 p-4">
+                  <AlertTriangle className="h-8 w-8 text-xedu-ruby" />
                 </div>
               </div>
               <div>
                 <h3 className="font-semibold text-lg">Kutilmagan xato yuz berdi</h3>
-                <p className="text-sm text-muted-foreground mt-1">
+                <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
                   {this.state.error?.message ?? 'Sahifani yuklashda xato'}
                 </p>
               </div>

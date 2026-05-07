@@ -36,7 +36,7 @@ export default function StudentShopPage() {
   const spendMutation = useMutation({
     mutationFn: (itemId: string) => coinsApi.spend(itemId),
     onSuccess: () => {
-      toast({ title: '✅ Sotib olindi!' });
+      toast({ title: ' Sotib olindi!' });
       queryClient.invalidateQueries({ queryKey: ['coins'] });
     },
     onError: (err: any) => {
@@ -64,7 +64,7 @@ export default function StudentShopPage() {
               <ShoppingBag className="h-6 w-6 text-primary" />
               EduCoin Do'kon
             </h1>
-            <p className="text-muted-foreground text-sm">Mukofotlarni tangalarga almashtiring</p>
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">Mukofotlarni tangalarga almashtiring</p>
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-full bg-yellow-50 border border-yellow-200 px-4 py-2">
@@ -108,7 +108,7 @@ export default function StudentShopPage() {
               </Card>
             ))
           ) : activeItems.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-muted-foreground">
+            <div className="col-span-full text-center py-12 text-xedu-slate-500 dark:text-xedu-slate-400">
               <ShoppingBag className="h-12 w-12 mx-auto mb-3 opacity-30" />
               <p className="font-medium">Do'konda hozircha mahsulot yo'q</p>
               <p className="text-sm mt-1">Keyinroq qayta tekshiring</p>
@@ -133,7 +133,7 @@ export default function StudentShopPage() {
                   </CardHeader>
                   <CardContent className="flex-1 flex flex-col justify-end space-y-3">
                     {item.description && (
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
+                      <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{item.description}</p>
                     )}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1 text-yellow-700 font-bold">
@@ -174,7 +174,7 @@ export default function StudentShopPage() {
                 {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
               </div>
             ) : !history || history.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-xedu-slate-500 dark:text-xedu-slate-400">
                 <History className="h-10 w-10 mx-auto mb-2 opacity-30" />
                 <p>Hali tranzaksiyalar yo'q</p>
               </div>
@@ -184,7 +184,7 @@ export default function StudentShopPage() {
                   {(history as CoinTransaction[]).map((tx) => (
                     <div
                       key={tx.id}
-                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors"
+                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${
@@ -194,7 +194,7 @@ export default function StudentShopPage() {
                         </div>
                         <div>
                           <p className="text-sm font-medium">{tx.reason}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                             {new Date(tx.createdAt).toLocaleDateString('uz-UZ')}
                           </p>
                         </div>

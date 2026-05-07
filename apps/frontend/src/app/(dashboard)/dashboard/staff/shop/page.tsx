@@ -49,7 +49,7 @@ export default function AdminShopPage() {
   const createMutation = useMutation({
     mutationFn: coinsApi.createShopItem,
     onSuccess: () => {
-      toast({ title: "✅ Mahsulot qo'shildi" });
+      toast({ title: " Mahsulot qo'shildi" });
       queryClient.invalidateQueries({ queryKey: ['coins', 'admin', 'shop'] });
       closeDialog();
     },
@@ -60,7 +60,7 @@ export default function AdminShopPage() {
     mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof coinsApi.updateShopItem>[1] }) =>
       coinsApi.updateShopItem(id, payload),
     onSuccess: () => {
-      toast({ title: '✅ Yangilandi' });
+      toast({ title: ' Yangilandi' });
       queryClient.invalidateQueries({ queryKey: ['coins', 'admin', 'shop'] });
       closeDialog();
     },
@@ -70,7 +70,7 @@ export default function AdminShopPage() {
   const deleteMutation = useMutation({
     mutationFn: coinsApi.deleteShopItem,
     onSuccess: () => {
-      toast({ title: "✅ O'chirildi" });
+      toast({ title: " O'chirildi" });
       queryClient.invalidateQueries({ queryKey: ['coins', 'admin', 'shop'] });
       setConfirmDelete(null);
     },
@@ -126,7 +126,7 @@ export default function AdminShopPage() {
             <ShoppingBag className="h-6 w-6 text-primary" />
             EduCoin Do'kon Boshqaruvi
           </h1>
-          <p className="text-muted-foreground text-sm">Mahsulotlar, balanslar va buyurtmalar</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">Mahsulotlar, balanslar va buyurtmalar</p>
         </div>
         <Button onClick={openCreate}>
           <Plus className="h-4 w-4 mr-1.5" /> Mahsulot qo&apos;shish
@@ -155,7 +155,7 @@ export default function AdminShopPage() {
               ))}
             </div>
           ) : !items || items.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-center py-12 text-xedu-slate-500 dark:text-xedu-slate-400">
               <Package className="h-12 w-12 mx-auto mb-3 opacity-30" />
               <p>Hali mahsulotlar yo&apos;q</p>
             </div>
@@ -173,7 +173,7 @@ export default function AdminShopPage() {
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    {item.description && <p className="text-sm text-muted-foreground">{item.description}</p>}
+                    {item.description && <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{item.description}</p>}
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1 text-yellow-700 font-bold">
                         <Coins className="h-4 w-4" />
@@ -185,7 +185,7 @@ export default function AdminShopPage() {
                       <Button variant="outline" size="sm" onClick={() => openEdit(item)}>
                         <Pencil className="h-3.5 w-3.5 mr-1" /> Tahrirlash
                       </Button>
-                      <Button variant="ghost" size="sm" className="text-destructive" onClick={() => setConfirmDelete(item.id)}>
+                      <Button variant="ghost" size="sm" className="text-xedu-ruby" onClick={() => setConfirmDelete(item.id)}>
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>
@@ -209,12 +209,12 @@ export default function AdminShopPage() {
               {balancesLoading ? (
                 <div className="space-y-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
               ) : !balances || balances.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">Hali ma&apos;lumot yo&apos;q</div>
+                <div className="text-center py-8 text-xedu-slate-500 dark:text-xedu-slate-400">Hali ma&apos;lumot yo&apos;q</div>
               ) : (
                 <ScrollArea className="max-h-[500px]">
                   <div className="space-y-1">
                     {balances.map((b: StudentBalance) => (
-                      <div key={b.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors">
+                      <div key={b.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
                             {b.firstName[0]}{b.lastName[0]}
@@ -249,19 +249,19 @@ export default function AdminShopPage() {
               {ordersLoading ? (
                 <div className="space-y-2">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}</div>
               ) : !orders || orders.length === 0 ? (
-                <div className="text-center py-8 text-muted-foreground">Hali buyurtmalar yo&apos;q</div>
+                <div className="text-center py-8 text-xedu-slate-500 dark:text-xedu-slate-400">Hali buyurtmalar yo&apos;q</div>
               ) : (
                 <ScrollArea className="max-h-[500px]">
                   <div className="space-y-1">
                     {(orders as CoinTransaction[]).map((tx) => (
-                      <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/30 transition-colors">
+                      <div key={tx.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-red-100 flex items-center justify-center text-sm font-bold text-red-700">
                             {tx.amount}
                           </div>
                           <div>
                             <p className="text-sm font-medium">{tx.reason}</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                               {tx.user?.firstName} {tx.user?.lastName} · {new Date(tx.createdAt).toLocaleDateString('uz-UZ')}
                             </p>
                           </div>
@@ -285,7 +285,7 @@ export default function AdminShopPage() {
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="space-y-1.5">
-              <Label>Nomi <span className="text-destructive">*</span></Label>
+              <Label>Nomi <span className="text-xedu-ruby">*</span></Label>
               <Input value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Masalan: Ruchka" />
             </div>
             <div className="space-y-1.5">
@@ -294,7 +294,7 @@ export default function AdminShopPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Narx (tanga) <span className="text-destructive">*</span></Label>
+                <Label>Narx (tanga) <span className="text-xedu-ruby">*</span></Label>
                 <Input type="number" value={form.cost} onChange={e => setForm(f => ({ ...f, cost: e.target.value }))} placeholder="50" />
               </div>
               <div className="space-y-1.5">
@@ -323,7 +323,7 @@ export default function AdminShopPage() {
           <DialogHeader>
             <DialogTitle>Mahsulotni o&apos;chirish</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">Bu mahsulotni o&apos;chirmoqchimisiz?</p>
+          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Bu mahsulotni o&apos;chirmoqchimisiz?</p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmDelete(null)}>Bekor</Button>
             <Button variant="destructive" onClick={() => confirmDelete && deleteMutation.mutate(confirmDelete)} disabled={deleteMutation.isPending}>

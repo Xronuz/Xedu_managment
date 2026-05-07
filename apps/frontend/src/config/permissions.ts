@@ -21,6 +21,19 @@ export type UserRole =
   | 'student'
   | 'parent';
 
+/** Rol nomlari — UI tanlash va ko'rsatish uchun */
+export const ROLES: { value: UserRole; label: string }[] = [
+  { value: 'director', label: 'Maktab direktori' },
+  { value: 'vice_principal', label: "Mudir o'rinbosari" },
+  { value: 'branch_admin', label: 'Filial boshqaruvchisi' },
+  { value: 'teacher', label: "O'qituvchi" },
+  { value: 'class_teacher', label: 'Sinf rahbari' },
+  { value: 'accountant', label: 'Moliyachi' },
+  { value: 'librarian', label: 'Kutubxonachi' },
+  { value: 'student', label: "O'quvchi" },
+  { value: 'parent', label: 'Ota-ona' },
+];
+
 /** Har bir route uchun ruxsat etilgan rollar */
 export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   // ═══════════════════════════════════════════════════════════════════════════════

@@ -3,31 +3,85 @@
 import { useState, Suspense } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { KeyRound, Eye, EyeOff, Loader2, CheckCircle2, ArrowLeft, ShieldCheck } from 'lucide-react';
+import {
+  KeyRound, Eye, EyeOff, Loader2, CheckCircle2,
+  ArrowLeft, ShieldCheck, AlertTriangle, XCircle,
+} from 'lucide-react';
 import Link from 'next/link';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { authApi } from '@/lib/api/auth';
+import { AuthShell } from '../_components/auth-shell';
+import { cn } from '@/lib/utils';
 
-// ── Password strength indicator ───────────────────────────────────────────────
+// ── Password strength indicator (rules-based) ─────────────────────────────────
+interface StrengthResult {
+  score: number; // 0–4
+  label: string;
+  checks: { label: string; pass: boolean }[];
+}
+
+function checkPasswordStrength(password: string): StrengthResult {
+  const checks = [
+    { label: "Kamida 8 ta belgi", pass: password.length >= 8 },
+    { label: "Kamida 1 ta katta harf", pass: /[A-Z]/.test(password) },
+    { label: "Kamida 1 ta raqam", pass: /\d/.test(password) },
+    { label: "Kamida 1 ta maxsus belgi", pass: /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\/;'`~]/.test(password) },
+  ];
+  const passed = checks.filter((c) => c.pass).length;
+  const labels = ['Juda zaif', 'Zaif', 'O\'rtacha', 'Yaxshi', 'Kuchli'];
+  return {
+    score: passed,
+    label: labels[passed],
+    checks,
+  };
+}
+
 function PasswordStrength({ password }: { password: string }) {
   if (!password) return null;
-  const strength = Math.min(Math.floor(password.length / 3), 4);
-  const labels = ['', 'Juda zaif', 'Zaif', 'O\'rtacha', 'Kuchli'];
-  const colors = ['', 'bg-destructive', 'bg-orange-400', 'bg-yellow-400', 'bg-green-500'];
+  const { score, label, checks } = checkPasswordStrength(password);
+  const colors = [
+    'bg-xedu-slate-200',
+    'bg-xedu-ruby',
+    'bg-xedu-amber',
+    'bg-xedu-primary',
+    'bg-xedu-primary',
+  ];
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       <div className="flex gap-1">
         {[1, 2, 3, 4].map((l) => (
           <div
             key={l}
-            className={`h-1 flex-1 rounded-full transition-colors ${l <= strength ? colors[strength] : 'bg-muted'}`}
+            className={cn(
+              'h-1 flex-1 rounded-full transition-colors duration-[var(--xedu-duration)]',
+              l <= score ? colors[score] : 'bg-xedu-slate-100 dark:bg-xedu-slate-800'
+            )}
           />
         ))}
       </div>
-      {strength > 0 && (
-        <p className={`text-xs ${strength <= 1 ? 'text-destructive' : strength <= 2 ? 'text-orange-500' : strength <= 3 ? 'text-yellow-600' : 'text-green-600'}`}>
-          {labels[strength]}
-        </p>
-      )}
+      <p
+        className={cn(
+          'text-xs font-medium',
+          score <= 1 ? 'text-xedu-ruby' : score <= 2 ? 'text-xedu-amber' : 'text-xedu-primary'
+        )}
+      >
+        {label}
+      </p>
+      <ul className="space-y-1">
+        {checks.map((c) => (
+          <li key={c.label} className="flex items-center gap-1.5 text-[11px] text-xedu-slate-500 dark:text-xedu-slate-400">
+            {c.pass ? (
+              <CheckCircle2 className="h-3 w-3 text-xedu-primary shrink-0" />
+            ) : (
+              <XCircle className="h-3 w-3 text-xedu-slate-300 dark:text-xedu-slate-600 shrink-0" />
+            )}
+            {c.label}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
@@ -49,7 +103,6 @@ function ResetPasswordForm() {
     mutationFn: () => authApi.resetPassword(token, password),
     onSuccess: () => {
       setDone(true);
-      setTimeout(() => router.push('/login'), 3000);
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message;
@@ -57,32 +110,37 @@ function ResetPasswordForm() {
     },
   });
 
-  const validate = () => {
+  const validate = (): boolean => {
     const e: Record<string, string> = {};
-    if (password.length < 8) e.password = 'Parol kamida 8 belgi bo\'lishi kerak';
-    if (password !== confirm) e.confirm = 'Parollar mos kelmadi';
+    const strength = checkPasswordStrength(password);
+    if (strength.score < 2) e.password = "Parol yetarli darajada kuchli emas";
+    if (password !== confirm) e.confirm = "Parollar mos kelmadi";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) { setErrors({ api: 'Token topilmadi. Havolani qayta tekshiring.' }); return; }
+    if (!token) { setErrors({ api: "Havola noto'g'ri yoki muddati o'tgan. Iltimos, qayta so'rang." }); return; }
     if (!validate()) return;
     mutation.mutate();
   };
 
   if (!token) {
     return (
-      <div className="rounded-2xl border bg-card shadow-sm p-6 text-center space-y-3">
-        <KeyRound className="h-10 w-10 text-muted-foreground mx-auto opacity-50" />
-        <p className="font-semibold">Token topilmadi</p>
-        <p className="text-sm text-muted-foreground">
-          Parol tiklash havolasi noto'g'ri yoki muddati o'tgan.
-        </p>
+      <div className="text-center space-y-4 py-4">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-xedu-ruby/10">
+          <KeyRound className="h-7 w-7 text-xedu-ruby" />
+        </div>
+        <div className="space-y-1">
+          <p className="font-semibold text-sm">Havola noto'g'ri</p>
+          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
+            Parol tiklash havolasi noto'g'ri yoki muddati o'tgan.
+          </p>
+        </div>
         <Link
           href="/forgot-password"
-          className="inline-block mt-2 text-sm text-primary hover:underline font-medium"
+          className="inline-flex items-center gap-1.5 text-sm text-xedu-primary hover:underline font-medium"
         >
           Yangi havola so'rash
         </Link>
@@ -92,111 +150,144 @@ function ResetPasswordForm() {
 
   if (done) {
     return (
-      <div className="rounded-2xl border bg-card shadow-sm p-6 text-center space-y-4 py-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30">
-          <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400" />
+      <div className="text-center space-y-5 py-4">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-xedu-primary-light/60 dark:bg-xedu-primary/15">
+          <CheckCircle2 className="h-8 w-8 text-xedu-primary" />
         </div>
         <div className="space-y-1.5">
-          <p className="font-semibold">Parol muvaffaqiyatli yangilandi!</p>
-          <p className="text-sm text-muted-foreground">
-            3 soniyada kirish sahifasiga yo'naltirilasiz...
+          <p className="font-semibold text-sm">Parol muvaffaqiyatli yangilandi</p>
+          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
+            Endi yangi parolingiz bilan tizimga kirishingiz mumkin.
           </p>
         </div>
+        <Button
+          className="w-full h-11 font-semibold"
+          onClick={() => router.replace('/login?reason=password_changed')}
+          size="lg"
+        >
+          Tizimga kirish
+          <ArrowLeft className="ml-2 h-4 w-4 rotate-180" />
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border bg-card shadow-sm p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        {/* New password */}
-        <div className="space-y-1.5">
-          <label htmlFor="password" className="text-sm font-medium">
-            Yangi parol <span className="text-destructive">*</span>
-          </label>
-          <div className="relative">
-            <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              id="password"
-              type={showPw ? 'text' : 'password'}
-              autoFocus
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); setErrors((p) => { const n = {...p}; delete n.password; return n; }); }}
-              placeholder="Kamida 8 belgi"
-              className="w-full pl-10 pr-10 h-10 rounded-lg border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-shadow"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPw((s) => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label={showPw ? 'Yashirish' : 'Ko\'rsatish'}
-            >
-              {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-          <PasswordStrength password={password} />
-          {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {/* New password */}
+      <div className="space-y-1.5">
+        <Label htmlFor="password" className="text-sm font-medium">
+          Yangi parol
+        </Label>
+        <div className="relative">
+          <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-400" />
+          <Input
+            id="password"
+            type={showPw ? 'text' : 'password'}
+            autoFocus
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setErrors((p) => { const n = { ...p }; delete n.password; delete n.api; return n; });
+            }}
+            placeholder="Kamida 8 ta belgi"
+            className="h-11 pl-10 pr-10"
+          />
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setShowPw((s) => !s)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-400 hover:text-xedu-slate-600 dark:hover:text-xedu-slate-200 transition-colors"
+            aria-label={showPw ? "Parolni yashirish" : "Parolni ko'rsatish"}
+          >
+            {showPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
         </div>
-
-        {/* Confirm password */}
-        <div className="space-y-1.5">
-          <label htmlFor="confirm" className="text-sm font-medium">
-            Parolni tasdiqlang <span className="text-destructive">*</span>
-          </label>
-          <div className="relative">
-            <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <input
-              id="confirm"
-              type={showCf ? 'text' : 'password'}
-              value={confirm}
-              onChange={(e) => { setConfirm(e.target.value); setErrors((p) => { const n = {...p}; delete n.confirm; return n; }); }}
-              placeholder="Takrorlang"
-              className={`w-full pl-10 pr-10 h-10 rounded-lg border bg-background text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-shadow ${
-                confirm && password === confirm ? 'border-green-500 focus:ring-green-400/40' : ''
-              }`}
-            />
-            <button
-              type="button"
-              onClick={() => setShowCf((s) => !s)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              aria-label={showCf ? 'Yashirish' : 'Ko\'rsatish'}
-            >
-              {showCf ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-          {confirm && password === confirm && (
-            <p className="text-xs text-green-600 flex items-center gap-1">
-              <CheckCircle2 className="h-3 w-3" /> Parollar mos keldi
-            </p>
-          )}
-          {errors.confirm && <p className="text-xs text-destructive">{errors.confirm}</p>}
-        </div>
-
-        {errors.api && (
-          <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2.5 text-sm text-destructive">
-            {errors.api}
-          </div>
+        <PasswordStrength password={password} />
+        {errors.password && (
+          <p className="text-xs text-xedu-ruby flex items-center gap-1">
+            <AlertTriangle className="h-3 w-3" />
+            {errors.password}
+          </p>
         )}
+      </div>
 
-        <button
-          type="submit"
-          disabled={mutation.isPending}
-          className="w-full h-10 rounded-lg bg-primary text-primary-foreground text-sm font-medium flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-60"
+      {/* Confirm password */}
+      <div className="space-y-1.5">
+        <Label htmlFor="confirm" className="text-sm font-medium">
+          Parolni tasdiqlang
+        </Label>
+        <div className="relative">
+          <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-400" />
+          <Input
+            id="confirm"
+            type={showCf ? 'text' : 'password'}
+            value={confirm}
+            onChange={(e) => {
+              setConfirm(e.target.value);
+              setErrors((p) => { const n = { ...p }; delete n.confirm; return n; });
+            }}
+            placeholder="Parolni takrorlang"
+            className={cn(
+              'h-11 pl-10 pr-10',
+              confirm && password === confirm && password.length > 0
+                ? 'border-xedu-primary focus-visible:ring-xedu-primary/30'
+                : ''
+            )}
+          />
+          <button
+            type="button"
+            tabIndex={-1}
+            onClick={() => setShowCf((s) => !s)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-400 hover:text-xedu-slate-600 dark:hover:text-xedu-slate-200 transition-colors"
+            aria-label={showCf ? "Parolni yashirish" : "Parolni ko'rsatish"}
+          >
+            {showCf ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
+        {confirm && password === confirm && password.length > 0 && (
+          <p className="text-xs text-xedu-primary flex items-center gap-1">
+            <CheckCircle2 className="h-3 w-3" />
+            Parollar mos keldi
+          </p>
+        )}
+        {errors.confirm && (
+          <p className="text-xs text-xedu-ruby flex items-center gap-1">
+            <AlertTriangle className="h-3 w-3" />
+            {errors.confirm}
+          </p>
+        )}
+      </div>
+
+      {errors.api && (
+        <div
+          role="alert"
+          className="flex items-start gap-2 rounded-xl border border-xedu-ruby/20 bg-xedu-ruby/8 px-3.5 py-3 text-sm text-xedu-ruby"
         >
-          {mutation.isPending ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Saqlanmoqda...
-            </>
-          ) : (
-            <>
-              <ShieldCheck className="h-4 w-4" />
-              Parolni yangilash
-            </>
-          )}
-        </button>
-      </form>
-    </div>
+          <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+          {errors.api}
+        </div>
+      )}
+
+      <Button
+        type="submit"
+        className="w-full h-11 font-semibold"
+        disabled={mutation.isPending}
+        size="lg"
+      >
+        {mutation.isPending ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Saqlanmoqda...
+          </>
+        ) : (
+          <>
+            <ShieldCheck className="mr-2 h-4 w-4" />
+            Parolni yangilash
+          </>
+        )}
+      </Button>
+    </form>
   );
 }
 
@@ -204,38 +295,37 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted/40 p-4">
-      <div className="w-full max-w-sm">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-4">
-            <KeyRound className="h-7 w-7 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold">Yangi parol o'rnatish</h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Kamida 8 ta belgi bo'lsin
-          </p>
-        </div>
-
-        <Suspense fallback={
-          <div className="rounded-2xl border bg-card shadow-sm p-6 text-center text-muted-foreground text-sm">
-            <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
-            Yuklanmoqda...
-          </div>
-        }>
-          <ResetPasswordForm />
-        </Suspense>
-
-        <div className="text-center mt-5">
-          <Link
-            href="/login"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+    <AuthShell>
+      <Card className="border-xedu-slate-100 dark:border-xedu-slate-800 shadow-sm">
+        <CardHeader className="pb-4 space-y-1">
+          <CardTitle className="text-lg font-bold tracking-tight">Yangi parol o'rnatish</CardTitle>
+          <CardDescription className="text-sm">
+            Hisob xavfsizligi uchun kuchli parol tanlang
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Suspense
+            fallback={
+              <div className="text-center text-xedu-slate-500 dark:text-xedu-slate-400 text-sm py-8">
+                <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                Yuklanmoqda...
+              </div>
+            }
           >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Kirish sahifasiga qaytish
-          </Link>
-        </div>
-      </div>
-    </div>
+            <ResetPasswordForm />
+          </Suspense>
+
+          <div className="text-center mt-5">
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1.5 text-sm text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-slate-700 dark:hover:text-xedu-slate-200 transition-colors"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Kirish sahifasiga qaytish
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+    </AuthShell>
   );
 }

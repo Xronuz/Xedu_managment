@@ -80,7 +80,7 @@ function PreferencesPanel() {
   const saveMutation = useMutation({
     mutationFn: () => notificationsApi.updatePreferences(prefs),
     onSuccess: () => {
-      toast({ title: '✅ Sozlamalar saqlandi' });
+      toast({ title: ' Sozlamalar saqlandi' });
       queryClient.invalidateQueries({ queryKey: ['notification-preferences'] });
     },
     onError: () => toast({ variant: 'destructive', title: 'Xato', description: 'Saqlab bo\'lmadi' }),
@@ -107,7 +107,7 @@ function PreferencesPanel() {
               <div key={key} className="flex items-center justify-between gap-4">
                 <div>
                   <Label className="font-medium text-sm">{label}</Label>
-                  <p className="text-xs text-muted-foreground">{description}</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{description}</p>
                 </div>
                 <Switch
                   checked={prefs[key] ?? false}
@@ -175,7 +175,7 @@ export default function NotificationsPage() {
         <div>
           <h1 className="text-2xl font-bold">Bildirishnomalar</h1>
           {unread > 0 && (
-            <p className="text-muted-foreground">{unread} ta o'qilmagan</p>
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400">{unread} ta o'qilmagan</p>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -197,7 +197,7 @@ export default function NotificationsPage() {
             <Button
               variant="outline"
               size="sm"
-              className="text-destructive hover:text-destructive"
+              className="text-xedu-ruby hover:text-xedu-ruby"
               onClick={async () => {
                 if (await ask({ title: "Barcha bildirishnomalarni o'chirasizmi?", variant: 'destructive', confirmText: "O'chirish" })) deleteAllMutation.mutate();
               }}
@@ -220,7 +220,7 @@ export default function NotificationsPage() {
         </div>
       ) : notifications.length === 0 ? (
         <Card>
-          <CardContent className="flex flex-col items-center py-16 text-center text-muted-foreground">
+          <CardContent className="flex flex-col items-center py-16 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
             <BellOff className="mb-4 h-12 w-12" />
             <p>Bildirishnomalar yo'q</p>
           </CardContent>
@@ -231,9 +231,9 @@ export default function NotificationsPage() {
             <div key={label} className="space-y-2">
               {/* Group header */}
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{label}</span>
+                <span className="text-xs font-semibold text-xedu-slate-500 dark:text-xedu-slate-400 uppercase tracking-wide">{label}</span>
                 <div className="flex-1 h-px bg-border" />
-                <span className="text-xs text-muted-foreground">{items.length}</span>
+                <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{items.length}</span>
               </div>
               {/* Items */}
               {items.map((n: any) => {
@@ -260,14 +260,14 @@ export default function NotificationsPage() {
                             <Badge variant="default" className="text-[10px] h-4 px-1.5">Yangi</Badge>
                           )}
                         </div>
-                        <p className="text-sm text-muted-foreground mt-0.5">{n.body}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{formatDate(n.createdAt)}</p>
+                        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">{n.body}</p>
+                        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">{formatDate(n.createdAt)}</p>
                       </div>
                       {/* Actions */}
                       <Button
                         size="icon"
                         variant="ghost"
-                        className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
+                        className="h-7 w-7 shrink-0 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                         onClick={() => deleteMutation.mutate(n.id)}
                         disabled={deleteMutation.isPending}
                       >

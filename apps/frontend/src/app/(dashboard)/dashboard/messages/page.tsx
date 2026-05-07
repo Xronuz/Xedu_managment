@@ -46,7 +46,7 @@ function MessageBubble({ msg, isMine, showSender = false }: { msg: any; isMine: 
         <p className="break-words whitespace-pre-wrap">{msg.content}</p>
         <div className={cn(
           'flex items-center gap-1 justify-end mt-1',
-          isMine ? 'text-primary-foreground/70' : 'text-muted-foreground',
+          isMine ? 'text-primary-foreground/70' : 'text-xedu-slate-500 dark:text-xedu-slate-400',
         )}>
           <span className="text-[10px]">
             {new Date(msg.createdAt).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
@@ -122,7 +122,7 @@ function CreateGroupDialog({
           />
           <div className="max-h-52 overflow-y-auto space-y-1 border rounded-md p-2">
             {filtered.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">Topilmadi</p>
+              <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 text-center py-4">Topilmadi</p>
             ) : filtered.map((u: any) => (
               <label
                 key={u.id}
@@ -136,12 +136,12 @@ function CreateGroupDialog({
                   <AvatarFallback className="text-[10px]">{getInitials(u.firstName, u.lastName)}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm">{u.firstName} {u.lastName}</span>
-                <span className="text-xs text-muted-foreground ml-auto">{u.role}</span>
+                <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 ml-auto">{u.role}</span>
               </label>
             ))}
           </div>
           {selected.length > 0 && (
-            <p className="text-xs text-muted-foreground">{selected.length} ta a'zo tanlandi</p>
+            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{selected.length} ta a'zo tanlandi</p>
           )}
         </div>
 
@@ -328,10 +328,10 @@ export default function MessagesPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <MessageSquare className="h-6 w-6 text-primary" /> Xabarlar
           </h1>
-          <p className="text-muted-foreground">Ichki xabar almashish tizimi</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Ichki xabar almashish tizimi</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
             {isConnected
               ? <><Wifi className="h-3.5 w-3.5 text-green-500" /> Online</>
               : <><WifiOff className="h-3.5 w-3.5 text-yellow-500" /> Polling</>
@@ -367,7 +367,7 @@ export default function MessagesPage() {
           )}>
             <div className="p-3 border-b">
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400" />
                 <Input
                   placeholder="Qidirish..."
                   className="pl-8 h-8 text-sm"
@@ -390,7 +390,7 @@ export default function MessagesPage() {
                   ))}
                 </div>
               ) : filteredConvs.length === 0 ? (
-                <div className="p-6 text-center text-sm text-muted-foreground">
+                <div className="p-6 text-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                   {search ? 'Topilmadi' : 'Hali xabarlar yo\'q'}
                 </div>
               ) : filteredConvs.map((conv: any) => {
@@ -419,7 +419,7 @@ export default function MessagesPage() {
                           </Badge>
                         )}
                       </div>
-                      <p className={cn('text-xs truncate', conv.unreadCount > 0 ? 'text-foreground' : 'text-muted-foreground')}>
+                      <p className={cn('text-xs truncate', conv.unreadCount > 0 ? 'text-foreground' : 'text-xedu-slate-500 dark:text-xedu-slate-400')}>
                         {lastMsg?.content ?? '—'}
                       </p>
                     </div>
@@ -436,7 +436,7 @@ export default function MessagesPage() {
           )}>
             <div className="p-3 border-b">
               <div className="relative">
-                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400" />
                 <Input
                   placeholder="Guruh qidirish..."
                   className="pl-8 h-8 text-sm"
@@ -459,7 +459,7 @@ export default function MessagesPage() {
                   ))}
                 </div>
               ) : filteredGroups.length === 0 ? (
-                <div className="p-6 text-center text-sm text-muted-foreground">
+                <div className="p-6 text-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                   {groupSearch ? 'Topilmadi' : (
                     <div>
                       <Users className="h-10 w-10 mx-auto mb-2 opacity-30" />
@@ -489,7 +489,7 @@ export default function MessagesPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-medium truncate">{g.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">
                       {g.participantCount} ta a'zo
                       {g.lastMessage ? ` · ${g.lastMessage.sender?.firstName}: ${g.lastMessage.content}` : ''}
                     </p>
@@ -510,9 +510,9 @@ export default function MessagesPage() {
             {!selectedUserId ? (
               <div className="flex-1 flex items-center justify-center text-center">
                 <div>
-                  <MessageSquare className="h-16 w-16 text-muted-foreground mx-auto mb-3 opacity-30" />
-                  <p className="font-medium text-muted-foreground">Suhbatni tanlang</p>
-                  <p className="text-sm text-muted-foreground/60 mt-1">Chap paneldan foydalanuvchini bosing</p>
+                  <MessageSquare className="h-16 w-16 text-xedu-slate-500 dark:text-xedu-slate-400 mx-auto mb-3 opacity-30" />
+                  <p className="font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Suhbatni tanlang</p>
+                  <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400/60 mt-1">Chap paneldan foydalanuvchini bosing</p>
                 </div>
               </div>
             ) : (
@@ -530,11 +530,11 @@ export default function MessagesPage() {
                     <p className="font-medium text-sm">
                       {selectedConv ? `${selectedConv.user?.firstName} ${selectedConv.user?.lastName}` : '...'}
                     </p>
-                    <p className="text-xs text-muted-foreground">{selectedConv?.user?.role ?? ''}</p>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{selectedConv?.user?.role ?? ''}</p>
                   </div>
                   <Button
                     size="icon" variant="ghost"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    className="h-8 w-8 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                     title="Suhbatni o'chirish"
                     onClick={async () => {
                       if (await ask({ title: "Bu suhbatdagi barcha o'z xabarlaringizni o'chirasizmi?", variant: 'destructive', confirmText: "O'chirish" })) {
@@ -557,7 +557,7 @@ export default function MessagesPage() {
                       ))}
                     </div>
                   ) : msgList.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-center text-sm text-muted-foreground">
+                    <div className="flex h-full items-center justify-center text-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                       <div><MessageSquare className="h-8 w-8 mx-auto mb-2 opacity-30" /><p>Suhbat boshlang</p></div>
                     </div>
                   ) : (
@@ -572,7 +572,7 @@ export default function MessagesPage() {
                             {showDate && (
                               <div className="flex items-center gap-2 my-3">
                                 <div className="flex-1 h-px bg-border" />
-                                <span className="text-xs text-muted-foreground px-2">{msgDate}</span>
+                                <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 px-2">{msgDate}</span>
                                 <div className="flex-1 h-px bg-border" />
                               </div>
                             )}
@@ -608,9 +608,9 @@ export default function MessagesPage() {
             {!selectedGroupId ? (
               <div className="flex-1 flex items-center justify-center text-center">
                 <div>
-                  <Users className="h-16 w-16 text-muted-foreground mx-auto mb-3 opacity-30" />
-                  <p className="font-medium text-muted-foreground">Guruhni tanlang</p>
-                  <p className="text-sm text-muted-foreground/60 mt-1">Yoki yangi guruh yarating</p>
+                  <Users className="h-16 w-16 text-xedu-slate-500 dark:text-xedu-slate-400 mx-auto mb-3 opacity-30" />
+                  <p className="font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Guruhni tanlang</p>
+                  <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400/60 mt-1">Yoki yangi guruh yarating</p>
                   <Button size="sm" className="mt-3 gap-1.5" onClick={() => setCreateGroupOpen(true)}>
                     <Plus className="h-3.5 w-3.5" /> Guruh yaratish
                   </Button>
@@ -627,13 +627,13 @@ export default function MessagesPage() {
                   </div>
                   <div className="flex-1">
                     <p className="font-medium text-sm">{selectedGroup?.name ?? '...'}</p>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                       {selectedGroup?.participantCount ?? 0} ta a'zo
                     </p>
                   </div>
                   <Button
                     size="sm" variant="ghost"
-                    className="text-xs text-muted-foreground hover:text-destructive gap-1"
+                    className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby gap-1"
                     onClick={async () => {
                       if (await ask({ title: 'Guruhdan chiqasizmi?', confirmText: 'Chiqish' })) leaveGroupMutation.mutate(selectedGroupId!);
                     }}
@@ -653,7 +653,7 @@ export default function MessagesPage() {
                       ))}
                     </div>
                   ) : gmList.length === 0 ? (
-                    <div className="flex h-full items-center justify-center text-center text-sm text-muted-foreground">
+                    <div className="flex h-full items-center justify-center text-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                       <div><Users className="h-8 w-8 mx-auto mb-2 opacity-30" /><p>Hali xabarlar yo'q. Birinchi xabarni yuboring!</p></div>
                     </div>
                   ) : (
@@ -668,7 +668,7 @@ export default function MessagesPage() {
                             {showDate && (
                               <div className="flex items-center gap-2 my-3">
                                 <div className="flex-1 h-px bg-border" />
-                                <span className="text-xs text-muted-foreground px-2">{msgDate}</span>
+                                <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 px-2">{msgDate}</span>
                                 <div className="flex-1 h-px bg-border" />
                               </div>
                             )}

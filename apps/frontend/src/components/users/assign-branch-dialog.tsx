@@ -65,7 +65,7 @@ export function AssignBranchDialog({
   const mutation = useMutation({
     mutationFn: () => usersApi.assignBranch(existingUser.id, targetBranchId, role),
     onSuccess: async () => {
-      toast({ title: '✅ Foydalanuvchi filialga biriktirildi' });
+      toast({ title: 'Foydalanuvchi filialga biriktirildi' });
       queryClient.invalidateQueries({ queryKey: ['users'] });
       // Agar joriy foydalanuvchi o'zini assignment'ini o'zgartirsa, JWT refresh
       if (existingUser.id === currentUser?.id) {
@@ -97,7 +97,7 @@ export function AssignBranchDialog({
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Building2 className="h-5 w-5 text-emerald-500" />
+            <Building2 className="h-5 w-5 text-xedu-primary" />
             Bu xodim allaqachon mavjud
           </DialogTitle>
           <DialogDescription>
@@ -121,9 +121,9 @@ export function AssignBranchDialog({
           )}
 
           {/* Target filial */}
-          <div className="rounded-lg bg-emerald-50 dark:bg-emerald-900/20 p-2.5">
-            <p className="text-[11px] font-bold uppercase tracking-wide text-emerald-600 dark:text-emerald-400 mb-1">Qo'shiladigan filial</p>
-            <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{targetBranchName ?? targetBranchId}</p>
+          <div className="rounded-lg bg-xedu-primary-light dark:bg-xedu-primary/20 p-2.5">
+            <p className="text-[11px] font-bold uppercase tracking-wide text-xedu-primary dark:text-xedu-primary mb-1">Qo'shiladigan filial</p>
+            <p className="text-sm font-semibold text-xedu-primary dark:text-xedu-primary">{targetBranchName ?? targetBranchId}</p>
           </div>
 
           {/* Role selection */}

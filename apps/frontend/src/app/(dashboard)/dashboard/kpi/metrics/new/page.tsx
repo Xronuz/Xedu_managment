@@ -101,7 +101,7 @@ export default function NewKpiMetricPage() {
   const mutation = useMutation({
     mutationFn: kpiApi.createMetric,
     onSuccess: () => {
-      toast({ title: '✅ KPI metrika yaratildi' });
+      toast({ title: ' KPI metrika yaratildi' });
       queryClient.invalidateQueries({ queryKey: ['kpi'] });
       router.push('/dashboard/kpi');
     },
@@ -152,7 +152,7 @@ export default function NewKpiMetricPage() {
         </Button>
         <div>
           <h1 className="text-2xl font-bold">Yangi KPI metrika</h1>
-          <p className="text-muted-foreground">Maktab uchun kalit ko&apos;rsatkich yaratish</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Maktab uchun kalit ko&apos;rsatkich yaratish</p>
         </div>
       </div>
 
@@ -169,7 +169,7 @@ export default function NewKpiMetricPage() {
           <CardContent className="space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="name">
-                Nomi <span className="text-destructive">*</span>
+                Nomi <span className="text-xedu-ruby">*</span>
               </Label>
               <Input
                 id="name"
@@ -177,7 +177,7 @@ export default function NewKpiMetricPage() {
                 {...register('name')}
                 className={errors.name ? 'border-destructive' : ''}
               />
-              {errors.name && <p className="text-xs text-destructive">{errors.name.message}</p>}
+              {errors.name && <p className="text-xs text-xedu-ruby">{errors.name.message}</p>}
             </div>
 
             <div className="space-y-1.5">
@@ -191,7 +191,7 @@ export default function NewKpiMetricPage() {
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label>Kategoriya <span className="text-destructive">*</span></Label>
+                <Label>Kategoriya <span className="text-xedu-ruby">*</span></Label>
                 <Controller
                   name="category"
                   control={control}
@@ -208,7 +208,7 @@ export default function NewKpiMetricPage() {
                     </Select>
                   )}
                 />
-                {errors.category && <p className="text-xs text-destructive">{errors.category.message}</p>}
+                {errors.category && <p className="text-xs text-xedu-ruby">{errors.category.message}</p>}
               </div>
 
               <div className="space-y-1.5">
@@ -291,14 +291,14 @@ export default function NewKpiMetricPage() {
                     </Select>
                   )}
                 />
-                <p className="text-xs text-muted-foreground">Tanlanmasa, maktab bo&apos;yicha KPI hisoblanadi</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Tanlanmasa, maktab bo&apos;yicha KPI hisoblanadi</p>
               </div>
             )}
 
             <div className="flex items-center justify-between rounded-lg border p-3">
               <div className="space-y-0.5">
                 <Label className="text-sm">Aktiv holat</Label>
-                <p className="text-xs text-muted-foreground">KPI monitoring tizimida ko&apos;rinadi</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">KPI monitoring tizimida ko&apos;rinadi</p>
               </div>
               <Controller
                 name="isActive"

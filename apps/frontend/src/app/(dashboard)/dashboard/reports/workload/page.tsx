@@ -115,7 +115,7 @@ export default function WorkloadPage() {
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <BarChart2 className="h-6 w-6 text-primary" /> O&apos;qituvchi ish yuklamasi
         </h1>
-        <p className="text-muted-foreground">Haftalik darslar, berilgan vazifalar va sinf sayisi bo&apos;yicha tahlil</p>
+        <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Haftalik darslar, berilgan vazifalar va sinf sayisi bo&apos;yicha tahlil</p>
       </div>
 
       {/* KPI cards */}
@@ -127,25 +127,25 @@ export default function WorkloadPage() {
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-violet-500/10"><Users className="h-5 w-5 text-violet-500" /></div>
-                <div><p className="text-xs text-muted-foreground">Jami o&apos;qituvchilar</p><p className="text-2xl font-bold">{totalTeachers}</p></div>
+                <div><p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Jami o&apos;qituvchilar</p><p className="text-2xl font-bold">{totalTeachers}</p></div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-blue-500/10"><BookOpen className="h-5 w-5 text-blue-500" /></div>
-                <div><p className="text-xs text-muted-foreground">Haftalik darslar</p><p className="text-2xl font-bold">{totalLessons}</p></div>
+                <div><p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Haftalik darslar</p><p className="text-2xl font-bold">{totalLessons}</p></div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-green-500/10"><TrendingUp className="h-5 w-5 text-green-500" /></div>
-                <div><p className="text-xs text-muted-foreground">O&apos;rtacha darslar</p><p className="text-2xl font-bold">{avgLessons}/hafta</p></div>
+                <div><p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">O&apos;rtacha darslar</p><p className="text-2xl font-bold">{avgLessons}/hafta</p></div>
               </CardContent>
             </Card>
             <Card>
               <CardContent className="p-4 flex items-center gap-3">
                 <div className="p-2.5 rounded-xl bg-red-500/10"><ClipboardCheck className="h-5 w-5 text-red-500" /></div>
-                <div><p className="text-xs text-muted-foreground">Haddan oshgan yuklamalar</p><p className="text-2xl font-bold">{overloadedCount}</p></div>
+                <div><p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Haddan oshgan yuklamalar</p><p className="text-2xl font-bold">{overloadedCount}</p></div>
               </CardContent>
             </Card>
           </>
@@ -190,7 +190,7 @@ export default function WorkloadPage() {
           {isLoading ? (
             <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14" />)}</div>
           ) : workloads.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">
+            <div className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
               <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
               <p className="text-sm">O&apos;qituvchilar topilmadi</p>
             </div>
@@ -199,21 +199,21 @@ export default function WorkloadPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b">
-                    <th className="text-left py-2.5 pr-3 font-medium text-muted-foreground">O&apos;qituvchi</th>
-                    <th className="text-left py-2.5 font-medium text-muted-foreground">Lavozim</th>
-                    <th className="text-center py-2.5 font-medium text-muted-foreground">
+                    <th className="text-left py-2.5 pr-3 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">O&apos;qituvchi</th>
+                    <th className="text-left py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Lavozim</th>
+                    <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
                       <span className="flex items-center justify-center gap-1"><BookOpen className="h-3.5 w-3.5" />Darslar/hafta</span>
                     </th>
-                    <th className="text-center py-2.5 font-medium text-muted-foreground">
+                    <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
                       <span className="flex items-center justify-center gap-1"><BookMarked className="h-3.5 w-3.5" />Vazifalar</span>
                     </th>
-                    <th className="text-center py-2.5 font-medium text-muted-foreground">Sinflar</th>
-                    <th className="text-right py-2.5 font-medium text-muted-foreground">Yuklamasi</th>
+                    <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Sinflar</th>
+                    <th className="text-right py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Yuklamasi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {workloads.map(t => (
-                    <tr key={t.id} className="border-b last:border-0 hover:bg-muted/20 transition-colors">
+                    <tr key={t.id} className="border-b last:border-0 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
                       <td className="py-2.5 pr-3">
                         <div className="flex items-center gap-2">
                           <Avatar className="h-7 w-7">
@@ -224,7 +224,7 @@ export default function WorkloadPage() {
                           <span className="font-medium">{t.firstName} {t.lastName}</span>
                         </div>
                       </td>
-                      <td className="py-2.5 text-muted-foreground text-xs">
+                      <td className="py-2.5 text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">
                         {ROLE_LABELS[t.role] ?? t.role}
                       </td>
                       <td className="py-2.5 text-center font-semibold">
@@ -232,8 +232,8 @@ export default function WorkloadPage() {
                           {t.lessonsPerWeek}
                         </span>
                       </td>
-                      <td className="py-2.5 text-center text-muted-foreground">{t.homeworkCount}</td>
-                      <td className="py-2.5 text-center text-muted-foreground">{t.classesCount}</td>
+                      <td className="py-2.5 text-center text-xedu-slate-500 dark:text-xedu-slate-400">{t.homeworkCount}</td>
+                      <td className="py-2.5 text-center text-xedu-slate-500 dark:text-xedu-slate-400">{t.classesCount}</td>
                       <td className="py-2.5 text-right">
                         <WorkloadBadge lessons={t.lessonsPerWeek} />
                       </td>
@@ -247,7 +247,7 @@ export default function WorkloadPage() {
       </Card>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
+      <div className="flex flex-wrap gap-4 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
         <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-green-400 shrink-0" />Normal (0–11 dars/hafta)</span>
         <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-yellow-400 shrink-0" />O&apos;rta (12–19 dars/hafta)</span>
         <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-red-400 shrink-0" />Yuqori (20+ dars/hafta)</span>

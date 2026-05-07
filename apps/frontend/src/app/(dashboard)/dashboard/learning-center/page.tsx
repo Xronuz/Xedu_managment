@@ -116,7 +116,7 @@ export default function LearningCenterPage() {
   const createMutation = useMutation({
     mutationFn: learningCenterApi.createCourse,
     onSuccess: () => {
-      toast({ title: '✅ Kurs qo\'shildi' });
+      toast({ title: 'Kurs qo\'shildi' });
       queryClient.invalidateQueries({ queryKey: ['learning-center'] });
       setCourseOpen(false);
     },
@@ -130,7 +130,7 @@ export default function LearningCenterPage() {
     mutationFn: ({ id, data }: { id: string; data: Partial<CreateCourseDto> }) =>
       learningCenterApi.updateCourse(id, data),
     onSuccess: () => {
-      toast({ title: '✅ Kurs yangilandi' });
+      toast({ title: 'Kurs yangilandi' });
       queryClient.invalidateQueries({ queryKey: ['learning-center'] });
       setCourseOpen(false);
       setEditCourse(null);
@@ -158,7 +158,7 @@ export default function LearningCenterPage() {
     mutationFn: ({ courseId, studentId }: { courseId: string; studentId: string }) =>
       learningCenterApi.enrollStudent(courseId, { studentId }),
     onSuccess: () => {
-      toast({ title: '✅ O\'quvchi qo\'shildi' });
+      toast({ title: 'O\'quvchi qo\'shildi' });
       queryClient.invalidateQueries({ queryKey: ['learning-center'] });
       setEnrollOpen(false);
       setEnrollStudentId('');
@@ -182,7 +182,7 @@ export default function LearningCenterPage() {
     mutationFn: ({ courseId, enrollmentId, status }: { courseId: string; enrollmentId: string; status: string }) =>
       learningCenterApi.updateEnrollment(courseId, enrollmentId, { status: status as any }),
     onSuccess: () => {
-      toast({ title: '✅ Holat yangilandi' });
+      toast({ title: 'Holat yangilandi' });
       queryClient.invalidateQueries({ queryKey: ['learning-center'] });
     },
   });
@@ -245,7 +245,7 @@ export default function LearningCenterPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <MonitorPlay className="h-6 w-6 text-violet-500" /> O&apos;quv markazi
           </h1>
-          <p className="text-muted-foreground">Mening kurslarim</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Mening kurslarim</p>
         </div>
 
         {myCoursesLoading ? (
@@ -255,8 +255,8 @@ export default function LearningCenterPage() {
         ) : (myCourses as CourseEnrollment[]).length === 0 ? (
           <Card>
             <CardContent className="py-16 text-center">
-              <MonitorPlay className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-30" />
-              <p className="text-muted-foreground">Siz hali hech qanday kursga yozilmagansiz</p>
+              <MonitorPlay className="mx-auto mb-3 h-12 w-12 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-30" />
+              <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Siz hali hech qanday kursga yozilmagansiz</p>
             </CardContent>
           </Card>
         ) : (
@@ -265,7 +265,7 @@ export default function LearningCenterPage() {
               const cfg = STATUS_CONFIG[en.status] ?? STATUS_CONFIG.active;
               const course = en.course;
               return (
-                <Card key={en.id} className="hover:shadow-md transition-all">
+                <Card key={en.id} className="hover:shadow-sm transition-all">
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle className="text-base leading-tight">
@@ -281,13 +281,13 @@ export default function LearningCenterPage() {
                   </CardHeader>
                   <CardContent className="space-y-2 text-sm">
                     {course?.teacher && (
-                      <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                      <div className="flex items-center gap-2 text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">
                         <Users className="h-3.5 w-3.5" />
                         {course.teacher.firstName} {course.teacher.lastName}
                       </div>
                     )}
                     {(course?.startDate || course?.endDate) && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         <Calendar className="h-3 w-3" />
                         {course.startDate ? course.startDate.split('T')[0] : '—'}
                         {' → '}
@@ -295,13 +295,13 @@ export default function LearningCenterPage() {
                       </div>
                     )}
                     {course?.price !== undefined && course.price !== null && (
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         <Banknote className="h-3 w-3 text-green-600" />
                         {formatCurrency(course.price)}
                       </div>
                     )}
                     <div className="flex items-center justify-between pt-2 border-t mt-2">
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                         Yozildi: {en.enrolledAt.split('T')[0]}
                       </span>
                       {en.grade !== undefined && en.grade !== null && (
@@ -311,7 +311,7 @@ export default function LearningCenterPage() {
                       )}
                     </div>
                     {en.notes && (
-                      <p className="text-xs text-muted-foreground italic">{en.notes}</p>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 italic">{en.notes}</p>
                     )}
                   </CardContent>
                 </Card>
@@ -331,7 +331,7 @@ export default function LearningCenterPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <MonitorPlay className="h-6 w-6 text-violet-500" /> O&apos;quv markazi
           </h1>
-          <p className="text-muted-foreground">Kurslar, yo&apos;nalishlar va guruhlar boshqaruvi</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Kurslar, yo&apos;nalishlar va guruhlar boshqaruvi</p>
         </div>
         {canManage && (
           <Button onClick={openCreate}>
@@ -353,7 +353,7 @@ export default function LearningCenterPage() {
               <CardContent className="p-4 flex items-center gap-4">
                 <div className={`p-3 rounded-xl ${bg}`}><Icon className={`h-5 w-5 ${color}`} /></div>
                 <div>
-                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{label}</p>
                   <p className="text-2xl font-bold">{value}</p>
                 </div>
               </CardContent>
@@ -364,7 +364,7 @@ export default function LearningCenterPage() {
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
         <Input
           placeholder="Kurs nomi bo'yicha qidirish..."
           className="pl-9"
@@ -381,8 +381,8 @@ export default function LearningCenterPage() {
       ) : (courses as Course[]).length === 0 ? (
         <Card>
           <CardContent className="py-16 text-center">
-            <MonitorPlay className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-30" />
-            <p className="text-muted-foreground">{search ? 'Kurs topilmadi' : 'Hozircha kurs mavjud emas'}</p>
+            <MonitorPlay className="mx-auto mb-3 h-12 w-12 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-30" />
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400">{search ? 'Kurs topilmadi' : 'Hozircha kurs mavjud emas'}</p>
             {canManage && !search && (
               <Button variant="outline" className="mt-4" onClick={openCreate}>
                 <Plus className="mr-2 h-4 w-4" /> Birinchi kursni qo&apos;shish
@@ -395,7 +395,7 @@ export default function LearningCenterPage() {
           {(courses as Course[]).map(course => (
             <Card
               key={course.id}
-              className={`cursor-pointer hover:shadow-md transition-all ${!course.isActive ? 'opacity-60' : ''}`}
+              className={`cursor-pointer hover:shadow-sm transition-all ${!course.isActive ? 'opacity-60' : ''}`}
               onClick={() => setDetailCourseId(course.id)}
             >
               <CardHeader className="pb-2">
@@ -411,12 +411,12 @@ export default function LearningCenterPage() {
               </CardHeader>
               <CardContent className="space-y-2 text-sm">
                 {course.teacher && (
-                  <div className="flex items-center gap-2 text-muted-foreground text-xs">
+                  <div className="flex items-center gap-2 text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">
                     <Users className="h-3.5 w-3.5" />
                     {course.teacher.firstName} {course.teacher.lastName}
                   </div>
                 )}
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <div className="flex items-center gap-4 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                   {course.duration && (
                     <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {course.duration} hafta</span>
                   )}
@@ -425,7 +425,7 @@ export default function LearningCenterPage() {
                   )}
                 </div>
                 {(course.startDate || course.endDate) && (
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-1 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                     <Calendar className="h-3 w-3" />
                     {course.startDate ? course.startDate.split('T')[0] : '—'}
                     {' → '}
@@ -433,7 +433,7 @@ export default function LearningCenterPage() {
                   </div>
                 )}
                 <div className="flex items-center justify-between mt-2 pt-2 border-t">
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
+                  <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1">
                     <Users className="h-3 w-3" />
                     {course.enrolledCount ?? 0}/{course.maxStudents} o&apos;quvchi
                   </span>
@@ -443,7 +443,7 @@ export default function LearningCenterPage() {
                         onClick={() => openEdit(course)}>
                         <Pencil className="h-3 w-3" />
                       </Button>
-                      <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                      <Button size="icon" variant="ghost" className="h-6 w-6 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                         onClick={async () => {
                           if (await ask({ title: `"${course.name}" kursini o'chirasizmi?`, variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(course.id);
                         }}
@@ -482,7 +482,7 @@ export default function LearningCenterPage() {
               </DialogHeader>
 
               {/* Course meta */}
-              <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+              <div className="flex flex-wrap gap-3 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                 {detailCourse.teacher && (
                   <span className="flex items-center gap-1"><Users className="h-3 w-3" /> {detailCourse.teacher.firstName} {detailCourse.teacher.lastName}</span>
                 )}
@@ -497,7 +497,7 @@ export default function LearningCenterPage() {
               {/* Students */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs font-medium text-muted-foreground">
+                  <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
                     O&apos;quvchilar ({(detailCourse.enrollments ?? []).length}/{detailCourse.maxStudents})
                   </p>
                   {(canManage || isTeacher) && (
@@ -509,7 +509,7 @@ export default function LearningCenterPage() {
                 </div>
 
                 {(detailCourse.enrollments ?? []).length === 0 ? (
-                  <p className="text-sm text-muted-foreground text-center py-6">O&apos;quvchilar yo&apos;q</p>
+                  <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 text-center py-6">O&apos;quvchilar yo&apos;q</p>
                 ) : (
                   <div className="space-y-1.5 max-h-64 overflow-y-auto">
                     {(detailCourse.enrollments ?? []).map((en: any) => {
@@ -523,7 +523,7 @@ export default function LearningCenterPage() {
                                 {cfg.label}
                               </Badge>
                               {en.grade !== undefined && en.grade !== null && (
-                                <span className="text-xs text-muted-foreground flex items-center gap-0.5">
+                                <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-0.5">
                                   <Star className="h-3 w-3 text-yellow-500" /> {en.grade}
                                 </span>
                               )}
@@ -532,7 +532,7 @@ export default function LearningCenterPage() {
                           {(canManage || isTeacher) && (
                             <div className="flex items-center gap-1 shrink-0">
                               {en.status === 'active' && (
-                                <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-green-600"
+                                <Button size="icon" variant="ghost" className="h-6 w-6 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-green-600"
                                   title="Tugatdi"
                                   onClick={() => updateEnrollMutation.mutate({ courseId: detailCourse.id, enrollmentId: en.id, status: 'completed' })}
                                   disabled={updateEnrollMutation.isPending}>
@@ -540,7 +540,7 @@ export default function LearningCenterPage() {
                                 </Button>
                               )}
                               {canManage && (
-                                <Button size="icon" variant="ghost" className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                                <Button size="icon" variant="ghost" className="h-6 w-6 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                                   onClick={() => removeEnrollMutation.mutate({ courseId: detailCourse.id, enrollmentId: en.id })}
                                   disabled={removeEnrollMutation.isPending}>
                                   <X className="h-3.5 w-3.5" />
@@ -569,13 +569,13 @@ export default function LearningCenterPage() {
 
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Kurs nomi <span className="text-destructive">*</span></Label>
+              <Label>Kurs nomi <span className="text-xedu-ruby">*</span></Label>
               <Input
                 placeholder="Masalan: Matematika (9-sinf)"
                 value={courseForm.name}
                 onChange={e => { setCourseForm(f => ({ ...f, name: e.target.value })); setCourseErrors(er => { const n = { ...er }; delete n.name; return n; }); }}
               />
-              {courseErrors.name && <p className="text-xs text-destructive">{courseErrors.name}</p>}
+              {courseErrors.name && <p className="text-xs text-xedu-ruby">{courseErrors.name}</p>}
             </div>
 
             <div className="space-y-1.5">
@@ -666,7 +666,7 @@ export default function LearningCenterPage() {
                 <Button
                   type="button"
                   variant="outline"
-                  className={`w-full h-10 gap-2 ${courseForm.isActive ? 'text-green-600 border-green-400' : 'text-muted-foreground'}`}
+                  className={`w-full h-10 gap-2 ${courseForm.isActive ? 'text-green-600 border-green-400' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}
                   onClick={() => setCourseForm(f => ({ ...f, isActive: !f.isActive }))}
                 >
                   {courseForm.isActive
@@ -696,7 +696,7 @@ export default function LearningCenterPage() {
           </DialogHeader>
           <div className="space-y-3 py-2">
             <div className="space-y-1.5">
-              <Label>O&apos;quvchi <span className="text-destructive">*</span></Label>
+              <Label>O&apos;quvchi <span className="text-xedu-ruby">*</span></Label>
               <Select value={enrollStudentId} onValueChange={setEnrollStudentId}>
                 <SelectTrigger>
                   <SelectValue placeholder="O'quvchi tanlang..." />

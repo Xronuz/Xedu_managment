@@ -46,7 +46,7 @@ const STATUS_CFG: Record<string, { label: string; color: string }> = {
   approved: { label: 'Tasdiqlandi',   color: 'border-green-500 text-green-600' },
   rejected: { label: 'Rad etildi',    color: 'border-red-500 text-red-600' },
   paid:     { label: "To'landi",      color: 'border-blue-500 text-blue-600' },
-  draft:    { label: 'Qoralama',      color: 'border-border text-muted-foreground' },
+  draft:    { label: 'Qoralama',      color: 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 dark:text-xedu-slate-400' },
 };
 
 function MonthLabel({ month, year }: { month: number; year: number }) {
@@ -145,7 +145,7 @@ export default function PayrollPage() {
   const createConfigMutation = useMutation({
     mutationFn: payrollApi.createSalaryConfig,
     onSuccess: () => {
-      toast({ title: '✅ Maosh konfiguratsiyasi yaratildi' });
+      toast({ title: ' Maosh konfiguratsiyasi yaratildi' });
       queryClient.invalidateQueries({ queryKey: ['payroll-staff'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-stats'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-unconfigured'] });
@@ -160,7 +160,7 @@ export default function PayrollPage() {
   const updateConfigMutation = useMutation({
     mutationFn: ({ id, ...payload }: any) => payrollApi.updateSalaryConfig(id, payload),
     onSuccess: () => {
-      toast({ title: '✅ Yangilandi' });
+      toast({ title: ' Yangilandi' });
       queryClient.invalidateQueries({ queryKey: ['payroll-staff'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-stats'] });
       setConfigOpen(false);
@@ -187,7 +187,7 @@ export default function PayrollPage() {
   const genMutation = useMutation({
     mutationFn: payrollApi.generatePayroll,
     onSuccess: () => {
-      toast({ title: '✅ Oylik hisob-kitob yaratildi' });
+      toast({ title: ' Oylik hisob-kitob yaratildi' });
       queryClient.invalidateQueries({ queryKey: ['payroll-monthly'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-stats'] });
       setGenOpen(false);
@@ -201,7 +201,7 @@ export default function PayrollPage() {
   const updateItemMutation = useMutation({
     mutationFn: ({ id, ...payload }: any) => payrollApi.updatePayrollItem(id, payload),
     onSuccess: () => {
-      toast({ title: '✅ Yangilandi' });
+      toast({ title: ' Yangilandi' });
       queryClient.invalidateQueries({ queryKey: ['payroll-detail', detailId] });
       queryClient.invalidateQueries({ queryKey: ['payroll-monthly'] });
       setEditingItemId(null);
@@ -215,7 +215,7 @@ export default function PayrollPage() {
   const approveMutation = useMutation({
     mutationFn: payrollApi.approvePayroll,
     onSuccess: () => {
-      toast({ title: '✅ Hisob-kitob tasdiqlandi' });
+      toast({ title: ' Hisob-kitob tasdiqlandi' });
       queryClient.invalidateQueries({ queryKey: ['payroll-monthly'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-detail', detailId] });
     },
@@ -228,7 +228,7 @@ export default function PayrollPage() {
   const paidMutation = useMutation({
     mutationFn: payrollApi.markPayrollPaid,
     onSuccess: () => {
-      toast({ title: "✅ To'landi deb belgilandi" });
+      toast({ title: " To'landi deb belgilandi" });
       queryClient.invalidateQueries({ queryKey: ['payroll-monthly'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-detail', detailId] });
     },
@@ -253,7 +253,7 @@ export default function PayrollPage() {
   const createAdvanceMutation = useMutation({
     mutationFn: payrollApi.createAdvance,
     onSuccess: () => {
-      toast({ title: "✅ Avans so'rovi yuborildi" });
+      toast({ title: " Avans so'rovi yuborildi" });
       queryClient.invalidateQueries({ queryKey: ['payroll-advances'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-stats'] });
       setAdvOpen(false);
@@ -268,7 +268,7 @@ export default function PayrollPage() {
   const issueAdvanceMutation = useMutation({
     mutationFn: payrollApi.issueAdvance,
     onSuccess: () => {
-      toast({ title: "✅ Avans berildi va tasdiqlandi" });
+      toast({ title: " Avans berildi va tasdiqlandi" });
       queryClient.invalidateQueries({ queryKey: ['payroll-advances'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-stats'] });
       setIssueOpen(false);
@@ -284,7 +284,7 @@ export default function PayrollPage() {
     mutationFn: ({ id, action, comment }: { id: string; action: 'approve' | 'reject'; comment?: string }) =>
       payrollApi.reviewAdvance(id, { action, comment }),
     onSuccess: () => {
-      toast({ title: '✅ Qaror qabul qilindi' });
+      toast({ title: ' Qaror qabul qilindi' });
       queryClient.invalidateQueries({ queryKey: ['payroll-advances'] });
       queryClient.invalidateQueries({ queryKey: ['payroll-stats'] });
       setReviewOpen(false);
@@ -309,7 +309,7 @@ export default function PayrollPage() {
   const advancePaidMutation = useMutation({
     mutationFn: payrollApi.markAdvancePaid,
     onSuccess: () => {
-      toast({ title: "✅ Avans to'landi deb belgilandi" });
+      toast({ title: " Avans to'landi deb belgilandi" });
       queryClient.invalidateQueries({ queryKey: ['payroll-advances'] });
     },
     onError: (err: any) => {
@@ -417,7 +417,7 @@ export default function PayrollPage() {
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Banknote className="h-6 w-6 text-primary" /> Maosh tizimi
         </h1>
-        <p className="text-muted-foreground">Xodimlar maoshi, avanslar va oylik hisob-kitob</p>
+        <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Xodimlar maoshi, avanslar va oylik hisob-kitob</p>
       </div>
 
       {/* Stats row */}
@@ -488,7 +488,7 @@ export default function PayrollPage() {
         {isManager && (
           <TabsContent value="staff" className="space-y-4 mt-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                 {(salaryConfigs as any[]).length} ta xodim sozlangan
               </p>
               <Button size="sm" onClick={openNewConfig}>
@@ -501,8 +501,8 @@ export default function PayrollPage() {
             ) : (salaryConfigs as any[]).length === 0 ? (
               <Card>
                 <CardContent className="py-12 text-center">
-                  <Banknote className="mx-auto mb-2 h-10 w-10 text-muted-foreground opacity-30" />
-                  <p className="text-muted-foreground">Hali xodimlar maoshi sozlanmagan</p>
+                  <Banknote className="mx-auto mb-2 h-10 w-10 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-30" />
+                  <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Hali xodimlar maoshi sozlanmagan</p>
                   <Button className="mt-3" size="sm" onClick={openNewConfig}><Plus className="mr-1.5 h-4 w-4" />Boshlash</Button>
                 </CardContent>
               </Card>
@@ -518,7 +518,7 @@ export default function PayrollPage() {
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="font-medium">{cfg.user?.firstName} {cfg.user?.lastName}</p>
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground flex-wrap">
+                        <div className="flex items-center gap-2 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 flex-wrap">
                           <span>{getRoleLabel(cfg.user?.role ?? '')}</span>
                           {cfg.position && <><span>·</span><span>{cfg.position}</span></>}
                           {!cfg.isActive && <Badge variant="destructive" className="text-[10px]">Nofaol</Badge>}
@@ -527,7 +527,7 @@ export default function PayrollPage() {
                       <div className="text-right shrink-0">
                         <p className="font-bold text-green-600">{formatCurrency(cfg.baseSalary)}</p>
                         {cfg.hourlyRate > 0 && (
-                          <p className="text-xs text-muted-foreground">+{formatCurrency(cfg.hourlyRate)}/soat</p>
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">+{formatCurrency(cfg.hourlyRate)}/soat</p>
                         )}
                       </div>
                       {isAdmin && (
@@ -538,7 +538,7 @@ export default function PayrollPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-destructive hover:text-destructive"
+                            className="h-8 w-8 text-xedu-ruby hover:text-xedu-ruby"
                             onClick={() => deleteConfigMutation.mutate(cfg.id)}
                             disabled={deleteConfigMutation.isPending}
                           >
@@ -558,7 +558,7 @@ export default function PayrollPage() {
         {isManager && (
           <TabsContent value="payroll" className="space-y-4 mt-4">
             <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{(payrolls as any[]).length} ta hisob-kitob</p>
+              <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{(payrolls as any[]).length} ta hisob-kitob</p>
               <Button size="sm" onClick={() => setGenOpen(true)}>
                 <RefreshCw className="mr-1.5 h-4 w-4" /> Yangi hisob-kitob
               </Button>
@@ -568,7 +568,7 @@ export default function PayrollPage() {
               <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
             ) : (payrolls as any[]).length === 0 ? (
               <Card>
-                <CardContent className="py-12 text-center text-muted-foreground">
+                <CardContent className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
                   <CalendarDays className="mx-auto mb-2 h-10 w-10 opacity-30" />
                   <p>Hisob-kitoblar yo'q</p>
                 </CardContent>
@@ -588,7 +588,7 @@ export default function PayrollPage() {
                             <p className="font-semibold">
                               <MonthLabel month={pr.month} year={pr.year} />
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                               {pr._count?.items ?? 0} ta xodim ·
                               Yaratdi: {pr.createdBy?.firstName} {pr.createdBy?.lastName}
                             </p>
@@ -597,7 +597,7 @@ export default function PayrollPage() {
                         <div className="flex items-center gap-3 shrink-0">
                           <div className="text-right hidden sm:block">
                             <p className="text-sm font-bold">{formatCurrency(pr.totalNet)}</p>
-                            <p className="text-xs text-muted-foreground">netto</p>
+                            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">netto</p>
                           </div>
                           <Badge variant="outline" className={cfg.color}>{cfg.label}</Badge>
                           <div className="flex gap-1">
@@ -633,7 +633,7 @@ export default function PayrollPage() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7 text-destructive"
+                                className="h-7 w-7 text-xedu-ruby"
                                 onClick={() => deletePayrollMutation.mutate(pr.id)}
                                 disabled={deletePayrollMutation.isPending}
                               >
@@ -654,7 +654,7 @@ export default function PayrollPage() {
         {/* ── TAB 3: Avanslar ──────────────────────────────────────────────── */}
         <TabsContent value="advances" className="space-y-4 mt-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">{(advances as any[]).length} ta so'rov</p>
+            <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{(advances as any[]).length} ta so'rov</p>
             <div className="flex gap-2">
               {/* Admin: directly issue advance to any staff member */}
               {isManager && (
@@ -675,7 +675,7 @@ export default function PayrollPage() {
             <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}</div>
           ) : (advances as any[]).length === 0 ? (
             <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
+              <CardContent className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
                 <Banknote className="mx-auto mb-2 h-10 w-10 opacity-30" />
                 <p>Avans so'rovlari yo'q</p>
               </CardContent>
@@ -700,13 +700,13 @@ export default function PayrollPage() {
                               {adv.user?.firstName} {adv.user?.lastName}
                             </p>
                             {isMine && <Badge variant="outline" className="text-[10px] px-1.5">Men</Badge>}
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                               <MonthLabel month={adv.month} year={adv.year} />
                             </span>
                           </div>
-                          {adv.reason && <p className="text-xs text-muted-foreground truncate">{adv.reason}</p>}
+                          {adv.reason && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{adv.reason}</p>}
                           {adv.approvedBy && (
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                               Tasdiqladi: {adv.approvedBy?.firstName} {adv.approvedBy?.lastName}
                             </p>
                           )}
@@ -779,7 +779,7 @@ export default function PayrollPage() {
                           <div className="flex-1">
                             <div className="flex items-center justify-between text-xs mb-1">
                               <span>Netto: {formatCurrency(pr.totalNet)}</span>
-                              <span className="text-muted-foreground">Brutto: {formatCurrency(pr.totalGross)}</span>
+                              <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Brutto: {formatCurrency(pr.totalGross)}</span>
                             </div>
                             <div className="h-2 bg-muted rounded-full overflow-hidden">
                               <div
@@ -793,7 +793,7 @@ export default function PayrollPage() {
                       );
                     })}
                     {(!stats?.recentPayrolls || stats.recentPayrolls.length === 0) && (
-                      <p className="text-center text-muted-foreground py-6">Ma'lumot yo'q</p>
+                      <p className="text-center text-xedu-slate-500 dark:text-xedu-slate-400 py-6">Ma'lumot yo'q</p>
                     )}
                   </div>
                 )}
@@ -866,7 +866,7 @@ export default function PayrollPage() {
           <div className="space-y-4 py-2">
             {!editConfig && (
               <div className="space-y-1.5">
-                <Label>Xodim <span className="text-destructive">*</span></Label>
+                <Label>Xodim <span className="text-xedu-ruby">*</span></Label>
                 <Select
                   value={configForm.userId}
                   onValueChange={v => { setConfigForm(f => ({ ...f, userId: v })); setConfigErrors(e => { const n = { ...e }; delete n.userId; return n; }); }}
@@ -881,11 +881,11 @@ export default function PayrollPage() {
                       </SelectItem>
                     ))}
                     {(unconfiguredStaff as any[]).length === 0 && (
-                      <div className="px-3 py-2 text-sm text-muted-foreground">Barcha xodimlar sozlangan</div>
+                      <div className="px-3 py-2 text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Barcha xodimlar sozlangan</div>
                     )}
                   </SelectContent>
                 </Select>
-                {configErrors.userId && <p className="text-xs text-destructive">{configErrors.userId}</p>}
+                {configErrors.userId && <p className="text-xs text-xedu-ruby">{configErrors.userId}</p>}
               </div>
             )}
             {/* ─ Tarif kalkulyator tugmasi ─ */}
@@ -893,7 +893,7 @@ export default function PayrollPage() {
               <Calculator className="h-4 w-4 text-primary flex-shrink-0" />
               <div className="flex-1 text-sm">
                 <div className="font-medium">UZ Tarifikatsiya kalkulyatori</div>
-                <div className="text-muted-foreground text-xs">Toifa, staj, daraja asosida maoshni avtomatik hisoblash</div>
+                <div className="text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">Toifa, staj, daraja asosida maoshni avtomatik hisoblash</div>
               </div>
               <Button
                 type="button"
@@ -907,14 +907,14 @@ export default function PayrollPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Asosiy oylik (so'm) <span className="text-destructive">*</span></Label>
+                <Label>Asosiy oylik (so'm) <span className="text-xedu-ruby">*</span></Label>
                 <Input
                   type="number"
                   placeholder="3 000 000"
                   value={configForm.baseSalary}
                   onChange={e => { setConfigForm(f => ({ ...f, baseSalary: e.target.value })); setConfigErrors(er => { const n = { ...er }; delete n.baseSalary; return n; }); }}
                 />
-                {configErrors.baseSalary && <p className="text-xs text-destructive">{configErrors.baseSalary}</p>}
+                {configErrors.baseSalary && <p className="text-xs text-xedu-ruby">{configErrors.baseSalary}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Asosiy soatlik narx</Label>
@@ -924,7 +924,7 @@ export default function PayrollPage() {
                   value={configForm.hourlyRate}
                   onChange={e => setConfigForm(f => ({ ...f, hourlyRate: e.target.value }))}
                 />
-                <p className="text-[10px] text-muted-foreground">Oddiy dars uchun</p>
+                <p className="text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400">Oddiy dars uchun</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -936,7 +936,7 @@ export default function PayrollPage() {
                   value={configForm.extraCurricularRate}
                   onChange={e => setConfigForm(f => ({ ...f, extraCurricularRate: e.target.value }))}
                 />
-                <p className="text-[10px] text-muted-foreground">Qo'shimcha to'garak</p>
+                <p className="text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400">Qo'shimcha to'garak</p>
               </div>
               <div className="space-y-1.5">
                 <Label>Ilmiy daraja qo'shimchasi</Label>
@@ -946,7 +946,7 @@ export default function PayrollPage() {
                   value={configForm.degreeAllowance}
                   onChange={e => setConfigForm(f => ({ ...f, degreeAllowance: e.target.value }))}
                 />
-                <p className="text-[10px] text-muted-foreground">PhD/Doktor uchun oylik</p>
+                <p className="text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400">PhD/Doktor uchun oylik</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
@@ -958,7 +958,7 @@ export default function PayrollPage() {
                   value={configForm.certificateAllowance}
                   onChange={e => setConfigForm(f => ({ ...f, certificateAllowance: e.target.value }))}
                 />
-                <p className="text-[10px] text-muted-foreground">IELTS/CEFR va boshqalar</p>
+                <p className="text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400">IELTS/CEFR va boshqalar</p>
               </div>
               <div className="space-y-1.5">
                 <Label>Lavozim</Label>
@@ -971,13 +971,13 @@ export default function PayrollPage() {
             </div>
             {!editConfig && (
               <div className="space-y-1.5">
-                <Label>Ishga kirgan sana <span className="text-destructive">*</span></Label>
+                <Label>Ishga kirgan sana <span className="text-xedu-ruby">*</span></Label>
                 <Input
                   type="date"
                   value={configForm.startDate}
                   onChange={e => { setConfigForm(f => ({ ...f, startDate: e.target.value })); setConfigErrors(er => { const n = { ...er }; delete n.startDate; return n; }); }}
                 />
-                {configErrors.startDate && <p className="text-xs text-destructive">{configErrors.startDate}</p>}
+                {configErrors.startDate && <p className="text-xs text-xedu-ruby">{configErrors.startDate}</p>}
               </div>
             )}
             <div className="rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-3 text-xs text-blue-700 dark:text-blue-400">
@@ -1045,7 +1045,7 @@ export default function PayrollPage() {
               />
             </div>
             <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-3 text-xs text-amber-700 dark:text-amber-400">
-              <p className="font-medium">ℹ️ Eslatma</p>
+              <p className="font-medium"> Eslatma</p>
               <p className="mt-1">Qoralama (draft) sifatida yaratiladi. Keyin har bir xodim uchun dars soatlari va bonuslar qo'shishingiz mumkin.</p>
             </div>
           </div>
@@ -1074,7 +1074,7 @@ export default function PayrollPage() {
                 <Badge variant="outline" className={(STATUS_CFG[payrollDetail.status] ?? STATUS_CFG.draft).color}>
                   {(STATUS_CFG[payrollDetail.status] ?? STATUS_CFG.draft).label}
                 </Badge>
-                <span className="text-sm text-muted-foreground">
+                <span className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                   Jami: <strong>{formatCurrency(payrollDetail.totalGross)}</strong> brutto →{' '}
                   <strong className="text-green-600">{formatCurrency(payrollDetail.totalNet)}</strong> netto
                 </span>
@@ -1105,7 +1105,7 @@ export default function PayrollPage() {
                           </Avatar>
                           <div>
                             <p className="font-medium text-sm">{item.user?.firstName} {item.user?.lastName}</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                               {item.staffSalary?.position ?? getRoleLabel(item.user?.role ?? '')}
                               {item.staffSalary?.hourlyRate > 0 && ` · ${formatCurrency(item.staffSalary.hourlyRate)}/soat`}
                             </p>
@@ -1113,13 +1113,13 @@ export default function PayrollPage() {
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-bold text-green-600">{formatCurrency(item.netTotal)}</p>
-                          <p className="text-xs text-muted-foreground">netto</p>
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">netto</p>
                         </div>
                         <div className="flex gap-1">
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-7 w-7 text-muted-foreground hover:text-primary"
+                            className="h-7 w-7 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-primary"
                             title="Maosh varaqasini yuklab olish (PDF)"
                             onClick={() => payrollApi.downloadSalarySlip(payrollDetail.id, item.id).catch(() =>
                               toast({ variant: 'destructive', title: 'PDF yuklab olishda xato' })
@@ -1208,9 +1208,9 @@ export default function PayrollPage() {
                             value={itemForm.note}
                             onChange={e => setItemForm(f => ({ ...f, note: e.target.value }))}
                           />
-                          <div className="text-xs text-muted-foreground bg-muted px-3 py-1.5 rounded space-y-0.5">
+                          <div className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 bg-muted px-3 py-1.5 rounded space-y-0.5">
                             {item.staffSalary?.hourlyRate > 0 && (
-                              <p>⚠️ O'tilmagan {Math.max(0, Number(itemForm.scheduledHours) - Number(itemForm.completedHours))} soat → −{formatCurrency(Math.max(0, Number(itemForm.scheduledHours) - Number(itemForm.completedHours)) * item.staffSalary.hourlyRate)} jarima</p>
+                              <p> O'tilmagan {Math.max(0, Number(itemForm.scheduledHours) - Number(itemForm.completedHours))} soat → −{formatCurrency(Math.max(0, Number(itemForm.scheduledHours) - Number(itemForm.completedHours)) * item.staffSalary.hourlyRate)} jarima</p>
                             )}
                             {item.staffSalary?.extraCurricularRate > 0 && Number(itemForm.extraCurricularHours) > 0 && (
                               <p>🎯 To'garak {itemForm.extraCurricularHours} soat → +{formatCurrency(Number(itemForm.extraCurricularHours) * item.staffSalary.extraCurricularRate)}</p>
@@ -1229,7 +1229,7 @@ export default function PayrollPage() {
                       )}
 
                       {item.note && !isEditing && (
-                        <p className="mt-2 text-xs text-muted-foreground italic">📝 {item.note}</p>
+                        <p className="mt-2 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 italic">📝 {item.note}</p>
                       )}
                     </CardContent>
                   </Card>
@@ -1241,11 +1241,11 @@ export default function PayrollPage() {
                 <CardContent className="p-4">
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                     <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Jami brutto</p>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Jami brutto</p>
                       <p className="font-bold">{formatCurrency(payrollDetail.totalGross)}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Avanslar</p>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Avanslar</p>
                       <p className="font-bold text-orange-600">
                         −{formatCurrency(
                           payrollDetail.items?.reduce((s: number, i: any) => s + i.advancePaid, 0) ?? 0
@@ -1253,11 +1253,11 @@ export default function PayrollPage() {
                       </p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Jami netto</p>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Jami netto</p>
                       <p className="font-bold text-green-600">{formatCurrency(payrollDetail.totalNet)}</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xs text-muted-foreground">Xodimlar</p>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Xodimlar</p>
                       <p className="font-bold">{payrollDetail.items?.length}</p>
                     </div>
                   </div>
@@ -1339,7 +1339,7 @@ export default function PayrollPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Miqdor (so'm) <span className="text-destructive">*</span></Label>
+              <Label>Miqdor (so'm) <span className="text-xedu-ruby">*</span></Label>
               <Input
                 type="number"
                 placeholder="500 000"
@@ -1393,7 +1393,7 @@ export default function PayrollPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Xodim <span className="text-destructive">*</span></Label>
+              <Label>Xodim <span className="text-xedu-ruby">*</span></Label>
               <Select
                 value={issueForm.targetUserId}
                 onValueChange={v => setIssueForm(f => ({ ...f, targetUserId: v }))}
@@ -1431,7 +1431,7 @@ export default function PayrollPage() {
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Miqdor (so'm) <span className="text-destructive">*</span></Label>
+              <Label>Miqdor (so'm) <span className="text-xedu-ruby">*</span></Label>
               <Input
                 type="number"
                 placeholder="500 000"
@@ -1478,7 +1478,7 @@ export default function PayrollPage() {
         <DialogContent className="max-w-sm">
           <DialogHeader>
             <DialogTitle>
-              {reviewAction === 'approve' ? '✅ Avansni tasdiqlash' : '❌ Avansni rad etish'}
+              {reviewAction === 'approve' ? ' Avansni tasdiqlash' : '❌ Avansni rad etish'}
             </DialogTitle>
             {reviewTarget && (
               <DialogDescription>
@@ -1491,7 +1491,7 @@ export default function PayrollPage() {
           <div className="space-y-3 py-2">
             {reviewTarget?.reason && (
               <div className="rounded-lg bg-muted p-3 text-sm">
-                <p className="text-xs text-muted-foreground mb-1">Sabab:</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-1">Sabab:</p>
                 <p>{reviewTarget.reason}</p>
               </div>
             )}
@@ -1532,9 +1532,9 @@ function StatCard({ icon, label, value, sub, color }: {
       <CardContent className="p-4 flex items-center gap-3">
         <div className={`p-2.5 rounded-xl ${color} shrink-0`}>{icon}</div>
         <div className="min-w-0">
-          <p className="text-xs text-muted-foreground truncate">{label}</p>
+          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{label}</p>
           <p className="font-bold text-lg leading-tight truncate">{value}</p>
-          <p className="text-xs text-muted-foreground truncate">{sub}</p>
+          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{sub}</p>
         </div>
       </CardContent>
     </Card>
@@ -1546,7 +1546,7 @@ function SumCell({ label, value, plus, minus, bold }: {
 }) {
   return (
     <div className="text-center bg-muted/40 rounded p-1.5">
-      <p className="text-[10px] text-muted-foreground">{label}</p>
+      <p className="text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400">{label}</p>
       <p className={`font-medium text-xs ${bold ? 'text-green-600 font-bold' : minus ? 'text-red-500' : plus ? 'text-green-600' : ''}`}>
         {minus ? '−' : plus ? '+' : ''}{value}
       </p>

@@ -61,19 +61,19 @@ function StatCard({ label, value, total, color }: { label: string; value: number
   const pct = total > 0 ? Math.round((value / total) * 100) : 0;
   return (
     <div className="flex flex-col gap-1">
-      <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{label}</span>
       <span className={`text-2xl font-bold ${color}`}>{value}</span>
       <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
         <div className={`h-full rounded-full transition-all ${color.replace('text-', 'bg-')}`} style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-xs text-muted-foreground">{pct}%</span>
+      <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{pct}%</span>
     </div>
   );
 }
 
 // ── Heat-map cell ──────────────────────────────────────────────────────────────
 function HeatCell({ pct }: { pct: number | null }) {
-  if (pct === null) return <div className="w-6 h-6 rounded-sm bg-muted/30" title="Ma'lumot yo'q" />;
+  if (pct === null) return <div className="w-6 h-6 rounded-sm bg-xedu-slate-50 dark:bg-xedu-slate-800/60" title="Ma'lumot yo'q" />;
   const bg =
     pct >= 95 ? 'bg-green-500' :
     pct >= 80 ? 'bg-green-300 dark:bg-green-700' :
@@ -172,7 +172,7 @@ export default function AttendancePage() {
       return { snapshot, reportKey };
     },
     onSuccess: () => {
-      toast({ title: '✅ Davomat saqlandi' });
+      toast({ title: ' Davomat saqlandi' });
       queryClient.invalidateQueries({ queryKey: ['attendance'] });
     },
     onError: (err: any, _vars, context) => {
@@ -248,7 +248,7 @@ export default function AttendancePage() {
     const map: Record<string, Status> = {};
     students.forEach(s => { map[s.id] = 'present'; });
     setAttendanceMap(map);
-    toast({ title: `✅ ${students.length} ta o'quvchi "Keldi" deb belgilandi` });
+    toast({ title: ` ${students.length} ta o'quvchi "Keldi" deb belgilandi` });
   };
 
   const setStatus = (studentId: string, status: Status) => {

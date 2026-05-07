@@ -67,7 +67,7 @@ function LeadCard({
 
   return (
     <div
-      className={`rounded-xl border bg-card p-3 shadow-sm hover:shadow-md transition-shadow cursor-pointer group ${
+      className={`rounded-xl border bg-white dark:bg-xedu-slate-900 p-3 shadow-sm hover:shadow-sm transition-shadow cursor-pointer group ${
         isConverted ? 'opacity-70' : ''
       }`}
       onClick={() => onOpenDetail(lead)}
@@ -81,7 +81,7 @@ function LeadCard({
           <a
             href={`tel:${lead.phone}`}
             onClick={(e) => e.stopPropagation()}
-            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary mt-0.5"
+            className="flex items-center gap-1 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-primary mt-0.5"
           >
             <Phone className="h-3 w-3" />
             {lead.phone}
@@ -92,29 +92,29 @@ function LeadCard({
 
       {/* Class expectation */}
       {lead.expectedClass && (
-        <div className="text-xs text-muted-foreground mb-2">
+        <div className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-2">
           📚 {lead.expectedClass.name}
         </div>
       )}
 
       {/* Note preview */}
       {lead.note && (
-        <p className="text-xs text-muted-foreground line-clamp-2 mb-2 italic">
+        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 line-clamp-2 mb-2 italic">
           "{lead.note}"
         </p>
       )}
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-1.5 border-t border-border/50">
+      <div className="flex items-center justify-between pt-1.5 border-t border-xedu-slate-200 dark:border-xedu-slate-700/50">
         <div className="flex items-center gap-1.5">
           {(lead._count?.comments ?? 0) > 0 && (
-            <span className="flex items-center gap-0.5 text-[10px] text-muted-foreground">
+            <span className="flex items-center gap-0.5 text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400">
               <MessageSquare className="h-2.5 w-2.5" />
               {lead._count!.comments}
             </span>
           )}
           {lead.assignedTo && (
-            <span className="text-[10px] text-muted-foreground truncate max-w-[80px]">
+            <span className="text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400 truncate max-w-[80px]">
               👤 {lead.assignedTo.firstName}
             </span>
           )}
@@ -199,7 +199,7 @@ function KanbanColumn({
         ))}
 
         {leads.length === 0 && (
-          <p className="text-[11px] text-muted-foreground text-center py-4 opacity-60">Bo'sh</p>
+          <p className="text-[11px] text-xedu-slate-500 dark:text-xedu-slate-400 text-center py-4 opacity-60">Bo'sh</p>
         )}
       </div>
 
@@ -207,7 +207,7 @@ function KanbanColumn({
       {status === 'NEW' && (
         <button
           onClick={() => onAddLead(status)}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors border-t border-border/40 rounded-b-xl"
+          className="flex items-center gap-1.5 px-3 py-2 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-700/30 transition-colors border-t border-xedu-slate-200 dark:border-xedu-slate-700/40 rounded-b-xl"
         >
           <Plus className="h-3 w-3" /> Lead qo'shish
         </button>
@@ -230,11 +230,11 @@ function AnalyticsPanel({ analytics }: { analytics: LeadAnalytics }) {
           { label: 'Bu oy convert', value: analytics.convertedThisMonth, icon: UserCheck, color: 'text-purple-600' },
           { label: 'Bu hafta yangi', value: analytics.newThisWeek, icon: Star,       color: 'text-amber-600' },
         ].map(({ label, value, icon: Icon, color }) => (
-          <Card key={label} className="border-border/60">
+          <Card key={label} className="border-xedu-slate-200 dark:border-xedu-slate-700/60">
             <CardContent className="pt-4 pb-3 px-4">
               <div className="flex items-center gap-2 mb-1">
                 <Icon className={`h-4 w-4 ${color}`} />
-                <span className="text-xs text-muted-foreground">{label}</span>
+                <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{label}</span>
               </div>
               <p className="text-2xl font-bold">{value}</p>
             </CardContent>
@@ -246,13 +246,13 @@ function AnalyticsPanel({ analytics }: { analytics: LeadAnalytics }) {
       <Card>
         <CardHeader className="pb-2 pt-4 px-4">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            <BarChart3 className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
             Manbalar bo'yicha (qaysi reklama ishlayapti?)
           </CardTitle>
         </CardHeader>
         <CardContent className="px-4 pb-4">
           {analytics.bySource.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Ma'lumot yo'q</p>
+            <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Ma'lumot yo'q</p>
           ) : (
             <div className="space-y-2">
               {analytics.bySource.map(({ source, count }) => {
@@ -268,7 +268,7 @@ function AnalyticsPanel({ analytics }: { analytics: LeadAnalytics }) {
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="text-xs text-muted-foreground shrink-0 w-10 text-right">
+                    <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0 w-10 text-right">
                       {count} ({pct}%)
                     </span>
                   </div>
@@ -318,7 +318,7 @@ function CreateLeadDialog({
   const mutation = useMutation({
     mutationFn: leadsApi.create,
     onSuccess: () => {
-      toast({ title: '✅ Lead qo\'shildi' });
+      toast({ title: ' Lead qo\'shildi' });
       setForm(EMPTY_FORM);
       setDupError(null);
       onSuccess();
@@ -350,17 +350,17 @@ function CreateLeadDialog({
         <div className="space-y-3 py-1">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label>Ism <span className="text-destructive">*</span></Label>
+              <Label>Ism <span className="text-xedu-ruby">*</span></Label>
               <Input value={form.firstName} onChange={e => set('firstName')(e.target.value)} placeholder="Jasur" />
             </div>
             <div className="space-y-1.5">
-              <Label>Familiya <span className="text-destructive">*</span></Label>
+              <Label>Familiya <span className="text-xedu-ruby">*</span></Label>
               <Input value={form.lastName} onChange={e => set('lastName')(e.target.value)} placeholder="Toshmatov" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <Label>Telefon <span className="text-destructive">*</span></Label>
+            <Label>Telefon <span className="text-xedu-ruby">*</span></Label>
             <Input
               value={form.phone}
               onChange={e => set('phone')(e.target.value)}
@@ -534,17 +534,17 @@ function ConvertDialog({
                 <p className="text-sm text-green-600 dark:text-green-400">Sinf: {result.className}</p>
               </div>
             </div>
-            <div className="rounded-lg border bg-muted/30 p-3 space-y-2 text-sm">
-              <p><span className="text-muted-foreground">Email:</span> <strong>{result.student.email}</strong></p>
+            <div className="rounded-lg border bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-3 space-y-2 text-sm">
+              <p><span className="text-xedu-slate-500 dark:text-xedu-slate-400">Email:</span> <strong>{result.student.email}</strong></p>
               <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">Parol:</span>
+                <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Parol:</span>
                 <code className="rounded bg-muted px-2 py-0.5 font-mono text-sm">{result.rawPassword}</code>
                 <Button variant="ghost" size="sm" className="h-6 px-2" onClick={copyPassword}>
                   {copied ? <CheckCircle className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
                 </Button>
               </div>
               <p className="text-xs text-amber-600 dark:text-amber-400">
-                ⚠️ Bu parolni o'quvchiga yuboring. Keyinroq ko'rinmaydi.
+                 Bu parolni o'quvchiga yuboring. Keyinroq ko'rinmaydi.
               </p>
             </div>
             <Button className="w-full" onClick={handleClose}>Yopish</Button>
@@ -554,7 +554,7 @@ function ConvertDialog({
           <>
             <div className="space-y-3 py-1">
               <div className="space-y-1.5">
-                <Label>Sinf / Guruh <span className="text-destructive">*</span></Label>
+                <Label>Sinf / Guruh <span className="text-xedu-ruby">*</span></Label>
                 <Select value={classId} onValueChange={setClassId}>
                   <SelectTrigger>
                     <SelectValue placeholder="Sinf tanlang..." />
@@ -570,7 +570,7 @@ function ConvertDialog({
               </div>
 
               <div className="space-y-1.5">
-                <Label>Email <span className="text-muted-foreground text-xs">(ixtiyoriy — yo'q bo'lsa telefon asosida)</span></Label>
+                <Label>Email <span className="text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">(ixtiyoriy — yo'q bo'lsa telefon asosida)</span></Label>
                 <Input
                   value={email}
                   onChange={e => setEmail(e.target.value)}
@@ -643,7 +643,7 @@ function LeadDetailDialog({
           <DialogTitle className="flex items-center gap-3">
             <div>
               <p>{displayLead.firstName} {displayLead.lastName}</p>
-              <p className="text-sm font-normal text-muted-foreground">{displayLead.phone}</p>
+              <p className="text-sm font-normal text-xedu-slate-500 dark:text-xedu-slate-400">{displayLead.phone}</p>
             </div>
             <Badge className={`ml-auto shrink-0 ${cfg.color} ${cfg.bgColor} border ${cfg.borderColor}`}>
               {cfg.label}
@@ -654,28 +654,28 @@ function LeadDetailDialog({
         <div className="space-y-4 pt-1">
           {/* Info grid */}
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-lg bg-muted/30 p-2.5">
-              <p className="text-xs text-muted-foreground mb-0.5">Manba</p>
+            <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5">
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-0.5">Manba</p>
               <div className="flex items-center gap-1.5">
                 <SourceIcon source={displayLead.source} />
                 <span>{LEAD_SOURCE_CONFIG[displayLead.source].label}</span>
               </div>
             </div>
             {displayLead.expectedClass && (
-              <div className="rounded-lg bg-muted/30 p-2.5">
-                <p className="text-xs text-muted-foreground mb-0.5">Mo'ljallangan sinf</p>
+              <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5">
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-0.5">Mo'ljallangan sinf</p>
                 <p>{displayLead.expectedClass.name}</p>
               </div>
             )}
             {displayLead.assignedTo && (
-              <div className="rounded-lg bg-muted/30 p-2.5">
-                <p className="text-xs text-muted-foreground mb-0.5">Mas'ul xodim</p>
+              <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5">
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-0.5">Mas'ul xodim</p>
                 <p>{displayLead.assignedTo.firstName} {displayLead.assignedTo.lastName}</p>
               </div>
             )}
             {displayLead.branch && (
-              <div className="rounded-lg bg-muted/30 p-2.5">
-                <p className="text-xs text-muted-foreground mb-0.5">Filial</p>
+              <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5">
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-0.5">Filial</p>
                 <p>{displayLead.branch.name}</p>
               </div>
             )}
@@ -684,7 +684,7 @@ function LeadDetailDialog({
           {/* Note */}
           {displayLead.note && (
             <div className="rounded-lg border bg-muted/20 p-3 text-sm">
-              <p className="text-xs text-muted-foreground mb-1">Izoh</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-1">Izoh</p>
               <p className="italic">"{displayLead.note}"</p>
             </div>
           )}
@@ -723,7 +723,7 @@ function LeadDetailDialog({
           {/* Comments */}
           <div>
             <p className="text-sm font-semibold mb-2 flex items-center gap-2">
-              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+              <MessageSquare className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
               Muloqot tarixi
             </p>
             {isLoading ? (
@@ -731,20 +731,20 @@ function LeadDetailDialog({
                 {[1,2].map(i => <Skeleton key={i} className="h-12" />)}
               </div>
             ) : (fullLead?.comments ?? []).length === 0 ? (
-              <p className="text-xs text-muted-foreground text-center py-3">Hali izoh yo'q</p>
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 text-center py-3">Hali izoh yo'q</p>
             ) : (
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {(fullLead?.comments ?? []).map((c: any) => (
-                  <div key={c.id} className="rounded-lg bg-muted/30 p-2.5 text-xs">
+                  <div key={c.id} className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5 text-xs">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-medium">
                         {c.author ? `${c.author.firstName} ${c.author.lastName}` : 'Tizim'}
                       </span>
-                      <span className="text-muted-foreground">
+                      <span className="text-xedu-slate-500 dark:text-xedu-slate-400">
                         {new Date(c.createdAt).toLocaleDateString('uz-UZ')}
                       </span>
                     </div>
-                    <p className="text-muted-foreground">{c.text}</p>
+                    <p className="text-xedu-slate-500 dark:text-xedu-slate-400">{c.text}</p>
                   </div>
                 ))}
               </div>
@@ -851,7 +851,7 @@ export default function CrmPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold">CRM — Leadlar</h1>
-          <p className="text-muted-foreground text-sm">
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">
             Jami {listData?.total ?? 0} ta lead
             {allLeads.filter(l => l.status === 'CONVERTED').length > 0 && (
               <> · <span className="text-green-600 font-medium">
@@ -879,7 +879,7 @@ export default function CrmPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-2 items-center">
         <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400" />
           <Input
             placeholder="Ism, telefon..."
             value={search}
@@ -888,7 +888,7 @@ export default function CrmPage() {
           />
           {search && (
             <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2">
-              <X className="h-3.5 w-3.5 text-muted-foreground" />
+              <X className="h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400" />
             </button>
           )}
         </div>

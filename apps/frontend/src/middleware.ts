@@ -19,7 +19,7 @@ function decodeJwtPayload(token: string): Record<string, any> | null {
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const PUBLIC_PATHS = ['/login', '/register', '/forgot-password', '/reset-password'];
+const PUBLIC_PATHS = ['/login', '/forgot-password', '/reset-password', '/accept-invite', '/first-login'];
 
 // Build ROLE_RESTRICTIONS from ROUTE_PERMISSIONS (single source of truth)
 const ROLE_RESTRICTIONS = Object.entries(ROUTE_PERMISSIONS).map(([path, roles]) => ({
@@ -50,7 +50,7 @@ export function middleware(request: NextRequest) {
 
   // ── 1. Public auth pages ──────────────────────────────────────────────
   if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
-    // Already logged in → redirect away from login/register pages
+    // Already logged in → redirect away from login pages
     if (isAuthenticated) {
       const home = ROLE_HOME[role as UserRole] ?? '/dashboard';
       return NextResponse.redirect(new URL(home, request.url));
@@ -66,7 +66,9 @@ export function middleware(request: NextRequest) {
   // ── 2. Dashboard routes require authentication ────────────────────────
   if (pathname.startsWith('/dashboard')) {
     if (!isAuthenticated) {
-      return NextResponse.redirect(new URL('/login', request.url));
+      const login = new URL('/login', request.url);
+      login.searchParams.set('reason', 'session_expired');
+      return NextResponse.redirect(login);
     }
 
     // Branch guard: every authenticated non-super_admin must have a branchId

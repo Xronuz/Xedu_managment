@@ -15,7 +15,7 @@ export default function DashboardLoading() {
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="rounded-xl border bg-card p-4 space-y-3">
+          <div key={i} className="rounded-xl border bg-white dark:bg-xedu-slate-900 p-4 space-y-3">
             <div className="flex justify-between items-center">
               <Skeleton className="h-4 w-24" />
               <Skeleton className="h-8 w-8 rounded-lg" />
@@ -28,7 +28,7 @@ export default function DashboardLoading() {
 
       {/* Content area */}
       <div className="grid gap-4 md:grid-cols-2">
-        <div className="rounded-xl border bg-card p-4 space-y-3">
+        <div className="rounded-xl border bg-white dark:bg-xedu-slate-900 p-4 space-y-3">
           <Skeleton className="h-5 w-36" />
           <div className="space-y-2">
             {[...Array(5)].map((_, i) => (
@@ -36,7 +36,7 @@ export default function DashboardLoading() {
             ))}
           </div>
         </div>
-        <div className="rounded-xl border bg-card p-4 space-y-3">
+        <div className="rounded-xl border bg-white dark:bg-xedu-slate-900 p-4 space-y-3">
           <Skeleton className="h-5 w-36" />
           <Skeleton className="h-48 w-full rounded-lg" />
         </div>

@@ -11,7 +11,11 @@ import { NextRequest, NextResponse } from 'next/server';
  * middleware keeps redirecting /login → /dashboard → infinite loop.
  */
 export async function GET(request: NextRequest) {
+  const reason = request.nextUrl.searchParams.get('reason') ?? '';
   const loginUrl = new URL('/login', request.url);
+  if (reason) {
+    loginUrl.searchParams.set('reason', reason);
+  }
   const response = NextResponse.redirect(loginUrl);
 
   const isHttps = request.url.startsWith('https');

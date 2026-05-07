@@ -65,9 +65,9 @@ function StatCard({ label, value, icon: Icon, color, bg, description }: {
       <CardContent className="p-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs font-medium text-muted-foreground">{label}</p>
+            <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">{label}</p>
             <p className="text-2xl font-bold mt-1">{value}</p>
-            {description && <p className="text-xs text-muted-foreground mt-0.5">{description}</p>}
+            {description && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">{description}</p>}
           </div>
           <div className={`p-3 rounded-xl ${bg}`}>
             <Icon className={`h-6 w-6 ${color}`} />
@@ -85,7 +85,7 @@ function ServiceRow({ name, status, detail }: { name: string; status: 'ok' | 'er
   const badgeClasses = {
     ok: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     error: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-    loading: 'bg-muted text-muted-foreground',
+    loading: 'bg-muted text-xedu-slate-500 dark:text-xedu-slate-400',
     unknown: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
   };
   return (
@@ -93,7 +93,7 @@ function ServiceRow({ name, status, detail }: { name: string; status: 'ok' | 'er
       <div className="flex items-center gap-3">
         <StatusDot status={status} />
         <span className="text-sm font-medium">{name}</span>
-        {detail && <span className="text-xs text-muted-foreground">{detail}</span>}
+        {detail && <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{detail}</span>}
       </div>
       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badgeClasses[status]}`}>
         {labels[status]}
@@ -194,12 +194,12 @@ export default function SystemHealthPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Activity className="h-6 w-6 text-primary" /> Tizim holati
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm mt-1">
             Platform monitoring va infratuzilma holati
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground">
+          <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
             Yangilangan: {lastRefresh.toLocaleTimeString('uz-UZ')}
           </span>
           <Button variant="outline" size="sm" onClick={handleRefreshAll}>
@@ -214,7 +214,7 @@ export default function SystemHealthPage() {
           ? 'bg-green-50 border-green-200 dark:bg-green-900/10 dark:border-green-800'
           : overallStatus === 'error'
           ? 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-800'
-          : 'bg-muted/40 border-border'
+          : 'bg-muted/40 border-xedu-slate-200 dark:border-xedu-slate-700'
       }`}>
         {overallStatus === 'ok' ? (
           <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0" />
@@ -233,7 +233,7 @@ export default function SystemHealthPage() {
               : overallStatus === 'error' ? 'Tizimda nosozlik aniqlandi'
               : 'Tizim holati tekshirilmoqda...'}
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5">
+          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">
             30 soniyada avtomatik yangilanadi
           </p>
         </div>
@@ -326,7 +326,7 @@ export default function SystemHealthPage() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="h-7 text-destructive border-destructive/30 hover:bg-destructive/10"
+                  className="h-7 text-xedu-ruby border-xedu-ruby/30 hover:bg-xedu-ruby/10"
                   onClick={() => cleanFailedMutation.mutate()}
                   disabled={cleanFailedMutation.isPending}
                 >
@@ -346,7 +346,7 @@ export default function SystemHealthPage() {
                 {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-10 rounded" />)}
               </div>
             ) : !queueStats ? (
-              <div className="text-center py-6 text-muted-foreground text-sm">
+              <div className="text-center py-6 text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">
                 <WifiOff className="h-8 w-8 mx-auto mb-2 opacity-30" />
                 Queue statistikasiga ulanib bo'lmadi
               </div>
@@ -406,7 +406,7 @@ export default function SystemHealthPage() {
           </CardHeader>
           <CardContent>
             {!recentSchools?.data?.length ? (
-              <p className="text-sm text-muted-foreground text-center py-4">Ma'lumot yo'q</p>
+              <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 text-center py-4">Ma'lumot yo'q</p>
             ) : (
               <div className="space-y-2">
                 {recentSchools.data.map((school: any) => (
@@ -415,14 +415,14 @@ export default function SystemHealthPage() {
                       <div className={`h-2 w-2 rounded-full ${school.isActive ? 'bg-green-500' : 'bg-muted-foreground'}`} />
                       <div>
                         <p className="font-medium leading-none">{school.name}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">{school.slug}</p>
+                        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">{school.slug}</p>
                       </div>
                     </div>
                     <div className="text-right">
                       <Badge variant="outline" className="text-xs">
                         {school.subscriptionTier ?? 'basic'}
                       </Badge>
-                      <p className="text-xs text-muted-foreground mt-0.5">
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">
                         {formatDate(school.createdAt)}
                       </p>
                     </div>

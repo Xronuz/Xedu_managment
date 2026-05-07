@@ -140,8 +140,8 @@ const config: Config = {
         '11':  '44px',
         '12':  '48px',
         'header': 'var(--header-height, 64px)',
-        'sidebar': 'var(--sidebar-width, 256px)',
-        'sidebar-collapsed': 'var(--sidebar-collapsed, 64px)',
+        'sidebar': 'var(--sidebar-width, 272px)',
+        'sidebar-collapsed': 'var(--sidebar-collapsed, 84px)',
       },
 
       /* ── Animations ── */

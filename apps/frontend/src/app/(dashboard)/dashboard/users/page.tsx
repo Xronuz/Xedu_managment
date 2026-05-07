@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Search, Users, Loader2, Eye, EyeOff, UserCheck, GraduationCap, Heart, Ban, RotateCcw, Link2, Upload, FileText, AlertTriangle, BookOpen, Trash2, SlidersHorizontal, X, ChevronDown } from 'lucide-react';
+import { Plus, Search, Users, Loader2, Eye, EyeOff, UserCheck, GraduationCap, Heart, Ban, RotateCcw, Link2, Upload, FileText, AlertTriangle, BookOpen, Trash2, SlidersHorizontal, X, ChevronDown, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,6 +24,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { getInitials, getRoleLabel, cn } from '@/lib/utils';
 import { ImportDialog } from '@/components/import/import-dialog';
 import { AssignBranchDialog } from '@/components/users/assign-branch-dialog';
+import { InviteUserDialog } from '@/components/invitation/invite-user-dialog';
 
 // ── Zod schema ────────────────────────────────────────────────────────────────
 const userSchema = z.object({
@@ -70,6 +71,7 @@ export default function UsersPage() {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const [open, setOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [inviteOpen, setInviteOpen] = useState(false);
   const [showPass, setShowPass] = useState(false);
   const [confirmDelete, setConfirmDelete]     = useState<any>(null);
   const [confirmHardDelete, setConfirmHardDelete] = useState<any>(null);
@@ -117,7 +119,7 @@ export default function UsersPage() {
       setCsvResult(result);
       queryClient.invalidateQueries({ queryKey: ['users'] });
       toast({
-        title: `✅ Import bajarildi: ${result.created} ta qo'shildi`,
+        title: ` Import bajarildi: ${result.created} ta qo'shildi`,
         description: result.skipped > 0 ? `${result.skipped} ta o'tkazib yuborildi` : undefined,
       });
     },
@@ -175,7 +177,7 @@ export default function UsersPage() {
     mutationFn: ({ id, restore }: { id: string; restore?: boolean }) =>
       restore ? usersApi.restore(id) : usersApi.remove(id),
     onSuccess: (_, vars) => {
-      toast({ title: vars.restore ? '✅ Foydalanuvchi faollashtirildi' : "Foydalanuvchi bloklandi" });
+      toast({ title: vars.restore ? ' Foydalanuvchi faollashtirildi' : "Foydalanuvchi bloklandi" });
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setConfirmDelete(null);
     },
@@ -188,7 +190,7 @@ export default function UsersPage() {
   const hardDeleteMutation = useMutation({
     mutationFn: (id: string) => usersApi.hardDelete(id),
     onSuccess: () => {
-      toast({ title: '🗑️ Foydalanuvchi butunlay o\'chirildi' });
+      toast({ title: ' Foydalanuvchi butunlay o\'chirildi' });
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setConfirmHardDelete(null);
     },
@@ -241,12 +243,12 @@ export default function UsersPage() {
               });
             }
           }
-          toast({ title: `✅ Foydalanuvchi va ${teacherSubjects.length} ta fan qo'shildi` });
+          toast({ title: ` Foydalanuvchi va ${teacherSubjects.length} ta fan qo'shildi` });
         } catch {
           toast({ variant: 'destructive', title: "Fan qo'shishda xato", description: "O'qituvchi yaratildi, lekin ba'zi fanlar qo'shilmadi" });
         }
       } else {
-        toast({ title: "✅ Foydalanuvchi qo'shildi" });
+        toast({ title: " Foydalanuvchi qo'shildi" });
       }
 
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -302,7 +304,7 @@ export default function UsersPage() {
                   <p className="text-xs font-semibold mt-1" style={{ color: DS.muted }}>Qo&apos;shildi</p>
                 </div>
                 <div className="rounded-2xl p-4 text-center" style={{ background: '#FEF3C7' }}>
-                  <p className="text-2xl font-black text-amber-600">{csvResult.skipped}</p>
+                  <p className="text-2xl font-black text-xedu-amber">{csvResult.skipped}</p>
                   <p className="text-xs font-semibold mt-1" style={{ color: DS.muted }}>O&apos;tkazildi</p>
                 </div>
               </div>
@@ -345,7 +347,7 @@ export default function UsersPage() {
               border border-black/[0.06] dark:border-white/[0.08]
               text-slate-900 dark:text-slate-100
               placeholder:text-slate-400 dark:placeholder:text-slate-500
-              focus:border-emerald-500/40 focus:ring-2 focus:ring-emerald-500/10"
+              focus:border-xedu-primary/40 focus:ring-2 focus:ring-xedu-primary/10"
           />
         </div>
 
@@ -356,7 +358,7 @@ export default function UsersPage() {
             className={cn(
               'inline-flex items-center gap-2 h-9 px-3.5 text-[12px] font-semibold rounded-[12px] transition-all border',
               hasFilter
-                ? 'bg-emerald-50 dark:bg-emerald-900/30 border-emerald-500/25 dark:border-emerald-700/50 text-emerald-700 dark:text-emerald-400'
+                ? 'bg-xedu-primary-light dark:bg-xedu-primary/30 border-xedu-primary/25 dark:border-xedu-primary/50 text-xedu-primary dark:text-xedu-primary'
                 : 'bg-slate-50 dark:bg-slate-800 border-black/[0.06] dark:border-white/[0.08] text-slate-700 dark:text-slate-200'
             )}
           >
@@ -440,10 +442,10 @@ export default function UsersPage() {
         {/* Stats — compact single chip */}
         <div className="flex items-center gap-2 rounded-[12px] px-3 h-9 text-[12px] font-semibold shrink-0 bg-slate-50 dark:bg-slate-800 border border-black/[0.06] dark:border-white/[0.08] text-slate-700 dark:text-slate-200">
           <Users className="h-3.5 w-3.5 text-slate-400 dark:text-slate-500" />
-          <span className="text-emerald-600 dark:text-emerald-400">{meta?.total ?? 0}</span>
+          <span className="text-xedu-primary dark:text-xedu-primary">{meta?.total ?? 0}</span>
           <span className="text-slate-300 dark:text-slate-600">·</span>
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 inline-block" />
-          <span className="text-emerald-600 dark:text-emerald-400">{activeCount}</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-xedu-primary inline-block" />
+          <span className="text-xedu-primary dark:text-xedu-primary">{activeCount}</span>
           <span className="text-slate-300 dark:text-slate-600">·</span>
           <span className="h-1.5 w-1.5 rounded-full bg-red-400 inline-block" />
           <span className="text-red-600 dark:text-red-400">{blockedCount}</span>
@@ -461,6 +463,9 @@ export default function UsersPage() {
           </Btn>
           <Btn variant="secondary" size="sm" className="h-9 rounded-[12px]" icon={<Upload className="h-4 w-4" />} onClick={() => setImportOpen(true)}>
             Import
+          </Btn>
+          <Btn variant="secondary" size="sm" className="h-9 rounded-[12px]" icon={<Mail className="h-4 w-4" />} onClick={() => setInviteOpen(true)}>
+            Taklif
           </Btn>
           <Btn variant="primary" size="sm" className="h-9 rounded-[12px]" icon={<Plus className="h-4 w-4" />} onClick={() => { setOpen(true); reset(); }}>
             Qo&apos;shish
@@ -499,7 +504,7 @@ export default function UsersPage() {
                       </span>
                     )}
                     {u.branchAssignments?.map((a: any, i: number) => (
-                      <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+                      <span key={i} className="inline-flex items-center px-1.5 py-0.5 rounded-md bg-xedu-primary-light dark:bg-xedu-primary/20 border border-xedu-primary-light dark:border-xedu-primary/50 text-[10px] font-medium text-xedu-primary dark:text-xedu-primary">
                         {a.branch?.name}
                       </span>
                     ))}
@@ -572,7 +577,7 @@ export default function UsersPage() {
       <Dialog open={!!confirmHardDelete} onOpenChange={v => { if (!v) setConfirmHardDelete(null); }}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-destructive">
+            <DialogTitle className="flex items-center gap-2 text-xedu-ruby">
               <Trash2 className="h-5 w-5" />
               Foydalanuvchini butunlay o'chirish
             </DialogTitle>
@@ -580,11 +585,11 @@ export default function UsersPage() {
               <span className="font-semibold text-foreground">
                 {confirmHardDelete?.firstName} {confirmHardDelete?.lastName}
               </span>{' '}
-              ({confirmHardDelete?.email}) foydalanuvchisi tizimdan <span className="font-semibold text-destructive">butunlay va qaytarib bo'lmasdan</span> o'chiriladi.
+              ({confirmHardDelete?.email}) foydalanuvchisi tizimdan <span className="font-semibold text-xedu-ruby">butunlay va qaytarib bo'lmasdan</span> o'chiriladi.
               Barcha ma'lumotlari ham o'chadi.
             </DialogDescription>
           </DialogHeader>
-          <div className="rounded-lg bg-destructive/10 border border-destructive/20 px-3 py-2.5 text-xs text-destructive font-medium flex items-start gap-2 mt-1">
+          <div className="rounded-lg bg-xedu-ruby/10 border border-xedu-ruby/20 px-3 py-2.5 text-xs text-xedu-ruby font-medium flex items-start gap-2 mt-1">
             <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
             Bu amalni bekor qilib bo'lmaydi. Davom etishdan oldin ishonch hosil qiling.
           </div>
@@ -613,18 +618,18 @@ export default function UsersPage() {
             {/* Asosiy ma'lumotlar */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Ism <span className="text-destructive">*</span></Label>
+                <Label>Ism <span className="text-xedu-ruby">*</span></Label>
                 <Input placeholder="Ali" {...register('firstName')} />
-                {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
+                {errors.firstName && <p className="text-xs text-xedu-ruby">{errors.firstName.message}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>Familiya <span className="text-destructive">*</span></Label>
+                <Label>Familiya <span className="text-xedu-ruby">*</span></Label>
                 <Input placeholder="Valiyev" {...register('lastName')} />
-                {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
+                {errors.lastName && <p className="text-xs text-xedu-ruby">{errors.lastName.message}</p>}
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label>Email <span className="text-destructive">*</span></Label>
+              <Label>Email <span className="text-xedu-ruby">*</span></Label>
               <Input
                 type="email"
                 placeholder="ali@maktab.uz"
@@ -645,25 +650,25 @@ export default function UsersPage() {
                   }
                 }}
               />
-              {checkingEmail && <p className="text-xs text-muted-foreground">Tekshirilmoqda...</p>}
-              {errors.email && <p className="text-xs text-destructive">{errors.email.message}</p>}
+              {checkingEmail && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Tekshirilmoqda...</p>}
+              {errors.email && <p className="text-xs text-xedu-ruby">{errors.email.message}</p>}
             </div>
             <div className="space-y-1.5">
-              <Label>Parol <span className="text-destructive">*</span></Label>
+              <Label>Parol <span className="text-xedu-ruby">*</span></Label>
               <div className="relative">
                 <Input type={showPass ? 'text' : 'password'} placeholder="Kamida 8 ta belgi" className="pr-10" {...register('password')} />
-                <button type="button" onClick={() => setShowPass(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                <button type="button" onClick={() => setShowPass(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground">
                   {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-              {errors.password && <p className="text-xs text-destructive">{errors.password.message}</p>}
+              {errors.password && <p className="text-xs text-xedu-ruby">{errors.password.message}</p>}
             </div>
             <div className="space-y-1.5">
               <Label>Telefon</Label>
               <Input placeholder="+998 90 123 45 67" {...register('phone')} />
             </div>
             <div className="space-y-1.5">
-              <Label>Rol <span className="text-destructive">*</span></Label>
+              <Label>Rol <span className="text-xedu-ruby">*</span></Label>
               <Controller
                 name="role"
                 control={control}
@@ -674,7 +679,7 @@ export default function UsersPage() {
                   </Select>
                 )}
               />
-              {errors.role && <p className="text-xs text-destructive">{errors.role.message}</p>}
+              {errors.role && <p className="text-xs text-xedu-ruby">{errors.role.message}</p>}
             </div>
 
             {/* Branch selector for school-wide roles */}
@@ -697,7 +702,7 @@ export default function UsersPage() {
                     </Select>
                   )}
                 />
-                <p className="text-xs text-muted-foreground">Agar tanlanmasa, foydalanuvchi joriy filialga biriktiriladi</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Agar tanlanmasa, foydalanuvchi joriy filialga biriktiriladi</p>
               </div>
             )}
 
@@ -714,9 +719,9 @@ export default function UsersPage() {
                     <p className="text-xs text-violet-600 dark:text-violet-400 mb-1.5 font-medium">Mavjud fanlar:</p>
                     <div className="flex flex-wrap gap-1.5">
                       {existingSubjects.map((s: any) => (
-                        <span key={s.id} className="inline-flex items-center gap-1 rounded-md bg-white dark:bg-background border px-2 py-0.5 text-xs">
+                        <span key={s.id} className="inline-flex items-center gap-1 rounded-md bg-white dark:bg-white dark:bg-xedu-slate-950 border px-2 py-0.5 text-xs">
                           <span className="font-medium">{s.name}</span>
-                          <span className="text-muted-foreground">({s.class?.name})</span>
+                          <span className="text-xedu-slate-500 dark:text-xedu-slate-400">({s.class?.name})</span>
                         </span>
                       ))}
                     </div>
@@ -728,10 +733,10 @@ export default function UsersPage() {
                   <div className="space-y-2">
                     <p className="text-xs text-violet-600 dark:text-violet-400 font-medium">Yangi qo'shiladi:</p>
                     {teacherSubjects.map((subj, idx) => (
-                      <div key={idx} className="flex items-center gap-2 bg-white dark:bg-background rounded-md p-2 border">
+                      <div key={idx} className="flex items-center gap-2 bg-white dark:bg-white dark:bg-xedu-slate-950 rounded-md p-2 border">
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{subj.name}</p>
-                          <p className="text-xs text-muted-foreground">
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                             {(classesData ?? []).find((c: any) => c.id === subj.classId)?.name ?? subj.classId}
                           </p>
                         </div>
@@ -742,7 +747,7 @@ export default function UsersPage() {
                           className="h-7 w-7 shrink-0"
                           onClick={() => setTeacherSubjects(prev => prev.filter((_, i) => i !== idx))}
                         >
-                          <Trash2 className="h-3.5 w-3.5 text-destructive" />
+                          <Trash2 className="h-3.5 w-3.5 text-xedu-ruby" />
                         </Button>
                       </div>
                     ))}
@@ -756,7 +761,7 @@ export default function UsersPage() {
                     <Input
                       id="subject-name"
                       placeholder="Fan nomi"
-                      className="bg-white dark:bg-background"
+                      className="bg-white dark:bg-white dark:bg-xedu-slate-950"
                       onChange={(e) => {
                         const name = e.target.value.trim();
                         if (!name) { setSubjectWarning(''); return; }
@@ -791,7 +796,7 @@ export default function UsersPage() {
                         }
                       }}
                     >
-                      <SelectTrigger className="bg-white dark:bg-background">
+                      <SelectTrigger className="bg-white dark:bg-white dark:bg-xedu-slate-950">
                         <SelectValue placeholder="Sinf tanlang" />
                       </SelectTrigger>
                       <SelectContent>
@@ -802,7 +807,7 @@ export default function UsersPage() {
                     </Select>
                   </div>
                   {subjectWarning && (
-                    <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">⚠️ {subjectWarning}</p>
+                    <p className="text-xs text-xedu-amber dark:text-amber-400 font-medium"> {subjectWarning}</p>
                   )}
                   <p className="text-xs text-violet-600 dark:text-violet-400 opacity-70">
                     Fan nomini yozib, sinf tanlang. Har bir fan alohida sinfga biriktiriladi.
@@ -822,7 +827,7 @@ export default function UsersPage() {
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                      <SelectTrigger className="bg-white dark:bg-background">
+                      <SelectTrigger className="bg-white dark:bg-white dark:bg-xedu-slate-950">
                         <SelectValue placeholder="Sinf tanlang (ixtiyoriy)..." />
                       </SelectTrigger>
                       <SelectContent>
@@ -848,12 +853,12 @@ export default function UsersPage() {
                   control={control}
                   render={({ field }) => (
                     <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                      <SelectTrigger className="bg-white dark:bg-background">
+                      <SelectTrigger className="bg-white dark:bg-white dark:bg-xedu-slate-950">
                         <SelectValue placeholder="O'quvchi tanlang (ixtiyoriy)..." />
                       </SelectTrigger>
                       <SelectContent>
                         {studentsList.length === 0 ? (
-                          <div className="px-3 py-2 text-sm text-muted-foreground">O'quvchilar topilmadi</div>
+                          <div className="px-3 py-2 text-sm text-xedu-slate-500 dark:text-xedu-slate-400">O'quvchilar topilmadi</div>
                         ) : (
                           studentsList.map((s: any) => (
                             <SelectItem key={s.id} value={s.id}>{s.firstName} {s.lastName}</SelectItem>
@@ -899,6 +904,7 @@ export default function UsersPage() {
         type="users"
         onSuccess={() => queryClient.invalidateQueries({ queryKey: ['users'] })}
       />
+      <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} />
     </PageShell>
   );
 }

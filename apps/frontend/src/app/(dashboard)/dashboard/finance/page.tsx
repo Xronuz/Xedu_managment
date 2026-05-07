@@ -40,7 +40,7 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   pending:  { label: 'Kutilmoqda',      color: 'text-yellow-600 bg-yellow-50 border-yellow-200' },
   overdue:  { label: "Muddati o'tgan",  color: 'text-red-600 bg-red-50 border-red-200' },
   failed:   { label: 'Muvaffaqiyatsiz', color: 'text-red-400 bg-red-50 border-red-100' },
-  refunded: { label: 'Qaytarildi',      color: 'text-muted-foreground bg-muted border-border' },
+  refunded: { label: 'Qaytarildi',      color: 'text-xedu-slate-500 dark:text-xedu-slate-400 bg-muted border-xedu-slate-200 dark:border-xedu-slate-700' },
 };
 
 const MONTHS_UZ = ['Yan','Fev','Mar','Apr','May','Iyn','Iyl','Avg','Sen','Okt','Noy','Dek'];
@@ -55,8 +55,8 @@ function StatRibbon({ stats, loading }: { stats?: FinanceDashboardStats; loading
       value: stats ? fmt(stats.thisMonthRevenue) : '—',
       trend: stats?.revenueGrowth,
       icon: TrendingUp,
-      iconCls: 'text-emerald-500',
-      bgCls:   'bg-emerald-500/10',
+      iconCls: 'text-xedu-primary',
+      bgCls:   'bg-xedu-primary/10',
     },
     {
       label: 'Jami daromad',
@@ -102,7 +102,7 @@ function StatRibbon({ stats, loading }: { stats?: FinanceDashboardStats; loading
               <Icon className={cn('h-4.5 w-4.5', item.iconCls)} />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-[11px] text-muted-foreground">{item.label}</p>
+              <p className="truncate text-[11px] text-xedu-slate-500 dark:text-xedu-slate-400">{item.label}</p>
               {loading
                 ? <Skeleton className="mt-0.5 h-5 w-20" />
                 : <p className="text-[15px] font-bold leading-tight">{item.value}</p>
@@ -110,7 +110,7 @@ function StatRibbon({ stats, loading }: { stats?: FinanceDashboardStats; loading
               {item.trend !== undefined && !loading && (
                 <span className={cn(
                   'flex items-center gap-0.5 text-[11px] font-medium',
-                  item.trend >= 0 ? 'text-emerald-600' : 'text-red-500',
+                  item.trend >= 0 ? 'text-xedu-primary' : 'text-red-500',
                 )}>
                   {item.trend >= 0
                     ? <ArrowUpRight className="h-3 w-3" />
@@ -119,7 +119,7 @@ function StatRibbon({ stats, loading }: { stats?: FinanceDashboardStats; loading
                 </span>
               )}
               {item.sub && !loading && (
-                <span className="text-[11px] text-muted-foreground">{item.sub}</span>
+                <span className="text-[11px] text-xedu-slate-500 dark:text-xedu-slate-400">{item.sub}</span>
               )}
             </div>
           </div>
@@ -154,7 +154,7 @@ function TabBar({ active, onChange }: { active: Tab; onChange: (t: Tab) => void 
           className={cn(
             'whitespace-nowrap rounded-full px-4 py-1.5 text-[13px] font-medium transition-all duration-200',
             active === t.id
-              ? 'bg-white text-emerald-700 shadow-md'
+              ? 'bg-white text-xedu-primary shadow-md'
               : 'text-slate-500 hover:text-slate-700 hover:bg-white/60',
           )}
         >
@@ -260,14 +260,14 @@ export default function FinanceDashboardPage() {
             <div className="flex h-full flex-col p-5">
               <div className="mb-3 shrink-0">
                 <p className="text-sm font-semibold">So&apos;nggi 12 oy daromadi</p>
-                <p className="text-xs text-muted-foreground">Faqat &quot;paid&quot; statusdagi to&apos;lovlar</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Faqat &quot;paid&quot; statusdagi to&apos;lovlar</p>
               </div>
               <div className="min-h-0 flex-1">
                 {chartLoading
                   ? <Skeleton className="h-full w-full rounded-xl" />
                   : monthlyRevenue.length === 0
                     ? (
-                      <div className="flex h-full items-center justify-center text-muted-foreground text-sm">
+                      <div className="flex h-full items-center justify-center text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">
                         <TrendingDown className="mr-2 h-4 w-4" /> Ma&apos;lumot yo&apos;q
                       </div>
                     )
@@ -280,9 +280,9 @@ export default function FinanceDashboardPage() {
           {/* Debtors tab */}
           {activeTab === 'debtors' && (
             <div className="flex h-full flex-col">
-              <div className="shrink-0 border-b border-black/5 px-5 py-3">
+              <div className="shrink-0 border-b border-black/[0.05] px-5 py-3">
                 <p className="text-sm font-semibold">Qarzdorlar ro&apos;yxati</p>
-                <p className="text-xs text-muted-foreground">Muddati o&apos;tgan yoki kutilayotgan to&apos;lovlar</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Muddati o&apos;tgan yoki kutilayotgan to&apos;lovlar</p>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto">
                 {debtorsLoading ? (
@@ -290,8 +290,8 @@ export default function FinanceDashboardPage() {
                     {Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}
                   </div>
                 ) : debtors.length === 0 ? (
-                  <div className="flex h-full flex-col items-center justify-center text-center text-muted-foreground">
-                    <CheckCircle className="h-10 w-10 mb-3 text-emerald-400 opacity-60" />
+                  <div className="flex h-full flex-col items-center justify-center text-center text-xedu-slate-500 dark:text-xedu-slate-400">
+                    <CheckCircle className="h-10 w-10 mb-3 text-xedu-primary opacity-60" />
                     <p className="font-medium">Barcha to&apos;lovlar vaqtida!</p>
                     <p className="text-xs mt-1 opacity-70">Hozirda qarzdor o&apos;quvchilar yo&apos;q</p>
                   </div>
@@ -300,7 +300,7 @@ export default function FinanceDashboardPage() {
                     <thead className="sticky top-0 bg-white/80 backdrop-blur-sm">
                       <tr>
                         {['#', "O'quvchi", 'Sinf', 'Qarzdorlik', "To'lovlar", 'Eng eski', ''].map((h) => (
-                          <th key={h} className="py-2.5 px-4 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground first:w-8 last:w-10">
+                          <th key={h} className="py-2.5 px-4 text-left text-xs font-semibold uppercase tracking-wide text-xedu-slate-500 dark:text-xedu-slate-400 first:w-8 last:w-10">
                             {h}
                           </th>
                         ))}
@@ -308,8 +308,8 @@ export default function FinanceDashboardPage() {
                     </thead>
                     <tbody>
                       {debtors.map((d, i) => (
-                        <tr key={d.student.id} className="border-t border-black/4 hover:bg-black/[0.02] group transition-colors">
-                          <td className="py-2.5 px-4 text-muted-foreground">{i + 1}</td>
+                        <tr key={d.student.id} className="border-t border-black/[0.04] hover:bg-black/[0.02] group transition-colors">
+                          <td className="py-2.5 px-4 text-xedu-slate-500 dark:text-xedu-slate-400">{i + 1}</td>
                           <td className="py-2.5 px-4">
                             <div className="flex items-center gap-2">
                               <Avatar className="h-7 w-7">
@@ -317,19 +317,19 @@ export default function FinanceDashboardPage() {
                               </Avatar>
                               <div>
                                 <p className="font-medium">{d.student.firstName} {d.student.lastName}</p>
-                                {d.student.phone && <p className="text-[11px] text-muted-foreground">{d.student.phone}</p>}
+                                {d.student.phone && <p className="text-[11px] text-xedu-slate-500 dark:text-xedu-slate-400">{d.student.phone}</p>}
                               </div>
                             </div>
                           </td>
-                          <td className="py-2.5 px-4 text-muted-foreground">{d.student.studentClasses?.[0]?.class?.name ?? '—'}</td>
+                          <td className="py-2.5 px-4 text-xedu-slate-500 dark:text-xedu-slate-400">{d.student.studentClasses?.[0]?.class?.name ?? '—'}</td>
                           <td className="py-2.5 px-4 font-bold text-red-600">{fmt(d.totalDebt)}</td>
-                          <td className="py-2.5 px-4 text-muted-foreground">{d.payments.length} ta</td>
-                          <td className="py-2.5 px-4 text-xs text-muted-foreground">{new Date(d.oldestDue).toLocaleDateString('uz-UZ')}</td>
+                          <td className="py-2.5 px-4 text-xedu-slate-500 dark:text-xedu-slate-400">{d.payments.length} ta</td>
+                          <td className="py-2.5 px-4 text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{new Date(d.oldestDue).toLocaleDateString('uz-UZ')}</td>
                           <td className="py-2.5 px-4">
                             <button
                               onClick={() => router.push(`/dashboard/messages?userId=${d.student.id}`)}
                               title="Xabar yuborish"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-1.5 hover:text-blue-600 hover:bg-blue-50"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity rounded-full p-1.5 hover:text-xedu-sky hover:bg-xedu-sky/5"
                             >
                               <MessageSquare className="h-4 w-4" />
                             </button>
@@ -346,9 +346,9 @@ export default function FinanceDashboardPage() {
           {/* Recent payments tab */}
           {activeTab === 'recent' && (
             <div className="flex h-full flex-col">
-              <div className="shrink-0 border-b border-black/5 px-5 py-3">
+              <div className="shrink-0 border-b border-black/[0.05] px-5 py-3">
                 <p className="text-sm font-semibold">So&apos;nggi to&apos;lovlar</p>
-                <p className="text-xs text-muted-foreground">Oxirgi 10 ta to&apos;lov operatsiyasi</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Oxirgi 10 ta to&apos;lov operatsiyasi</p>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto divide-y divide-black/4">
                 {statsLoading ? (
@@ -356,7 +356,7 @@ export default function FinanceDashboardPage() {
                     {Array(6).fill(0).map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}
                   </div>
                 ) : !stats?.recentPayments?.length ? (
-                  <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                  <div className="flex h-full flex-col items-center justify-center text-xedu-slate-500 dark:text-xedu-slate-400">
                     <CreditCard className="h-8 w-8 mb-3 opacity-30" />
                     <p>Hali to&apos;lovlar kiritilmagan</p>
                   </div>
@@ -367,7 +367,7 @@ export default function FinanceDashboardPage() {
                       <div key={p.id} className="flex items-center gap-4 px-5 py-3 hover:bg-black/[0.02] transition-colors">
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{p.student.firstName} {p.student.lastName}</p>
-                          <p className="text-xs text-muted-foreground truncate">
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">
                             {p.description ?? "To'lov"} · {new Date(p.paidAt ?? p.createdAt).toLocaleDateString('uz-UZ')}
                           </p>
                         </div>
@@ -386,10 +386,10 @@ export default function FinanceDashboardPage() {
           {/* Fee structures tab */}
           {activeTab === 'fees' && (
             <div className="flex h-full flex-col">
-              <div className="shrink-0 border-b border-black/5 px-5 py-3">
+              <div className="shrink-0 border-b border-black/[0.05] px-5 py-3">
                 <p className="text-sm font-semibold">Faol to&apos;lov tartiblari</p>
                 {feeSummary && (
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                     Jami kutilgan: <span className="font-semibold text-foreground">{fmt(feeSummary.totalExpected)}</span>
                   </p>
                 )}
@@ -400,7 +400,7 @@ export default function FinanceDashboardPage() {
                     {Array(5).fill(0).map((_, i) => <Skeleton key={i} className="h-12 rounded-xl" />)}
                   </div>
                 ) : !feeSummary?.feeStructures?.length ? (
-                  <div className="flex h-full flex-col items-center justify-center text-muted-foreground">
+                  <div className="flex h-full flex-col items-center justify-center text-xedu-slate-500 dark:text-xedu-slate-400">
                     <FileText className="h-8 w-8 mb-3 opacity-30" />
                     <p>To&apos;lov tartiblari sozlanmagan</p>
                   </div>
@@ -409,7 +409,7 @@ export default function FinanceDashboardPage() {
                     <thead className="sticky top-0 bg-white/80 backdrop-blur-sm">
                       <tr>
                         {['Nomi', 'Daraja', 'Chastota', 'Miqdor'].map((h) => (
-                          <th key={h} className="py-2.5 px-4 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          <th key={h} className="py-2.5 px-4 text-left text-xs font-semibold uppercase tracking-wide text-xedu-slate-500 dark:text-xedu-slate-400">
                             {h}
                           </th>
                         ))}
@@ -417,9 +417,9 @@ export default function FinanceDashboardPage() {
                     </thead>
                     <tbody>
                       {feeSummary.feeStructures.map((f: any) => (
-                        <tr key={f.id} className="border-t border-black/4 hover:bg-black/[0.02] transition-colors">
+                        <tr key={f.id} className="border-t border-black/[0.04] hover:bg-black/[0.02] transition-colors">
                           <td className="py-2.5 px-4 font-medium">{f.name}</td>
-                          <td className="py-2.5 px-4 text-muted-foreground">{f.gradeLevel ? `${f.gradeLevel}-sinf` : 'Barchasi'}</td>
+                          <td className="py-2.5 px-4 text-xedu-slate-500 dark:text-xedu-slate-400">{f.gradeLevel ? `${f.gradeLevel}-sinf` : 'Barchasi'}</td>
                           <td className="py-2.5 px-4">
                             <Badge variant="secondary" className="text-[11px]">
                               {f.frequency === 'monthly' ? 'Oylik' : f.frequency === 'yearly' ? 'Yillik' : f.frequency}
@@ -454,7 +454,7 @@ export default function FinanceDashboardPage() {
                 <p className="text-xs font-medium truncate">
                   {stats.latestPayroll.year}y {MONTHS_UZ[stats.latestPayroll.month - 1]} maoshi
                 </p>
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-[11px] text-xedu-slate-500 dark:text-xedu-slate-400">
                   Jami: <span className="font-bold text-purple-600">{fmt(stats.latestPayroll.totalNet)}</span>
                 </p>
               </div>
@@ -482,7 +482,7 @@ export default function FinanceDashboardPage() {
                 </svg>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground">Faol o&apos;quvchilar</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Faol o&apos;quvchilar</p>
                 <p className="text-lg font-bold text-blue-600">{stats.totalStudents}</p>
               </div>
             </div>

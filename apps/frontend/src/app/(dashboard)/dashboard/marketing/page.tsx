@@ -46,7 +46,7 @@ export default function MarketingDashboardPage() {
           <Megaphone className="h-6 w-6 text-pink-500" />
           <h1 className="text-2xl font-bold tracking-tight">Marketing Dashboard</h1>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">
+        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
           Leadlar, konversiya va marketing kanallari tahlili
         </p>
       </div>
@@ -62,7 +62,7 @@ export default function MarketingDashboardPage() {
             <CardContent className="pt-5 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Jami leadlar</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Jami leadlar</p>
                   <p className="text-2xl font-bold">{data?.totalLeads ?? 0}</p>
                 </div>
                 <Users className="h-8 w-8 text-blue-300" />
@@ -73,10 +73,10 @@ export default function MarketingDashboardPage() {
             <CardContent className="pt-5 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Yangi (30 kun)</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Yangi (30 kun)</p>
                   <p className="text-2xl font-bold">{data?.newLeads ?? 0}</p>
                 </div>
-                <UserPlus className="h-8 w-8 text-emerald-300" />
+                <UserPlus className="h-8 w-8 text-xedu-primary" />
               </div>
             </CardContent>
           </Card>
@@ -84,10 +84,10 @@ export default function MarketingDashboardPage() {
             <CardContent className="pt-5 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">Konvertatsiya</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Konvertatsiya</p>
                   <p className="text-2xl font-bold">{data?.conversionRate ?? 0}%</p>
                 </div>
-                <CheckCircle2 className="h-8 w-8 text-emerald-300" />
+                <CheckCircle2 className="h-8 w-8 text-xedu-primary" />
               </div>
             </CardContent>
           </Card>
@@ -95,7 +95,7 @@ export default function MarketingDashboardPage() {
             <CardContent className="pt-5 pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-xs text-muted-foreground">O'quvchiga aylangan</p>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">O'quvchiga aylangan</p>
                   <p className="text-2xl font-bold">{data?.convertedLeads ?? 0}</p>
                 </div>
                 <TrendingUp className="h-8 w-8 text-violet-300" />
@@ -110,7 +110,7 @@ export default function MarketingDashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              <BarChart3 className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
               Lead voronkasi
             </CardTitle>
           </CardHeader>
@@ -147,7 +147,7 @@ export default function MarketingDashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <PieChart className="h-4 w-4 text-muted-foreground" />
+              <PieChart className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
               Manba bo'yicha
             </CardTitle>
           </CardHeader>
@@ -165,7 +165,7 @@ export default function MarketingDashboardPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex justify-between text-sm">
                         <span className="font-medium">{source.label}</span>
-                        <span className="text-muted-foreground">{source.conversionRate}% konversiya</span>
+                        <span className="text-xedu-slate-500 dark:text-xedu-slate-400">{source.conversionRate}% konversiya</span>
                       </div>
                       <Progress
                         value={Math.min(source.conversionRate, 100)}
@@ -176,7 +176,7 @@ export default function MarketingDashboardPage() {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
+              <div className="text-center py-8 text-xedu-slate-500 dark:text-xedu-slate-400">
                 <Megaphone className="h-10 w-10 mx-auto mb-3 text-slate-300" />
                 <p>Ma'lumot yo'q</p>
               </div>
@@ -189,7 +189,7 @@ export default function MarketingDashboardPage() {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <TrendingUp className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />
             Oylik dinamika
           </CardTitle>
         </CardHeader>
@@ -211,7 +211,7 @@ export default function MarketingDashboardPage() {
               </ResponsiveContainer>
             </div>
           ) : (
-            <div className="text-center py-8 text-muted-foreground">
+            <div className="text-center py-8 text-xedu-slate-500 dark:text-xedu-slate-400">
               <TrendingUp className="h-10 w-10 mx-auto mb-3 text-slate-300" />
               <p>Ma'lumot yo'q</p>
             </div>

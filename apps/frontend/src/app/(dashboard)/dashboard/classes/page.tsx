@@ -67,7 +67,7 @@ export default function ClassesPage() {
   const createMutation = useMutation({
     mutationFn: classesApi.create,
     onSuccess: () => {
-      toast({ title: "✅ Sinf qo'shildi" });
+      toast({ title: " Sinf qo'shildi" });
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       closeDialog();
     },
@@ -80,7 +80,7 @@ export default function ClassesPage() {
   const updateMutation = useMutation({
     mutationFn: ({ id, payload }: { id: string; payload: any }) => classesApi.update(id, payload),
     onSuccess: () => {
-      toast({ title: '✅ Sinf yangilandi' });
+      toast({ title: ' Sinf yangilandi' });
       queryClient.invalidateQueries({ queryKey: ['classes'] });
       closeDialog();
     },
@@ -208,7 +208,7 @@ export default function ClassesPage() {
                           <Pencil className="mr-2 h-4 w-4" /> Tahrirlash
                         </DropdownMenuItem>
                         {canDelete && (
-                          <DropdownMenuItem className="text-destructive focus:text-destructive"
+                          <DropdownMenuItem className="text-xedu-ruby focus:text-xedu-ruby"
                             onClick={e => { e.stopPropagation(); deleteMutation.mutate(cls.id); }}>
                             <Trash2 className="mr-2 h-4 w-4" /> O&apos;chirish
                           </DropdownMenuItem>
@@ -253,28 +253,28 @@ export default function ClassesPage() {
 
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Sinf nomi <span className="text-destructive">*</span></Label>
+              <Label>Sinf nomi <span className="text-xedu-ruby">*</span></Label>
               <Input placeholder="Masalan: 5-A" value={form.name}
                 onChange={e => { setForm(f => ({ ...f, name: e.target.value })); setErrors(er => { const n = { ...er }; delete n.name; return n; }); }} />
-              {errors.name && <p className="text-xs text-destructive">{errors.name}</p>}
+              {errors.name && <p className="text-xs text-xedu-ruby">{errors.name}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Sinf darajasi <span className="text-destructive">*</span></Label>
+                <Label>Sinf darajasi <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.gradeLevel} onValueChange={sel('gradeLevel')}>
                   <SelectTrigger><SelectValue placeholder="1-12..." /></SelectTrigger>
                   <SelectContent>{GRADES.map(g => <SelectItem key={g} value={String(g)}>{g}-sinf</SelectItem>)}</SelectContent>
                 </Select>
-                {errors.gradeLevel && <p className="text-xs text-destructive">{errors.gradeLevel}</p>}
+                {errors.gradeLevel && <p className="text-xs text-xedu-ruby">{errors.gradeLevel}</p>}
               </div>
               <div className="space-y-1.5">
-                <Label>O&apos;quv yili <span className="text-destructive">*</span></Label>
+                <Label>O&apos;quv yili <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.academicYear} onValueChange={sel('academicYear')}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>{ACADEMIC_YEARS.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}</SelectContent>
                 </Select>
-                {errors.academicYear && <p className="text-xs text-destructive">{errors.academicYear}</p>}
+                {errors.academicYear && <p className="text-xs text-xedu-ruby">{errors.academicYear}</p>}
               </div>
             </div>
 

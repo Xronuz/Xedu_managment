@@ -79,7 +79,7 @@ export default function MyClassPage() {
         entries: entries.map((e) => ({ studentId: e.studentId, status: e.status as any })),
       }),
     onSuccess: () => {
-      toast({ title: 'Davomat saqlandi ✓' });
+      toast({ title: 'Davomat saqlandi ' });
       qc.invalidateQueries({ queryKey: ['attendance'] });
     },
     onError: () => toast({ title: 'Xatolik', description: 'Davomat saqlanmadi', variant: 'destructive' }),
@@ -109,7 +109,7 @@ export default function MyClassPage() {
         comment: gradeForm.comment || undefined,
       }),
     onSuccess: () => {
-      toast({ title: 'Baho saqlandi ✓' });
+      toast({ title: 'Baho saqlandi ' });
       setGradeOpen(false);
       setGradeForm({ studentId: '', subjectId: '', score: '', maxScore: '10', type: 'classwork', comment: '' });
       qc.invalidateQueries({ queryKey: ['grades'] });
@@ -121,7 +121,7 @@ export default function MyClassPage() {
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="h-8 w-8 animate-spin text-xedu-slate-500 dark:text-xedu-slate-400" />
       </div>
     );
   }
@@ -129,10 +129,10 @@ export default function MyClassPage() {
   if (!cls) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
-        <School className="h-16 w-16 text-muted-foreground/40" />
+        <School className="h-16 w-16 text-xedu-slate-500 dark:text-xedu-slate-400/40" />
         <div>
           <p className="text-lg font-semibold">Sinfingiz topilmadi</p>
-          <p className="text-sm text-muted-foreground">Siz hali birorta sinfga sinf rahbari sifatida biriktirilmagansiz.</p>
+          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Siz hali birorta sinfga sinf rahbari sifatida biriktirilmagansiz.</p>
         </div>
       </div>
     );
@@ -169,7 +169,7 @@ export default function MyClassPage() {
             <School className="h-7 w-7 text-primary" />
             Mening sinfim — {cls.name}
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
             {cls.gradeLevel}-sinf · {cls.academicYear} o'quv yili
           </p>
         </div>
@@ -187,7 +187,7 @@ export default function MyClassPage() {
               <div className="rounded-lg bg-blue-100 p-2 shrink-0"><Users className="h-5 w-5 text-blue-600" /></div>
               <div>
                 <p className="text-2xl font-bold">{studentCount}</p>
-                <p className="text-xs text-muted-foreground">Jami o'quvchi</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Jami o'quvchi</p>
               </div>
             </div>
           </CardContent>
@@ -198,7 +198,7 @@ export default function MyClassPage() {
               <div className="rounded-lg bg-purple-100 p-2 shrink-0"><BookOpen className="h-5 w-5 text-purple-600" /></div>
               <div>
                 <p className="text-2xl font-bold">{(mySubjects as any[]).length}</p>
-                <p className="text-xs text-muted-foreground">Fanlarim</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Fanlarim</p>
               </div>
             </div>
           </CardContent>
@@ -209,7 +209,7 @@ export default function MyClassPage() {
               <div className="rounded-lg bg-green-100 p-2 shrink-0"><ClipboardCheck className="h-5 w-5 text-green-600" /></div>
               <div>
                 <p className="text-2xl font-bold">{presentCount}</p>
-                <p className="text-xs text-muted-foreground">Bugun keldi</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Bugun keldi</p>
               </div>
             </div>
           </CardContent>
@@ -220,7 +220,7 @@ export default function MyClassPage() {
               <div className="rounded-lg bg-red-100 p-2 shrink-0"><XCircle className="h-5 w-5 text-red-600" /></div>
               <div>
                 <p className="text-2xl font-bold">{absentCount}</p>
-                <p className="text-xs text-muted-foreground">Bugun kelmadi</p>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Bugun kelmadi</p>
               </div>
             </div>
           </CardContent>
@@ -275,16 +275,16 @@ export default function MyClassPage() {
             </CardHeader>
             <CardContent>
               {students.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">O'quvchilar topilmadi</p>
+                <p className="text-center text-xedu-slate-500 dark:text-xedu-slate-400 py-8">O'quvchilar topilmadi</p>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b">
-                        <th className="py-2 px-2 text-left w-8 text-muted-foreground font-medium">#</th>
-                        <th className="py-2 px-2 text-left text-muted-foreground font-medium">O'quvchi</th>
+                        <th className="py-2 px-2 text-left w-8 text-xedu-slate-500 dark:text-xedu-slate-400 font-medium">#</th>
+                        <th className="py-2 px-2 text-left text-xedu-slate-500 dark:text-xedu-slate-400 font-medium">O'quvchi</th>
                         {(Object.keys(STATUS_CONFIG) as AttStatus[]).map((s) => (
-                          <th key={s} className="py-2 px-2 text-center text-muted-foreground font-medium">
+                          <th key={s} className="py-2 px-2 text-center text-xedu-slate-500 dark:text-xedu-slate-400 font-medium">
                             {STATUS_CONFIG[s].label}
                           </th>
                         ))}
@@ -292,8 +292,8 @@ export default function MyClassPage() {
                     </thead>
                     <tbody className="divide-y">
                       {students.map((student, idx) => (
-                        <tr key={student.id} className="hover:bg-muted/30 transition-colors">
-                          <td className="py-2 px-2 text-muted-foreground">{idx + 1}</td>
+                        <tr key={student.id} className="hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
+                          <td className="py-2 px-2 text-xedu-slate-500 dark:text-xedu-slate-400">{idx + 1}</td>
                           <td className="py-2 px-2 font-medium">
                             {student.firstName} {student.lastName}
                           </td>
@@ -333,12 +333,12 @@ export default function MyClassPage() {
             </CardHeader>
             <CardContent>
               {students.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">O'quvchilar topilmadi</p>
+                <p className="text-center text-xedu-slate-500 dark:text-xedu-slate-400 py-8">O'quvchilar topilmadi</p>
               ) : (
                 <div className="divide-y">
                   {students.map((student, idx) => (
                     <div key={student.id} className="flex items-center gap-3 py-3">
-                      <span className="w-6 text-sm text-muted-foreground">{idx + 1}</span>
+                      <span className="w-6 text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{idx + 1}</span>
                       <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                         <UserCircle className="h-5 w-5 text-primary" />
                       </div>
@@ -380,7 +380,7 @@ export default function MyClassPage() {
             </CardHeader>
             <CardContent>
               {(mySubjects as any[]).length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
+                <p className="text-center text-xedu-slate-500 dark:text-xedu-slate-400 py-8">
                   Sizga biriktirilgan fan topilmadi
                 </p>
               ) : (
@@ -394,7 +394,7 @@ export default function MyClassPage() {
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-sm">{sub.name}</p>
                         {sub.class && (
-                          <p className="text-xs text-muted-foreground">{sub.class.name}</p>
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{sub.class.name}</p>
                         )}
                       </div>
                       <Button

@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { TokenPair } from '@eduplatform/types';
+import { authApi } from '@/lib/api/auth';
 
 export interface AuthUser {
   id: string;
@@ -74,7 +75,12 @@ export const useAuthStore = create<AuthState>()(
           user: state.user ? { ...state.user, ...partial } : null,
         })),
 
-      logout: () => {
+      logout: async () => {
+        try {
+          await authApi.logout();
+        } catch {
+          // Backend logout may fail if token is already expired — safe to ignore
+        }
         set({
           user: null,
           accessToken: null,
@@ -84,6 +90,7 @@ export const useAuthStore = create<AuthState>()(
         });
         if (typeof window !== 'undefined') {
           localStorage.removeItem('auth-storage');
+          localStorage.removeItem('branch-storage');
         }
       },
 

@@ -92,7 +92,7 @@ export default function MeetingsPage() {
   const createMutation = useMutation({
     mutationFn: meetingsApi.create,
     onSuccess: () => {
-      toast({ title: '✅ Uchrashuv rejalashtirildi' });
+      toast({ title: ' Uchrashuv rejalashtirildi' });
       queryClient.invalidateQueries({ queryKey: ['meetings'] });
       setOpen(false);
       setForm(EMPTY_FORM);
@@ -156,7 +156,7 @@ export default function MeetingsPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <CalendarCheck className="h-6 w-6 text-blue-500" /> Ota-ona uchrashuvlari
           </h1>
-          <p className="text-muted-foreground">O&apos;qituvchi — ota-ona muloqot jadvali</p>
+          <p className="text-xedu-slate-500 dark:text-xedu-slate-400">O&apos;qituvchi — ota-ona muloqot jadvali</p>
         </div>
         {canManage && (
           <Button onClick={() => { setForm(EMPTY_FORM); setErrors({}); setOpen(true); }}>
@@ -170,19 +170,19 @@ export default function MeetingsPage() {
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-blue-500/10"><CalendarCheck className="h-5 w-5 text-blue-500" /></div>
-            <div><p className="text-xs text-muted-foreground">Yaqin uchrashuvlar</p><p className="text-2xl font-bold">{upcoming}</p></div>
+            <div><p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Yaqin uchrashuvlar</p><p className="text-2xl font-bold">{upcoming}</p></div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-green-500/10"><CheckCircle2 className="h-5 w-5 text-green-500" /></div>
-            <div><p className="text-xs text-muted-foreground">Bajarilgan</p><p className="text-2xl font-bold">{completedCount}</p></div>
+            <div><p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Bajarilgan</p><p className="text-2xl font-bold">{completedCount}</p></div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4 flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-violet-500/10"><Users className="h-5 w-5 text-violet-500" /></div>
-            <div><p className="text-xs text-muted-foreground">Jami uchrashuvlar</p><p className="text-2xl font-bold">{meta?.total ?? meetings.length}</p></div>
+            <div><p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Jami uchrashuvlar</p><p className="text-2xl font-bold">{meta?.total ?? meetings.length}</p></div>
           </CardContent>
         </Card>
       </div>
@@ -208,13 +208,13 @@ export default function MeetingsPage() {
           {isLoading ? (
             <div className="space-y-3">{[...Array(4)].map((_, i) => <Skeleton key={i} className="h-20" />)}</div>
           ) : error ? (
-            <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
+            <div className="flex flex-col items-center gap-3 py-12 text-xedu-slate-500 dark:text-xedu-slate-400">
               <CalendarCheck className="h-10 w-10 opacity-30" />
               <p className="text-sm">Uchrashuvlar API hali mavjud emas</p>
               <p className="text-xs">Backend moduli keyingi versiyada qo&apos;shiladi</p>
             </div>
           ) : meetings.length === 0 ? (
-            <div className="flex flex-col items-center gap-3 py-12 text-muted-foreground">
+            <div className="flex flex-col items-center gap-3 py-12 text-xedu-slate-500 dark:text-xedu-slate-400">
               <CalendarCheck className="h-10 w-10 opacity-40" />
               <p className="text-sm">Uchrashuvlar yo&apos;q</p>
               {canManage && (
@@ -231,7 +231,7 @@ export default function MeetingsPage() {
                 const d = new Date(meeting.scheduledAt);
                 const isToday = d.toDateString() === new Date().toDateString();
                 return (
-                  <div key={meeting.id} className="flex items-center justify-between rounded-lg border p-3 gap-4 hover:bg-muted/20 transition-colors group">
+                  <div key={meeting.id} className="flex items-center justify-between rounded-lg border p-3 gap-4 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors group">
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="p-2 rounded-full bg-primary/10 shrink-0">
                         <MediumIcon className="h-4 w-4 text-primary" />
@@ -239,21 +239,21 @@ export default function MeetingsPage() {
                       <div className="min-w-0">
                         <p className="font-medium text-sm truncate">
                           {meeting.teacher?.firstName} {meeting.teacher?.lastName}
-                          <span className="text-muted-foreground mx-1">↔</span>
+                          <span className="text-xedu-slate-500 dark:text-xedu-slate-400 mx-1">↔</span>
                           {meeting.parent?.firstName} {meeting.parent?.lastName}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                           {meeting.student?.firstName} {meeting.student?.lastName} · {meeting.student?.class?.name}
                         </p>
-                        {meeting.agenda && <p className="text-xs text-muted-foreground truncate mt-0.5">📋 {meeting.agenda}</p>}
+                        {meeting.agenda && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate mt-0.5"> {meeting.agenda}</p>}
                       </div>
                     </div>
                     <div className="flex items-center gap-3 shrink-0 text-right">
                       <div>
-                        <p className={`text-xs font-medium ${isToday ? 'text-primary' : 'text-muted-foreground'}`}>
+                        <p className={`text-xs font-medium ${isToday ? 'text-primary' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
                           {isToday ? 'Bugun' : d.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' })}
                         </p>
-                        <p className="text-xs text-muted-foreground flex items-center gap-1 justify-end">
+                        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1 justify-end">
                           <Clock className="h-3 w-3" />{d.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' })}
                           {meeting.duration && ` · ${meeting.duration} min`}
                         </p>
@@ -267,7 +267,7 @@ export default function MeetingsPage() {
                             onClick={() => statusMutation.mutate({ id: meeting.id, status: 'completed' })} title="Bajarildi">
                             <CheckCircle2 className="h-3.5 w-3.5" />
                           </Button>
-                          <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                          <Button variant="ghost" size="icon" className="h-7 w-7 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                             onClick={() => deleteMutation.mutate(meeting.id)} title="O'chirish">
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
@@ -282,7 +282,7 @@ export default function MeetingsPage() {
 
           {meta && meta.totalPages > 1 && (
             <div className="flex items-center justify-between mt-4 pt-4 border-t">
-              <p className="text-sm text-muted-foreground">{(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, meta.total)} / {meta.total}</p>
+              <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{(page - 1) * LIMIT + 1}–{Math.min(page * LIMIT, meta.total)} / {meta.total}</p>
               <div className="flex gap-1">
                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}><ChevronLeft className="h-4 w-4" /></Button>
                 <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setPage(p => Math.min(meta.totalPages, p + 1))} disabled={page >= meta.totalPages}><ChevronRight className="h-4 w-4" /></Button>
@@ -301,38 +301,38 @@ export default function MeetingsPage() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>O&apos;qituvchi <span className="text-destructive">*</span></Label>
+              <Label>O&apos;qituvchi <span className="text-xedu-ruby">*</span></Label>
               <Select value={form.teacherId} onValueChange={sel('teacherId')}>
                 <SelectTrigger><SelectValue placeholder="O'qituvchi tanlang..." /></SelectTrigger>
                 <SelectContent>{(teachers as any[]).map((t: any) => <SelectItem key={t.id} value={t.id}>{t.firstName} {t.lastName}</SelectItem>)}</SelectContent>
               </Select>
-              {errors.teacherId && <p className="text-xs text-destructive">{errors.teacherId}</p>}
+              {errors.teacherId && <p className="text-xs text-xedu-ruby">{errors.teacherId}</p>}
             </div>
 
             <div className="space-y-1.5">
-              <Label>Ota-ona <span className="text-destructive">*</span></Label>
+              <Label>Ota-ona <span className="text-xedu-ruby">*</span></Label>
               <Select value={form.parentId} onValueChange={sel('parentId')}>
                 <SelectTrigger><SelectValue placeholder="Ota-ona tanlang..." /></SelectTrigger>
                 <SelectContent>{(parents as any[]).map((p: any) => <SelectItem key={p.id} value={p.id}>{p.firstName} {p.lastName}</SelectItem>)}</SelectContent>
               </Select>
-              {errors.parentId && <p className="text-xs text-destructive">{errors.parentId}</p>}
+              {errors.parentId && <p className="text-xs text-xedu-ruby">{errors.parentId}</p>}
             </div>
 
             <div className="space-y-1.5">
-              <Label>O&apos;quvchi <span className="text-destructive">*</span></Label>
+              <Label>O&apos;quvchi <span className="text-xedu-ruby">*</span></Label>
               <Select value={form.studentId} onValueChange={sel('studentId')}>
                 <SelectTrigger><SelectValue placeholder="O'quvchi tanlang..." /></SelectTrigger>
                 <SelectContent>{(students as any[]).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.firstName} {s.lastName}</SelectItem>)}</SelectContent>
               </Select>
-              {errors.studentId && <p className="text-xs text-destructive">{errors.studentId}</p>}
+              {errors.studentId && <p className="text-xs text-xedu-ruby">{errors.studentId}</p>}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
-                <Label>Sana va vaqt <span className="text-destructive">*</span></Label>
+                <Label>Sana va vaqt <span className="text-xedu-ruby">*</span></Label>
                 <Input type="datetime-local" value={form.scheduledAt}
                   onChange={e => { setForm(f => ({ ...f, scheduledAt: e.target.value })); setErrors(e2 => { const n = { ...e2 }; delete n.scheduledAt; return n; }); }} />
-                {errors.scheduledAt && <p className="text-xs text-destructive">{errors.scheduledAt}</p>}
+                {errors.scheduledAt && <p className="text-xs text-xedu-ruby">{errors.scheduledAt}</p>}
               </div>
               <div className="space-y-1.5">
                 <Label>Davomiylik (min)</Label>

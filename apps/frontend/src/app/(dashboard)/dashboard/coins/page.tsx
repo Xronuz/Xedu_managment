@@ -42,7 +42,7 @@ function reasonLabel(reason: string) {
 
 function BalanceCard({ coins }: { coins: number }) {
   return (
-    <Card className="bg-gradient-to-br from-amber-400 to-orange-500 text-white border-0 shadow-lg">
+    <Card className="bg-gradient-to-br from-amber-400 to-orange-500 text-white border-0 shadow-md">
       <CardContent className="pt-6 pb-5">
         <div className="flex items-center justify-between">
           <div>
@@ -73,13 +73,13 @@ function TxRow({ tx }: { tx: CoinTransaction }) {
       </span>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium truncate">{reasonLabel(tx.reason)}</p>
-        <p className="text-xs text-muted-foreground">{formatDate(tx.createdAt)}</p>
+        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{formatDate(tx.createdAt)}</p>
       </div>
       <div className="text-right">
         <p className={cn('text-sm font-semibold', earn ? 'text-green-600' : 'text-red-500')}>
           {earn ? '+' : ''}{tx.amount}
         </p>
-        <p className="text-xs text-muted-foreground">{tx.balance} coin</p>
+        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{tx.balance} coin</p>
       </div>
     </div>
   );
@@ -104,7 +104,7 @@ function ShopItemCard({
           <span className="text-2xl">{item.emoji ?? '🎁'}</span>
           <div className="flex-1 min-w-0">
             <p className="font-semibold text-sm truncate">{item.name}</p>
-            {item.description && <p className="text-xs text-muted-foreground truncate">{item.description}</p>}
+            {item.description && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 truncate">{item.description}</p>}
           </div>
         </div>
         <div className="flex items-center justify-between mt-auto pt-2">
@@ -112,7 +112,7 @@ function ShopItemCard({
             <Coins className="h-3 w-3 mr-1" />{item.cost.toLocaleString()}
           </Badge>
           {item.stock !== null && item.stock !== undefined && (
-            <span className="text-xs text-muted-foreground">{item.stock} ta qoldi</span>
+            <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{item.stock} ta qoldi</span>
           )}
         </div>
       </CardContent>
@@ -351,7 +351,7 @@ function AdminShopTab() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">{(items as ShopItem[]).length} ta mahsulot</p>
+        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{(items as ShopItem[]).length} ta mahsulot</p>
         <Button size="sm" onClick={openCreate}>
           <Plus className="h-4 w-4 mr-1.5" />Mahsulot qo'shish
         </Button>
@@ -360,7 +360,7 @@ function AdminShopTab() {
       {isLoading ? (
         <div className="space-y-2">{Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-16 rounded-lg" />)}</div>
       ) : (items as ShopItem[]).length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-2">
+        <div className="flex flex-col items-center justify-center py-12 text-xedu-slate-500 dark:text-xedu-slate-400 gap-2">
           <Package className="h-10 w-10 opacity-30" />
           <p className="text-sm">Hali mahsulot qo'shilmagan</p>
         </div>
@@ -369,7 +369,7 @@ function AdminShopTab() {
           {(items as ShopItem[]).map(item => (
             <div key={item.id} className={cn(
               'flex items-center gap-3 rounded-xl border px-4 py-3',
-              !item.isActive && 'opacity-50 bg-muted/30',
+              !item.isActive && 'opacity-50 bg-xedu-slate-50 dark:bg-xedu-slate-800/60',
             )}>
               <span className="text-xl w-8 text-center">{item.emoji ?? '🎁'}</span>
               <div className="flex-1 min-w-0">
@@ -379,7 +379,7 @@ function AdminShopTab() {
                     <Coins className="inline h-3 w-3 mr-0.5" />{item.cost.toLocaleString()} coin
                   </span>
                   {item.stock !== null && item.stock !== undefined && (
-                    <span className="text-xs text-muted-foreground">· {item.stock} ta qoldi</span>
+                    <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">· {item.stock} ta qoldi</span>
                   )}
                   {!item.isActive && <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Nofaol</Badge>}
                 </div>
@@ -393,13 +393,13 @@ function AdminShopTab() {
                 >
                   {item.isActive
                     ? <ToggleRight className="h-4 w-4 text-green-600" />
-                    : <ToggleLeft className="h-4 w-4 text-muted-foreground" />}
+                    : <ToggleLeft className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400" />}
                 </Button>
                 <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openEdit(item)}>
                   <Edit3 className="h-4 w-4" />
                 </Button>
                 <Button
-                  size="icon" variant="ghost" className="h-8 w-8 hover:text-destructive"
+                  size="icon" variant="ghost" className="h-8 w-8 hover:text-xedu-ruby"
                   disabled={deleteMutation.isPending}
                   onClick={async () => {
                     if (await ask({ title: `"${item.name}" mahsulotini o'chirasizmi?`, variant: 'destructive', confirmText: "O'chirish" }))
@@ -435,7 +435,7 @@ function AdminOrdersTab() {
 
   if ((orders as CoinTransaction[]).length === 0)
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-2">
+      <div className="flex flex-col items-center justify-center py-12 text-xedu-slate-500 dark:text-xedu-slate-400 gap-2">
         <ShoppingCart className="h-10 w-10 opacity-30" />
         <p className="text-sm">Hali xarid qilinmagan</p>
       </div>
@@ -450,7 +450,7 @@ function AdminOrdersTab() {
             <p className="text-sm font-medium truncate">
               {o.user ? `${o.user.firstName} ${o.user.lastName}` : 'Noma\'lum'}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
               {(o.metadata as any)?.itemName ?? 'Mahsulot'} · {formatDate(o.createdAt)}
             </p>
           </div>
@@ -485,12 +485,12 @@ function AdminBalancesTab() {
       {isLoading ? (
         <div className="space-y-2">{Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}</div>
       ) : filtered.length === 0 ? (
-        <p className="text-center text-sm text-muted-foreground py-8">O'quvchi topilmadi</p>
+        <p className="text-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400 py-8">O'quvchi topilmadi</p>
       ) : (
         <div className="space-y-1.5">
           {filtered.map((s, idx) => (
             <div key={s.id} className="flex items-center gap-3 rounded-xl border px-4 py-2.5">
-              <span className="text-xs font-mono w-5 text-muted-foreground">{idx + 1}</span>
+              <span className="text-xs font-mono w-5 text-xedu-slate-500 dark:text-xedu-slate-400">{idx + 1}</span>
               <p className="flex-1 text-sm font-medium">{s.firstName} {s.lastName}</p>
               <Badge variant="secondary" className="font-bold text-amber-600 bg-amber-50 dark:bg-amber-900/20">
                 <Coins className="h-3 w-3 mr-1" />{s.coins.toLocaleString()}
@@ -580,7 +580,7 @@ export default function CoinsPage() {
                 {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-36 rounded-xl" />)}
               </div>
             ) : (shopItems as ShopItem[]).length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-2">
+              <div className="flex flex-col items-center justify-center py-12 text-xedu-slate-500 dark:text-xedu-slate-400 gap-2">
                 <Package className="h-10 w-10 opacity-30" />
                 <p className="text-sm">Hali mahsulotlar qo'shilmagan</p>
               </div>
@@ -608,7 +608,7 @@ export default function CoinsPage() {
                 {histLoading
                   ? Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 my-1 rounded" />)
                   : (history as CoinTransaction[]).length === 0
-                    ? <p className="text-center text-sm text-muted-foreground py-8">Tarix yo'q</p>
+                    ? <p className="text-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400 py-8">Tarix yo'q</p>
                     : (history as CoinTransaction[]).map(tx => <TxRow key={tx.id} tx={tx} />)}
               </CardContent>
             </Card>

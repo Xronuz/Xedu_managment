@@ -4,13 +4,12 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  ClipboardCheck, School, Users, TrendingUp, TrendingDown,
+  ClipboardCheck, Users, TrendingUp, TrendingDown,
   CheckCircle2, ShieldAlert, Bell, BarChart2, Activity, Coins,
-  CalendarOff, ArrowUpRight, X,
+  ArrowUpRight,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -21,15 +20,8 @@ import { useRouter } from 'next/navigation';
 
 import { usersApi } from '@/lib/api/users';
 import { classesApi } from '@/lib/api/classes';
-import { paymentsApi } from '@/lib/api/payments';
-import { superAdminApi } from '@/lib/api/super-admin';
-import { parentApi } from '@/lib/api/parent';
-import { scheduleApi } from '@/lib/api/schedule';
 import { attendanceApi } from '@/lib/api/attendance';
 import { examsApi } from '@/lib/api/exams';
-import { homeworkApi } from '@/lib/api/homework';
-import { subjectsApi } from '@/lib/api/subjects';
-import { gradesApi } from '@/lib/api/grades';
 import { coinsApi } from '@/lib/api/coins';
 import { kpiApi } from '@/lib/api/kpi';
 import { aiAnalyticsApi } from '@/lib/api/ai-analytics';
@@ -41,11 +33,7 @@ import { financeApi } from '@/lib/api/finance';
 import { notificationsApi } from '@/lib/api/notifications';
 
 import {
-  C, ICON_CFG, LEGACY_COLOR_MAP, StatCard, PCard, SectionHeader, QuickActions,
-  OnboardingChecklist, TodayScheduleWidget, AttendanceSummaryWidget,
-  UpcomingExamsWidget, ClassTeacherMyClassSection, TeacherKPISection,
-  VicePrincipalSection, AdminChartsSection, AcademicCalendarWidget,
-  SuperAdminServiceStatus, MONTH_LABELS, PIE_COLORS, FREQ_UZ
+  C, ICON_CFG, PCard, QuickActions, AcademicCalendarWidget,
 } from './shared-widgets';
 
 import {
@@ -180,20 +168,22 @@ export function DirectorDashboard() {
   };
 
   return (
-    <div className="relative pb-20 md:pb-6 space-y-6">
+    <div className="relative pb-20 md:pb-6 space-y-5">
       {/* Quick Action Surface */}
       <QuickActionSurface onOpenCommandPalette={handleOpenCommandPalette} />
 
       {/* Header */}
-      <div className="space-y-3">
-        <div>
-          <h1 className="text-[28px] font-black tracking-tight leading-none" style={{ color: C.text }}>
-            Direktor paneli
-          </h1>
-          <p className="text-sm mt-2 font-medium" style={{ color: C.muted }}>
-            Maktab umumiy holati · {dayLabel}
-          </p>
-        </div>
+      <div>
+        <h1 className="text-[28px] font-black tracking-tight leading-none" style={{ color: C.text }}>
+          Direktor paneli
+        </h1>
+        <p className="text-sm mt-1.5 font-medium" style={{ color: C.muted }}>
+          Maktab umumiy holati · {dayLabel}
+        </p>
+      </div>
+
+      {/* Sticky Situation Bar */}
+      <div className="sticky top-0 z-20 -mx-2 px-2 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm">
         <SituationBar
           data={situationData}
           onAlertsClick={() => router.push('/dashboard/discipline')}
@@ -202,13 +192,16 @@ export function DirectorDashboard() {
       </div>
 
       {/* ── Strategic Overview Canvas ─────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-col lg:flex-row gap-5">
         {/* Main canvas */}
-        <div className="flex-1 min-w-0 space-y-5">
+        <div className="flex-1 min-w-0 space-y-4">
           <BranchHealthMap
             branches={(branches as any[]) ?? []}
             allUsers={allUsers}
+            pendingLeaves={pendingLeaveList}
+            pendingDiscipline={pendingDisciplineList}
             isLoading={branchesLoading}
+            selectedBranchId={selectedBranch?.id}
             onSelectBranch={handleSelectBranch}
           />
 
@@ -235,16 +228,19 @@ export function DirectorDashboard() {
         </div>
 
         {/* Intelligence Feed */}
-        <div className="w-full lg:w-[300px] xl:w-[340px] shrink-0 space-y-5">
+        <div className="w-full lg:w-[300px] xl:w-[340px] shrink-0 space-y-4">
           <IntelligenceFeed
             aiSummary={aiSummary}
             pendingLeaves={pendingLeaveList}
             pendingDiscipline={pendingDisciplineList}
+            attendanceSummary={attendanceSummary as any}
+            branches={(branches as any[]) ?? []}
+            upcomingExams={upcomingExamsCount}
             isLoading={!aiSummary && attLoading}
           />
 
           {/* Legacy: KPI + AI quick cards (preserved) */}
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <KPICard kpiData={kpiData} />
             <AiRiskCard aiSummary={aiSummary} />
             <EduCoinCard coinStats={coinStats} />
@@ -256,7 +252,7 @@ export function DirectorDashboard() {
       <div className="grid gap-4 md:grid-cols-2">
         {/* Leave approval quick-list */}
         <PCard>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <div>
               <p className="font-bold text-[15px]" style={{ color: C.text }}>Ta'til so'rovlari</p>
               <p className="text-xs mt-0.5" style={{ color: C.muted }}>{pendingLeaveList.length} ta kutilmoqda</p>
@@ -267,8 +263,8 @@ export function DirectorDashboard() {
           </div>
           <div className="space-y-2 max-h-64 overflow-y-auto">
             {pendingLeaveList.length === 0 ? (
-              <div className="flex flex-col items-center py-8 gap-2">
-                <CheckCircle2 className="h-7 w-7 text-xedu-primary" />
+              <div className="flex flex-col items-center py-7 gap-2">
+                <CheckCircle2 className="h-6 w-6 text-xedu-primary" />
                 <p className="text-sm font-medium" style={{ color: C.muted }}>Kutilayotgan so'rovlar yo'q</p>
               </div>
             ) : (
@@ -308,18 +304,18 @@ export function DirectorDashboard() {
 
         {/* Broadcast */}
         <PCard>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: ICON_CFG.blue.bg }}>
-              <Bell className="h-4.5 w-4.5" style={{ color: ICON_CFG.blue.icon }} />
+          <div className="flex items-center gap-2 mb-3">
+            <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: ICON_CFG.blue.bg }}>
+              <Bell className="h-4 w-4" style={{ color: ICON_CFG.blue.icon }} />
             </div>
             <div>
               <p className="font-bold text-[15px]" style={{ color: C.text }}>E'lon yuborish</p>
               <p className="text-xs" style={{ color: C.muted }}>Toplu xabar yuborish</p>
             </div>
           </div>
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             <Select value={annTarget} onValueChange={setAnnTarget}>
-              <SelectTrigger className="h-10 text-sm rounded-[14px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 text-sm rounded-[14px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all_staff">Barcha xodimlar</SelectItem>
                 <SelectItem value="all_teachers">Barcha o'qituvchilar</SelectItem>
@@ -332,7 +328,7 @@ export function DirectorDashboard() {
               </SelectContent>
             </Select>
             <input
-              className="w-full rounded-[14px] border px-4 py-2.5 text-sm outline-none transition-colors focus:ring-2"
+              className="w-full rounded-[14px] border px-4 py-2 text-sm outline-none transition-colors focus:ring-2"
               style={{ borderColor: C.border }}
               placeholder="E'lon sarlavhasi..."
               value={annTitle}
@@ -343,10 +339,10 @@ export function DirectorDashboard() {
               value={annBody}
               onChange={e => setAnnBody(e.target.value)}
               className="resize-none text-sm rounded-[14px]"
-              rows={3}
+              rows={2}
             />
             <Button
-              className="w-full"
+              className="w-full h-9"
               onClick={handleBroadcast}
               disabled={!annTitle.trim() || !annBody.trim() || broadcastMutation.isPending}
             >
@@ -359,7 +355,7 @@ export function DirectorDashboard() {
       {/* Pending discipline */}
       {pendingDisciplineList.length > 0 && (
         <PCard>
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-3">
             <ShieldAlert className="h-5 w-5 text-red-500" />
             <p className="font-bold text-[15px]" style={{ color: C.text }}>Hal qilinmagan intizom holatlari</p>
           </div>
@@ -386,11 +382,11 @@ export function DirectorDashboard() {
         </PCard>
       )}
 
-      {/* Academic calendar */}
+      {/* Academic calendar + quick links */}
       <div className="grid gap-4 md:grid-cols-2">
         <AcademicCalendarWidget canEdit={true} />
         <PCard>
-          <p className="font-bold text-[15px] mb-4" style={{ color: C.text }}>Tezkor havolalar</p>
+          <p className="font-bold text-[15px] mb-3" style={{ color: C.text }}>Tezkor havolalar</p>
           <QuickActions items={[
             { label: 'Davomat hisoboti', href: '/dashboard/attendance', icon: ClipboardCheck, iconColor: C.primary },
             { label: 'Baholar', href: '/dashboard/grades', icon: BarChart2, iconColor: '#2563EB' },
@@ -407,6 +403,10 @@ export function DirectorDashboard() {
         open={panelOpen}
         onClose={() => setPanelOpen(false)}
         branch={selectedBranch}
+        pendingLeaves={pendingLeaveList}
+        pendingDiscipline={pendingDisciplineList}
+        attendanceSummary={attendanceSummary as any}
+        allUsers={allUsers}
       />
     </div>
   );
@@ -423,17 +423,17 @@ function KPICard({ kpiData }: { kpiData: any }) {
   return (
     <Link
       href="/dashboard/kpi"
-      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 p-4 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
+      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>KPI</p>
-        <ArrowUpRight className="h-3.5 w-3.5 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors" />
+        <ArrowUpRight className="h-3 w-3 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors" />
       </div>
-      <p className="text-2xl font-black leading-none tracking-tight mb-1" style={{ color: C.text }}>
+      <p className="text-xl font-black leading-none tracking-tight" style={{ color: C.text }}>
         {avg}%
       </p>
-      <p className="text-[11px] font-medium" style={{ color: C.muted }}>
-        {items.length} ta metrika · o'rtacha bajarilish
+      <p className="text-[11px] font-medium mt-0.5" style={{ color: C.muted }}>
+        {items.length} ta metrika
       </p>
     </Link>
   );
@@ -446,20 +446,20 @@ function AiRiskCard({ aiSummary }: { aiSummary: any }) {
   return (
     <Link
       href="/dashboard/ai-analytics"
-      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 p-4 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
+      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>AI Tahlil</p>
-        <ArrowUpRight className="h-3.5 w-3.5 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors" />
+        <ArrowUpRight className="h-3 w-3 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors" />
       </div>
       <p
-        className="text-2xl font-black leading-none tracking-tight mb-1"
+        className="text-xl font-black leading-none tracking-tight"
         style={{ color: atRisk > 0 ? '#DC2626' : C.text }}
       >
         {atRisk}
       </p>
-      <p className="text-[11px] font-medium" style={{ color: C.muted }}>
-        {total > 0 ? `${total} ta o'quvchidan xavf ostida` : "O'quvchilar tahlili"}
+      <p className="text-[11px] font-medium mt-0.5" style={{ color: C.muted }}>
+        {total > 0 ? `xavf ostida / ${total}` : "O'quvchilar tahlili"}
       </p>
     </Link>
   );
@@ -471,16 +471,16 @@ function EduCoinCard({ coinStats }: { coinStats: any }) {
   return (
     <Link
       href="/dashboard/coins"
-      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 p-4 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
+      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>EduCoin</p>
-        <ArrowUpRight className="h-3.5 w-3.5 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors" />
+        <ArrowUpRight className="h-3 w-3 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors" />
       </div>
-      <p className="text-2xl font-black leading-none tracking-tight mb-1" style={{ color: C.text }}>
+      <p className="text-xl font-black leading-none tracking-tight" style={{ color: C.text }}>
         {count.toLocaleString()}
       </p>
-      <p className="text-[11px] font-medium" style={{ color: C.muted }}>Faol o'quvchilar</p>
+      <p className="text-[11px] font-medium mt-0.5" style={{ color: C.muted }}>Faol o'quvchilar</p>
     </Link>
   );
 }

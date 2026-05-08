@@ -1,7 +1,8 @@
 'use client';
 
-import { BookOpen, ClipboardCheck, GraduationCap, Calendar, AlertTriangle } from 'lucide-react';
+import { BookOpen, ClipboardCheck, GraduationCap, Calendar } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
 import { WorkspaceBlock } from './branch-health-map';
 import Link from 'next/link';
 
@@ -29,13 +30,13 @@ export function AcademicSnapshot({
 }: AcademicSnapshotProps) {
   if (isLoading) {
     return (
-      <WorkspaceBlock title="Akademik holat" icon={BookOpen} action={{ label: 'Batafsil', href: '/dashboard/education' }}>
-        <div className="p-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <Skeleton className="h-16 rounded-lg" />
-            <Skeleton className="h-16 rounded-lg" />
-            <Skeleton className="h-16 rounded-lg" />
-            <Skeleton className="h-16 rounded-lg" />
+      <WorkspaceBlock title="Akademik" icon={BookOpen} action={{ label: 'Batafsil', href: '/dashboard/education' }}>
+        <div className="p-3 space-y-2">
+          <div className="flex gap-2">
+            <Skeleton className="h-14 flex-1 rounded-md" />
+            <Skeleton className="h-14 flex-1 rounded-md" />
+            <Skeleton className="h-14 flex-1 rounded-md" />
+            <Skeleton className="h-14 flex-1 rounded-md" />
           </div>
         </div>
       </WorkspaceBlock>
@@ -47,43 +48,37 @@ export function AcademicSnapshot({
   const hasAttendance = attendanceSummary != null && (attendanceSummary.marked ?? 0) > 0;
 
   return (
-    <WorkspaceBlock title="Akademik holat" icon={BookOpen} action={{ label: 'Batafsil', href: '/dashboard/education' }}>
-      <div className="p-4">
-        <div className="grid grid-cols-2 gap-3">
-          {/* Attendance */}
+    <WorkspaceBlock title="Akademik" icon={BookOpen} action={{ label: 'Batafsil', href: '/dashboard/education' }}>
+      <div className="p-3">
+        {/* 4-pill row */}
+        <div className="flex gap-2">
           <AcademicPill
             icon={ClipboardCheck}
             label="Davomat"
-            value={hasAttendance ? `${pct}%` : "—"}
+            value={hasAttendance ? `${pct}%` : '—'}
             sub={hasAttendance ? `${attendanceSummary?.marked ?? 0} / ${totalStudents}` : "Ma'lumot yo'q"}
             tone={pct < 70 ? 'urgent' : pct < 85 ? 'attention' : 'calm'}
             href="/dashboard/attendance"
           />
-
-          {/* Classes */}
           <AcademicPill
             icon={GraduationCap}
             label="Sinflar"
             value={classCount}
-            sub="Faol sinflar"
+            sub="Faol"
             href="/dashboard/classes"
           />
-
-          {/* Students */}
           <AcademicPill
             icon={BookOpen}
             label="O'quvchilar"
             value={totalStudents}
-            sub="Jami ro'yxatda"
+            sub="Jami"
             href="/dashboard/students"
           />
-
-          {/* Exams */}
           <AcademicPill
             icon={Calendar}
             label="Imtihonlar"
             value={upcomingExams > 0 ? upcomingExams : '—'}
-            sub={upcomingExams > 0 ? 'Yaqin 7 kun" ichida' : "Rejalashtirilmagan"}
+            sub={upcomingExams > 0 ? 'Yaqin 7 kunda' : 'Rejalashtirilmagan'}
             tone={upcomingExams > 0 ? 'attention' : 'calm'}
             href="/dashboard/exams"
           />
@@ -91,17 +86,17 @@ export function AcademicSnapshot({
 
         {/* Attendance detail bar */}
         {hasAttendance && (
-          <div className="mt-3 pt-3 border-t border-xedu-slate-100 dark:border-xedu-slate-800">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex-1 h-1.5 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 overflow-hidden">
+          <div className="mt-2 pt-2 border-t border-xedu-slate-100 dark:border-xedu-slate-800">
+            <div className="flex items-center gap-2 mb-1.5">
+              <div className="flex-1 h-1 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-xedu-primary transition-all"
-                  style={{ width: `${pct}%` }}
+                  style={{ width: `${Math.min(pct, 100)}%` }}
                 />
               </div>
-              <span className="text-[11px] font-bold text-xedu-slate-600 dark:text-xedu-slate-400 tabular-nums">{pct}%</span>
+              <span className="text-[10px] font-bold text-xedu-slate-500 tabular-nums">{pct}%</span>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <MiniStat label="Keldi" value={attendanceSummary?.present ?? 0} color="text-xedu-primary" />
               <MiniStat label="Kelmadi" value={attendanceSummary?.absent ?? 0} color="text-red-500" />
               <MiniStat label="Kechikdi" value={attendanceSummary?.late ?? 0} color="text-amber-500" />
@@ -129,7 +124,11 @@ function AcademicPill({
   href?: string;
 }) {
   const valueColor =
-    tone === 'urgent' ? 'text-red-600 dark:text-red-400' : tone === 'attention' ? 'text-amber-600 dark:text-amber-400' : 'text-xedu-slate-900 dark:text-xedu-slate-100';
+    tone === 'urgent'
+      ? 'text-red-600 dark:text-red-400'
+      : tone === 'attention'
+      ? 'text-amber-600 dark:text-amber-400'
+      : 'text-xedu-slate-900 dark:text-xedu-slate-100';
 
   const Wrapper = href ? Link : 'div';
   const wrapperProps = href ? { href } : {};
@@ -138,27 +137,25 @@ function AcademicPill({
     <Wrapper
       {...(wrapperProps as any)}
       className={cn(
-        'rounded-lg border border-xedu-slate-100 dark:border-xedu-slate-800 p-3 transition-colors',
+        'flex-1 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 p-2 transition-colors',
         href && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/40 cursor-pointer'
       )}
     >
-      <div className="flex items-center gap-1.5 mb-2">
-        <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</span>
+      <div className="flex items-center gap-1 mb-1">
+        <Icon className="h-3 w-3 text-xedu-slate-400" />
+        <span className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</span>
       </div>
-      <p className={`text-lg font-black leading-none ${valueColor}`}>{value}</p>
-      <p className="text-[11px] text-xedu-slate-500 mt-1">{sub}</p>
+      <p className={`text-base font-black leading-none ${valueColor}`}>{value}</p>
+      <p className="text-[10px] text-xedu-slate-500 mt-0.5">{sub}</p>
     </Wrapper>
   );
 }
 
 function MiniStat({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="flex items-center gap-1.5">
-      <span className={`text-xs font-bold tabular-nums ${color}`}>{value}</span>
-      <span className="text-[11px] text-xedu-slate-500">{label}</span>
+    <div className="flex items-center gap-1">
+      <span className={`text-[11px] font-bold tabular-nums ${color}`}>{value}</span>
+      <span className="text-[10px] text-xedu-slate-500">{label}</span>
     </div>
   );
 }
-
-import { cn } from '@/lib/utils';

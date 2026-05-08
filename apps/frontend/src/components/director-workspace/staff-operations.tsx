@@ -23,13 +23,13 @@ export function StaffOperations({
 }: StaffOperationsProps) {
   if (isLoading) {
     return (
-      <WorkspaceBlock title="Xodimlar holati" icon={Users} action={{ label: 'Batafsil', href: '/dashboard/staff' }}>
-        <div className="p-4 space-y-3">
-          <div className="grid grid-cols-2 gap-3">
-            <Skeleton className="h-16 rounded-lg" />
-            <Skeleton className="h-16 rounded-lg" />
+      <WorkspaceBlock title="Xodimlar" icon={Users} action={{ label: 'Batafsil', href: '/dashboard/staff' }}>
+        <div className="p-3 space-y-2">
+          <div className="flex gap-2">
+            <Skeleton className="h-14 flex-1 rounded-md" />
+            <Skeleton className="h-14 flex-1 rounded-md" />
           </div>
-          <Skeleton className="h-10 rounded-lg" />
+          <Skeleton className="h-8 rounded-md" />
         </div>
       </WorkspaceBlock>
     );
@@ -39,32 +39,22 @@ export function StaffOperations({
   const hasPending = pendingLeaves > 0 || pendingDiscipline > 0;
 
   return (
-    <WorkspaceBlock title="Xodimlar holati" icon={Users} action={{ label: 'Batafsil', href: '/dashboard/staff' }}>
-      <div className="p-4">
-        <div className="grid grid-cols-2 gap-3 mb-3">
-          <StaffPill
-            icon={Users}
-            label="O'qituvchilar"
-            value={teacherCount}
-            href="/dashboard/users"
-          />
-          <StaffPill
-            icon={ShieldCheck}
-            label="Boshqa xodimlar"
-            value={staffCount}
-            href="/dashboard/users"
-          />
+    <WorkspaceBlock title="Xodimlar" icon={Users} action={{ label: 'Batafsil', href: '/dashboard/staff' }}>
+      <div className="p-3">
+        <div className="flex gap-2 mb-2">
+          <StaffPill icon={Users} label="O'qituvchilar" value={teacherCount} href="/dashboard/users" />
+          <StaffPill icon={ShieldCheck} label="Boshqa xodimlar" value={staffCount} href="/dashboard/users" />
         </div>
 
         {/* Capacity summary */}
-        <div className="rounded-lg border border-xedu-slate-100 dark:border-xedu-slate-800 px-3 py-2.5 flex items-center justify-between">
-          <span className="text-xs text-xedu-slate-500">Jami xodimlar</span>
+        <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2.5 py-1.5 flex items-center justify-between">
+          <span className="text-[11px] text-xedu-slate-500">Jami xodimlar</span>
           <span className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 tabular-nums">{totalStaff}</span>
         </div>
 
         {/* Pending attention */}
         {hasPending && (
-          <div className="mt-3 space-y-1.5">
+          <div className="mt-2 space-y-1">
             {pendingLeaves > 0 && (
               <AttentionRow
                 icon={Clock}
@@ -107,15 +97,15 @@ function StaffPill({
     <Wrapper
       {...(wrapperProps as any)}
       className={cn(
-        'rounded-lg border border-xedu-slate-100 dark:border-xedu-slate-800 p-3 transition-colors',
+        'flex-1 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 p-2 transition-colors',
         href && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/40 cursor-pointer'
       )}
     >
-      <div className="flex items-center gap-1.5 mb-2">
-        <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
-        <span className="text-[10px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</span>
+      <div className="flex items-center gap-1 mb-1">
+        <Icon className="h-3 w-3 text-xedu-slate-400" />
+        <span className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</span>
       </div>
-      <p className="text-lg font-black leading-none text-xedu-slate-900 dark:text-xedu-slate-100">{value}</p>
+      <p className="text-base font-black leading-none text-xedu-slate-900 dark:text-xedu-slate-100">{value}</p>
     </Wrapper>
   );
 }
@@ -134,18 +124,24 @@ function AttentionRow({
   tone?: 'attention' | 'urgent';
 }) {
   const dotColor = tone === 'urgent' ? 'bg-red-500' : 'bg-amber-500';
+  const bgColor = tone === 'urgent'
+    ? 'hover:bg-red-50 dark:hover:bg-red-900/10'
+    : 'hover:bg-amber-50 dark:hover:bg-amber-900/10';
 
   return (
     <Link
       href={href}
-      className="flex items-center justify-between rounded-lg px-3 py-2 border border-xedu-slate-100 dark:border-xedu-slate-800 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/40 transition-colors"
+      className={cn(
+        'flex items-center justify-between rounded-md px-2.5 py-1.5 border border-xedu-slate-100 dark:border-xedu-slate-800 transition-colors',
+        bgColor
+      )}
     >
-      <div className="flex items-center gap-2">
-        <div className={`h-1.5 w-1.5 rounded-full ${dotColor}`} />
-        <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
-        <span className="text-xs font-medium text-xedu-slate-700 dark:text-xedu-slate-300">{label}</span>
+      <div className="flex items-center gap-1.5">
+        <div className={cn('h-1.5 w-1.5 rounded-full', dotColor)} />
+        <Icon className="h-3 w-3 text-xedu-slate-400" />
+        <span className="text-[11px] font-medium text-xedu-slate-700 dark:text-xedu-slate-300">{label}</span>
       </div>
-      <span className="text-xs font-bold text-xedu-slate-900 dark:text-xedu-slate-100 tabular-nums">{count}</span>
+      <span className="text-[11px] font-bold text-xedu-slate-900 dark:text-xedu-slate-100 tabular-nums">{count}</span>
     </Link>
   );
 }

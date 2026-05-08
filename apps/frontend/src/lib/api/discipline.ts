@@ -54,4 +54,15 @@ export const disciplineApi = {
     const { data } = await apiClient.get(`/discipline/student/${studentId}`);
     return data as DisciplineIncident[];
   },
+
+  getStats: async () => {
+    const { data } = await apiClient.get('/discipline/stats');
+    return data as {
+      total: number;
+      thisMonth: number;
+      unresolved: number;
+      bySeverity: { severity: DisciplineSeverity; count: number }[];
+      byType: { type: DisciplineType; count: number }[];
+    };
+  },
 };

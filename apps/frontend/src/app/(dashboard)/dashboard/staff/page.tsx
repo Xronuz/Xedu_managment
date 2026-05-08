@@ -15,6 +15,7 @@ import CrmPage           from '../crm/page';
 import LeaveRequestsPage from '../leave-requests/page';
 import DisciplinePage    from '../discipline/page';
 import MeetingsPage      from '../meetings/page';
+import { StaffWorkspace } from './_components/staff-workspace';
 
 const TABS = [
   { id: 'users',      label: 'Foydalanuvchilar', roles: ['director'] },
@@ -63,7 +64,7 @@ function TabContent({ tab }: { tab: string }) {
     case 'leave':      return <LeaveRequestsPage />;
     case 'discipline': return <DisciplinePage />;
     case 'meetings':   return <MeetingsPage />;
-    default:           return <UsersPage />;
+    default:           return <StaffWorkspace />;
   }
 }
 

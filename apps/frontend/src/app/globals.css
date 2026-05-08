@@ -337,4 +337,39 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* ── Workspace System Utilities ───────────────────────────────────────────── */
+  .workspace-surface {
+    background: var(--xedu-bg-elevated);
+    border: 1px solid var(--xedu-border);
+    border-radius: 0.75rem;
+  }
+  .workspace-surface-hover {
+    transition: background-color 150ms ease, border-color 150ms ease;
+  }
+  .workspace-surface-hover:hover {
+    background: var(--xedu-slate-50);
+    border-color: var(--xedu-border-hover);
+  }
+
+  .workspace-header-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgba(247, 248, 248, 0.9);
+    backdrop-filter: blur(8px);
+  }
+  .dark .workspace-header-sticky {
+    background: rgba(15, 23, 42, 0.9);
+  }
+
+  .workspace-divider {
+    height: 1px;
+    background: var(--xedu-border);
+  }
+
+  /* ── Density Tokens ───────────────────────────────────────────────────────── */
+  .density-compact { --ws-pad: 0.5rem; --ws-gap: 0.5rem; }
+  .density-normal  { --ws-pad: 0.75rem; --ws-gap: 0.75rem; }
+  .density-spacious{ --ws-pad: 1rem; --ws-gap: 1rem; }
 }

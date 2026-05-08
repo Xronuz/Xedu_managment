@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ClipboardCheck, Users, TrendingUp, TrendingDown,
   CheckCircle2, ShieldAlert, Bell, BarChart2, Activity, Coins,
-  ArrowUpRight, GitCompare, X,
+  ArrowUpRight, GitCompare, X, LayoutDashboard,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +26,6 @@ import { coinsApi } from '@/lib/api/coins';
 import { kpiApi } from '@/lib/api/kpi';
 import { aiAnalyticsApi } from '@/lib/api/ai-analytics';
 import { branchesApi } from '@/lib/api/branches';
-import { academicCalendarApi } from '@/lib/api/academic-calendar';
 import { leaveRequestsApi } from '@/lib/api/leave-requests';
 import { disciplineApi } from '@/lib/api/discipline';
 import { financeApi } from '@/lib/api/finance';
@@ -35,6 +34,14 @@ import { notificationsApi } from '@/lib/api/notifications';
 import {
   C, ICON_CFG, PCard, QuickActions, AcademicCalendarWidget,
 } from './shared-widgets';
+
+import {
+  WorkspaceShell,
+  WorkspaceHeader,
+  WorkspaceMain,
+  WorkspaceSidebar,
+  WorkspaceSection,
+} from '@/components/workspace-system';
 
 import {
   SituationBar,
@@ -203,311 +210,290 @@ export function DirectorDashboard() {
   };
 
   return (
-    <div className="relative pb-20 md:pb-6 space-y-4">
-      {/* Quick Action Surface */}
-      <QuickActionSurface onOpenCommandPalette={handleOpenCommandPalette} />
+    <WorkspaceShell layout="two-column" density="compact">
+      {/* ── Header + Sticky Situation Zone ─────────────────────────────────── */}
+      <div className="w-full lg:col-span-2 space-y-1">
+        <QuickActionSurface onOpenCommandPalette={handleOpenCommandPalette} />
 
-      {/* Header */}
-      <div>
-        <h1 className="text-[28px] font-black tracking-tight leading-none" style={{ color: C.text }}>
-          Direktor paneli
-        </h1>
-        <p className="text-sm mt-1.5 font-medium" style={{ color: C.muted }}>
-          Maktab umumiy holati · {dayLabel}
-        </p>
-      </div>
-
-      {/* Sticky Situation Bar */}
-      <div className="sticky top-0 z-20 -mx-2 px-2 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm space-y-1">
-        <SituationBar
-          data={situationData}
-          onAlertsClick={() => router.push('/dashboard/alerts')}
-          onApprovalsClick={() => router.push('/dashboard/approvals')}
+        <WorkspaceHeader
+          title="Direktor paneli"
+          subtitle={`Maktab umumiy holati · ${dayLabel}`}
+          icon={<LayoutDashboard className="h-5 w-5 text-xedu-slate-500" />}
         />
-        <ExecutiveSummary data={execSummaryData} />
+
+        <div className="sticky top-0 z-20 -mx-2 px-2 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm space-y-1">
+          <SituationBar
+            data={situationData}
+            onAlertsClick={() => router.push('/dashboard/alerts')}
+            onApprovalsClick={() => router.push('/dashboard/approvals')}
+          />
+          <ExecutiveSummary data={execSummaryData} />
+        </div>
       </div>
 
-      {/* ── Strategic Overview Canvas ─────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row gap-4">
-        {/* Main canvas */}
-        <div className="flex-1 min-w-0 space-y-3">
-          {/* Branch Health Map with compare controls */}
-          <div className="relative">
-            <div className="flex items-center justify-end gap-2 mb-1 px-1">
-              {compareMode && compareSelected.length >= 2 && (
-                <button
-                  onClick={() => setCompareSelected([])}
-                  className="flex items-center gap-1 text-[10px] font-semibold text-xedu-slate-500 hover:text-red-500 transition-colors"
-                >
-                  <X className="h-3 w-3" />
-                  Tozalash ({compareSelected.length})
-                </button>
-              )}
+      {/* ── Main Canvas ─────────────────────────────────────────────────────── */}
+      <WorkspaceMain className="space-y-3">
+        {/* Branch Health Map with compare controls */}
+        <div className="relative">
+          <div className="flex items-center justify-end gap-2 mb-1 px-1">
+            {compareMode && compareSelected.length >= 2 && (
               <button
-                onClick={() => {
-                  setCompareMode((v) => !v);
-                  if (compareMode) setCompareSelected([]);
-                }}
-                className={cn(
-                  'flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold transition-colors',
-                  compareMode
-                    ? 'bg-xedu-primary text-white'
-                    : 'text-xedu-slate-500 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800'
-                )}
+                onClick={() => setCompareSelected([])}
+                className="flex items-center gap-1 text-[10px] font-semibold text-xedu-slate-500 hover:text-red-500 transition-colors"
               >
-                <GitCompare className="h-3 w-3" />
-                {compareMode ? 'Taqqoslashni yopish' : 'Filial taqqoslash'}
+                <X className="h-3 w-3" />
+                Tozalash ({compareSelected.length})
               </button>
-            </div>
-
-            <BranchHealthMap
-              branches={(branches as any[]) ?? []}
-              allUsers={allUsers}
-              pendingLeaves={pendingLeaveList}
-              pendingDiscipline={pendingDisciplineList}
-              isLoading={branchesLoading}
-              selectedBranchId={selectedBranch?.id}
-              compareMode={compareMode}
-              compareSelected={compareSelected}
-              onSelectBranch={handleSelectBranch}
-              onToggleCompare={handleToggleCompare}
-            />
-
-            {/* Comparison panel */}
-            {compareSelected.length >= 2 && (
-              <div className="mt-3">
-                <BranchComparison
-                  branches={(branches as any[]) ?? []}
-                  selectedIds={compareSelected}
-                  allUsers={allUsers}
-                  pendingLeaves={pendingLeaveList}
-                  pendingDiscipline={pendingDisciplineList}
-                  onClose={() => { setCompareMode(false); setCompareSelected([]); }}
-                  onRemove={(id) => setCompareSelected((prev) => prev.filter((x) => x !== id))}
-                />
-              </div>
             )}
-          </div>
-
-          <FinancialPulse
-            financeData={financeData as any}
-            isLoading={!financeData && !attLoading}
-          />
-
-          <AcademicSnapshot
-            attendanceSummary={attendanceSummary as any}
-            classCount={classList.length}
-            activeStudents={studentCount}
-            upcomingExams={upcomingExamsCount}
-            isLoading={attLoading}
-          />
-
-          <StaffOperations
-            teacherCount={teacherCount}
-            staffCount={staffCount}
-            pendingLeaves={pendingLeaveList.length}
-            pendingDiscipline={pendingDisciplineList.length}
-            isLoading={!usersData}
-          />
-        </div>
-
-        {/* Right sidebar: Intelligence + Activity + Insights */}
-        <div className="w-full lg:w-[300px] xl:w-[340px] shrink-0 space-y-3">
-          <IntelligenceFeed
-            aiSummary={aiSummary}
-            pendingLeaves={pendingLeaveList}
-            pendingDiscipline={pendingDisciplineList}
-            attendanceSummary={attendanceSummary as any}
-            branches={(branches as any[]) ?? []}
-            upcomingExams={upcomingExamsCount}
-            isLoading={!aiSummary && attLoading}
-          />
-
-          <SmartInsights
-            data={{
-              branches: (branches as any[]) ?? [],
-              attendanceSummary,
-              pendingLeaves: pendingLeaveList,
-              pendingDiscipline: pendingDisciplineList,
-              aiSummary,
-              financeData: financeData as any,
-              teacherCount,
-              studentCount,
-            }}
-            maxInsights={4}
-          />
-
-          <ActivityStream
-            pendingLeaves={pendingLeaveList}
-            pendingDiscipline={pendingDisciplineList}
-            attendanceSummary={attendanceSummary as any}
-            branches={(branches as any[]) ?? []}
-            aiSummary={aiSummary}
-            financeData={financeData as any}
-            upcomingExams={upcomingExamsData as any[]}
-            maxItems={10}
-          />
-
-          {/* Legacy: KPI + AI quick cards (preserved) */}
-          <div className="grid grid-cols-3 gap-2">
-            <KPICard kpiData={kpiData} />
-            <AiRiskCard aiSummary={aiSummary} />
-            <EduCoinCard coinStats={coinStats} />
-          </div>
-        </div>
-      </div>
-
-      {/* ── Supplementary blocks (preserved interactive widgets) ──────────────── */}
-      <div className="grid gap-3 md:grid-cols-2">
-        {/* Leave approval quick-list */}
-        <PCard>
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="font-bold text-[15px]" style={{ color: C.text }}>Ta'til so'rovlari</p>
-              <p className="text-xs mt-0.5" style={{ color: C.muted }}>{pendingLeaveList.length} ta kutilmoqda</p>
-            </div>
-            <Badge variant={pendingLeaveList.length > 0 ? 'destructive' : 'secondary'}>
-              {pendingLeaveList.length} ta
-            </Badge>
-          </div>
-          <div className="space-y-2 max-h-64 overflow-y-auto">
-            {pendingLeaveList.length === 0 ? (
-              <div className="flex flex-col items-center py-7 gap-2">
-                <CheckCircle2 className="h-6 w-6 text-xedu-primary" />
-                <p className="text-sm font-medium" style={{ color: C.muted }}>Kutilayotgan so'rovlar yo'q</p>
-              </div>
-            ) : (
-              pendingLeaveList.slice(0, 6).map((req: any) => (
-                <div key={req.id} className="flex items-center justify-between rounded-[14px] border p-3" style={{ borderColor: C.border }}>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate" style={{ color: C.text }}>
-                      {req.requester?.firstName} {req.requester?.lastName}
-                    </p>
-                    <p className="text-xs truncate" style={{ color: C.muted }}>
-                      {new Date(req.startDate).toLocaleDateString('uz-UZ')} – {new Date(req.endDate).toLocaleDateString('uz-UZ')}
-                    </p>
-                  </div>
-                  <div className="flex gap-1.5 shrink-0 ml-3">
-                    <button
-                      className="h-7 px-3 rounded-full text-xs font-semibold"
-                      style={{ background: C.primaryLight, color: C.primary }}
-                      onClick={() => reviewMutation.mutate({ id: req.id, action: 'approve' })}
-                      disabled={reviewMutation.isPending}
-                    >
-                      Tasdiqlash
-                    </button>
-                    <button
-                      className="h-7 px-3 rounded-full text-xs font-semibold"
-                      style={{ background: '#FEE2E2', color: '#DC2626' }}
-                      onClick={() => reviewMutation.mutate({ id: req.id, action: 'reject' })}
-                      disabled={reviewMutation.isPending}
-                    >
-                      Rad
-                    </button>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </PCard>
-
-        {/* Broadcast */}
-        <PCard>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="h-8 w-8 rounded-lg flex items-center justify-center" style={{ background: ICON_CFG.blue.bg }}>
-              <Bell className="h-4 w-4" style={{ color: ICON_CFG.blue.icon }} />
-            </div>
-            <div>
-              <p className="font-bold text-[15px]" style={{ color: C.text }}>E'lon yuborish</p>
-              <p className="text-xs" style={{ color: C.muted }}>Toplu xabar yuborish</p>
-            </div>
-          </div>
-          <div className="space-y-2.5">
-            <Select value={annTarget} onValueChange={setAnnTarget}>
-              <SelectTrigger className="h-9 text-sm rounded-[14px]"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all_staff">Barcha xodimlar</SelectItem>
-                <SelectItem value="all_teachers">Barcha o'qituvchilar</SelectItem>
-                <SelectItem value="class_teachers">Sinf rahbarlari</SelectItem>
-                <SelectItem value="all_parents">Barcha ota-onalar</SelectItem>
-                <SelectItem value="all_students">Barcha o'quvchilar</SelectItem>
-                <SelectItem value="vice_principal">O'rinbosarlar</SelectItem>
-                <SelectItem value="accountant">Moliya bo'limi</SelectItem>
-                <SelectItem value="librarian">Kutubxonachi</SelectItem>
-              </SelectContent>
-            </Select>
-            <input
-              className="w-full rounded-[14px] border px-4 py-2 text-sm outline-none transition-colors focus:ring-2"
-              style={{ borderColor: C.border }}
-              placeholder="E'lon sarlavhasi..."
-              value={annTitle}
-              onChange={e => setAnnTitle(e.target.value)}
-            />
-            <Textarea
-              placeholder="E'lon matni..."
-              value={annBody}
-              onChange={e => setAnnBody(e.target.value)}
-              className="resize-none text-sm rounded-[14px]"
-              rows={2}
-            />
-            <Button
-              className="w-full h-9"
-              onClick={handleBroadcast}
-              disabled={!annTitle.trim() || !annBody.trim() || broadcastMutation.isPending}
-            >
-              {broadcastMutation.isPending ? 'Yuborilmoqda...' : broadcastMutation.isSuccess ? 'Yuborildi' : "E'lon yuborish"}
-            </Button>
-          </div>
-        </PCard>
-      </div>
-
-      {/* Pending discipline */}
-      {pendingDisciplineList.length > 0 && (
-        <PCard>
-          <div className="flex items-center gap-2 mb-3">
-            <ShieldAlert className="h-5 w-5 text-red-500" />
-            <p className="font-bold text-[15px]" style={{ color: C.text }}>Hal qilinmagan intizom holatlari</p>
-          </div>
-          <div className="space-y-2 max-h-48 overflow-y-auto">
-            {pendingDisciplineList.slice(0, 5).map((d: any) => (
-              <div key={d.id} className="flex items-center gap-3 rounded-[14px] border p-3" style={{ borderColor: C.border }}>
-                <div className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium truncate" style={{ color: C.text }}>
-                    {d.student?.firstName} {d.student?.lastName}
-                  </p>
-                  <p className="text-xs truncate" style={{ color: C.muted }}>{d.description}</p>
-                </div>
-              </div>
-            ))}
             <button
-              onClick={() => router.push('/dashboard/discipline')}
-              className="w-full text-xs font-semibold py-2 rounded-[14px] transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30"
-              style={{ color: C.primary }}
+              onClick={() => {
+                setCompareMode((v) => !v);
+                if (compareMode) setCompareSelected([]);
+              }}
+              className={cn(
+                'flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold transition-colors',
+                compareMode
+                  ? 'bg-xedu-primary text-white'
+                  : 'text-xedu-slate-500 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800'
+              )}
             >
-              Barchasini ko'rish →
+              <GitCompare className="h-3 w-3" />
+              {compareMode ? 'Taqqoslashni yopish' : 'Filial taqqoslash'}
             </button>
           </div>
-        </PCard>
-      )}
 
-      {/* Academic calendar + quick links */}
-      <div className="grid gap-3 md:grid-cols-2">
-        <AcademicCalendarWidget canEdit={true} />
-        <PCard>
-          <p className="font-bold text-[15px] mb-3" style={{ color: C.text }}>Tezkor havolalar</p>
-          <QuickActions items={[
-            { label: 'Davomat hisoboti', href: '/dashboard/attendance', icon: ClipboardCheck, iconColor: C.primary },
-            { label: 'Baholar', href: '/dashboard/grades', icon: BarChart2, iconColor: '#2563EB' },
-            { label: 'Moliya xulosasi', href: '/dashboard/finance', icon: TrendingUp, iconColor: '#D97706' },
-            { label: 'Dars jadvali', href: '/dashboard/schedule', icon: Activity, iconColor: '#7C3AED' },
-            { label: 'Xodimlar', href: '/dashboard/staff', icon: Users, iconColor: C.muted },
-            { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart2, iconColor: '#4338CA' },
-          ]} />
-        </PCard>
-      </div>
+          <BranchHealthMap
+            branches={(branches as any[]) ?? []}
+            allUsers={allUsers}
+            pendingLeaves={pendingLeaveList}
+            pendingDiscipline={pendingDisciplineList}
+            isLoading={branchesLoading}
+            selectedBranchId={selectedBranch?.id}
+            compareMode={compareMode}
+            compareSelected={compareSelected}
+            onSelectBranch={handleSelectBranch}
+            onToggleCompare={handleToggleCompare}
+          />
 
-      {/* Right Contextual Panel */}
+          {compareSelected.length >= 2 && (
+            <div className="mt-3">
+              <BranchComparison
+                branches={(branches as any[]) ?? []}
+                selectedIds={compareSelected}
+                allUsers={allUsers}
+                pendingLeaves={pendingLeaveList}
+                pendingDiscipline={pendingDisciplineList}
+                onClose={() => { setCompareMode(false); setCompareSelected([]); }}
+                onRemove={(id) => setCompareSelected((prev) => prev.filter((x) => x !== id))}
+              />
+            </div>
+          )}
+        </div>
+
+        <FinancialPulse
+          financeData={financeData as any}
+          isLoading={!financeData && !attLoading}
+        />
+
+        <AcademicSnapshot
+          attendanceSummary={attendanceSummary as any}
+          classCount={classList.length}
+          activeStudents={studentCount}
+          upcomingExams={upcomingExamsCount}
+          isLoading={attLoading}
+        />
+
+        <StaffOperations
+          teacherCount={teacherCount}
+          staffCount={staffCount}
+          pendingLeaves={pendingLeaveList.length}
+          pendingDiscipline={pendingDisciplineList.length}
+          isLoading={!usersData}
+        />
+
+        {/* Supplementary blocks */}
+        <div className="grid gap-3 md:grid-cols-2">
+          <WorkspaceSection
+            title="Ta'til so'rovlari"
+            action={
+              <Badge variant={pendingLeaveList.length > 0 ? 'destructive' : 'secondary'}>
+                {pendingLeaveList.length} ta
+              </Badge>
+            }
+          >
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {pendingLeaveList.length === 0 ? (
+                <div className="flex flex-col items-center py-7 gap-2">
+                  <CheckCircle2 className="h-6 w-6 text-xedu-primary" />
+                  <p className="text-sm font-medium" style={{ color: C.muted }}>Kutilayotgan so'rovlar yo'q</p>
+                </div>
+              ) : (
+                pendingLeaveList.slice(0, 6).map((req: any) => (
+                  <div key={req.id} className="flex items-center justify-between rounded-[14px] border p-3" style={{ borderColor: C.border }}>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium truncate" style={{ color: C.text }}>
+                        {req.requester?.firstName} {req.requester?.lastName}
+                      </p>
+                      <p className="text-xs truncate" style={{ color: C.muted }}>
+                        {new Date(req.startDate).toLocaleDateString('uz-UZ')} – {new Date(req.endDate).toLocaleDateString('uz-UZ')}
+                      </p>
+                    </div>
+                    <div className="flex gap-1.5 shrink-0 ml-3">
+                      <button
+                        className="h-7 px-3 rounded-full text-xs font-semibold"
+                        style={{ background: C.primaryLight, color: C.primary }}
+                        onClick={() => reviewMutation.mutate({ id: req.id, action: 'approve' })}
+                        disabled={reviewMutation.isPending}
+                      >
+                        Tasdiqlash
+                      </button>
+                      <button
+                        className="h-7 px-3 rounded-full text-xs font-semibold"
+                        style={{ background: '#FEE2E2', color: '#DC2626' }}
+                        onClick={() => reviewMutation.mutate({ id: req.id, action: 'reject' })}
+                        disabled={reviewMutation.isPending}
+                      >
+                        Rad
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </WorkspaceSection>
+
+          <WorkspaceSection
+            title="E'lon yuborish"
+            icon={<Bell className="h-4 w-4" />}
+          >
+            <div className="space-y-2.5">
+              <Select value={annTarget} onValueChange={setAnnTarget}>
+                <SelectTrigger className="h-9 text-sm rounded-[14px]"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all_staff">Barcha xodimlar</SelectItem>
+                  <SelectItem value="all_teachers">Barcha o'qituvchilar</SelectItem>
+                  <SelectItem value="class_teachers">Sinf rahbarlari</SelectItem>
+                  <SelectItem value="all_parents">Barcha ota-onalar</SelectItem>
+                  <SelectItem value="all_students">Barcha o'quvchilar</SelectItem>
+                  <SelectItem value="vice_principal">O'rinbosarlar</SelectItem>
+                  <SelectItem value="accountant">Moliya bo'limi</SelectItem>
+                  <SelectItem value="librarian">Kutubxonachi</SelectItem>
+                </SelectContent>
+              </Select>
+              <input
+                className="w-full rounded-[14px] border px-4 py-2 text-sm outline-none transition-colors focus:ring-2"
+                style={{ borderColor: C.border }}
+                placeholder="E'lon sarlavhasi..."
+                value={annTitle}
+                onChange={e => setAnnTitle(e.target.value)}
+              />
+              <Textarea
+                placeholder="E'lon matni..."
+                value={annBody}
+                onChange={e => setAnnBody(e.target.value)}
+                className="resize-none text-sm rounded-[14px]"
+                rows={2}
+              />
+              <Button
+                className="w-full h-9"
+                onClick={handleBroadcast}
+                disabled={!annTitle.trim() || !annBody.trim() || broadcastMutation.isPending}
+              >
+                {broadcastMutation.isPending ? 'Yuborilmoqda...' : broadcastMutation.isSuccess ? 'Yuborildi' : "E'lon yuborish"}
+              </Button>
+            </div>
+          </WorkspaceSection>
+        </div>
+
+        {pendingDisciplineList.length > 0 && (
+          <WorkspaceSection
+            title="Hal qilinmagan intizom holatlari"
+            icon={<ShieldAlert className="h-4 w-4 text-red-500" />}
+          >
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {pendingDisciplineList.slice(0, 5).map((d: any) => (
+                <div key={d.id} className="flex items-center gap-3 rounded-[14px] border p-3" style={{ borderColor: C.border }}>
+                  <div className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium truncate" style={{ color: C.text }}>
+                      {d.student?.firstName} {d.student?.lastName}
+                    </p>
+                    <p className="text-xs truncate" style={{ color: C.muted }}>{d.description}</p>
+                  </div>
+                </div>
+              ))}
+              <button
+                onClick={() => router.push('/dashboard/discipline')}
+                className="w-full text-xs font-semibold py-2 rounded-[14px] transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30"
+                style={{ color: C.primary }}
+              >
+                Barchasini ko'rish →
+              </button>
+            </div>
+          </WorkspaceSection>
+        )}
+
+        <div className="grid gap-3 md:grid-cols-2">
+          <AcademicCalendarWidget canEdit={true} />
+          <PCard>
+            <p className="font-bold text-[15px] mb-3" style={{ color: C.text }}>Tezkor havolalar</p>
+            <QuickActions items={[
+              { label: 'Davomat hisoboti', href: '/dashboard/attendance', icon: ClipboardCheck, iconColor: C.primary },
+              { label: 'Baholar', href: '/dashboard/grades', icon: BarChart2, iconColor: '#2563EB' },
+              { label: 'Moliya xulosasi', href: '/dashboard/finance', icon: TrendingUp, iconColor: '#D97706' },
+              { label: 'Dars jadvali', href: '/dashboard/schedule', icon: Activity, iconColor: '#7C3AED' },
+              { label: 'Xodimlar', href: '/dashboard/staff', icon: Users, iconColor: C.muted },
+              { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart2, iconColor: '#4338CA' },
+            ]} />
+          </PCard>
+        </div>
+      </WorkspaceMain>
+
+      {/* ── Right Sidebar ───────────────────────────────────────────────────── */}
+      <WorkspaceSidebar width="normal">
+        <IntelligenceFeed
+          aiSummary={aiSummary}
+          pendingLeaves={pendingLeaveList}
+          pendingDiscipline={pendingDisciplineList}
+          attendanceSummary={attendanceSummary as any}
+          branches={(branches as any[]) ?? []}
+          upcomingExams={upcomingExamsCount}
+          isLoading={!aiSummary && attLoading}
+        />
+
+        <SmartInsights
+          data={{
+            branches: (branches as any[]) ?? [],
+            attendanceSummary,
+            pendingLeaves: pendingLeaveList,
+            pendingDiscipline: pendingDisciplineList,
+            aiSummary,
+            financeData: financeData as any,
+            teacherCount,
+            studentCount,
+          }}
+          maxInsights={4}
+        />
+
+        <ActivityStream
+          pendingLeaves={pendingLeaveList}
+          pendingDiscipline={pendingDisciplineList}
+          attendanceSummary={attendanceSummary as any}
+          branches={(branches as any[]) ?? []}
+          aiSummary={aiSummary}
+          financeData={financeData as any}
+          upcomingExams={upcomingExamsData as any[]}
+          maxItems={10}
+        />
+
+        <div className="grid grid-cols-3 gap-2">
+          <KPICard kpiData={kpiData} />
+          <AiRiskCard aiSummary={aiSummary} />
+          <EduCoinCard coinStats={coinStats} />
+        </div>
+      </WorkspaceSidebar>
+
+      {/* ── Right Contextual Panel ──────────────────────────────────────────── */}
       <RightContextualPanel
         open={panelOpen}
         onClose={() => setPanelOpen(false)}
@@ -517,7 +503,7 @@ export function DirectorDashboard() {
         attendanceSummary={attendanceSummary as any}
         allUsers={allUsers}
       />
-    </div>
+    </WorkspaceShell>
   );
 }
 

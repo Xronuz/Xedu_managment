@@ -13,6 +13,7 @@ import { CommandPalette } from '@/components/command-palette';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { HeaderActionsProvider } from '@/lib/header-actions-context';
 import { useRoleGuard } from '@/components/auth/role-guard';
+import { WorkspaceProvider } from '@/components/workspace-system';
 import { authApi } from '@/lib/api/auth';
 import { PageTransition } from '@/components/layout/page-transition';
 
@@ -114,31 +115,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <HeaderActionsProvider>
-      {/* White sidebar + header, gray content with rounded-tl-2xl inner corner */}
-      <div className="flex h-screen bg-xedu-bg-elevated dark:bg-xedu-slate-900 overflow-hidden">
-        <RealtimeProvider />
+      <WorkspaceProvider>
+        {/* White sidebar + header, gray content with rounded-tl-2xl inner corner */}
+        <div className="flex h-screen bg-xedu-bg-elevated dark:bg-xedu-slate-900 overflow-hidden">
+          <RealtimeProvider />
 
-        <div className="hidden md:flex shrink-0">
-          <Sidebar />
+          <div className="hidden md:flex shrink-0">
+            <Sidebar />
+          </div>
+
+          <div className="flex flex-1 min-w-0 flex-col overflow-hidden">
+            <Header />
+            <main
+              className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg dark:bg-xedu-slate-950 rounded-tl-2xl p-6"
+              onClick={() => { if (!sidebarCollapsed) setSidebarCollapsed(true); }}
+            >
+              <BreadcrumbNav />
+              <PageErrorBoundary>
+                <PageTransition>{children}</PageTransition>
+              </PageErrorBoundary>
+            </main>
+          </div>
+
+          <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
+          <ConfirmDialog />
+          <MobileFab />
         </div>
-
-        <div className="flex flex-1 min-w-0 flex-col overflow-hidden">
-          <Header />
-          <main
-            className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg dark:bg-xedu-slate-950 rounded-tl-2xl p-6"
-            onClick={() => { if (!sidebarCollapsed) setSidebarCollapsed(true); }}
-          >
-            <BreadcrumbNav />
-            <PageErrorBoundary>
-              <PageTransition>{children}</PageTransition>
-            </PageErrorBoundary>
-          </main>
-        </div>
-
-        <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
-        <ConfirmDialog />
-        <MobileFab />
-      </div>
+      </WorkspaceProvider>
     </HeaderActionsProvider>
   );
 }

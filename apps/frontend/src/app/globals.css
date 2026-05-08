@@ -329,4 +329,12 @@
   .glow-emerald-subtle {
     box-shadow: 0 0 40px rgba(15,123,83,0.04), 0 0 80px rgba(15,123,83,0.02);
   }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
 }

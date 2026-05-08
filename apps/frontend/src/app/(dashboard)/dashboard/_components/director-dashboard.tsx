@@ -186,8 +186,8 @@ export function DirectorDashboard() {
       <div className="sticky top-0 z-20 -mx-2 px-2 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm">
         <SituationBar
           data={situationData}
-          onAlertsClick={() => router.push('/dashboard/discipline')}
-          onApprovalsClick={() => router.push('/dashboard/leave-requests')}
+          onAlertsClick={() => router.push('/dashboard/alerts')}
+          onApprovalsClick={() => router.push('/dashboard/approvals')}
         />
       </div>
 

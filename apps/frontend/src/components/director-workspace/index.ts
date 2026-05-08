@@ -6,3 +6,6 @@ export { StaffOperations } from './staff-operations';
 export { IntelligenceFeed } from './intelligence-feed';
 export { RightContextualPanel, type BranchDetail } from './right-panel';
 export { QuickActionSurface } from './quick-action-surface';
+export { SplitView, SplitViewListHeader, SplitViewListBody, SplitViewDetailHeader, SplitViewDetailBody } from './split-view';
+export { FloatingBulkToolbar } from './floating-bulk-toolbar';
+export { AuditDetailPane } from './audit-detail-pane';

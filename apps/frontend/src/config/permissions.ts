@@ -54,6 +54,8 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   '/dashboard/crm':            ['director', 'vice_principal', 'branch_admin'],
   '/dashboard/meetings':       ['director', 'vice_principal', 'class_teacher'],
   '/dashboard/leave-requests': ['director', 'vice_principal', 'branch_admin'],
+  '/dashboard/approvals':      ['director', 'vice_principal'],
+  '/dashboard/alerts':         ['director', 'vice_principal', 'branch_admin'],
 
   // ═══════════════════════════════════════════════════════════════════════════════
   // DISCIPLINE

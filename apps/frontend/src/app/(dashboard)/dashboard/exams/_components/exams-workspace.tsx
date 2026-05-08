@@ -38,6 +38,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import {
   WorkspaceShell, WorkspaceHeader, WorkspaceToolbar, WorkspaceMain, WorkspaceSidebar, WorkspaceSection,
+  StatPill, QuickLink, InfoItem
 } from '@/components/workspace-system';
 import { OpTable } from '@/components/workspace-system/op-table';
 import {
@@ -207,7 +208,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium line-clamp-2">{q.text}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">{QTYPE_LABELS[q.type]}</Badge>
+                          <Badge variant="outline" className="text-2xs px-1.5 py-0">{QTYPE_LABELS[q.type]}</Badge>
                           <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{q.points} ball</span>
                         </div>
                       </div>
@@ -436,46 +437,8 @@ function ExamPanel({ exam, open, onClose, canManage, onPublish }: {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function StatPill({ label, value, tone = 'calm' }: { label: string; value: number; tone?: 'calm' | 'success' | 'urgent' | 'attention' }) {
-  const color = {
-    calm: 'text-xedu-slate-800 dark:text-xedu-slate-200',
-    success: 'text-xedu-primary',
-    urgent: 'text-red-600',
-    attention: 'text-amber-600',
-  }[tone];
 
-  return (
-    <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-      <p className={cn('text-sm font-bold tabular-nums', color)}>{value}</p>
-    </div>
-  );
-}
 
-function QuickLink({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium text-xedu-slate-600 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
-    >
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
-      {label}
-      <ArrowRight className="h-3 w-3 ml-auto text-xedu-slate-300" />
-    </Link>
-  );
-}
-
-function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-2 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2.5 py-2">
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400 shrink-0 mt-0.5" />
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-        <p className="text-xs font-medium text-xedu-slate-700 dark:text-xedu-slate-300 truncate">{value}</p>
-      </div>
-    </div>
-  );
-}
 
 // ── Main Workspace ────────────────────────────────────────────────────────────
 
@@ -751,13 +714,13 @@ export function ExamsWorkspace() {
         <div className="min-w-0">
           <p className="font-semibold text-xedu-slate-900 dark:text-xedu-slate-100 text-xs truncate">{e.title}</p>
           <div className="flex items-center gap-1.5 mt-0.5">
-            <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">
+            <Badge variant="outline" className="text-2xs px-1 py-0 h-4">
               {FREQUENCY_LABELS[e.frequency] ?? e.frequency}
             </Badge>
             {e.isPublished ? (
-              <span className="text-[9px] text-xedu-primary font-medium">E&apos;lon qilingan</span>
+              <span className="text-2xs text-xedu-primary font-medium">E&apos;lon qilingan</span>
             ) : (
-              <span className="text-[9px] text-amber-500 font-medium">Qoralama</span>
+              <span className="text-2xs text-amber-500 font-medium">Qoralama</span>
             )}
           </div>
         </div>
@@ -768,7 +731,7 @@ export function ExamsWorkspace() {
       header: 'Sinf',
       width: '90px',
       cell: (e: Exam) => (
-        <span className="text-[11px] text-xedu-slate-600">{e.class?.name ?? '—'}</span>
+        <span className="text-xs text-xedu-slate-600">{e.class?.name ?? '—'}</span>
       ),
     },
     {
@@ -776,7 +739,7 @@ export function ExamsWorkspace() {
       header: 'Fan',
       width: '100px',
       cell: (e: Exam) => (
-        <span className="text-[11px] text-xedu-slate-600">{e.subject?.name ?? '—'}</span>
+        <span className="text-xs text-xedu-slate-600">{e.subject?.name ?? '—'}</span>
       ),
     },
     {
@@ -789,7 +752,7 @@ export function ExamsWorkspace() {
         return (
           <div className="flex items-center gap-1">
             <Calendar className={cn('h-3 w-3 shrink-0', isUpcoming ? 'text-xedu-primary' : 'text-xedu-slate-400')} />
-            <span className={cn('text-[11px]', isUpcoming ? 'text-xedu-slate-700 font-medium' : 'text-xedu-slate-400')}>
+            <span className={cn('text-xs', isUpcoming ? 'text-xedu-slate-700 font-medium' : 'text-xedu-slate-400')}>
               {formatDate(e.scheduledAt)}
             </span>
           </div>
@@ -802,7 +765,7 @@ export function ExamsWorkspace() {
       width: '70px',
       align: 'center' as const,
       cell: (e: Exam) => (
-        <span className="text-[11px] font-bold text-xedu-slate-700">{e.maxScore}</span>
+        <span className="text-xs font-bold text-xedu-slate-700">{e.maxScore}</span>
       ),
     },
     {
@@ -811,7 +774,7 @@ export function ExamsWorkspace() {
       width: '60px',
       align: 'center' as const,
       cell: (e: Exam) => (
-        <span className="text-[11px] text-xedu-slate-500">{e.duration ?? '—'}</span>
+        <span className="text-xs text-xedu-slate-500">{e.duration ?? '—'}</span>
       ),
     },
     {
@@ -822,17 +785,17 @@ export function ExamsWorkspace() {
         const isPast = new Date(e.scheduledAt) < now;
         if (isPast) {
           return (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-xedu-slate-400">
+            <span className="inline-flex items-center gap-1 text-2xs font-bold text-xedu-slate-400">
               <CheckCircle className="h-3 w-3" /> Tugagan
             </span>
           );
         }
         return e.isPublished ? (
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-xedu-primary">
+          <span className="inline-flex items-center gap-1 text-2xs font-bold text-xedu-primary">
             <CheckCircle className="h-3 w-3" /> Faol
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-500">
+          <span className="inline-flex items-center gap-1 text-2xs font-bold text-amber-500">
             <Clock className="h-3 w-3" /> Kutilmoqda
           </span>
         );
@@ -903,7 +866,7 @@ export function ExamsWorkspace() {
             <Filter className="h-3.5 w-3.5" />
             Filterlar
             {activeFilters.length > 0 && (
-              <span className="ml-0.5 text-[10px] font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
+              <span className="ml-0.5 text-2xs font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
                 {activeFilters.length}
               </span>
             )}
@@ -912,7 +875,7 @@ export function ExamsWorkspace() {
           {activeFilters.map((f) => (
             <span
               key={f.key}
-              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-[11px] font-semibold text-xedu-primary"
+              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
               <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
@@ -924,7 +887,7 @@ export function ExamsWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterClass(''); setFilterSubject(''); setFilterFrequency(''); setFilterTimeRange(''); setFilterPublished(''); }}
-              className="text-[11px] font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
             >
               Tozalash
             </button>
@@ -1091,7 +1054,7 @@ export function ExamsWorkspace() {
                   <Clock className="h-3.5 w-3.5 text-xedu-primary shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-xedu-slate-700 truncate">{e.title}</p>
-                    <p className="text-[10px] text-xedu-slate-400">{e.class?.name} · {formatDate(e.scheduledAt)}</p>
+                    <p className="text-2xs text-xedu-slate-400">{e.class?.name} · {formatDate(e.scheduledAt)}</p>
                   </div>
                 </button>
               ))}
@@ -1105,7 +1068,7 @@ export function ExamsWorkspace() {
               {frequencyBreakdown.map((f) => (
                 <div key={f.freq} className="flex items-center justify-between rounded-md px-2 py-1.5">
                   <span className="text-xs font-medium text-xedu-slate-600">{f.label}</span>
-                  <span className="text-[11px] font-bold tabular-nums text-xedu-slate-700">{f.count}</span>
+                  <span className="text-xs font-bold tabular-nums text-xedu-slate-700">{f.count}</span>
                 </div>
               ))}
             </div>
@@ -1118,7 +1081,7 @@ export function ExamsWorkspace() {
               {subjectBreakdown.map((s) => (
                 <div key={s.name} className="flex items-center justify-between rounded-md px-2 py-1.5">
                   <span className="text-xs font-medium text-xedu-slate-600 truncate">{s.name}</span>
-                  <span className="text-[11px] font-bold tabular-nums text-xedu-slate-700">{s.count}</span>
+                  <span className="text-xs font-bold tabular-nums text-xedu-slate-700">{s.count}</span>
                 </div>
               ))}
             </div>
@@ -1137,7 +1100,7 @@ export function ExamsWorkspace() {
                   <FileQuestion className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-xedu-slate-700 truncate">{e.title}</p>
-                    <p className="text-[10px] text-xedu-slate-400">{e.class?.name} · {formatDate(e.scheduledAt)}</p>
+                    <p className="text-2xs text-xedu-slate-400">{e.class?.name} · {formatDate(e.scheduledAt)}</p>
                   </div>
                 </button>
               ))}

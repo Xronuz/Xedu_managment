@@ -32,6 +32,7 @@ import {
 
 import {
   WorkspaceShell, WorkspaceHeader, WorkspaceToolbar, WorkspaceMain, WorkspaceSidebar, WorkspaceSection,
+  StatPill, QuickLink, InfoItem
 } from '@/components/workspace-system';
 import { OpTable } from '@/components/workspace-system/op-table';
 import {
@@ -139,7 +140,7 @@ function LeaveRequestPanel({ request, open, onClose, canReview, onApprove, onRej
           </div>
 
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400 mb-1">Sabab</p>
+            <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1">Sabab</p>
             <p className="text-xs text-xedu-slate-700 bg-xedu-slate-50 dark:bg-xedu-slate-800 rounded-md px-2.5 py-2">
               {request.reason}
             </p>
@@ -184,22 +185,22 @@ function LeaveRequestPanel({ request, open, onClose, canReview, onApprove, onRej
                 const aCfg = STATUS_CONFIG[approval.status] ?? STATUS_CONFIG.pending;
                 return (
                   <div key={approval.id} className="flex items-start gap-3 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-3 py-2.5">
-                    <div className="h-8 w-8 rounded-full bg-xedu-slate-100 flex items-center justify-center text-[10px] font-bold text-xedu-slate-500 shrink-0">
+                    <div className="h-8 w-8 rounded-full bg-xedu-slate-100 flex items-center justify-center text-2xs font-bold text-xedu-slate-500 shrink-0">
                       {getInitials(approval.approver?.firstName ?? '', approval.approver?.lastName ?? '')}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="text-xs font-medium">{approval.approver?.firstName} {approval.approver?.lastName}</span>
-                        <span className={cn('inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border', aCfg.badge)}>
+                        <span className={cn('inline-flex items-center gap-1 text-2xs font-bold px-1.5 py-0.5 rounded border', aCfg.badge)}>
                           <span className={cn('h-1.5 w-1.5 rounded-full', aCfg.dot)} />
                           {aCfg.label}
                         </span>
                       </div>
                       {approval.comment && (
-                        <p className="text-[11px] text-xedu-slate-500 mt-0.5 italic">{approval.comment}</p>
+                        <p className="text-xs text-xedu-slate-500 mt-0.5 italic">{approval.comment}</p>
                       )}
                       {approval.decidedAt && (
-                        <p className="text-[10px] text-xedu-slate-400 mt-0.5">{formatDate(approval.decidedAt)}</p>
+                        <p className="text-2xs text-xedu-slate-400 mt-0.5">{formatDate(approval.decidedAt)}</p>
                       )}
                     </div>
                   </div>
@@ -232,46 +233,8 @@ function LeaveRequestPanel({ request, open, onClose, canReview, onApprove, onRej
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function StatPill({ label, value, tone = 'calm' }: { label: string; value: string | number; tone?: 'calm' | 'success' | 'urgent' | 'attention' }) {
-  const color = {
-    calm: 'text-xedu-slate-800 dark:text-xedu-slate-200',
-    success: 'text-xedu-primary',
-    urgent: 'text-red-600',
-    attention: 'text-amber-600',
-  }[tone];
 
-  return (
-    <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-      <p className={cn('text-sm font-bold tabular-nums', color)}>{value}</p>
-    </div>
-  );
-}
 
-function QuickLink({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium text-xedu-slate-600 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
-    >
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
-      {label}
-      <ArrowRight className="h-3 w-3 ml-auto text-xedu-slate-300" />
-    </Link>
-  );
-}
-
-function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-2 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2.5 py-2">
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400 shrink-0 mt-0.5" />
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-        <p className="text-xs font-medium text-xedu-slate-700 dark:text-xedu-slate-300 truncate">{value}</p>
-      </div>
-    </div>
-  );
-}
 
 // ── Main Workspace ────────────────────────────────────────────────────────────
 
@@ -486,14 +449,14 @@ export function LeaveRequestsWorkspace() {
       header: "So'rovchi",
       cell: (r: LeaveRequest) => (
         <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center text-[9px] font-bold text-xedu-slate-500">
+          <div className="h-6 w-6 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center text-2xs font-bold text-xedu-slate-500">
             {getInitials(r.requester?.firstName ?? '', r.requester?.lastName ?? '')}
           </div>
           <div className="min-w-0">
             <p className="font-semibold text-xedu-slate-900 dark:text-xedu-slate-100 text-xs truncate">
               {r.requester ? `${r.requester.firstName} ${r.requester.lastName}` : "Noma'lum"}
             </p>
-            <p className="text-[10px] text-xedu-slate-400">{getRoleLabel(r.requester?.role ?? '')}</p>
+            <p className="text-2xs text-xedu-slate-400">{getRoleLabel(r.requester?.role ?? '')}</p>
           </div>
         </div>
       ),
@@ -503,7 +466,7 @@ export function LeaveRequestsWorkspace() {
       header: 'Tur',
       width: '80px',
       cell: (r: LeaveRequest) => (
-        <span className="text-[11px] font-medium text-xedu-slate-600">{LEAVE_TYPE_LABELS[r.type ?? ''] ?? r.type ?? '—'}</span>
+        <span className="text-xs font-medium text-xedu-slate-600">{LEAVE_TYPE_LABELS[r.type ?? ''] ?? r.type ?? '—'}</span>
       ),
     },
     {
@@ -513,7 +476,7 @@ export function LeaveRequestsWorkspace() {
       cell: (r: LeaveRequest) => (
         <div className="flex items-center gap-1">
           <Calendar className="h-3 w-3 text-xedu-slate-400 shrink-0" />
-          <span className="text-[11px] text-xedu-slate-600">
+          <span className="text-xs text-xedu-slate-600">
             {formatDate(r.startDate)} – {formatDate(r.endDate)}
           </span>
         </div>
@@ -526,7 +489,7 @@ export function LeaveRequestsWorkspace() {
       align: 'center' as const,
       cell: (r: LeaveRequest) => {
         const days = Math.ceil((new Date(r.endDate).getTime() - new Date(r.startDate).getTime()) / (1000 * 60 * 60 * 24)) + 1;
-        return <span className="text-[11px] font-bold text-xedu-slate-700">{days}</span>;
+        return <span className="text-xs font-bold text-xedu-slate-700">{days}</span>;
       },
     },
     {
@@ -536,7 +499,7 @@ export function LeaveRequestsWorkspace() {
       cell: (r: LeaveRequest) => {
         const cfg = STATUS_CONFIG[r.status] ?? STATUS_CONFIG.pending;
         return (
-          <span className={cn('inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border', cfg.badge)}>
+          <span className={cn('inline-flex items-center gap-1 text-2xs font-bold px-1.5 py-0.5 rounded border', cfg.badge)}>
             <span className={cn('h-1.5 w-1.5 rounded-full', cfg.dot)} />
             {cfg.label}
           </span>
@@ -548,7 +511,7 @@ export function LeaveRequestsWorkspace() {
       header: 'Yuborildi',
       width: '80px',
       cell: (r: LeaveRequest) => (
-        <span className="text-[11px] text-xedu-slate-400">{formatDate(r.createdAt)}</span>
+        <span className="text-xs text-xedu-slate-400">{formatDate(r.createdAt)}</span>
       ),
     },
   ], []);
@@ -604,7 +567,7 @@ export function LeaveRequestsWorkspace() {
             <Filter className="h-3.5 w-3.5" />
             Filterlar
             {activeFilters.length > 0 && (
-              <span className="ml-0.5 text-[10px] font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
+              <span className="ml-0.5 text-2xs font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
                 {activeFilters.length}
               </span>
             )}
@@ -613,7 +576,7 @@ export function LeaveRequestsWorkspace() {
           {activeFilters.map((f) => (
             <span
               key={f.key}
-              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-[11px] font-semibold text-xedu-primary"
+              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
               <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
@@ -625,7 +588,7 @@ export function LeaveRequestsWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterStatus(''); setFilterType(''); }}
-              className="text-[11px] font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
             >
               Tozalash
             </button>
@@ -758,7 +721,7 @@ export function LeaveRequestsWorkspace() {
                     <p className="text-xs font-medium text-xedu-slate-700 truncate">
                       {r.requester?.firstName} {r.requester?.lastName}
                     </p>
-                    <p className="text-[10px] text-xedu-slate-400">
+                    <p className="text-2xs text-xedu-slate-400">
                       {formatDate(r.startDate)} – {formatDate(r.endDate)}
                     </p>
                   </div>
@@ -782,7 +745,7 @@ export function LeaveRequestsWorkspace() {
                     <p className="text-xs font-medium text-xedu-slate-700 truncate">
                       {o.req.requester?.firstName} {o.req.requester?.lastName}
                     </p>
-                    <p className="text-[10px] text-xedu-slate-400">
+                    <p className="text-2xs text-xedu-slate-400">
                       {o.overlapsWith.length} ta ustma-ust tushish
                     </p>
                   </div>
@@ -798,7 +761,7 @@ export function LeaveRequestsWorkspace() {
               {typeBreakdown.map((t) => (
                 <div key={t.type} className="flex items-center justify-between rounded-md px-2 py-1.5">
                   <span className="text-xs font-medium text-xedu-slate-600">{t.label}</span>
-                  <span className="text-[11px] font-bold tabular-nums text-xedu-slate-700">{t.count}</span>
+                  <span className="text-xs font-bold tabular-nums text-xedu-slate-700">{t.count}</span>
                 </div>
               ))}
             </div>

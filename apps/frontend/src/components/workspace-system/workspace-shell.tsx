@@ -51,8 +51,8 @@ export function WorkspaceShell({
 
   const layoutClass = {
     single: 'flex flex-col',
-    'two-column': 'flex flex-col lg:flex-row gap-4',
-    'three-column': 'flex flex-col xl:flex-row gap-4',
+    'two-column': 'flex flex-col lg:flex-row lg:flex-wrap gap-4',
+    'three-column': 'flex flex-col xl:flex-row xl:flex-wrap gap-4',
     fullscreen: 'flex flex-col h-[calc(100vh-var(--header-height,60px))]',
   }[layout];
 
@@ -90,11 +90,11 @@ export function WorkspaceHeader({
             <span key={idx} className="flex items-center gap-1">
               {idx > 0 && <span className="text-xedu-slate-300 text-xs">/</span>}
               {crumb.href ? (
-                <a href={crumb.href} className="text-[11px] font-medium text-xedu-slate-500 hover:text-xedu-primary transition-colors">
+                <a href={crumb.href} className="text-xs font-medium text-xedu-slate-500 hover:text-xedu-primary transition-colors">
                   {crumb.label}
                 </a>
               ) : (
-                <span className="text-[11px] font-medium text-xedu-slate-400">{crumb.label}</span>
+                <span className="text-xs font-medium text-xedu-slate-400">{crumb.label}</span>
               )}
             </span>
           ))}
@@ -104,7 +104,7 @@ export function WorkspaceHeader({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             {icon && <span className="shrink-0">{icon}</span>}
-            <h1 className="text-[22px] font-black tracking-tight leading-none text-xedu-slate-900 dark:text-xedu-slate-100">
+            <h1 className="text-3xl font-black tracking-tight leading-none text-xedu-slate-900 dark:text-xedu-slate-100">
               {title}
             </h1>
           </div>

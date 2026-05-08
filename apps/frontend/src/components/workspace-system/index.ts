@@ -26,3 +26,12 @@ export type { CommandItem } from './command-palette';
 export { EntityPanel } from './entity-panel';
 export type { EntityType, EntityPanelProps } from './entity-panel';
 export { useMobileWorkspace } from './use-mobile-workspace';
+export {
+  StatPill,
+  QuickLink,
+  InfoItem,
+  EmptyState,
+  LoadingSurface,
+  SectionLabel,
+} from './workspace-helpers';
+export type { StatTone } from './workspace-helpers';

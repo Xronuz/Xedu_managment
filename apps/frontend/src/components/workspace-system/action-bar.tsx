@@ -47,6 +47,7 @@ export function PrimaryAction({
       type={type}
       onClick={onClick}
       disabled={disabled || loading}
+      aria-busy={loading}
       className={cn(
         'inline-flex items-center justify-center gap-1.5',
         'rounded-lg px-3.5 py-2',
@@ -83,6 +84,7 @@ export function SecondaryAction({
 }: SecondaryActionProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       className={cn(
@@ -122,6 +124,7 @@ export function TertiaryAction({
 }: TertiaryActionProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       className={cn(
@@ -161,6 +164,7 @@ export function DestructiveAction({
 }: DestructiveActionProps) {
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       className={cn(
@@ -208,9 +212,11 @@ export function IconAction({
 
   return (
     <button
+      type="button"
       onClick={onClick}
       disabled={disabled}
       title={title}
+      aria-label={title}
       className={cn(
         'inline-flex items-center justify-center',
         'h-7 w-7 rounded-md',

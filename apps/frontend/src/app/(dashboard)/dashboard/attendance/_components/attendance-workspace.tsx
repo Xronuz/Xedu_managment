@@ -29,6 +29,7 @@ import {
   WorkspaceMain,
   WorkspaceSidebar,
   WorkspaceSection,
+  StatPill, QuickLink, InfoItem
 } from '@/components/workspace-system';
 import {
   PrimaryAction,
@@ -381,7 +382,7 @@ export function AttendanceWorkspace() {
                   key={cls.id}
                   onClick={() => handleClassSelect(cls.id)}
                   className={cn(
-                    'whitespace-nowrap rounded-full px-3 py-1 text-[11px] font-bold transition-all',
+                    'whitespace-nowrap rounded-full px-3 py-1 text-xs font-bold transition-all',
                     active
                       ? 'bg-xedu-primary text-white shadow-sm'
                       : 'bg-white dark:bg-xedu-slate-800 border border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-600 hover:bg-xedu-slate-50'
@@ -395,7 +396,7 @@ export function AttendanceWorkspace() {
 
           {/* Date picker */}
           <div className="flex items-center gap-2">
-            <Label className="text-[10px] text-xedu-slate-400 shrink-0">Sana:</Label>
+            <Label className="text-2xs text-xedu-slate-400 shrink-0">Sana:</Label>
             <input
               type="date"
               value={selectedDate}
@@ -424,7 +425,7 @@ export function AttendanceWorkspace() {
                   <p className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">
                     {students.length} ta o'quvchi
                   </p>
-                  <p className="text-[11px] text-xedu-slate-400">
+                  <p className="text-xs text-xedu-slate-400">
                     {selectedDate === today ? 'Bugun' : selectedDate}
                     {unmarkedCount > 0 && (
                       <span className="ml-2 text-amber-600 font-semibold">{unmarkedCount} ta belgilanmagan</span>
@@ -484,17 +485,17 @@ export function AttendanceWorkspace() {
                           {isSelected && <CheckCheck className="h-3 w-3 text-white" />}
                         </button>
 
-                        <span className="w-5 text-[10px] font-mono text-xedu-slate-400 text-right shrink-0">{idx + 1}</span>
+                        <span className="w-5 text-2xs font-mono text-xedu-slate-400 text-right shrink-0">{idx + 1}</span>
                         <div className={cn('h-2 w-2 rounded-full shrink-0', cfg.dot)} />
                         <div className="min-w-0">
                           <span className="text-xs font-bold text-xedu-slate-900 dark:text-xedu-slate-100 truncate block">
                             {s.firstName} {s.lastName}
                           </span>
                           {current !== 'present' && (
-                            <span className={cn('text-[10px] font-bold', cfg.color)}>{cfg.label}</span>
+                            <span className={cn('text-2xs font-bold', cfg.color)}>{cfg.label}</span>
                           )}
                           {hasReport && !attendanceMap[s.id] && (
-                            <span className="text-[10px] text-xedu-slate-400 ml-1">· Avval belgilangan</span>
+                            <span className="text-2xs text-xedu-slate-400 ml-1">· Avval belgilangan</span>
                           )}
                         </div>
                       </div>
@@ -553,8 +554,8 @@ export function AttendanceWorkspace() {
                       <div key={r.id} className="flex items-center justify-between text-xs py-1 border-b last:border-0 border-xedu-slate-50 dark:border-xedu-slate-800">
                         <span className="font-medium text-xedu-slate-700">{r.student?.firstName} {r.student?.lastName}</span>
                         <div className="flex items-center gap-2">
-                          {r.note && <span className="text-[10px] italic text-xedu-slate-400">&ldquo;{r.note}&rdquo;</span>}
-                          <span className={cn('flex items-center gap-1 text-[10px] font-bold', cfg.color)}>
+                          {r.note && <span className="text-2xs italic text-xedu-slate-400">&ldquo;{r.note}&rdquo;</span>}
+                          <span className={cn('flex items-center gap-1 text-2xs font-bold', cfg.color)}>
                             <cfg.icon className="h-3 w-3" />
                             {cfg.label}
                           </span>
@@ -620,7 +621,7 @@ export function AttendanceWorkspace() {
                     })}
                   </tbody>
                 </table>
-                <div className="flex items-center gap-2 mt-3 pt-2 border-t border-xedu-slate-100 text-[10px] text-xedu-slate-400 flex-wrap">
+                <div className="flex items-center gap-2 mt-3 pt-2 border-t border-xedu-slate-100 text-2xs text-xedu-slate-400 flex-wrap">
                   <span>Davomat:</span>
                   {[['bg-red-500', '< 40%'], ['bg-orange-400', '40–59%'], ['bg-yellow-400', '60–79%'], ['bg-green-300', '80–94%'], ['bg-green-500', '95–100%']].map(([c, l]) => (
                     <span key={l} className="flex items-center gap-1">
@@ -649,7 +650,7 @@ export function AttendanceWorkspace() {
               <StatPill label="Kechikdi" value={summary.late} tone="attention" />
               <StatPill label="Uzrli" value={summary.excused} tone="calm" />
             </div>
-            <div className="mt-2 flex items-center justify-between text-[10px] text-xedu-slate-400">
+            <div className="mt-2 flex items-center justify-between text-2xs text-xedu-slate-400">
               <span>Belgilanish: {summary.marked}/{summary.totalStudents}</span>
               <span className="font-bold text-xedu-slate-700">{summary.presentPct}%</span>
             </div>
@@ -671,7 +672,7 @@ export function AttendanceWorkspace() {
             {unmarkedCount > 0 && (
               <div className="flex items-start gap-2 mt-2 px-1">
                 <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
-                <p className="text-[11px] font-medium text-amber-700">{unmarkedCount} ta o'quvchi belgilanmagan</p>
+                <p className="text-xs font-medium text-amber-700">{unmarkedCount} ta o'quvchi belgilanmagan</p>
               </div>
             )}
           </WorkspaceSection>
@@ -688,7 +689,7 @@ export function AttendanceWorkspace() {
                   className="w-full flex items-center justify-between rounded-md px-2 py-1.5 text-left hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
                 >
                   <span className="text-xs font-medium text-xedu-slate-700 truncate">{s.name}</span>
-                  <span className="text-[10px] font-bold text-red-600 shrink-0">{s.streak} kun kelmagan</span>
+                  <span className="text-2xs font-bold text-red-600 shrink-0">{s.streak} kun kelmagan</span>
                 </button>
               ))}
             </div>
@@ -763,34 +764,7 @@ export function AttendanceWorkspace() {
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
-function StatPill({ label, value, tone = 'calm' }: { label: string; value: number; tone?: 'calm' | 'success' | 'urgent' | 'attention' }) {
-  const color = {
-    calm: 'text-xedu-slate-800 dark:text-xedu-slate-200',
-    success: 'text-xedu-primary',
-    urgent: 'text-red-600',
-    attention: 'text-amber-600',
-  }[tone];
 
-  return (
-    <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-      <p className={cn('text-sm font-bold tabular-nums', color)}>{value}</p>
-    </div>
-  );
-}
-
-function QuickLink({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium text-xedu-slate-600 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
-    >
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
-      {label}
-      <ArrowRight className="h-3 w-3 ml-auto text-xedu-slate-300" />
-    </Link>
-  );
-}
 
 // ── Student Attendance Entity Panel ────────────────────────────────────────────
 
@@ -842,7 +816,7 @@ function StudentAttendancePanel({
           {rate !== null && (
             <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400">Davomat foizi</span>
+                <span className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400">Davomat foizi</span>
                 <span className={cn('text-sm font-bold', getScoreColor(rate))}>{rate}%</span>
               </div>
               <div className="h-2 w-full rounded-full bg-xedu-slate-100 overflow-hidden">
@@ -882,7 +856,7 @@ function StudentAttendancePanel({
                       <span className={cn('h-2 w-2 rounded-full', cfg.dot)} />
                       <span className="text-xs font-medium text-xedu-slate-700">{cfg.label}</span>
                     </div>
-                    <span className="text-[10px] text-xedu-slate-400">{r.date ? format(new Date(r.date), 'dd.MM.yyyy') : '—'}</span>
+                    <span className="text-2xs text-xedu-slate-400">{r.date ? format(new Date(r.date), 'dd.MM.yyyy') : '—'}</span>
                   </div>
                 );
               })}

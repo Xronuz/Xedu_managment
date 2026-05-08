@@ -135,13 +135,13 @@ export function EntityPanel({
                   {title}
                 </h3>
                 <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400">
+                  <span className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400">
                     {cfg.label}
                   </span>
                   {subtitle && (
                     <>
                       <span className="text-xedu-slate-300">·</span>
-                      <span className="text-[11px] text-xedu-slate-500 truncate">{subtitle}</span>
+                      <span className="text-xs text-xedu-slate-500 truncate">{subtitle}</span>
                     </>
                   )}
                 </div>
@@ -151,11 +151,13 @@ export function EntityPanel({
               {statusCfg && (
                 <div className="flex items-center gap-1">
                   <div className={cn('h-2 w-2 rounded-full', statusCfg.dot)} />
-                  <span className={cn('text-[11px] font-bold', statusCfg.text)}>{statusCfg.label}</span>
+                  <span className={cn('text-xs font-bold', statusCfg.text)}>{statusCfg.label}</span>
                 </div>
               )}
               <button
+                type="button"
                 onClick={onClose}
+                aria-label="Yopish"
                 className="h-7 w-7 rounded-md flex items-center justify-center hover:bg-xedu-slate-100 dark:hover:bg-xedu-slate-800 transition-colors"
               >
                 <X className="h-4 w-4 text-xedu-slate-400" />
@@ -170,7 +172,7 @@ export function EntityPanel({
             <div className="grid grid-cols-3 gap-2">
               {metrics.map((m, i) => (
                 <div key={i} className="rounded-lg border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
-                  <p className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{m.label}</p>
+                  <p className="text-2xs font-semibold uppercase tracking-wider text-xedu-slate-400">{m.label}</p>
                   <p className={cn(
                     'text-sm font-bold tabular-nums',
                     m.tone === 'urgent' ? 'text-red-600' :
@@ -194,7 +196,7 @@ export function EntityPanel({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  'relative px-3 py-2.5 text-[11px] font-bold transition-colors',
+                  'relative px-3 py-2.5 text-xs font-bold transition-colors',
                   activeTab === tab.id
                     ? 'text-xedu-slate-900 dark:text-xedu-slate-100'
                     : 'text-xedu-slate-400 hover:text-xedu-slate-600 dark:hover:text-xedu-slate-300'
@@ -217,7 +219,7 @@ export function EntityPanel({
             <div className="p-5">
               {activity && activity.length > 0 && (
                 <div className="space-y-0">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-400 mb-2">
+                  <p className="text-2xs font-bold uppercase tracking-[0.12em] text-xedu-slate-400 mb-2">
                     Faollik tarixi
                   </p>
                   <div className="relative space-y-0">
@@ -255,10 +257,10 @@ function TimelineRow({ event }: { event: { label: string; value: string; timesta
     <div className="relative flex items-start gap-3 py-2">
       <div className={cn('h-[11px] w-[11px] rounded-full border-2 border-white dark:border-xedu-slate-900 shrink-0 mt-0.5 z-[1]', dotColor)} />
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-medium text-xedu-slate-800 dark:text-xedu-slate-200">{event.label}</p>
-        <p className="text-[11px] text-xedu-slate-500">{event.value}</p>
+        <p className="text-base font-medium text-xedu-slate-800 dark:text-xedu-slate-200">{event.label}</p>
+        <p className="text-xs text-xedu-slate-500">{event.value}</p>
         {event.timestamp && (
-          <p className="text-[10px] text-xedu-slate-400 mt-0.5 flex items-center gap-1">
+          <p className="text-2xs text-xedu-slate-400 mt-0.5 flex items-center gap-1">
             <Clock className="h-2.5 w-2.5" />
             {event.timestamp}
           </p>

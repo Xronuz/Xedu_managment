@@ -32,6 +32,7 @@ import { useToast } from '@/components/ui/use-toast';
 
 import {
   WorkspaceShell, WorkspaceHeader, WorkspaceToolbar, WorkspaceMain, WorkspaceSidebar, WorkspaceSection,
+  StatPill, QuickLink, InfoItem
 } from '@/components/workspace-system';
 import {
   PrimaryAction, SecondaryAction, IconAction, ActionBar,
@@ -152,20 +153,6 @@ function LoadingSkeleton({ rows = 4 }: { rows?: number }) {
 }
 
 // ── Stat Pill (sidebar) ───────────────────────────────────────────────────────
-function StatPill({ label, value, tone = 'calm' }: { label: string; value: string | number; tone?: 'calm' | 'success' | 'urgent' | 'attention' }) {
-  const color = {
-    calm: 'text-xedu-slate-800 dark:text-xedu-slate-200',
-    success: 'text-xedu-primary',
-    urgent: 'text-red-600',
-    attention: 'text-amber-600',
-  }[tone];
-  return (
-    <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-      <p className={`text-sm font-bold tabular-nums ${color}`}>{value}</p>
-    </div>
-  );
-}
 
 // ══════════════════════════════════════════════════════════════════════════════
 // ── ANALYTICS SURFACE ─────────────────────────────────────────────────────────
@@ -548,9 +535,9 @@ function AnalyticsSurface({ branchFilter, months }: { branchFilter: string; mont
           Smart Alerts
           {!alertLoading && (alerts ?? []).length > 0 && (
             <span className="ml-auto flex gap-1.5">
-              {alertCounts.danger  > 0 && <Badge variant="destructive" className="text-[10px] h-4 px-1.5">{alertCounts.danger} xavfli</Badge>}
-              {alertCounts.warning > 0 && <Badge className="text-[10px] h-4 px-1.5 bg-amber-500 hover:bg-amber-600">{alertCounts.warning} ogohlantirish</Badge>}
-              {alertCounts.info    > 0 && <Badge variant="secondary" className="text-[10px] h-4 px-1.5">{alertCounts.info} ma'lumot</Badge>}
+              {alertCounts.danger  > 0 && <Badge variant="destructive" className="text-2xs h-4 px-1.5">{alertCounts.danger} xavfli</Badge>}
+              {alertCounts.warning > 0 && <Badge className="text-2xs h-4 px-1.5 bg-amber-500 hover:bg-amber-600">{alertCounts.warning} ogohlantirish</Badge>}
+              {alertCounts.info    > 0 && <Badge variant="secondary" className="text-2xs h-4 px-1.5">{alertCounts.info} ma'lumot</Badge>}
             </span>
           )}
         </h2>
@@ -576,7 +563,7 @@ function AnalyticsSurface({ branchFilter, months }: { branchFilter: string; mont
                     <div className="flex items-center gap-2 flex-wrap">
                       <p className={`text-xs font-semibold ${cfg.text}`}>{alert.title}</p>
                       {alert.branchName && (
-                        <Badge variant="outline" className="text-[10px] h-4 px-1">{alert.branchName}</Badge>
+                        <Badge variant="outline" className="text-2xs h-4 px-1">{alert.branchName}</Badge>
                       )}
                     </div>
                     <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">{alert.message}</p>
@@ -1003,7 +990,7 @@ function IntelligenceSidebar({ activeTab }: { activeTab: string }) {
         icon={<ShieldAlert className="h-4 w-4 text-red-500" />}
         action={
           !alertLoading && (alerts ?? []).length > 0 ? (
-            <span className="text-[10px] font-bold text-xedu-slate-400">{(alerts ?? []).length} ta</span>
+            <span className="text-2xs font-bold text-xedu-slate-400">{(alerts ?? []).length} ta</span>
           ) : undefined
         }
       >
@@ -1025,14 +1012,14 @@ function IntelligenceSidebar({ activeTab }: { activeTab: string }) {
                 <div key={i} className={`rounded-md border px-2.5 py-2 ${cfg.bg} ${cfg.border}`}>
                   <div className="flex items-center gap-1.5">
                     <span className="text-sm">{cfg.icon}</span>
-                    <p className={`text-[11px] font-semibold ${cfg.text} truncate`}>{alert.title}</p>
+                    <p className={`text-xs font-semibold ${cfg.text} truncate`}>{alert.title}</p>
                   </div>
-                  <p className="text-[10px] text-xedu-slate-500 mt-0.5 line-clamp-2">{alert.message}</p>
+                  <p className="text-2xs text-xedu-slate-500 mt-0.5 line-clamp-2">{alert.message}</p>
                 </div>
               );
             })}
             {(alerts ?? []).length > 3 && (
-              <p className="text-[10px] text-xedu-slate-400 text-center pt-1">+{(alerts ?? []).length - 3} ta ko'proq</p>
+              <p className="text-2xs text-xedu-slate-400 text-center pt-1">+{(alerts ?? []).length - 3} ta ko'proq</p>
             )}
           </div>
         )}
@@ -1219,7 +1206,7 @@ export function ReportsWorkspace() {
                 <Icon className="h-4 w-4" />
                 {label}
                 {premium && (
-                  <span className="ml-0.5 text-[10px] font-bold text-violet-500 bg-violet-500/10 rounded px-1 py-0.5 leading-none">
+                  <span className="ml-0.5 text-2xs font-bold text-violet-500 bg-violet-500/10 rounded px-1 py-0.5 leading-none">
                     PRO
                   </span>
                 )}

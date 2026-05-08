@@ -82,6 +82,7 @@ const config: Config = {
           700: 'var(--xedu-slate-700)',
           800: 'var(--xedu-slate-800)',
           900: 'var(--xedu-slate-900)',
+          950: 'var(--xedu-slate-950)',
         },
         'xedu-gold':   'var(--xedu-gold)',
         'xedu-ruby':   'var(--xedu-ruby)',

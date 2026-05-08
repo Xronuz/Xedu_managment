@@ -38,6 +38,7 @@ import { ImportDialog } from '@/components/import/import-dialog';
 
 import {
   WorkspaceShell, WorkspaceHeader, WorkspaceToolbar, WorkspaceMain, WorkspaceSidebar, WorkspaceSection,
+  StatPill, QuickLink, InfoItem
 } from '@/components/workspace-system';
 import {
   PrimaryAction, SecondaryAction, IconAction, ActionBar,
@@ -200,46 +201,8 @@ function LessonPanel({ slot, open, onClose, canManage, onEdit, onDelete }: {
 
 // ── Sub-components ────────────────────────────────────────────────────────────
 
-function StatPill({ label, value, tone = 'calm' }: { label: string; value: string | number; tone?: 'calm' | 'success' | 'urgent' | 'attention' }) {
-  const color = {
-    calm: 'text-xedu-slate-800 dark:text-xedu-slate-200',
-    success: 'text-xedu-primary',
-    urgent: 'text-red-600',
-    attention: 'text-amber-600',
-  }[tone];
 
-  return (
-    <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-      <p className={cn('text-sm font-bold tabular-nums', color)}>{value}</p>
-    </div>
-  );
-}
 
-function QuickLink({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium text-xedu-slate-600 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
-    >
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
-      {label}
-      <ArrowRight className="h-3 w-3 ml-auto text-xedu-slate-300" />
-    </Link>
-  );
-}
-
-function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-2 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2.5 py-2">
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400 shrink-0 mt-0.5" />
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-        <p className="text-xs font-medium text-xedu-slate-700 dark:text-xedu-slate-300 truncate">{value}</p>
-      </div>
-    </div>
-  );
-}
 
 // ── Weekly Grid ───────────────────────────────────────────────────────────────
 
@@ -292,7 +255,7 @@ function WeeklyGrid({
           <div key={slot} className="grid grid-cols-7 gap-1 mb-1">
             <div className="flex flex-col items-center justify-center py-2 px-1">
               <span className="text-xs font-bold text-xedu-slate-500 dark:text-xedu-slate-400">{slot}</span>
-              <span className="text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400">{SLOT_TIMES[slot].start}</span>
+              <span className="text-2xs text-xedu-slate-500 dark:text-xedu-slate-400">{SLOT_TIMES[slot].start}</span>
             </div>
 
             {DAYS.map(({ key: day }) => {
@@ -327,7 +290,7 @@ function WeeklyGrid({
                   {hasConflict && (
                     <div className="flex items-center gap-1 rounded px-1 py-0.5 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700">
                       <AlertTriangle className="h-2.5 w-2.5 text-red-500 shrink-0" />
-                      <span className="text-[9px] text-red-600 dark:text-red-400 font-medium leading-tight">
+                      <span className="text-2xs text-red-600 dark:text-red-400 font-medium leading-tight">
                         {teacherConflict ? "O'qituvchi ziddiyati" : roomConflict ? 'Xona ziddiyati' : 'Ziddiyat'}
                       </span>
                     </div>
@@ -357,7 +320,7 @@ function WeeklyGrid({
                         <p className="font-semibold truncate pr-5">{cell.subject?.name}</p>
                         <p className="opacity-70 truncate">{cell.class?.name}</p>
                         {(cell.roomNumber || cell.room?.name) && (
-                          <p className="opacity-60 text-[10px]">Xona: {cell.room?.name ?? cell.roomNumber}</p>
+                          <p className="opacity-60 text-2xs">Xona: {cell.room?.name ?? cell.roomNumber}</p>
                         )}
                         {canManage && !isCross && (
                           <button
@@ -439,7 +402,7 @@ function ListView({
               {label}
               {count > 0 && (
                 <span className={cn(
-                  'ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold',
+                  'ml-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-2xs font-bold',
                   active ? 'bg-white/20 text-white' : 'bg-xedu-slate-200 text-xedu-slate-600 dark:bg-xedu-slate-700 dark:text-xedu-slate-300'
                 )}>
                   {count}
@@ -478,7 +441,7 @@ function ListView({
                   <div className="flex items-center gap-2">
                     <p className="font-semibold">{slot.subject?.name}</p>
                     {isCross && (
-                      <Badge variant="outline" className="text-[10px] h-4 px-1 border-muted-foreground/40 text-xedu-slate-500 dark:text-xedu-slate-400">
+                      <Badge variant="outline" className="text-2xs h-4 px-1 border-muted-foreground/40 text-xedu-slate-500 dark:text-xedu-slate-400">
                         {slot.branch?.name ?? 'boshqa filial'}
                       </Badge>
                     )}
@@ -991,7 +954,7 @@ export function ScheduleWorkspace() {
             <Filter className="h-3.5 w-3.5" />
             Filterlar
             {activeFilters.length > 0 && (
-              <span className="ml-0.5 text-[10px] font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
+              <span className="ml-0.5 text-2xs font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
                 {activeFilters.length}
               </span>
             )}
@@ -1000,7 +963,7 @@ export function ScheduleWorkspace() {
           {activeFilters.map((f) => (
             <span
               key={f.key}
-              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-[11px] font-semibold text-xedu-primary"
+              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
               <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
@@ -1012,7 +975,7 @@ export function ScheduleWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterClass(''); setFilterTeacher(''); }}
-              className="text-[11px] font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
             >
               Tozalash
             </button>
@@ -1117,7 +1080,7 @@ export function ScheduleWorkspace() {
                   <BookOpen className="h-3.5 w-3.5 text-xedu-primary shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-xedu-slate-700 truncate">{s.subject?.name}</p>
-                    <p className="text-[10px] text-xedu-slate-400">{s.class?.name} · {s.startTime}</p>
+                    <p className="text-2xs text-xedu-slate-400">{s.class?.name} · {s.startTime}</p>
                   </div>
                 </button>
               ))}
@@ -1131,7 +1094,7 @@ export function ScheduleWorkspace() {
               {teacherLoad.map((t) => (
                 <div key={t.name} className="flex items-center justify-between rounded-md px-2 py-1.5">
                   <span className="text-xs font-medium text-xedu-slate-600 truncate">{t.name}</span>
-                  <span className="text-[10px] font-bold tabular-nums text-xedu-slate-700">{t.count}</span>
+                  <span className="text-2xs font-bold tabular-nums text-xedu-slate-700">{t.count}</span>
                 </div>
               ))}
             </div>
@@ -1144,7 +1107,7 @@ export function ScheduleWorkspace() {
               {classLoad.map((c) => (
                 <div key={c.name} className="flex items-center justify-between rounded-md px-2 py-1.5">
                   <span className="text-xs font-medium text-xedu-slate-600 truncate">{c.name}</span>
-                  <span className="text-[10px] font-bold tabular-nums text-xedu-slate-700">{c.count}</span>
+                  <span className="text-2xs font-bold tabular-nums text-xedu-slate-700">{c.count}</span>
                 </div>
               ))}
             </div>

@@ -117,15 +117,17 @@ export function OpTable<T>({
 
   return (
     <div className={cn('rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 overflow-hidden bg-white dark:bg-xedu-slate-900', className)}>
-      <div className={cn('overflow-x-auto', maxHeight && `max-h-[${maxHeight}] overflow-y-auto`)}>
+      <div className={cn('overflow-x-auto', maxHeight && 'overflow-y-auto')} style={maxHeight ? { maxHeight } : undefined}>
         <table className="w-full text-left">
           <thead className="sticky top-0 z-10 bg-xedu-slate-50/80 dark:bg-xedu-slate-800/80 backdrop-blur-sm">
             <tr className="border-b border-xedu-slate-100 dark:border-xedu-slate-800">
               {selectable && (
                 <th className={cn('w-10', densityPadding)}>
                   <button
+                    type="button"
                     onClick={onSelectAll}
                     className="flex items-center justify-center"
+                    aria-label={allSelected ? "Barchasini bekor qilish" : "Barchasini tanlash"}
                   >
                     {allSelected ? (
                       <CheckSquare className="h-4 w-4 text-xedu-primary" />
@@ -146,13 +148,14 @@ export function OpTable<T>({
                   key={col.key}
                   className={cn(
                     densityPadding,
-                    'text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-500 whitespace-nowrap',
+                    'text-2xs font-bold uppercase tracking-[0.12em] text-xedu-slate-500 whitespace-nowrap',
                     col.align === 'center' && 'text-center',
                     col.align === 'right' && 'text-right',
                     col.sortable && 'cursor-pointer hover:text-xedu-slate-700 transition-colors select-none'
                   )}
                   style={col.width ? { width: col.width } : undefined}
                   onClick={() => col.sortable && onSort?.(col.key)}
+                  aria-sort={col.sortable ? (sortKey === col.key ? (sortDir === 'asc' ? 'ascending' : 'descending') : 'none') : undefined}
                 >
                   <span className="inline-flex items-center gap-1">
                     {col.header}
@@ -184,13 +187,9 @@ export function OpTable<T>({
                 muted: 'opacity-60',
               }[tone];
 
-              const RowWrapper = href ? 'a' : 'tr';
-              const rowProps = href ? { href } : {};
-
               return (
-                <RowWrapper
+                <tr
                   key={key}
-                  {...(rowProps as any)}
                   className={cn(
                     'group transition-colors',
                     toneBg,
@@ -198,6 +197,7 @@ export function OpTable<T>({
                     !isSelected && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30',
                     href && 'cursor-pointer'
                   )}
+                  onClick={() => href && (window.location.href = href)}
                   onMouseEnter={() => setHoveredRow(key)}
                   onMouseLeave={() => setHoveredRow(null)}
                 >
@@ -239,7 +239,7 @@ export function OpTable<T>({
                       </div>
                     </td>
                   )}
-                </RowWrapper>
+                </tr>
               );
             })}
           </tbody>

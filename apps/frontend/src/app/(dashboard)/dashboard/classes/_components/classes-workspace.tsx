@@ -36,6 +36,7 @@ import {
   WorkspaceMain,
   WorkspaceSidebar,
   WorkspaceSection,
+  StatPill, QuickLink, InfoItem
 } from '@/components/workspace-system';
 import { OpTable } from '@/components/workspace-system/op-table';
 import {
@@ -329,7 +330,7 @@ export function ClassesWorkspace() {
       cell: (c: ClassRow) => (
         <div className="min-w-0">
           <p className="font-bold text-xedu-slate-900 dark:text-xedu-slate-100 text-xs">{c.name}</p>
-          <p className="text-[10px] text-xedu-slate-400">{c.academicYear}</p>
+          <p className="text-2xs text-xedu-slate-400">{c.academicYear}</p>
         </div>
       ),
     },
@@ -338,7 +339,7 @@ export function ClassesWorkspace() {
       header: 'Daraja',
       width: '70px',
       cell: (c: ClassRow) => (
-        <span className="text-[11px] font-bold px-1.5 py-0.5 rounded border border-xedu-slate-100 bg-xedu-slate-50 text-xedu-slate-600">
+        <span className="text-xs font-bold px-1.5 py-0.5 rounded border border-xedu-slate-100 bg-xedu-slate-50 text-xedu-slate-600">
           {c.gradeLevel}-sinf
         </span>
       ),
@@ -348,7 +349,7 @@ export function ClassesWorkspace() {
       header: 'Filial',
       width: '110px',
       cell: (c: ClassRow) => (
-        <span className="text-xedu-slate-500 text-[11px]">{c.branch?.name ?? '—'}</span>
+        <span className="text-xedu-slate-500 text-xs">{c.branch?.name ?? '—'}</span>
       ),
     },
     {
@@ -358,7 +359,7 @@ export function ClassesWorkspace() {
       cell: (c: ClassRow) => {
         if (!c.classTeacher) {
           return (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600">
+            <span className="inline-flex items-center gap-1 text-2xs font-bold text-amber-600">
               <AlertTriangle className="h-3 w-3" />
               Biriktirilmagan
             </span>
@@ -366,10 +367,10 @@ export function ClassesWorkspace() {
         }
         return (
           <div className="flex items-center gap-1.5 min-w-0">
-            <div className="h-5 w-5 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center shrink-0 text-[9px] font-bold text-xedu-slate-500">
+            <div className="h-5 w-5 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center shrink-0 text-2xs font-bold text-xedu-slate-500">
               {c.classTeacher.firstName[0]}{c.classTeacher.lastName[0]}
             </div>
-            <span className="text-[11px] font-medium text-xedu-slate-700 truncate">
+            <span className="text-xs font-medium text-xedu-slate-700 truncate">
               {c.classTeacher.firstName} {c.classTeacher.lastName}
             </span>
           </div>
@@ -385,7 +386,7 @@ export function ClassesWorkspace() {
         return (
           <div className="flex items-center gap-1">
             <Users className="h-3 w-3 text-xedu-slate-400" />
-            <span className={cn('text-[11px] font-bold tabular-nums', count === 0 ? 'text-amber-500' : 'text-xedu-slate-700')}>
+            <span className={cn('text-xs font-bold tabular-nums', count === 0 ? 'text-amber-500' : 'text-xedu-slate-700')}>
               {count}
             </span>
           </div>
@@ -397,7 +398,7 @@ export function ClassesWorkspace() {
       header: 'Fanlar',
       width: '70px',
       cell: (c: ClassRow) => (
-        <span className="text-[11px] font-bold tabular-nums text-xedu-slate-700">
+        <span className="text-xs font-bold tabular-nums text-xedu-slate-700">
           {c.subjects?.length ?? 0}
         </span>
       ),
@@ -411,14 +412,14 @@ export function ClassesWorkspace() {
         const noStudents = (c._count?.students ?? 0) === 0;
         if (noTeacher || noStudents) {
           return (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600">
+            <span className="inline-flex items-center gap-1 text-2xs font-bold text-amber-600">
               <AlertTriangle className="h-3 w-3" />
               Diqqat
             </span>
           );
         }
         return (
-          <span className="inline-flex items-center gap-1 text-[10px] font-bold text-xedu-primary">
+          <span className="inline-flex items-center gap-1 text-2xs font-bold text-xedu-primary">
             <CheckCircle2 className="h-3 w-3" />
             Tayyor
           </span>
@@ -480,7 +481,7 @@ export function ClassesWorkspace() {
             <Filter className="h-3.5 w-3.5" />
             Filterlar
             {activeFilters.length > 0 && (
-              <span className="ml-0.5 text-[10px] font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
+              <span className="ml-0.5 text-2xs font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
                 {activeFilters.length}
               </span>
             )}
@@ -489,7 +490,7 @@ export function ClassesWorkspace() {
           {activeFilters.map((f) => (
             <span
               key={f.key}
-              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-[11px] font-semibold text-xedu-primary"
+              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
               <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
@@ -501,7 +502,7 @@ export function ClassesWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterBranch(''); setFilterTeacher(''); setFilterGrade(''); }}
-              className="text-[11px] font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
             >
               Tozalash
             </button>
@@ -643,7 +644,7 @@ export function ClassesWorkspace() {
                   )}
                 >
                   <span className="text-xs font-medium">{grade}-sinf</span>
-                  <span className="text-[11px] font-bold tabular-nums text-xedu-slate-500">{count}</span>
+                  <span className="text-xs font-bold tabular-nums text-xedu-slate-500">{count}</span>
                 </button>
               ))}
             </div>
@@ -796,34 +797,7 @@ export function ClassesWorkspace() {
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
-function StatPill({ label, value, suffix = '', tone = 'calm' }: { label: string; value: number; suffix?: string; tone?: 'calm' | 'success' | 'urgent' | 'attention' }) {
-  const color = {
-    calm: 'text-xedu-slate-800 dark:text-xedu-slate-200',
-    success: 'text-xedu-primary',
-    urgent: 'text-red-600',
-    attention: 'text-amber-600',
-  }[tone];
 
-  return (
-    <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-      <p className={cn('text-sm font-bold tabular-nums', color)}>{value}{suffix}</p>
-    </div>
-  );
-}
-
-function QuickLink({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium text-xedu-slate-600 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
-    >
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
-      {label}
-      <ArrowRight className="h-3 w-3 ml-auto text-xedu-slate-300" />
-    </Link>
-  );
-}
 
 // ── Class Entity Panel ─────────────────────────────────────────────────────────
 
@@ -895,9 +869,9 @@ function ClassPanel({
 
           {cls.classTeacher && (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">Sinf rahbari</p>
+              <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">Sinf rahbari</p>
               <div className="flex items-center gap-2 rounded-md border border-xedu-slate-100 px-2.5 py-2">
-                <div className="h-7 w-7 rounded-full bg-xedu-slate-100 flex items-center justify-center text-[10px] font-bold text-xedu-slate-500">
+                <div className="h-7 w-7 rounded-full bg-xedu-slate-100 flex items-center justify-center text-2xs font-bold text-xedu-slate-500">
                   {cls.classTeacher.firstName[0]}{cls.classTeacher.lastName[0]}
                 </div>
                 <span className="text-xs font-medium text-xedu-slate-700">
@@ -910,15 +884,15 @@ function ClassPanel({
           {/* Subjects list */}
           {classSubjects.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">Fanlar</p>
+              <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">Fanlar</p>
               <div className="flex flex-wrap gap-1">
                 {classSubjects.slice(0, 8).map((s: any) => (
-                  <span key={s.id} className="text-[10px] font-bold px-1.5 py-0.5 rounded border border-blue-100 bg-blue-50 text-blue-600">
+                  <span key={s.id} className="text-2xs font-bold px-1.5 py-0.5 rounded border border-blue-100 bg-blue-50 text-blue-600">
                     {s.name}
                   </span>
                 ))}
                 {classSubjects.length > 8 && (
-                  <span className="text-[10px] font-bold px-1.5 py-0.5 rounded border border-xedu-slate-100 bg-xedu-slate-50 text-xedu-slate-500">
+                  <span className="text-2xs font-bold px-1.5 py-0.5 rounded border border-xedu-slate-100 bg-xedu-slate-50 text-xedu-slate-500">
                     +{classSubjects.length - 8}
                   </span>
                 )}
@@ -929,10 +903,10 @@ function ClassPanel({
           {/* GPA if available */}
           {gpa && (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">O'rtacha GPA</p>
+              <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">O'rtacha GPA</p>
               <div className="flex items-center gap-2">
                 <span className="text-lg font-bold text-xedu-primary">{gpa.classAvg?.toFixed(2) ?? '—'}</span>
-                <span className="text-[10px] text-xedu-slate-400">sinf o'rtachasi</span>
+                <span className="text-2xs text-xedu-slate-400">sinf o'rtachasi</span>
               </div>
             </div>
           )}
@@ -975,12 +949,12 @@ function ClassPanel({
             </div>
           ) : (
             <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">
+              <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">
                 {students.length} ta o'quvchi
               </p>
               {students.slice(0, 8).map((s: any, idx: number) => (
                 <div key={s.id} className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors">
-                  <span className="text-[10px] text-xedu-slate-400 w-4 text-right">{idx + 1}</span>
+                  <span className="text-2xs text-xedu-slate-400 w-4 text-right">{idx + 1}</span>
                   <div className="h-5 w-5 rounded-full bg-xedu-slate-100 flex items-center justify-center text-[8px] font-bold text-xedu-slate-500">
                     {s.firstName?.[0]}{s.lastName?.[0]}
                   </div>
@@ -1018,19 +992,19 @@ function ClassPanel({
             </div>
           ) : (
             <div className="space-y-1">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">
+              <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">
                 {schedule.length} ta dars
               </p>
               {schedule.slice(0, 8).map((s: any) => (
                 <div key={s.id} className="flex items-center justify-between rounded-md border border-xedu-slate-100 px-2.5 py-2">
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-xedu-slate-700 truncate">{s.subject?.name ?? 'Fan'}</p>
-                    <p className="text-[10px] text-xedu-slate-400">
+                    <p className="text-2xs text-xedu-slate-400">
                       {s.dayOfWeek ?? '—'} · {s.startTime ?? '—'} - {s.endTime ?? '—'}
                     </p>
                   </div>
                   {s.teacher && (
-                    <span className="text-[10px] text-xedu-slate-500 shrink-0">
+                    <span className="text-2xs text-xedu-slate-500 shrink-0">
                       {s.teacher.firstName} {s.teacher.lastName}
                     </span>
                   )}
@@ -1060,10 +1034,10 @@ function ClassPanel({
                 <div key={s.id} className="flex items-center justify-between rounded-md border border-xedu-slate-100 px-2.5 py-2">
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-xedu-slate-700">{s.name}</p>
-                    {s.code && <p className="text-[10px] text-xedu-slate-400">{s.code}</p>}
+                    {s.code && <p className="text-2xs text-xedu-slate-400">{s.code}</p>}
                   </div>
                   {s.teacher && (
-                    <span className="text-[10px] text-xedu-slate-500 shrink-0">
+                    <span className="text-2xs text-xedu-slate-500 shrink-0">
                       {s.teacher.firstName} {s.teacher.lastName}
                     </span>
                   )}
@@ -1085,17 +1059,17 @@ function ClassPanel({
                 <TrendingUp className="h-5 w-5 text-xedu-primary" />
                 <div>
                   <p className="text-lg font-bold text-xedu-slate-900">{gpa.classAvg?.toFixed(2) ?? '—'}</p>
-                  <p className="text-[10px] text-xedu-slate-400">Sinf o'rtachasi</p>
+                  <p className="text-2xs text-xedu-slate-400">Sinf o'rtachasi</p>
                 </div>
               </div>
               {gpa.students && gpa.students.length > 0 && (
                 <div className="space-y-1">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400 mb-1">O'quvchilar bo'yicha</p>
+                  <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1">O'quvchilar bo'yicha</p>
                   {gpa.students.slice(0, 8).map((s: any) => (
                     <div key={s.studentId} className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-xedu-slate-50 transition-colors">
                       <span className="text-xs font-medium text-xedu-slate-700">{s.name}</span>
                       <span className={cn(
-                        'text-[11px] font-bold tabular-nums',
+                        'text-xs font-bold tabular-nums',
                         s.gpa >= 4 ? 'text-xedu-primary' : s.gpa >= 3 ? 'text-xedu-slate-600' : 'text-amber-600'
                       )}>
                         {s.gpa?.toFixed(2) ?? '—'}
@@ -1154,14 +1128,3 @@ function ClassPanel({
   );
 }
 
-function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-2 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2.5 py-2">
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400 shrink-0 mt-0.5" />
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-        <p className="text-xs font-medium text-xedu-slate-700 dark:text-xedu-slate-300 truncate">{value}</p>
-      </div>
-    </div>
-  );
-}

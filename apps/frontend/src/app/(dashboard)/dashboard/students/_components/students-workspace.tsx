@@ -25,6 +25,7 @@ import {
   WorkspaceMain,
   WorkspaceSidebar,
   WorkspaceSection,
+  StatPill, QuickLink, InfoItem
 } from '@/components/workspace-system';
 import { OpTable } from '@/components/workspace-system/op-table';
 import {
@@ -173,14 +174,14 @@ export function StudentsWorkspace() {
       header: "O'quvchi",
       cell: (s: StudentRow) => (
         <div className="flex items-center gap-2">
-          <div className="h-7 w-7 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center shrink-0 text-[10px] font-bold text-xedu-slate-500">
+          <div className="h-7 w-7 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center shrink-0 text-2xs font-bold text-xedu-slate-500">
             {s.firstName[0]}{s.lastName[0]}
           </div>
           <div className="min-w-0">
             <p className="font-semibold text-xedu-slate-900 dark:text-xedu-slate-100 truncate">
               {s.firstName} {s.lastName}
             </p>
-            <p className="text-[10px] text-xedu-slate-400 truncate">{s.email}</p>
+            <p className="text-2xs text-xedu-slate-400 truncate">{s.email}</p>
           </div>
         </div>
       ),
@@ -212,7 +213,7 @@ export function StudentsWorkspace() {
       cell: (s: StudentRow) => (
         <div className="flex items-center gap-1.5">
           <div className={cn('h-2 w-2 rounded-full', s.isActive ? 'bg-xedu-primary' : 'bg-red-400')} />
-          <span className={cn('text-[11px] font-semibold', s.isActive ? 'text-xedu-primary' : 'text-red-500')}>
+          <span className={cn('text-xs font-semibold', s.isActive ? 'text-xedu-primary' : 'text-red-500')}>
             {s.isActive ? 'Faol' : 'Nofaol'}
           </span>
         </div>
@@ -223,7 +224,7 @@ export function StudentsWorkspace() {
       header: 'Telefon',
       width: '120px',
       cell: (s: StudentRow) => (
-        <span className="text-xedu-slate-500 text-[11px]">{s.phone ?? '—'}</span>
+        <span className="text-xedu-slate-500 text-xs">{s.phone ?? '—'}</span>
       ),
     },
     {
@@ -232,11 +233,11 @@ export function StudentsWorkspace() {
       width: '120px',
       cell: (s: StudentRow) => (
         s.parent ? (
-          <span className="text-[11px] text-xedu-slate-500">
+          <span className="text-xs text-xedu-slate-500">
             {s.parent.firstName} {s.parent.lastName}
           </span>
         ) : (
-          <span className="text-xedu-slate-300 text-[11px]">—</span>
+          <span className="text-xedu-slate-300 text-xs">—</span>
         )
       ),
     },
@@ -309,7 +310,7 @@ export function StudentsWorkspace() {
             <Filter className="h-3.5 w-3.5" />
             Filterlar
             {activeFilters.length > 0 && (
-              <span className="ml-0.5 text-[10px] font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
+              <span className="ml-0.5 text-2xs font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
                 {activeFilters.length}
               </span>
             )}
@@ -318,7 +319,7 @@ export function StudentsWorkspace() {
           {activeFilters.map((f) => (
             <span
               key={f.key}
-              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-[11px] font-semibold text-xedu-primary"
+              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
               <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
@@ -330,7 +331,7 @@ export function StudentsWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterClass(''); setFilterBranch(''); setFilterStatus(''); }}
-              className="text-[11px] font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
             >
               Tozalash
             </button>
@@ -453,7 +454,7 @@ export function StudentsWorkspace() {
                   )}
                 >
                   <span className="text-xs font-medium truncate">{c.name}</span>
-                  <span className="text-[11px] font-bold tabular-nums text-xedu-slate-500">{count}</span>
+                  <span className="text-xs font-bold tabular-nums text-xedu-slate-500">{count}</span>
                 </button>
               );
             })}
@@ -515,34 +516,7 @@ export function StudentsWorkspace() {
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
-function StatPill({ label, value, tone = 'calm' }: { label: string; value: number; tone?: 'calm' | 'success' | 'urgent' | 'attention' }) {
-  const color = {
-    calm: 'text-xedu-slate-800 dark:text-xedu-slate-200',
-    success: 'text-xedu-primary',
-    urgent: 'text-red-600',
-    attention: 'text-amber-600',
-  }[tone];
 
-  return (
-    <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-      <p className={cn('text-sm font-bold tabular-nums', color)}>{value}</p>
-    </div>
-  );
-}
-
-function QuickLink({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium text-xedu-slate-600 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
-    >
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
-      {label}
-      <ArrowRight className="h-3 w-3 ml-auto text-xedu-slate-300" />
-    </Link>
-  );
-}
 
 // ── Student Entity Panel ───────────────────────────────────────────────────────
 
@@ -667,14 +641,3 @@ function StudentPanel({
   );
 }
 
-function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-2 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2.5 py-2">
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400 shrink-0 mt-0.5" />
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-        <p className="text-xs font-medium text-xedu-slate-700 dark:text-xedu-slate-300 truncate">{value}</p>
-      </div>
-    </div>
-  );
-}

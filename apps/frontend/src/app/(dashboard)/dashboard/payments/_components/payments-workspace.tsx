@@ -35,6 +35,7 @@ import {
   WorkspaceMain,
   WorkspaceSidebar,
   WorkspaceSection,
+  StatPill, QuickLink, InfoItem
 } from '@/components/workspace-system';
 import { OpTable } from '@/components/workspace-system/op-table';
 import {
@@ -321,14 +322,14 @@ export function PaymentsWorkspace() {
       header: "To'lovchi",
       cell: (p: PaymentRow) => (
         <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center shrink-0 text-[9px] font-bold text-xedu-slate-500">
+          <div className="h-6 w-6 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center shrink-0 text-2xs font-bold text-xedu-slate-500">
             {p.student?.firstName?.[0]}{p.student?.lastName?.[0]}
           </div>
           <div className="min-w-0">
             <p className="font-semibold text-xedu-slate-900 dark:text-xedu-slate-100 text-xs truncate">
               {p.student ? `${p.student.firstName} ${p.student.lastName}` : "Noma'lum"}
             </p>
-            <p className="text-[10px] text-xedu-slate-400 truncate">
+            <p className="text-2xs text-xedu-slate-400 truncate">
               {p.student?.class?.name ?? p.student?.phone ?? '—'}
             </p>
           </div>
@@ -344,7 +345,7 @@ export function PaymentsWorkspace() {
           <p className="text-xs font-bold tabular-nums text-xedu-slate-900 dark:text-xedu-slate-100">
             {formatCurrency(p.amount)}
           </p>
-          <p className="text-[9px] text-xedu-slate-400">{p.currency ?? 'UZS'}</p>
+          <p className="text-2xs text-xedu-slate-400">{p.currency ?? 'UZS'}</p>
         </div>
       ),
     },
@@ -355,7 +356,7 @@ export function PaymentsWorkspace() {
       cell: (p: PaymentRow) => {
         const cfg = STATUS_CONFIG[p.status] ?? STATUS_CONFIG.pending;
         return (
-          <span className={cn('inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border', cfg.badge)}>
+          <span className={cn('inline-flex items-center gap-1 text-2xs font-bold px-1.5 py-0.5 rounded border', cfg.badge)}>
             <span className={cn('h-1.5 w-1.5 rounded-full', cfg.dot)} />
             {cfg.label}
           </span>
@@ -367,7 +368,7 @@ export function PaymentsWorkspace() {
       header: 'Usul',
       width: '80px',
       cell: (p: PaymentRow) => (
-        <span className="text-[11px] text-xedu-slate-500">
+        <span className="text-xs text-xedu-slate-500">
           {PROVIDER_LABELS[p.provider ?? 'cash'] ?? p.provider ?? 'Naqd'}
         </span>
       ),
@@ -379,7 +380,7 @@ export function PaymentsWorkspace() {
       cell: (p: PaymentRow) => {
         const isOverdue = p.dueDate && new Date(p.dueDate) < new Date() && p.status !== 'paid';
         return (
-          <span className={cn('text-[11px]', isOverdue ? 'text-red-500 font-bold' : 'text-xedu-slate-500')}>
+          <span className={cn('text-xs', isOverdue ? 'text-red-500 font-bold' : 'text-xedu-slate-500')}>
             {p.dueDate ? formatDate(p.dueDate) : '—'}
           </span>
         );
@@ -390,7 +391,7 @@ export function PaymentsWorkspace() {
       header: "To'lov sanasi",
       width: '90px',
       cell: (p: PaymentRow) => (
-        <span className="text-[11px] text-xedu-slate-500">
+        <span className="text-xs text-xedu-slate-500">
           {p.paidAt ? formatDate(p.paidAt) : p.createdAt ? formatDate(p.createdAt) : '—'}
         </span>
       ),
@@ -450,7 +451,7 @@ export function PaymentsWorkspace() {
             <Filter className="h-3.5 w-3.5" />
             Filterlar
             {activeFilters.length > 0 && (
-              <span className="ml-0.5 text-[10px] font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
+              <span className="ml-0.5 text-2xs font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
                 {activeFilters.length}
               </span>
             )}
@@ -459,7 +460,7 @@ export function PaymentsWorkspace() {
           {activeFilters.map((f) => (
             <span
               key={f.key}
-              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-[11px] font-semibold text-xedu-primary"
+              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
               <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
@@ -471,7 +472,7 @@ export function PaymentsWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterStatus(''); setFilterClass(''); setFilterFrom(''); setFilterTo(''); }}
-              className="text-[11px] font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
             >
               Tozalash
             </button>
@@ -503,7 +504,7 @@ export function PaymentsWorkspace() {
             </select>
 
             <div className="flex items-center gap-1">
-              <Label className="text-[10px] text-xedu-slate-400">Dan</Label>
+              <Label className="text-2xs text-xedu-slate-400">Dan</Label>
               <input
                 type="date"
                 value={filterFrom}
@@ -512,7 +513,7 @@ export function PaymentsWorkspace() {
               />
             </div>
             <div className="flex items-center gap-1">
-              <Label className="text-[10px] text-xedu-slate-400">Gacha</Label>
+              <Label className="text-2xs text-xedu-slate-400">Gacha</Label>
               <input
                 type="date"
                 value={filterTo}
@@ -581,17 +582,17 @@ export function PaymentsWorkspace() {
       <WorkspaceSidebar width="narrow">
         <WorkspaceSection title="Moliyaviy ko'rsatkichlar" icon={<TrendingUp className="h-4 w-4" />}>
           <div className="grid grid-cols-2 gap-2">
-            <StatPill label="Bu oy" value={totalCollected} isCurrency />
-            <StatPill label="Jami" value={totalRevenue} isCurrency />
-            <StatPill label="Kutilmoqda" value={stats?.pendingAmount ?? 0} isCurrency tone="attention" />
-            <StatPill label="Muddati o'tgan" value={stats?.overdueAmount ?? 0} isCurrency tone="urgent" />
+            <StatPill label="Bu oy" value={formatCurrency(totalCollected)} />
+            <StatPill label="Jami" value={formatCurrency(totalRevenue)} />
+            <StatPill label="Kutilmoqda" value={stats?.pendingAmount ?? 0} tone="attention" />
+            <StatPill label="Muddati o'tgan" value={stats?.overdueAmount ?? 0} tone="urgent" />
           </div>
         </WorkspaceSection>
 
         <WorkspaceSection title="Qarzdorlar" icon={<AlertTriangle className="h-4 w-4" />}>
           <div className="grid grid-cols-2 gap-2">
             <StatPill label="Qarzdorlar" value={totalDebtors} tone={totalDebtors > 0 ? 'urgent' : 'success'} />
-            <StatPill label="Qarz jami" value={totalDebt} isCurrency tone={totalDebt > 0 ? 'urgent' : 'success'} />
+            <StatPill label="Qarz jami" value={formatCurrency(totalDebt)} tone={totalDebt > 0 ? 'urgent' : 'success'} />
             <StatPill label="Kutilmoqda" value={pendingCount} tone="attention" />
             <StatPill label="Muddati o'tgan" value={overdueCount} tone="urgent" />
           </div>
@@ -606,10 +607,10 @@ export function PaymentsWorkspace() {
                     {PROVIDER_LABELS[method] ?? method}
                   </span>
                   <div className="text-right">
-                    <span className="text-[11px] font-bold tabular-nums text-xedu-slate-700">
+                    <span className="text-xs font-bold tabular-nums text-xedu-slate-700">
                       {formatCurrency(data.amount)}
                     </span>
-                    <span className="text-[9px] text-xedu-slate-400 ml-1">({data.count})</span>
+                    <span className="text-2xs text-xedu-slate-400 ml-1">({data.count})</span>
                   </div>
                 </div>
               ))}
@@ -629,9 +630,9 @@ export function PaymentsWorkspace() {
                   <div key={c.classId} className="flex items-center justify-between rounded-md px-2 py-1.5">
                     <div className="min-w-0">
                       <span className="text-xs font-medium text-xedu-slate-700 truncate">{c.className}</span>
-                      <span className="text-[9px] text-xedu-slate-400 ml-1">{c.debtorCount} ta</span>
+                      <span className="text-2xs text-xedu-slate-400 ml-1">{c.debtorCount} ta</span>
                     </div>
-                    <span className="text-[11px] font-bold tabular-nums text-red-600">
+                    <span className="text-xs font-bold tabular-nums text-red-600">
                       {formatCurrency(c.totalDebt)}
                     </span>
                   </div>
@@ -734,38 +735,7 @@ export function PaymentsWorkspace() {
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
-function StatPill({ label, value, isCurrency = false, tone = 'calm' }: {
-  label: string; value: number; isCurrency?: boolean; tone?: 'calm' | 'success' | 'urgent' | 'attention';
-}) {
-  const color = {
-    calm: 'text-xedu-slate-800 dark:text-xedu-slate-200',
-    success: 'text-xedu-primary',
-    urgent: 'text-red-600',
-    attention: 'text-amber-600',
-  }[tone];
 
-  const display = isCurrency ? formatCurrency(value) : value.toLocaleString('uz-UZ');
-
-  return (
-    <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-      <p className={cn('text-sm font-bold tabular-nums', color)}>{display}</p>
-    </div>
-  );
-}
-
-function QuickLink({ href, icon: Icon, label }: { href: string; icon: React.ElementType; label: string }) {
-  return (
-    <Link
-      href={href}
-      className="flex items-center gap-2 rounded-md px-2 py-1.5 text-xs font-medium text-xedu-slate-600 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
-    >
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
-      {label}
-      <ArrowRight className="h-3 w-3 ml-auto text-xedu-slate-300" />
-    </Link>
-  );
-}
 
 // ── Payment Entity Panel ───────────────────────────────────────────────────────
 
@@ -814,7 +784,7 @@ function PaymentPanel({
 
           {payment.description && (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400 mb-1">Izoh</p>
+              <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1">Izoh</p>
               <p className="text-xs text-xedu-slate-700 bg-xedu-slate-50 dark:bg-xedu-slate-800 rounded-md px-2.5 py-2">
                 {payment.description}
               </p>
@@ -892,7 +862,7 @@ function PaymentPanel({
               <Clock className="h-3.5 w-3.5 text-xedu-slate-400 shrink-0 mt-0.5" />
               <div>
                 <p className="text-xs font-medium text-xedu-slate-700">Yaratildi</p>
-                <p className="text-[10px] text-xedu-slate-400">{payment.createdAt ? formatDate(payment.createdAt) : '—'}</p>
+                <p className="text-2xs text-xedu-slate-400">{payment.createdAt ? formatDate(payment.createdAt) : '—'}</p>
               </div>
             </div>
             {payment.paidAt && (
@@ -900,7 +870,7 @@ function PaymentPanel({
                 <CheckCircle2 className="h-3.5 w-3.5 text-xedu-primary shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs font-medium text-xedu-slate-700">To'landi</p>
-                  <p className="text-[10px] text-xedu-slate-400">{formatDate(payment.paidAt)}</p>
+                  <p className="text-2xs text-xedu-slate-400">{formatDate(payment.paidAt)}</p>
                 </div>
               </div>
             )}
@@ -909,7 +879,7 @@ function PaymentPanel({
                 <Calendar className="h-3.5 w-3.5 text-xedu-slate-400 shrink-0 mt-0.5" />
                 <div>
                   <p className="text-xs font-medium text-xedu-slate-700">Muddat</p>
-                  <p className="text-[10px] text-xedu-slate-400">{formatDate(payment.dueDate)}</p>
+                  <p className="text-2xs text-xedu-slate-400">{formatDate(payment.dueDate)}</p>
                 </div>
               </div>
             )}
@@ -937,14 +907,3 @@ function PaymentPanel({
   );
 }
 
-function InfoItem({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-2 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2.5 py-2">
-      <Icon className="h-3.5 w-3.5 text-xedu-slate-400 shrink-0 mt-0.5" />
-      <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-        <p className="text-xs font-medium text-xedu-slate-700 dark:text-xedu-slate-300 truncate">{value}</p>
-      </div>
-    </div>
-  );
-}

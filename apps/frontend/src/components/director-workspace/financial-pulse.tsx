@@ -59,10 +59,10 @@ export function FinancialPulse({ financeData, isLoading }: FinancialPulseProps) 
 
   return (
     <WorkspaceBlock title="Moliya" icon={TrendingUp} action={{ label: 'Batafsil', href: '/dashboard/finance' }}>
-      <div className="p-3">
+      <div className="px-3 py-2">
         {/* Primary metric */}
-        <div className="flex items-baseline gap-2 mb-2">
-          <p className="text-xl font-black tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100">
+        <div className="flex items-baseline gap-2 mb-1.5">
+          <p className="text-lg font-black tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100">
             {formatCurrency(thisMonth)}
           </p>
           <div className="flex items-center gap-0.5">
@@ -74,7 +74,7 @@ export function FinancialPulse({ financeData, isLoading }: FinancialPulseProps) 
         </div>
 
         {/* Secondary row */}
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           <FinPill label="O'tgan oy" value={formatCurrency(lastMonth)} />
           <FinPill label="Kutilmoqda" value={formatCurrency(pending)} tone={pending > 0 ? 'attention' : 'calm'} />
           <FinPill label="Kechikkan" value={formatCurrency(overdue)} tone={overdue > 0 ? 'urgent' : 'calm'} />
@@ -93,9 +93,9 @@ function FinPill({ label, value, tone = 'calm' }: { label: string; value: string
       : 'text-xedu-slate-700 dark:text-xedu-slate-300';
 
   return (
-    <div className="flex-1 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
-      <p className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400 mb-0.5">{label}</p>
-      <p className={`text-xs font-bold tabular-nums ${valueColor}`}>{value}</p>
+    <div className="flex-1 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1">
+      <p className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
+      <p className={`text-[11px] font-bold tabular-nums leading-tight ${valueColor}`}>{value}</p>
     </div>
   );
 }

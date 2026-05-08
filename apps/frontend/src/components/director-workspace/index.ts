@@ -1,5 +1,5 @@
 export { SituationBar, type SituationBarData } from './situation-bar';
-export { BranchHealthMap } from './branch-health-map';
+export { BranchHealthMap, WorkspaceBlock } from './branch-health-map';
 export { FinancialPulse } from './financial-pulse';
 export { AcademicSnapshot } from './academic-snapshot';
 export { StaffOperations } from './staff-operations';
@@ -9,3 +9,8 @@ export { QuickActionSurface } from './quick-action-surface';
 export { SplitView, SplitViewListHeader, SplitViewListBody, SplitViewDetailHeader, SplitViewDetailBody } from './split-view';
 export { FloatingBulkToolbar } from './floating-bulk-toolbar';
 export { AuditDetailPane } from './audit-detail-pane';
+export { ExecutiveSummary, type ExecutiveSummaryData } from './executive-summary';
+export { TrendIndicator, Sparkline } from './trend-indicator';
+export { ActivityStream } from './activity-stream';
+export { BranchComparison } from './branch-comparison';
+export { SmartInsights } from './smart-insights';

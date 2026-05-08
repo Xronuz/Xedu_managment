@@ -40,21 +40,21 @@ export function StaffOperations({
 
   return (
     <WorkspaceBlock title="Xodimlar" icon={Users} action={{ label: 'Batafsil', href: '/dashboard/staff' }}>
-      <div className="p-3">
-        <div className="flex gap-2 mb-2">
+      <div className="px-3 py-2">
+        <div className="flex gap-1.5 mb-1.5">
           <StaffPill icon={Users} label="O'qituvchilar" value={teacherCount} href="/dashboard/users" />
           <StaffPill icon={ShieldCheck} label="Boshqa xodimlar" value={staffCount} href="/dashboard/users" />
         </div>
 
         {/* Capacity summary */}
-        <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2.5 py-1.5 flex items-center justify-between">
+        <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1 flex items-center justify-between">
           <span className="text-[11px] text-xedu-slate-500">Jami xodimlar</span>
           <span className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 tabular-nums">{totalStaff}</span>
         </div>
 
         {/* Pending attention */}
         {hasPending && (
-          <div className="mt-2 space-y-1">
+          <div className="mt-1.5 space-y-1">
             {pendingLeaves > 0 && (
               <AttentionRow
                 icon={Clock}
@@ -101,11 +101,11 @@ function StaffPill({
         href && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/40 cursor-pointer'
       )}
     >
-      <div className="flex items-center gap-1 mb-1">
+      <div className="flex items-center gap-1 mb-0.5">
         <Icon className="h-3 w-3 text-xedu-slate-400" />
         <span className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</span>
       </div>
-      <p className="text-base font-black leading-none text-xedu-slate-900 dark:text-xedu-slate-100">{value}</p>
+      <p className="text-sm font-black leading-none text-xedu-slate-900 dark:text-xedu-slate-100">{value}</p>
     </Wrapper>
   );
 }

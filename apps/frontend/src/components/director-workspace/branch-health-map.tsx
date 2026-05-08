@@ -3,7 +3,8 @@
 import { useState } from 'react';
 import {
   Building2, ChevronRight, Users, GraduationCap, MapPin,
-  Eye, FileText, AlertTriangle, Clock, TrendingUp,
+  Eye, FileText, AlertTriangle, Clock, BarChart3,
+  CheckSquare, Square, GitCompare,
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -17,7 +18,10 @@ interface BranchHealthMapProps {
   pendingDiscipline?: any[];
   isLoading: boolean;
   selectedBranchId?: string | null;
+  compareMode?: boolean;
+  compareSelected?: string[];
   onSelectBranch: (branch: BranchDetail) => void;
+  onToggleCompare?: (id: string) => void;
 }
 
 export function BranchHealthMap({
@@ -27,7 +31,10 @@ export function BranchHealthMap({
   pendingDiscipline = [],
   isLoading,
   selectedBranchId,
+  compareMode = false,
+  compareSelected = [],
   onSelectBranch,
+  onToggleCompare,
 }: BranchHealthMapProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
@@ -72,6 +79,11 @@ export function BranchHealthMap({
           const hasAttention = branchAlerts > 0 || branchPending > 0;
           const isSelected = selectedBranchId === branch.id;
           const isHovered = hoveredId === branch.id;
+          const isCompared = compareSelected.includes(branch.id);
+
+          // Operational pressure score
+          const pressureScore = (branchAlerts * 2 + branchPending) / Math.max(students + teachers, 1);
+          const pressureLevel = pressureScore > 0.1 ? 'critical' : pressureScore > 0.03 ? 'elevated' : 'normal';
 
           return (
             <div
@@ -85,6 +97,20 @@ export function BranchHealthMap({
                   : 'border-l-2 border-l-transparent hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/40',
               )}
             >
+              {/* Compare checkbox */}
+              {compareMode && onToggleCompare && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); onToggleCompare(branch.id); }}
+                  className="shrink-0 mt-0.5"
+                >
+                  {isCompared ? (
+                    <CheckSquare className="h-4 w-4 text-xedu-primary" />
+                  ) : (
+                    <Square className="h-4 w-4 text-xedu-slate-300" />
+                  )}
+                </button>
+              )}
+
               {/* Health dot with pulse for attention */}
               <div className="shrink-0 flex flex-col items-center gap-0.5 w-4">
                 <div className="relative">
@@ -111,14 +137,17 @@ export function BranchHealthMap({
                       {branch.code}
                     </span>
                   )}
-                  {hasAttention && (
-                    <span className="shrink-0 flex items-center gap-1 text-[10px] font-bold text-red-500">
-                      <AlertTriangle className="h-3 w-3" />
+                  {pressureLevel !== 'normal' && (
+                    <span className={cn(
+                      'shrink-0 flex items-center gap-0.5 text-[9px] font-bold px-1 py-0 rounded',
+                      pressureLevel === 'critical' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'
+                    )}>
+                      <AlertTriangle className="h-2.5 w-2.5" />
                       {branchAlerts + branchPending}
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 mt-0.5">
+                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                   {branch.address && (
                     <p className="text-[11px] text-xedu-slate-500 truncate flex items-center gap-0.5">
                       <MapPin className="h-2.5 w-2.5 shrink-0" />
@@ -130,6 +159,12 @@ export function BranchHealthMap({
                     <OpIndicator icon={GraduationCap} value={students} />
                     <OpIndicator icon={Users} value={teachers} />
                     <OpIndicator icon={Users} value={staff} />
+                    {branchAlerts > 0 && (
+                      <OpIndicator icon={AlertTriangle} value={branchAlerts} tone="urgent" />
+                    )}
+                    {branchPending > 0 && (
+                      <OpIndicator icon={Clock} value={branchPending} tone="attention" />
+                    )}
                   </div>
                 </div>
               </div>
@@ -158,6 +193,13 @@ export function BranchHealthMap({
                   label="Hisobot"
                   href={`/dashboard/branches/${branch.id}`}
                 />
+                {compareMode && onToggleCompare && (
+                  <ActionBtn
+                    icon={GitCompare}
+                    label={isCompared ? 'Olib tashlash' : 'Taqqoslash'}
+                    onClick={() => onToggleCompare(branch.id)}
+                  />
+                )}
               </div>
 
               {/* Chevron + mobile tap target */}
@@ -182,11 +224,24 @@ export function BranchHealthMap({
   );
 }
 
-function OpIndicator({ icon: Icon, value }: { icon: React.ElementType; value: number }) {
+function OpIndicator({
+  icon: Icon,
+  value,
+  tone = 'calm',
+}: {
+  icon: React.ElementType;
+  value: number;
+  tone?: 'calm' | 'attention' | 'urgent';
+}) {
+  const color =
+    tone === 'urgent' ? 'text-red-500' :
+    tone === 'attention' ? 'text-amber-500' :
+    'text-xedu-slate-400';
+
   return (
-    <span className="flex items-center gap-0.5 text-[10px] font-semibold text-xedu-slate-400 tabular-nums">
-      <Icon className="h-2.5 w-2.5" />
-      {value}
+    <span className="flex items-center gap-0.5 text-[10px] font-semibold tabular-nums">
+      <Icon className={cn('h-2.5 w-2.5', color)} />
+      <span className={color}>{value}</span>
     </span>
   );
 }

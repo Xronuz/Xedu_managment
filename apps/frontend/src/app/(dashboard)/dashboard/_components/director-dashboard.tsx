@@ -6,7 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ClipboardCheck, Users, TrendingUp, TrendingDown,
   CheckCircle2, ShieldAlert, Bell, BarChart2, Activity, Coins,
-  ArrowUpRight,
+  ArrowUpRight, GitCompare, X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'next/navigation';
 
@@ -45,8 +45,13 @@ import {
   IntelligenceFeed,
   RightContextualPanel,
   QuickActionSurface,
+  ExecutiveSummary,
+  ActivityStream,
+  BranchComparison,
+  SmartInsights,
   type BranchDetail,
   type SituationBarData,
+  type ExecutiveSummaryData,
 } from '@/components/director-workspace';
 
 export function DirectorDashboard() {
@@ -62,7 +67,11 @@ export function DirectorDashboard() {
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<BranchDetail | null>(null);
 
-  // ── Data queries ─────────────────────────────────────────────────────────────
+  // ── Comparison mode ────────────────────────────────────────────────────────
+  const [compareMode, setCompareMode] = useState(false);
+  const [compareSelected, setCompareSelected] = useState<string[]>([]);
+
+  // ── Data queries ────────────────────────────────────────────────────────────
   const { data: attendanceSummary, isLoading: attLoading } = useQuery({
     queryKey: ['attendance', 'today-summary', 'school-wide'],
     queryFn: attendanceApi.getTodaySummary,
@@ -112,7 +121,7 @@ export function DirectorDashboard() {
     queryFn: () => examsApi.getUpcoming(7).catch(() => []),
   });
 
-  // ── Derived data ─────────────────────────────────────────────────────────────
+  // ── Derived data ────────────────────────────────────────────────────────────
   const classList: any[] = Array.isArray(classesData) ? classesData : (classesData as any)?.data ?? [];
   const allUsers: any[] = (usersData as any)?.data ?? [];
   const teacherCount = allUsers.filter((u: any) => ['teacher', 'class_teacher'].includes(u.role)).length;
@@ -128,7 +137,26 @@ export function DirectorDashboard() {
 
   const atRisk = (aiSummary?.riskDistribution?.critical ?? 0) + (aiSummary?.riskDistribution?.high ?? 0);
 
-  // ── Mutations ────────────────────────────────────────────────────────────────
+  // ── Executive summary data ──────────────────────────────────────────────────
+  const thisMonthRev = financeData?.thisMonthRevenue ?? 0;
+  const lastMonthRev = financeData?.lastMonthRevenue ?? 0;
+  const revenueGrowth = financeData?.revenueGrowth ?? (lastMonthRev > 0 ? ((thisMonthRev - lastMonthRev) / lastMonthRev) * 100 : 0);
+
+  const execSummaryData: ExecutiveSummaryData = {
+    branchCount: (branches as any[])?.length ?? 0,
+    branchTrend: 'stable',
+    attendancePct: presentPct > 0 ? presentPct : null,
+    attendanceTrend: presentPct > 0 ? (presentPct < 75 ? 'down' : presentPct > 90 ? 'up' : 'stable') : 'stable',
+    staffTotal: teacherCount + staffCount,
+    staffPressure: pendingLeaveList.length > teacherCount * 0.2 ? 'elevated' : 'normal',
+    revenueGrowth: revenueGrowth || null,
+    pendingTotal: pendingLeaveList.length + pendingDisciplineList.length,
+    pendingTrend: pendingLeaveList.length + pendingDisciplineList.length > 5 ? 'up' : 'stable',
+    atRiskCount: atRisk,
+    riskTrend: atRisk > 0 ? 'up' : 'stable',
+  };
+
+  // ── Mutations ───────────────────────────────────────────────────────────────
   const reviewMutation = useMutation({
     mutationFn: ({ id, action }: { id: string; action: 'approve' | 'reject' }) =>
       leaveRequestsApi.review(id, { action }),
@@ -155,6 +183,13 @@ export function DirectorDashboard() {
     document.dispatchEvent(new CustomEvent('open-command-palette'));
   };
 
+  const handleToggleCompare = (id: string) => {
+    setCompareSelected((prev) => {
+      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
+      return next;
+    });
+  };
+
   const dayLabel = new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' });
 
   const situationData: SituationBarData = {
@@ -168,7 +203,7 @@ export function DirectorDashboard() {
   };
 
   return (
-    <div className="relative pb-20 md:pb-6 space-y-5">
+    <div className="relative pb-20 md:pb-6 space-y-4">
       {/* Quick Action Surface */}
       <QuickActionSurface onOpenCommandPalette={handleOpenCommandPalette} />
 
@@ -183,27 +218,76 @@ export function DirectorDashboard() {
       </div>
 
       {/* Sticky Situation Bar */}
-      <div className="sticky top-0 z-20 -mx-2 px-2 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm">
+      <div className="sticky top-0 z-20 -mx-2 px-2 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm space-y-1">
         <SituationBar
           data={situationData}
           onAlertsClick={() => router.push('/dashboard/alerts')}
           onApprovalsClick={() => router.push('/dashboard/approvals')}
         />
+        <ExecutiveSummary data={execSummaryData} />
       </div>
 
       {/* ── Strategic Overview Canvas ─────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row gap-5">
+      <div className="flex flex-col lg:flex-row gap-4">
         {/* Main canvas */}
-        <div className="flex-1 min-w-0 space-y-4">
-          <BranchHealthMap
-            branches={(branches as any[]) ?? []}
-            allUsers={allUsers}
-            pendingLeaves={pendingLeaveList}
-            pendingDiscipline={pendingDisciplineList}
-            isLoading={branchesLoading}
-            selectedBranchId={selectedBranch?.id}
-            onSelectBranch={handleSelectBranch}
-          />
+        <div className="flex-1 min-w-0 space-y-3">
+          {/* Branch Health Map with compare controls */}
+          <div className="relative">
+            <div className="flex items-center justify-end gap-2 mb-1 px-1">
+              {compareMode && compareSelected.length >= 2 && (
+                <button
+                  onClick={() => setCompareSelected([])}
+                  className="flex items-center gap-1 text-[10px] font-semibold text-xedu-slate-500 hover:text-red-500 transition-colors"
+                >
+                  <X className="h-3 w-3" />
+                  Tozalash ({compareSelected.length})
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setCompareMode((v) => !v);
+                  if (compareMode) setCompareSelected([]);
+                }}
+                className={cn(
+                  'flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold transition-colors',
+                  compareMode
+                    ? 'bg-xedu-primary text-white'
+                    : 'text-xedu-slate-500 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800'
+                )}
+              >
+                <GitCompare className="h-3 w-3" />
+                {compareMode ? 'Taqqoslashni yopish' : 'Filial taqqoslash'}
+              </button>
+            </div>
+
+            <BranchHealthMap
+              branches={(branches as any[]) ?? []}
+              allUsers={allUsers}
+              pendingLeaves={pendingLeaveList}
+              pendingDiscipline={pendingDisciplineList}
+              isLoading={branchesLoading}
+              selectedBranchId={selectedBranch?.id}
+              compareMode={compareMode}
+              compareSelected={compareSelected}
+              onSelectBranch={handleSelectBranch}
+              onToggleCompare={handleToggleCompare}
+            />
+
+            {/* Comparison panel */}
+            {compareSelected.length >= 2 && (
+              <div className="mt-3">
+                <BranchComparison
+                  branches={(branches as any[]) ?? []}
+                  selectedIds={compareSelected}
+                  allUsers={allUsers}
+                  pendingLeaves={pendingLeaveList}
+                  pendingDiscipline={pendingDisciplineList}
+                  onClose={() => { setCompareMode(false); setCompareSelected([]); }}
+                  onRemove={(id) => setCompareSelected((prev) => prev.filter((x) => x !== id))}
+                />
+              </div>
+            )}
+          </div>
 
           <FinancialPulse
             financeData={financeData as any}
@@ -227,8 +311,8 @@ export function DirectorDashboard() {
           />
         </div>
 
-        {/* Intelligence Feed */}
-        <div className="w-full lg:w-[300px] xl:w-[340px] shrink-0 space-y-4">
+        {/* Right sidebar: Intelligence + Activity + Insights */}
+        <div className="w-full lg:w-[300px] xl:w-[340px] shrink-0 space-y-3">
           <IntelligenceFeed
             aiSummary={aiSummary}
             pendingLeaves={pendingLeaveList}
@@ -239,8 +323,33 @@ export function DirectorDashboard() {
             isLoading={!aiSummary && attLoading}
           />
 
+          <SmartInsights
+            data={{
+              branches: (branches as any[]) ?? [],
+              attendanceSummary,
+              pendingLeaves: pendingLeaveList,
+              pendingDiscipline: pendingDisciplineList,
+              aiSummary,
+              financeData: financeData as any,
+              teacherCount,
+              studentCount,
+            }}
+            maxInsights={4}
+          />
+
+          <ActivityStream
+            pendingLeaves={pendingLeaveList}
+            pendingDiscipline={pendingDisciplineList}
+            attendanceSummary={attendanceSummary as any}
+            branches={(branches as any[]) ?? []}
+            aiSummary={aiSummary}
+            financeData={financeData as any}
+            upcomingExams={upcomingExamsData as any[]}
+            maxItems={10}
+          />
+
           {/* Legacy: KPI + AI quick cards (preserved) */}
-          <div className="space-y-2.5">
+          <div className="grid grid-cols-3 gap-2">
             <KPICard kpiData={kpiData} />
             <AiRiskCard aiSummary={aiSummary} />
             <EduCoinCard coinStats={coinStats} />
@@ -249,7 +358,7 @@ export function DirectorDashboard() {
       </div>
 
       {/* ── Supplementary blocks (preserved interactive widgets) ──────────────── */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-2">
         {/* Leave approval quick-list */}
         <PCard>
           <div className="flex items-center justify-between mb-3">
@@ -383,7 +492,7 @@ export function DirectorDashboard() {
       )}
 
       {/* Academic calendar + quick links */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-3 md:grid-cols-2">
         <AcademicCalendarWidget canEdit={true} />
         <PCard>
           <p className="font-bold text-[15px] mb-3" style={{ color: C.text }}>Tezkor havolalar</p>

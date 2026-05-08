@@ -148,7 +148,7 @@ export function IntelligenceFeed({
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       <FeedHeader title="Operatsion oqim" icon={Zap} />
 
       {/* Attention Required */}
@@ -212,8 +212,8 @@ interface StreamItem {
 function FeedHeader({ title, icon: Icon }: { title: string; icon: React.ElementType }) {
   return (
     <div className="flex items-center justify-between px-1">
-      <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-xedu-slate-500" />
+      <div className="flex items-center gap-1.5">
+        <Icon className="h-3.5 w-3.5 text-xedu-slate-500" />
         <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">{title}</h3>
       </div>
     </div>
@@ -234,7 +234,7 @@ function FeedSection({
 
   return (
     <div className="border border-xedu-slate-100 dark:border-xedu-slate-800 rounded-xl overflow-hidden bg-white dark:bg-xedu-slate-900">
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
+      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-slate-50/30 dark:bg-xedu-slate-800/20">
         <div className={cn('h-1.5 w-1.5 rounded-full', accentColor)} />
         <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-500">{title}</p>
       </div>
@@ -275,14 +275,14 @@ function StreamRow({ item }: { item: StreamItem }) {
     <Wrapper
       {...(wrapperProps as any)}
       className={cn(
-        'flex items-center gap-2.5 px-3 py-2.5 transition-colors',
+        'flex items-center gap-2 px-3 py-2 transition-colors',
         href && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/40 cursor-pointer',
         priorityBg
       )}
     >
-      <Icon className={cn('h-3.5 w-3.5 shrink-0', priorityColor)} />
+      <Icon className={cn('h-3 w-3 shrink-0', priorityColor)} />
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-semibold text-xedu-slate-800 dark:text-xedu-slate-200 truncate leading-snug">
+        <p className="text-[12px] font-semibold text-xedu-slate-800 dark:text-xedu-slate-200 truncate leading-snug">
           {title}
         </p>
         <p className="text-[11px] text-xedu-slate-500 leading-snug">{meta}</p>

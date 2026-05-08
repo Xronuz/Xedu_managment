@@ -49,9 +49,9 @@ export function AcademicSnapshot({
 
   return (
     <WorkspaceBlock title="Akademik" icon={BookOpen} action={{ label: 'Batafsil', href: '/dashboard/education' }}>
-      <div className="p-3">
+      <div className="px-3 py-2">
         {/* 4-pill row */}
-        <div className="flex gap-2">
+        <div className="flex gap-1.5">
           <AcademicPill
             icon={ClipboardCheck}
             label="Davomat"
@@ -86,8 +86,8 @@ export function AcademicSnapshot({
 
         {/* Attendance detail bar */}
         {hasAttendance && (
-          <div className="mt-2 pt-2 border-t border-xedu-slate-100 dark:border-xedu-slate-800">
-            <div className="flex items-center gap-2 mb-1.5">
+          <div className="mt-1.5 pt-1.5 border-t border-xedu-slate-100 dark:border-xedu-slate-800">
+            <div className="flex items-center gap-2 mb-1">
               <div className="flex-1 h-1 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 overflow-hidden">
                 <div
                   className="h-full rounded-full bg-xedu-primary transition-all"
@@ -141,12 +141,12 @@ function AcademicPill({
         href && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/40 cursor-pointer'
       )}
     >
-      <div className="flex items-center gap-1 mb-1">
+      <div className="flex items-center gap-1 mb-0.5">
         <Icon className="h-3 w-3 text-xedu-slate-400" />
         <span className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</span>
       </div>
-      <p className={`text-base font-black leading-none ${valueColor}`}>{value}</p>
-      <p className="text-[10px] text-xedu-slate-500 mt-0.5">{sub}</p>
+      <p className={`text-sm font-black leading-none ${valueColor}`}>{value}</p>
+      <p className="text-[10px] text-xedu-slate-500 mt-0.5 leading-tight">{sub}</p>
     </Wrapper>
   );
 }

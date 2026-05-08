@@ -1,86 +1,27 @@
 'use client';
 
-import { Suspense, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { Plus, FileDown } from 'lucide-react';
-import { SectionTabs } from '@/components/layout/section-tabs';
+import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
-import { usePageActions } from '@/lib/header-actions-context';
+import { StudentsWorkspace } from './_components/students-workspace';
 
-import AttendancePage from '../attendance/page';
-import GradesPage     from '../grades/page';
-import ExamsPage      from '../exams/page';
-import HomeworkPage   from '../homework/page';
-
-const TABS = [
-  { id: 'attendance', label: 'Davomat',      roles: ['director', 'vice_principal', 'teacher', 'class_teacher', 'branch_admin'] },
-  { id: 'grades',     label: 'Baholar',      roles: ['director', 'vice_principal', 'teacher', 'class_teacher', 'branch_admin'] },
-  { id: 'exams',      label: 'Imtihonlar',   roles: ['director', 'vice_principal', 'teacher', 'class_teacher', 'branch_admin'] },
-  { id: 'homework',   label: 'Uy vazifalari',roles: ['director', 'vice_principal', 'teacher', 'class_teacher', 'branch_admin'] },
-];
-
-const TAB_ACTIONS: Record<string, React.ReactNode> = {
-  grades: (
-    <Button size="sm" variant="outline" onClick={() => document.dispatchEvent(new CustomEvent('grades:export'))}>
-      <FileDown className="h-4 w-4" /> Excel
-    </Button>
-  ),
-  exams: (
-    <Button size="sm" onClick={() => document.dispatchEvent(new CustomEvent('exams:open-add'))}>
-      <Plus className="h-4 w-4" /> Imtihon qo&apos;shish
-    </Button>
-  ),
-  homework: (
-    <Button size="sm" onClick={() => document.dispatchEvent(new CustomEvent('homework:open-add'))}>
-      <Plus className="h-4 w-4" /> Vazifa qo&apos;shish
-    </Button>
-  ),
-};
-
-function TabFallback() {
+function StudentsFallback() {
   return (
-    <div className="space-y-2">
-      {[...Array(8)].map((_, i) => <Skeleton key={i} className="h-14 rounded-2xl" />)}
-    </div>
-  );
-}
-
-function TabContent({ tab }: { tab: string }) {
-  switch (tab) {
-    case 'grades':   return <GradesPage />;
-    case 'exams':    return <ExamsPage />;
-    case 'homework': return <HomeworkPage />;
-    default:         return <AttendancePage />;
-  }
-}
-
-function StudentsContent() {
-  const searchParams   = useSearchParams();
-  const tab            = searchParams.get('tab') ?? 'attendance';
-  const { setActions } = usePageActions();
-
-  useEffect(() => {
-    setActions(TAB_ACTIONS[tab] ?? null);
-    return () => setActions(null);
-  }, [tab, setActions]);
-
-  return (
-    <div>
-      <div className="mb-1">
-        <h1 className="text-xl font-bold text-foreground">O&apos;quvchilar</h1>
-        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Davomat, baholar, imtihonlar va uy vazifalari</p>
+    <div className="space-y-4">
+      <Skeleton className="h-8 w-64 rounded-lg" />
+      <Skeleton className="h-10 w-full rounded-lg" />
+      <div className="space-y-2">
+        {[...Array(6)].map((_, i) => (
+          <Skeleton key={i} className="h-12 w-full rounded-lg" />
+        ))}
       </div>
-      <div className="mt-3">
-        <SectionTabs tabs={TABS} defaultTab="attendance" />
-      </div>
-      <Suspense fallback={<TabFallback />}>
-        <TabContent tab={tab} />
-      </Suspense>
     </div>
   );
 }
 
 export default function StudentsPage() {
-  return <Suspense><StudentsContent /></Suspense>;
+  return (
+    <Suspense fallback={<StudentsFallback />}>
+      <StudentsWorkspace />
+    </Suspense>
+  );
 }

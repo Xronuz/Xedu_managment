@@ -23,19 +23,19 @@ function AnimatedCounter({ target, suffix }: { target: number; suffix: string })
       ([entry]) => {
         if (entry.isIntersecting && !hasAnimated.current) {
           hasAnimated.current = true;
-          const duration = 1500;
+          const duration = 1800;
           const start = performance.now();
 
           const tick = (now: number) => {
             const progress = Math.min((now - start) / duration, 1);
-            const eased = 1 - Math.pow(1 - progress, 3);
+            const eased = 1 - Math.pow(1 - progress, 4);
             setCount(Math.floor(eased * target));
             if (progress < 1) requestAnimationFrame(tick);
           };
           requestAnimationFrame(tick);
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
     );
 
     observer.observe(el);
@@ -49,7 +49,7 @@ function AnimatedCounter({ target, suffix }: { target: number; suffix: string })
       : count.toString();
 
   return (
-    <span ref={ref}>
+    <span ref={ref} className="tabular-nums">
       {display}{suffix}
     </span>
   );
@@ -57,26 +57,37 @@ function AnimatedCounter({ target, suffix }: { target: number; suffix: string })
 
 export function ProofSection() {
   return (
-    <section className="bg-xedu-bg dark:bg-xedu-slate-950 border-y border-xedu-slate-100 dark:border-xedu-slate-800/50">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-16 sm:py-20">
+    <section className="relative overflow-hidden surface-atmospheric">
+      {/* Subtle top edge highlight */}
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-xedu-slate-200/60 to-transparent" />
+
+      <div className="relative mx-auto max-w-6xl px-5 sm:px-8 py-20 sm:py-28">
         <SectionHeader
           label="Institutsional ko'lam"
           title="Ta'lim boshqaruviga ishonch bilan yondashuv"
           description="Xedu yirik ta'lim guruhlari va ko'p filialli tashkilotlarning operatsion infratuzilmasi sifatida xizmat qiladi."
         />
 
-        <div className="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {stats.map((stat) => (
+        <div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          {stats.map((stat, i) => (
             <div
               key={stat.label}
-              className="text-center p-6 rounded-2xl bg-white dark:bg-xedu-slate-900 border border-xedu-slate-100 dark:border-xedu-slate-800"
+              className="relative group"
             >
-              <p className="text-3xl sm:text-4xl font-bold text-xedu-slate-900 dark:text-white tracking-tight">
-                <AnimatedCounter target={stat.value} suffix={stat.suffix} />
-              </p>
-              <p className="mt-2 text-[12px] sm:text-[13px] text-xedu-slate-500 dark:text-xedu-slate-400">
-                {stat.label}
-              </p>
+              <div className="relative rounded-2xl bg-white shadow-premium-sm p-7 sm:p-8 transition-all duration-300 hover:shadow-premium-md">
+                {/* Edge highlight */}
+                <div className="absolute inset-0 rounded-2xl bg-gradient-to-b from-white/80 to-transparent opacity-60 pointer-events-none" />
+
+                <p className="relative text-3xl sm:text-[2.5rem] font-bold text-xedu-slate-900 tracking-[-0.02em] leading-none">
+                  <AnimatedCounter target={stat.value} suffix={stat.suffix} />
+                </p>
+                <p className="relative mt-3 text-[12px] sm:text-[13px] text-xedu-slate-500 leading-relaxed">
+                  {stat.label}
+                </p>
+
+                {/* Subtle bottom accent */}
+                <div className="absolute bottom-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-xedu-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              </div>
             </div>
           ))}
         </div>

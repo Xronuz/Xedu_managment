@@ -281,4 +281,52 @@
 
   .shadow-pill     { box-shadow: var(--xedu-shadow-pill); }
   .shadow-elevated { box-shadow: var(--xedu-shadow-lg); }
+
+  /* ── Premium Depth System ─────────────────────────────────────────────────── */
+  .surface-premium {
+    background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFB 100%);
+  }
+  .surface-elevated {
+    background: linear-gradient(180deg, #FDFEFE 0%, #F7F9F8 100%);
+    border: 1px solid rgba(0,0,0,0.03);
+  }
+  .surface-atmospheric {
+    background: linear-gradient(180deg, #F8FAFA 0%, #F2F4F3 100%);
+  }
+  .surface-warm {
+    background: linear-gradient(180deg, #FDFCFA 0%, #F9F8F6 100%);
+  }
+
+  .shadow-premium-sm {
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03), 0 2px 8px rgba(0,0,0,0.04), 0 0 0 1px rgba(0,0,0,0.02);
+  }
+  .shadow-premium-md {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02), 0 8px 24px rgba(0,0,0,0.05), 0 0 0 1px rgba(0,0,0,0.02);
+  }
+  .shadow-premium-lg {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.02), 0 16px 48px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.02);
+  }
+  .shadow-premium-xl {
+    box-shadow: 0 8px 16px rgba(0,0,0,0.02), 0 32px 64px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.02);
+  }
+
+  .edge-subtle {
+    position: relative;
+  }
+  .edge-subtle::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 40%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .glow-emerald-subtle {
+    box-shadow: 0 0 40px rgba(15,123,83,0.04), 0 0 80px rgba(15,123,83,0.02);
+  }
 }

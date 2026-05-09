@@ -26,7 +26,7 @@ export class PaymentsController {
   }
 
   @Get('history')
-  @Roles(UserRole.ACCOUNTANT, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR)
+  @Roles(UserRole.ACCOUNTANT, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR, UserRole.PARENT, UserRole.STUDENT)
   @ApiOperation({ summary: 'To\'lovlar tarixi' })
   getHistory(
     @CurrentUser() user: JwtPayload,
@@ -56,6 +56,13 @@ export class PaymentsController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.paymentsService.markAsPaid(id, user);
+  }
+
+  @Get('parent-summary')
+  @Roles(UserRole.PARENT, UserRole.STUDENT)
+  @ApiOperation({ summary: 'Ota-ona uchun soddalashtirilgan to\'lov xulosasi' })
+  parentSummary(@CurrentUser() user: JwtPayload) {
+    return this.paymentsService.getParentSummary(user);
   }
 
   @Public()

@@ -6,6 +6,7 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
 import { GradeType, JwtPayload, UserRole } from '@eduplatform/types';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
+import { assertParentOfChild } from '@/common/utils/parent-guard.util';
 import { CoinsService, COIN_RULES } from '@/modules/coins/coins.service';
 
 const GRADE_TTL = 5 * 60;     // 5 min — baholar tez-tez yangilanishi mumkin
@@ -211,9 +212,10 @@ export class GradesService {
   }
 
   async getStudentGrades(studentId: string, currentUser: JwtPayload, subjectId?: string) {
-    // Students may only access their own grades
+    // Students may only access their own grades; parents only their children's
     const resolvedStudentId =
       currentUser.role === UserRole.STUDENT ? currentUser.sub : studentId;
+    await assertParentOfChild(this.prisma, currentUser, resolvedStudentId);
 
     const schoolId = currentUser.schoolId!;
     const key = this.ck(schoolId, currentUser.branchId, `student:${resolvedStudentId}:${subjectId ?? 'all'}`);
@@ -371,6 +373,7 @@ export class GradesService {
 
   /** Returns just the GPA number for a student */
   async getStudentGpa(studentId: string, currentUser: JwtPayload) {
+    await assertParentOfChild(this.prisma, currentUser, studentId);
     const grades = await this.prisma.grade.findMany({
       where: { studentId, ...buildTenantWhere(currentUser) },
       select: { score: true, maxScore: true },

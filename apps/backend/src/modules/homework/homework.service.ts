@@ -5,6 +5,7 @@ import { CreateHomeworkDto, UpdateHomeworkDto, SubmitHomeworkDto, GradeSubmissio
 import { AuditService } from '@/common/audit/audit.service';
 import { NotificationsService } from '@/modules/notifications/notifications.service';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
+import { assertParentOfChild } from '@/common/utils/parent-guard.util';
 
 @Injectable()
 export class HomeworkService {
@@ -226,5 +227,43 @@ export class HomeworkService {
 
     if (!submission) throw new NotFoundException('Topshiriq topilmadi');
     return submission;
+  }
+
+  async getByChild(childId: string, currentUser: JwtPayload) {
+    await assertParentOfChild(this.prisma, currentUser, childId);
+
+    // Find child's current classes
+    const classStudents = await this.prisma.classStudent.findMany({
+      where: { studentId: childId },
+      select: { classId: true },
+    });
+    const classIds = classStudents.map(cs => cs.classId);
+
+    const homeworks = await this.prisma.homework.findMany({
+      where: {
+        classId: { in: classIds },
+        ...buildTenantWhere(currentUser),
+      },
+      include: {
+        subject: { select: { id: true, name: true } },
+        class: { select: { id: true, name: true } },
+      },
+      orderBy: { dueDate: 'asc' },
+    });
+
+    // Fetch submissions separately
+    const submissions = await this.prisma.homeworkSubmission.findMany({
+      where: {
+        studentId: childId,
+        homeworkId: { in: homeworks.map(h => h.id) },
+      },
+      select: { id: true, homeworkId: true, submittedAt: true, score: true },
+    });
+    const submissionMap = new Map(submissions.map(s => [s.homeworkId, s]));
+
+    return homeworks.map(hw => ({
+      ...hw,
+      submission: submissionMap.get(hw.id) ?? null,
+    }));
   }
 }

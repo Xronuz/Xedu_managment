@@ -14,14 +14,7 @@ import {
   AlertCircle,
   GraduationCap,
   FileText,
-  Flame,
-  Star,
-  Trophy,
-  Zap,
-  Award,
-  Target,
   Download,
-  Coins,
   ShoppingBag,
 } from 'lucide-react';
 import {
@@ -47,7 +40,6 @@ import {
 import { useAuthStore } from '@/store/auth.store';
 import { apiClient } from '@/lib/api/client';
 import { examsApi } from '@/lib/api/exams';
-import { coinsApi } from '@/lib/api/coins';
 import { UserRole, GradeType, AttendanceStatus, DayOfWeek } from '@eduplatform/types';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -684,171 +676,6 @@ function StudentUpcomingExams({ studentId }: { studentId: string }) {
 
 // ─── Gamification ─────────────────────────────────────────────────────────────
 
-interface Achievement {
-  id: string;
-  label: string;
-  description: string;
-  icon: React.ReactNode;
-  color: string;
-  earned: boolean;
-}
-
-function computeStreak(records: AttendanceRecord[]): number {
-  // Sort descending by date
-  const sorted = [...records]
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
-  let streak = 0;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  for (const r of sorted) {
-    const d = new Date(r.date);
-    d.setHours(0, 0, 0, 0);
-    const diffDays = Math.round((today.getTime() - d.getTime()) / 86400000);
-    if (diffDays !== streak) break;
-    if (r.status === AttendanceStatus.PRESENT || r.status === AttendanceStatus.LATE) {
-      streak++;
-    } else {
-      break;
-    }
-  }
-  return streak;
-}
-
-function computeAchievements(opts: {
-  gpa: number;
-  attendancePct: number;
-  streak: number;
-  pendingHomework: number;
-  totalHomework: number;
-}): Achievement[] {
-  const { gpa, attendancePct, streak, pendingHomework, totalHomework } = opts;
-  return [
-    {
-      id: 'alacha',
-      label: "A'lochi",
-      description: 'GPA 90% dan yuqori',
-      icon: <Trophy className="h-4 w-4" />,
-      color: 'text-xedu-amber bg-amber-50 border-xedu-amber/20',
-      earned: gpa >= 90,
-    },
-    {
-      id: 'devoniy',
-      label: 'Devoniy',
-      description: 'So\'nggi 30 kunda 100% davomat',
-      icon: <Star className="h-4 w-4" />,
-      color: 'text-xedu-primary bg-xedu-primary-light border-xedu-primary/20',
-      earned: attendancePct === 100,
-    },
-    {
-      id: 'streak7',
-      label: '7 kunlik streak',
-      description: '7 kun ketma-ket keldi',
-      icon: <Flame className="h-4 w-4" />,
-      color: 'text-orange-600 bg-orange-50 border-orange-200',
-      earned: streak >= 7,
-    },
-    {
-      id: 'streak30',
-      label: '30 kunlik streak',
-      description: '30 kun ketma-ket keldi',
-      icon: <Zap className="h-4 w-4" />,
-      color: 'text-xedu-violet bg-violet-50 border-xedu-violet/20',
-      earned: streak >= 30,
-    },
-    {
-      id: 'faol',
-      label: 'Faol o\'quvchi',
-      description: 'Barcha uy vazifalar topshirildi',
-      icon: <Target className="h-4 w-4" />,
-      color: 'text-xedu-sky bg-sky-50 border-xedu-sky/20',
-      earned: totalHomework > 0 && pendingHomework === 0,
-    },
-    {
-      id: 'excellent5',
-      label: 'Beshlik',
-      description: 'GPA 95% dan yuqori',
-      icon: <Award className="h-4 w-4" />,
-      color: 'text-pink-600 bg-pink-50 border-pink-200',
-      earned: gpa >= 95,
-    },
-  ];
-}
-
-function GamificationSection({ records, gpa, attendancePct, pendingHomework, totalHomework }: {
-  records: AttendanceRecord[];
-  gpa: number;
-  attendancePct: number;
-  pendingHomework: number;
-  totalHomework: number;
-}) {
-  const streak = computeStreak(records);
-  const achievements = computeAchievements({ gpa, attendancePct, streak, pendingHomework, totalHomework });
-  const earned = achievements.filter(a => a.earned);
-  const notEarned = achievements.filter(a => !a.earned);
-
-  return (
-    <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <Trophy className="h-4 w-4 text-xedu-gold" />
-          Yutuqlar va streak
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Streak counter */}
-        <div className="flex items-center gap-3 rounded-xl bg-xedu-amber/5 border border-xedu-amber/20 dark:border-xedu-amber/30 px-4 py-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-xedu-amber/10 dark:bg-xedu-amber/20">
-            <Flame className="h-6 w-6 text-xedu-amber" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-xedu-amber dark:text-xedu-amber">{streak} kun</p>
-            <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Ketma-ket davomat streaki</p>
-          </div>
-          {streak >= 7 && (
-            <div className="ml-auto">
-              <Badge className="bg-xedu-amber/10 text-xedu-amber border-xedu-amber/30 dark:bg-xedu-amber/20 dark:text-xedu-amber">
-                🔥 Ajoyib!
-              </Badge>
-            </div>
-          )}
-        </div>
-
-        {/* Earned badges */}
-        {earned.length > 0 && (
-          <div>
-            <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 mb-2">Qo'lga kiritilgan yutuqlar ({earned.length})</p>
-            <div className="flex flex-wrap gap-2">
-              {earned.map(a => (
-                <div key={a.id} className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium ${a.color}`} title={a.description}>
-                  {a.icon}
-                  {a.label}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Locked badges */}
-        {notEarned.length > 0 && (
-          <div>
-            <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 mb-2">Ochilmagan yutuqlar</p>
-            <div className="flex flex-wrap gap-2">
-              {notEarned.map(a => (
-                <div key={a.id} className="flex items-center gap-1.5 rounded-full border border-dashed px-3 py-1.5 text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 opacity-50" title={a.description}>
-                  {a.icon}
-                  {a.label}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
-}
-
 // ─── Main page ────────────────────────────────────────────────────────────────
 
 export default function StudentPortalPage() {
@@ -886,12 +713,6 @@ export default function StudentPortalPage() {
   const studentId = user?.id ?? '';
 
   // Fetch all data for stat cards
-  const { data: coinsData, isLoading: coinsLoading } = useQuery({
-    queryKey: ['coins', 'balance', studentId],
-    queryFn: () => coinsApi.getBalance(),
-    enabled: !!studentId,
-  });
-
   const { data: gradesData, isLoading: gradesLoading } = useQuery<GradesResponse>({
     queryKey: ['grades', 'student', studentId],
     queryFn: async () => {
@@ -955,7 +776,7 @@ export default function StudentPortalPage() {
     homeworkData?.filter((hw) => !hw.submission && !isPastDue(hw.dueDate)).length ?? 0;
 
   const isStatsLoading =
-    gradesLoading || scheduleLoading || homeworkLoading || attendanceLoading || coinsLoading;
+    gradesLoading || scheduleLoading || homeworkLoading || attendanceLoading;
 
   // Don't render if not a student
   if (user && user.role !== UserRole.STUDENT) {
@@ -1107,42 +928,7 @@ export default function StudentPortalPage() {
           </CardContent>
         </Card>
 
-        {/* EduCoin balance */}
-        <Card className="cursor-pointer hover:shadow-sm transition-shadow" onClick={() => router.push('/dashboard/student/shop')}>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
-              EduCoin balans
-            </CardTitle>
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-yellow-100">
-              <Coins className="h-4 w-4 text-yellow-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isStatsLoading ? (
-              <>
-                <Skeleton className="h-8 w-14 mb-1" />
-                <Skeleton className="h-3 w-20" />
-              </>
-            ) : (
-              <>
-                <div className="text-2xl font-bold">{coinsData?.coins ?? 0}</div>
-                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">Do'konga o'tish →</p>
-              </>
-            )}
-          </CardContent>
-        </Card>
       </div>
-
-      {/* Gamification */}
-      {!attendanceLoading && !gradesLoading && !homeworkLoading && attendanceData && (
-        <GamificationSection
-          records={attendanceData}
-          gpa={gpa}
-          attendancePct={attendancePct}
-          pendingHomework={unpaidHomework}
-          totalHomework={homeworkData?.length ?? 0}
-        />
-      )}
 
       {/* Subject Radar + Upcoming Exams row */}
       {!gradesLoading && gradesData && (gradesData.grades?.length ?? 0) >= 3 && (

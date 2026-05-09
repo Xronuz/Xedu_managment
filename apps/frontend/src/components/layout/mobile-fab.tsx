@@ -4,7 +4,8 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Plus, X, ClipboardCheck, BookOpen, MessageSquare,
-  Calendar, GraduationCap, BookMarked,
+  Calendar, GraduationCap, BookMarked, CreditCard, Users,
+  FileText, Home,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -17,6 +18,7 @@ interface FabAction {
 }
 
 const FAB_ACTIONS: FabAction[] = [
+  // Staff actions
   {
     label: 'Davomat',
     icon: ClipboardCheck,
@@ -59,6 +61,64 @@ const FAB_ACTIONS: FabAction[] = [
     color: 'bg-pink-500 hover:bg-pink-600',
     roles: ['director', 'vice_principal', 'teacher', 'class_teacher', 'accountant', 'librarian'],
   },
+  // Parent actions
+  {
+    label: 'Uyga vazifa',
+    icon: BookMarked,
+    href: '/dashboard/parent?tab=homework',
+    color: 'bg-xedu-primary hover:bg-xedu-primary/90',
+    roles: ['parent'],
+  },
+  {
+    label: "To'lovlar",
+    icon: CreditCard,
+    href: '/dashboard/parent?tab=payments',
+    color: 'bg-xedu-teal hover:bg-xedu-teal/90',
+    roles: ['parent'],
+  },
+  {
+    label: 'Davomat',
+    icon: ClipboardCheck,
+    href: '/dashboard/parent?tab=attendance',
+    color: 'bg-green-500 hover:bg-green-600',
+    roles: ['parent'],
+  },
+  {
+    label: 'Xabar',
+    icon: MessageSquare,
+    href: '/dashboard/messages',
+    color: 'bg-pink-500 hover:bg-pink-600',
+    roles: ['parent'],
+  },
+  // Student actions
+  {
+    label: 'Uyga vazifa',
+    icon: BookMarked,
+    href: '/dashboard/student?tab=homework',
+    color: 'bg-xedu-primary hover:bg-xedu-primary/90',
+    roles: ['student'],
+  },
+  {
+    label: 'Dars jadvali',
+    icon: Calendar,
+    href: '/dashboard/student?tab=schedule',
+    color: 'bg-teal-500 hover:bg-teal-600',
+    roles: ['student'],
+  },
+  {
+    label: 'Baholar',
+    icon: FileText,
+    href: '/dashboard/student?tab=grades',
+    color: 'bg-blue-500 hover:bg-blue-600',
+    roles: ['student'],
+  },
+  {
+    label: 'Xabar',
+    icon: MessageSquare,
+    href: '/dashboard/messages',
+    color: 'bg-pink-500 hover:bg-pink-600',
+    roles: ['student'],
+  },
 ];
 
 export function MobileFab() {
@@ -68,9 +128,9 @@ export function MobileFab() {
 
   const role = user?.role ?? '';
 
-  // Only show for staff roles, not student/parent/super_admin
-  const staffRoles = ['director', 'vice_principal', 'teacher', 'class_teacher', 'accountant', 'librarian'];
-  if (!staffRoles.includes(role)) return null;
+  // Show for staff, parent, and student roles
+  const allowedRoles = ['director', 'vice_principal', 'teacher', 'class_teacher', 'accountant', 'librarian', 'parent', 'student'];
+  if (!allowedRoles.includes(role)) return null;
 
   const actions = FAB_ACTIONS.filter(a => !a.roles || a.roles.includes(role));
 

@@ -7,6 +7,7 @@ import { NotificationQueueService } from '@/modules/notifications/notification-q
 import { AuditService } from '@/common/audit/audit.service';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
+import { assertParentOfChild } from '@/common/utils/parent-guard.util';
 
 const ATTENDANCE_TTL = 3 * 60;   // 3 min — nisbatan tez-tez o'zgaradi
 const SUMMARY_TTL   = 2 * 60;   // 2 min — joriy kun xulosasi
@@ -221,6 +222,7 @@ export class AttendanceService {
   }
 
   async getStudentHistory(studentId: string, currentUser: JwtPayload, limit = 30) {
+    await assertParentOfChild(this.prisma, currentUser, studentId);
     const schoolId = currentUser.schoolId!;
     const key = this.ck(schoolId, currentUser.branchId, `history:${studentId}:${limit}`);
     const cached = await this.redis.getJson<any[]>(key);

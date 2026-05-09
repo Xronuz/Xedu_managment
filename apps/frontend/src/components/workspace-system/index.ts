@@ -53,3 +53,17 @@ export { useDebouncedValue } from './use-debounced-value';
 export { useVirtualization } from './use-virtualization';
 export { MemoChart } from './memo-chart';
 export { RealtimePulse } from './realtime-pulse';
+export {
+  FamilyShell,
+  FamilyHeader,
+  FamilyQuickStats,
+  FamilyMain,
+  FamilySidebar,
+} from './family-shell';
+export {
+  StudentShell,
+  StudentHeader,
+  StudentDayBlock,
+  StudentProgress,
+} from './student-shell';
+export { AcademicEmptyState } from './academic-empty-state';

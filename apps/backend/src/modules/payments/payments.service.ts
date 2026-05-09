@@ -1,12 +1,13 @@
-import { Injectable, NotFoundException, UnauthorizedException, BadRequestException, Logger, Optional } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException, BadRequestException, ForbiddenException, Logger, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { IsString, IsNumber, IsOptional, Min, IsDateString } from 'class-validator';
 import * as crypto from 'crypto';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { JwtPayload, PaymentStatus } from '@eduplatform/types';
+import { JwtPayload, PaymentStatus, UserRole } from '@eduplatform/types';
 import { AuditService } from '@/common/audit/audit.service';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
+import { assertParentOfChild } from '@/common/utils/parent-guard.util';
 import { TreasuryService } from '@/modules/treasury/treasury.service';
 import { FinancialShiftsService } from '@/modules/financial-shifts/financial-shifts.service';
 
@@ -149,6 +150,11 @@ export class PaymentsService {
     page = 1,
     limit = 20,
   ) {
+    // Validate parent-child relationship when viewing specific student
+    if (studentId) {
+      await assertParentOfChild(this.prisma, currentUser, studentId);
+    }
+
     // Hard caps: prevent OOM from malicious ?limit=999999
     page  = Math.max(1, page);
     limit = Math.min(100, Math.max(1, limit));
@@ -254,6 +260,60 @@ export class PaymentsService {
       overdue: totalOverdue._sum.amount ?? 0,
       debtors,
       classStats,
+    };
+  }
+
+  async getParentSummary(currentUser: JwtPayload) {
+    // Resolve children for parent, or self for student
+    let studentIds: string[];
+    if (currentUser.role === UserRole.STUDENT) {
+      studentIds = [currentUser.sub];
+    } else if (currentUser.role === UserRole.PARENT) {
+      const links = await this.prisma.parentStudent.findMany({
+        where: { parentId: currentUser.sub },
+        select: { studentId: true },
+      });
+      studentIds = links.map(l => l.studentId);
+    } else {
+      throw new ForbiddenException('Bu endpoint faqat ota-ona va o\'quvchilar uchun');
+    }
+
+    const [pendingPayments, recentPayments, totalPaid] = await this.prisma.$transaction([
+      this.prisma.payment.findMany({
+        where: {
+          studentId: { in: studentIds },
+          status: { in: ['pending', 'overdue'] as any },
+        },
+        include: { student: { select: { id: true, firstName: true, lastName: true } } },
+        orderBy: { dueDate: 'asc' },
+        take: 10,
+      }),
+      this.prisma.payment.findMany({
+        where: {
+          studentId: { in: studentIds },
+          status: 'paid' as any,
+        },
+        include: { student: { select: { id: true, firstName: true, lastName: true } } },
+        orderBy: { paidAt: 'desc' },
+        take: 5,
+      }),
+      this.prisma.payment.aggregate({
+        where: {
+          studentId: { in: studentIds },
+          status: 'paid' as any,
+        },
+        _sum: { amount: true },
+      }),
+    ]);
+
+    const outstandingBalance = pendingPayments.reduce((sum, p) => sum + p.amount, 0);
+
+    return {
+      outstandingBalance,
+      totalPaid: totalPaid._sum.amount ?? 0,
+      pendingCount: pendingPayments.length,
+      pendingPayments,
+      recentPayments,
     };
   }
 

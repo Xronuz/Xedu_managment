@@ -7,7 +7,7 @@ import {
   Users, School, CreditCard, TrendingUp, TrendingDown,
   AlertCircle, Globe, CheckCircle2, Building2, LayoutGrid,
   BookOpen, BookMarked, ClipboardCheck, Calendar, GraduationCap, ChevronRight,
-  Rocket, X, Library, BookCopy, Hourglass, DollarSign, BarChart2, Coins,
+  Rocket, X, Library, BookCopy, Hourglass, DollarSign, BarChart2,
   CalendarOff, ShieldAlert, CalendarCheck, Activity, Bell, ArrowUpRight, Server,
   CalendarDays, Plus, Pencil, Trash2 as Trash2Icon,
 } from 'lucide-react';
@@ -39,7 +39,7 @@ import { examsApi } from '@/lib/api/exams';
 import { homeworkApi } from '@/lib/api/homework';
 import { subjectsApi } from '@/lib/api/subjects';
 import { gradesApi } from '@/lib/api/grades';
-import { coinsApi } from '@/lib/api/coins';
+
 import { kpiApi } from '@/lib/api/kpi';
 import { aiAnalyticsApi } from '@/lib/api/ai-analytics';
 import { branchesApi } from '@/lib/api/branches';

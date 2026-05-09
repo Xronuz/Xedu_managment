@@ -74,7 +74,7 @@ export class GradesController {
   }
 
   @Get('student/:id')
-  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.STUDENT)
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.STUDENT, UserRole.PARENT)
   @ApiOperation({ summary: 'O\'quvchi baholari' })
   getStudentGrades(
     @Param('id') studentId: string,

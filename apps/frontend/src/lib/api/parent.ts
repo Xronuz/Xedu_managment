@@ -48,4 +48,9 @@ export const parentApi = {
     const { data } = await apiClient.get(`/parent/child/${studentId}/coins`);
     return data as { balance: number; rank: number; total: number; history: any[] };
   },
+
+  getChildHomework: async (studentId: string) => {
+    const { data } = await apiClient.get(`/homework/by-child/${studentId}`);
+    return data;
+  },
 };

@@ -21,10 +21,7 @@ import {
   Send,
   Loader2,
   FileText,
-  Coins,
-  Trophy,
-  ArrowUpCircle,
-  ArrowDownCircle,
+
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -133,7 +130,7 @@ export default function ParentPage() {
   const queryClient = useQueryClient();
 
   const [selectedChildId, setSelectedChildId] = useState<string>('');
-  const [activeTab, setActiveTab] = useState('attendance');
+  const [activeTab, setActiveTab] = useState('homework');
   const [subjectFilter, setSubjectFilter] = useState<string>('all');
 
   // Leave request form state
@@ -187,10 +184,11 @@ export default function ParentPage() {
     select: (data: any) => (Array.isArray(data) ? data : data?.data ?? []),
   });
 
-  const { data: coinsData, isLoading: coinsLoading } = useQuery({
-    queryKey: ['parent', 'coins', childId],
-    queryFn: () => parentApi.getChildCoins(childId),
-    enabled: !!childId,
+  const { data: homeworkData, isLoading: homeworkLoading } = useQuery({
+    queryKey: ['parent', 'homework', childId],
+    queryFn: () => parentApi.getChildHomework(childId),
+    enabled: !!childId && activeTab === 'homework',
+    select: (data: any) => (Array.isArray(data) ? data : data?.data ?? []),
   });
 
   // ── Real-time WebSocket: ota-onaga davomat ogohlantiruvi ────────────────
@@ -513,20 +511,26 @@ export default function ParentPage() {
 
             {/* EduCoin */}
             <Card
-              className="cursor-pointer hover:shadow-sm transition-shadow border-amber-200 dark:border-amber-800/50"
-              onClick={() => setActiveTab('coins')}
+              className="cursor-pointer hover:shadow-sm transition-shadow border-xedu-primary/20 dark:border-xedu-primary/30"
+              onClick={() => setActiveTab('homework')}
             >
               <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">EduCoin</CardTitle>
-                <Coins className="h-4 w-4 text-amber-500" />
+                <CardTitle className="text-sm font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Uyga vazifa</CardTitle>
+                <BookOpen className="h-4 w-4 text-xedu-primary" />
               </CardHeader>
               <CardContent>
-                {coinsLoading ? (
+                {homeworkLoading ? (
                   <Skeleton className="h-7 w-16" />
-                ) : coinsData ? (
+                ) : homeworkData ? (
                   <>
-                    <div className="text-2xl font-bold text-amber-600">{coinsData.balance.toLocaleString()} 🪙</div>
-                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">Reyting: #{coinsData.rank}</p>
+                    <div className="text-2xl font-bold text-xedu-primary">
+                      {homeworkData.filter((h: any) => !h.submission).length}
+                    </div>
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">
+                      {homeworkData.filter((h: any) => new Date(h.dueDate) < new Date() && !h.submission).length > 0
+                        ? `${homeworkData.filter((h: any) => new Date(h.dueDate) < new Date() && !h.submission).length} ta muddati o'tgan`
+                        : 'Topshirish kerak'}
+                    </p>
                   </>
                 ) : (
                   <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">—</p>
@@ -558,9 +562,9 @@ export default function ParentPage() {
                 <CalendarOff className="mr-1.5 h-4 w-4" />
                 Ta&apos;til so&apos;rovi
               </TabsTrigger>
-              <TabsTrigger value="coins">
-                <Coins className="mr-1.5 h-4 w-4" />
-                EduCoin
+              <TabsTrigger value="homework">
+                <BookOpen className="mr-1.5 h-4 w-4" />
+                Uyga vazifa
               </TabsTrigger>
             </TabsList>
 
@@ -1010,94 +1014,54 @@ export default function ParentPage() {
               </Card>
             </TabsContent>
 
-            {/* ── EduCoin ── */}
-            <TabsContent value="coins" className="mt-4 space-y-4">
-              {coinsLoading ? (
+            {/* ── Homework ── */}
+            <TabsContent value="homework" className="mt-4 space-y-4">
+              {homeworkLoading ? (
                 <ListSkeleton rows={5} />
-              ) : !coinsData ? (
+              ) : !homeworkData || homeworkData.length === 0 ? (
                 <Card>
                   <CardContent className="py-10">
-                    <EmptyState icon={Coins} title="Coin ma'lumoti yo'q" />
+                    <EmptyState icon={BookOpen} title="Uyga vazifa yo'q" description="Hozircha hech qanday topshirish kerak bo'lgan vazifa yo'q" />
                   </CardContent>
                 </Card>
               ) : (
-                <>
-                  {/* Balance + Rank */}
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <Card className="col-span-1 sm:col-span-2 bg-gradient-to-br from-amber-50 to-yellow-50 dark:from-amber-950/30 dark:to-yellow-950/30 border-amber-200 dark:border-amber-800">
-                      <CardContent className="flex items-center gap-5 py-5">
-                        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-amber-100 dark:bg-amber-900/40">
-                          <Coins className="h-8 w-8 text-amber-600" />
-                        </div>
-                        <div>
-                          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Joriy balans</p>
-                          <p className="text-4xl font-bold text-amber-600">{coinsData.balance.toLocaleString()}</p>
-                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">🪙 EduCoin</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                    <Card>
-                      <CardContent className="flex flex-col items-center justify-center gap-1 py-5">
-                        <Trophy className="h-7 w-7 text-yellow-500" />
-                        <p className="text-3xl font-bold">{coinsData.rank}</p>
-                        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 text-center">
-                          {coinsData.total} o&apos;quvchi ichida<br />maktab reytingi
-                        </p>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  {/* History */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Coin harakatlari tarixi</CardTitle>
-                    </CardHeader>
-                    <CardContent className="p-0">
-                      {coinsData.history.length === 0 ? (
-                        <EmptyState icon={Coins} title="Hali hech qanday harakat yo'q" description="Baholar va davomat orqali coin to'plash mumkin" />
-                      ) : (
-                        <div className="divide-y">
-                          {coinsData.history.map((tx: any) => {
-                            const isEarn = tx.type === 'earn';
-                            const reasonLabels: Record<string, string> = {
-                              grade_excellent:   '📚 A\'lo baho',
-                              attendance_weekly: '📅 Haftalik 100% davomat',
-                              discipline_praise: '🏅 O\'qituvchi maqtovi',
-                              manual_award:      '🎁 Qo\'lda berildi',
-                              discipline_warning:' Intizom buzilishi',
-                              shop_purchase:     '🛍 Do\'konda xarid',
-                              manual_deduct:     '📉 Qo\'lda ayirildi',
-                            };
-                            const label = reasonLabels[tx.reason] ?? tx.reason;
-                            return (
-                              <div key={tx.id} className="flex items-center gap-3 px-4 py-3">
-                                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${isEarn ? 'bg-green-100 dark:bg-green-900/30' : 'bg-red-100 dark:bg-red-900/30'}`}>
-                                  {isEarn
-                                    ? <ArrowUpCircle className="h-5 w-5 text-green-600" />
-                                    : <ArrowDownCircle className="h-5 w-5 text-red-500" />}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium truncate">{label}</p>
-                                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
-                                    {new Date(tx.createdAt).toLocaleString('uz-UZ')}
-                                  </p>
-                                </div>
-                                <div className="text-right shrink-0">
-                                  <p className={`font-bold ${isEarn ? 'text-xedu-primary' : 'text-red-500'}`}>
-                                    {isEarn ? '+' : ''}{tx.amount} 🪙
-                                  </p>
-                                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
-                                    Balans: {tx.balance}
-                                  </p>
-                                </div>
+                <div className="space-y-3">
+                  {homeworkData.map((hw: any) => {
+                    const isOverdue = new Date(hw.dueDate) < new Date() && !hw.submission;
+                    const isSubmitted = !!hw.submission;
+                    return (
+                      <Card key={hw.id} className={isOverdue ? 'border-xedu-ruby/30' : ''}>
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <h4 className="text-sm font-medium truncate">{hw.title}</h4>
+                                {isSubmitted && (
+                                  <Badge variant="outline" className="text-xs border-xedu-primary text-xedu-primary">
+                                    Topshirildi
+                                  </Badge>
+                                )}
+                                {isOverdue && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    Muddati o'tgan
+                                  </Badge>
+                                )}
                               </div>
-                            );
-                          })}
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                </>
+                              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 line-clamp-2">{hw.description || 'Tavsif yo\'q'}</p>
+                              <div className="flex items-center gap-3 mt-2">
+                                <span className="text-xs text-xedu-slate-500">{hw.subject?.name}</span>
+                                <span className="text-xs text-xedu-slate-400">•</span>
+                                <span className={`text-xs ${isOverdue ? 'text-xedu-ruby' : 'text-xedu-slate-500'}`}>
+                                  Tugash: {formatDate(hw.dueDate)}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  })}
+                </div>
               )}
             </TabsContent>
           </Tabs>

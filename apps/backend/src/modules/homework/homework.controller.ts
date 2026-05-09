@@ -18,7 +18,7 @@ export class HomeworkController {
   @Get()
   @Roles(
     UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN,
-    UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT,
+    UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT,
   )
   @ApiOperation({ summary: 'Uyga vazifalar ro\'yxati' })
   findAll(
@@ -32,7 +32,7 @@ export class HomeworkController {
   @Get(':id')
   @Roles(
     UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN,
-    UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT,
+    UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT,
   )
   @ApiOperation({ summary: 'Uyga vazifa ma\'lumoti' })
   findOne(
@@ -94,5 +94,15 @@ export class HomeworkController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.homeworkService.getMySubmission(id, user);
+  }
+
+  @Get('by-child/:childId')
+  @Roles(UserRole.PARENT, UserRole.STUDENT)
+  @ApiOperation({ summary: 'Farzandning uyga vazifalari (ota-ona uchun)' })
+  getByChild(
+    @Param('childId') childId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.homeworkService.getByChild(childId, user);
   }
 }

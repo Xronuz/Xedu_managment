@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { cn } from '@/lib/utils';
 import { CheckSquare, Square, ArrowUpDown } from 'lucide-react';
 
@@ -17,6 +17,7 @@ import { CheckSquare, Square, ArrowUpDown } from 'lucide-react';
    - Sort indicators
    - Empty state
    - Loading skeletons
+   - Row memoization for scale readiness
 
    Reference: Linear + SAP + Airtable Enterprise density
    ═══════════════════════════════════════════════════════════════════════════════ */
@@ -55,6 +56,38 @@ export interface OpTableProps<T> {
   maxHeight?: string;
 }
 
+/* ── Static lookup tables (never recreated) ───────────────────────────────── */
+
+const DENSITY_PADDING: Record<TableDensity, string> = {
+  compact: 'px-3 py-1.5',
+  normal: 'px-4 py-2.5',
+  spacious: 'px-5 py-3.5',
+};
+
+const DENSITY_TEXT: Record<TableDensity, string> = {
+  compact: 'text-xs',
+  normal: 'text-sm',
+  spacious: 'text-base',
+};
+
+const TONE_BG: Record<RowTone, string> = {
+  neutral: '',
+  attention: 'bg-xedu-amber-50/60 dark:bg-xedu-amber-900/15',
+  urgent: 'bg-xedu-ruby-50/60 dark:bg-xedu-ruby-900/15',
+  success: 'bg-xedu-emerald-50/60 dark:bg-xedu-emerald-900/15',
+  muted: 'opacity-60',
+};
+
+const TONE_BORDER: Record<RowTone, string> = {
+  neutral: '',
+  attention: 'border-l-2 border-l-xedu-amber-400',
+  urgent: 'border-l-2 border-l-xedu-ruby-400',
+  success: 'border-l-2 border-l-xedu-emerald-400',
+  muted: '',
+};
+
+/* ── Main component ───────────────────────────────────────────────────────── */
+
 export function OpTable<T>({
   columns,
   rows,
@@ -78,20 +111,17 @@ export function OpTable<T>({
 }: OpTableProps<T>) {
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
-  const allSelected = rows.length > 0 && rows.every((r) => selectedIds.includes(rowKey(r)));
+  const allSelected = useMemo(
+    () => rows.length > 0 && rows.every((r) => selectedIds.includes(rowKey(r))),
+    [rows, selectedIds, rowKey]
+  );
   const someSelected = selectedIds.length > 0 && !allSelected;
 
-  const densityPadding = {
-    compact: 'px-3 py-1.5',
-    normal: 'px-4 py-2.5',
-    spacious: 'px-5 py-3.5',
-  }[density];
+  const densityPadding = DENSITY_PADDING[density];
+  const densityText = DENSITY_TEXT[density];
 
-  const densityText = {
-    compact: 'text-xs',
-    normal: 'text-sm',
-    spacious: 'text-base',
-  }[density];
+  const handleMouseEnter = useCallback((key: string) => setHoveredRow(key), []);
+  const handleMouseLeave = useCallback(() => setHoveredRow(null), []);
 
   if (isLoading) {
     return (
@@ -172,90 +202,142 @@ export function OpTable<T>({
             </tr>
           </thead>
           <tbody className="divide-y divide-xedu-slate-100 dark:divide-xedu-slate-800">
-            {rows.map((row, idx) => {
-              const key = rowKey(row);
-              const tone = rowTone?.(row) ?? 'neutral';
-              const isSelected = selectedIds.includes(key);
-              const isHovered = hoveredRow === key;
-              const href = rowHref?.(row);
-
-              const toneBg = {
-                neutral: '',
-                attention: 'bg-xedu-amber-50/60 dark:bg-xedu-amber-900/15',
-                urgent: 'bg-xedu-ruby-50/60 dark:bg-xedu-ruby-900/15',
-                success: 'bg-xedu-emerald-50/60 dark:bg-xedu-emerald-900/15',
-                muted: 'opacity-60',
-              }[tone];
-
-              const toneBorder = {
-                neutral: '',
-                attention: 'border-l-2 border-l-xedu-amber-400',
-                urgent: 'border-l-2 border-l-xedu-ruby-400',
-                success: 'border-l-2 border-l-xedu-emerald-400',
-                muted: '',
-              }[tone];
-
-              return (
-                <tr
-                  key={key}
-                  className={cn(
-                    'group transition-colors touch-manipulation',
-                    toneBg,
-                    toneBorder,
-                    isSelected && 'bg-xedu-primary-light/30',
-                    !isSelected && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30',
-                    href && 'cursor-pointer'
-                  )}
-                  onClick={() => href && (window.location.href = href)}
-                  onMouseEnter={() => setHoveredRow(key)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                >
-                  {selectable && (
-                    <td className={cn(densityPadding, 'w-10')} onClick={(e) => e.preventDefault()}>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onSelect?.(key); }}
-                        className="flex items-center justify-center min-h-[44px] min-w-[44px]"
-                      >
-                        {isSelected ? (
-                          <CheckSquare className="h-4 w-4 text-xedu-primary" />
-                        ) : (
-                          <Square className="h-4 w-4 text-xedu-slate-300" />
-                        )}
-                      </button>
-                    </td>
-                  )}
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className={cn(
-                        densityPadding,
-                        densityText,
-                        'text-xedu-slate-800 dark:text-xedu-slate-200',
-                        col.align === 'center' && 'text-center',
-                        col.align === 'right' && 'text-right'
-                      )}
-                    >
-                      {col.cell(row, idx)}
-                    </td>
-                  ))}
-                  {rowActions && (
-                    <td className={cn(densityPadding, 'w-0')}>
-                      <div className={cn(
-                        'flex items-center gap-1 transition-opacity',
-                        'opacity-100',
-                        'md:opacity-0 md:group-hover:opacity-100',
-                        (isHovered || isSelected) && 'md:opacity-100'
-                      )}>
-                        {rowActions(row)}
-                      </div>
-                    </td>
-                  )}
-                </tr>
-              );
-            })}
+            {rows.map((row, idx) => (
+              <OpTableRow<T>
+                key={rowKey(row)}
+                row={row}
+                index={idx}
+                columns={columns}
+                rowKeyFn={rowKey}
+                densityPadding={densityPadding}
+                densityText={densityText}
+                selectable={selectable}
+                selectedIds={selectedIds}
+                onSelect={onSelect}
+                rowTone={rowTone}
+                rowHref={rowHref}
+                rowActions={rowActions}
+                hoveredRow={hoveredRow}
+                onMouseEnter={handleMouseEnter}
+                onMouseLeave={handleMouseLeave}
+              />
+            ))}
           </tbody>
         </table>
       </div>
     </div>
   );
 }
+
+/* ── Memoized row component ───────────────────────────────────────────────── */
+
+interface OpTableRowProps<T> {
+  row: T;
+  index: number;
+  columns: OpColumn<T>[];
+  rowKeyFn: (row: T) => string;
+  densityPadding: string;
+  densityText: string;
+  selectable: boolean;
+  selectedIds: string[];
+  onSelect?: (id: string) => void;
+  rowTone?: (row: T) => RowTone;
+  rowHref?: (row: T) => string | undefined;
+  rowActions?: (row: T) => React.ReactNode;
+  hoveredRow: string | null;
+  onMouseEnter: (key: string) => void;
+  onMouseLeave: () => void;
+}
+
+const OpTableRow = memo(function OpTableRow<T>({
+  row,
+  index,
+  columns,
+  rowKeyFn,
+  densityPadding,
+  densityText,
+  selectable,
+  selectedIds,
+  onSelect,
+  rowTone,
+  rowHref,
+  rowActions,
+  hoveredRow,
+  onMouseEnter,
+  onMouseLeave,
+}: OpTableRowProps<T>) {
+  const key = rowKeyFn(row);
+  const tone = rowTone?.(row) ?? 'neutral';
+  const isSelected = selectedIds.includes(key);
+  const isHovered = hoveredRow === key;
+  const href = rowHref?.(row);
+
+  const toneBg = TONE_BG[tone];
+  const toneBorder = TONE_BORDER[tone];
+
+  const handleRowClick = useCallback(() => {
+    if (href) window.location.href = href;
+  }, [href]);
+
+  const handleSelectClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect?.(key);
+  }, [onSelect, key]);
+
+  return (
+    <tr
+      className={cn(
+        'group transition-colors touch-manipulation',
+        toneBg,
+        toneBorder,
+        isSelected && 'bg-xedu-primary-light/30',
+        !isSelected && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30',
+        href && 'cursor-pointer'
+      )}
+      onClick={handleRowClick}
+      onMouseEnter={() => onMouseEnter(key)}
+      onMouseLeave={onMouseLeave}
+    >
+      {selectable && (
+        <td className={cn(densityPadding, 'w-10')} onClick={(e) => e.preventDefault()}>
+          <button
+            onClick={handleSelectClick}
+            className="flex items-center justify-center min-h-[44px] min-w-[44px]"
+          >
+            {isSelected ? (
+              <CheckSquare className="h-4 w-4 text-xedu-primary" />
+            ) : (
+              <Square className="h-4 w-4 text-xedu-slate-300" />
+            )}
+          </button>
+        </td>
+      )}
+      {columns.map((col) => (
+        <td
+          key={col.key}
+          className={cn(
+            densityPadding,
+            densityText,
+            'text-xedu-slate-800 dark:text-xedu-slate-200',
+            col.align === 'center' && 'text-center',
+            col.align === 'right' && 'text-right'
+          )}
+        >
+          {col.cell(row, index)}
+        </td>
+      ))}
+      {rowActions && (
+        <td className={cn(densityPadding, 'w-0')}>
+          <div className={cn(
+            'flex items-center gap-1 transition-opacity',
+            'opacity-100',
+            'md:opacity-0 md:group-hover:opacity-100',
+            (isHovered || isSelected) && 'md:opacity-100'
+          )}>
+            {rowActions(row)}
+          </div>
+        </td>
+      )}
+    </tr>
+  );
+}) as <T>(props: OpTableRowProps<T>) => React.JSX.Element;

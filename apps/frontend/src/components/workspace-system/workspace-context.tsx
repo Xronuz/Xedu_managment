@@ -3,67 +3,107 @@
 import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   WORKSPACE CONTEXT
-   Global workspace state management for panels, selections, comparisons,
-   and contextual surfaces. Role-agnostic.
+   WORKSPACE CONTEXT SYSTEM
+   Split-context architecture for performance under institutional scale.
+
+   Problem: A single context causes ALL consumers to rerender on ANY state change.
+   Solution: Three independent contexts so components subscribe only to what they use.
+
+   Usage:
+     import { useWorkspacePanel, useWorkspaceSelection, useWorkspaceOps } from './workspace-context';
+
+   Backward compatible:
+     useWorkspace() still returns all three combined.
    ═══════════════════════════════════════════════════════════════════════════════ */
 
-export interface WorkspaceState {
-  /* Panel state */
+/* ──────────────────────────────────────────────────────────────────────────────
+   PANEL CONTEXT — slide-over panel state
+   Consumers: EntityPanel, row click handlers
+   ────────────────────────────────────────────────────────────────────────────── */
+
+interface PanelState {
   panelOpen: boolean;
   panelEntityType: string | null;
   panelEntityId: string | null;
-
-  /* Selection state */
-  selectedIds: string[];
-  lastSelectedId: string | null;
-
-  /* Comparison state */
-  compareMode: boolean;
-  compareIds: string[];
-
-  /* Filters */
-  activeFilters: Record<string, string | string[]>;
-
-  /* Search */
-  searchQuery: string;
-  searchScope: string;
 }
 
-interface WorkspaceContextValue {
-  state: WorkspaceState;
-
-  /* Panel actions */
+interface PanelContextValue {
+  state: PanelState;
   openPanel: (entityType: string, entityId: string) => void;
   closePanel: () => void;
+}
 
-  /* Selection actions */
+const defaultPanelState: PanelState = {
+  panelOpen: false,
+  panelEntityType: null,
+  panelEntityId: null,
+};
+
+const PanelContext = createContext<PanelContextValue | null>(null);
+
+function usePanelContext() {
+  const ctx = useContext(PanelContext);
+  if (!ctx) throw new Error('useWorkspacePanel must be used within WorkspaceProvider');
+  return ctx;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   SELECTION CONTEXT — bulk selection state
+   Consumers: OpTable, FloatingBulkToolbar
+   ────────────────────────────────────────────────────────────────────────────── */
+
+interface SelectionState {
+  selectedIds: string[];
+  lastSelectedId: string | null;
+}
+
+interface SelectionContextValue {
+  state: SelectionState;
   toggleSelect: (id: string) => void;
   selectAll: (ids: string[]) => void;
   clearSelection: () => void;
   setSelectedIds: (ids: string[]) => void;
+}
 
-  /* Comparison actions */
+const defaultSelectionState: SelectionState = {
+  selectedIds: [],
+  lastSelectedId: null,
+};
+
+const SelectionContext = createContext<SelectionContextValue | null>(null);
+
+function useSelectionContext() {
+  const ctx = useContext(SelectionContext);
+  if (!ctx) throw new Error('useWorkspaceSelection must be used within WorkspaceProvider');
+  return ctx;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   OPERATIONS CONTEXT — filters, search, compare
+   Consumers: WorkspaceToolbar, filter chips, search inputs
+   ────────────────────────────────────────────────────────────────────────────── */
+
+interface OpsState {
+  compareMode: boolean;
+  compareIds: string[];
+  activeFilters: Record<string, string | string[]>;
+  searchQuery: string;
+  searchScope: string;
+}
+
+interface OpsContextValue {
+  state: OpsState;
   toggleCompareMode: () => void;
   toggleCompareId: (id: string) => void;
   clearCompare: () => void;
-
-  /* Filter actions */
   setFilter: (key: string, value: string | string[] | null) => void;
   clearFilters: () => void;
-
-  /* Search actions */
   setSearchQuery: (q: string) => void;
   setSearchScope: (scope: string) => void;
   clearSearch: () => void;
 }
 
-const defaultState: WorkspaceState = {
-  panelOpen: false,
-  panelEntityType: null,
-  panelEntityId: null,
-  selectedIds: [],
-  lastSelectedId: null,
+const defaultOpsState: OpsState = {
   compareMode: false,
   compareIds: [],
   activeFilters: {},
@@ -71,53 +111,72 @@ const defaultState: WorkspaceState = {
   searchScope: 'all',
 };
 
-const WorkspaceContext = createContext<WorkspaceContextValue | null>(null);
+const OpsContext = createContext<OpsContextValue | null>(null);
+
+function useOpsContext() {
+  const ctx = useContext(OpsContext);
+  if (!ctx) throw new Error('useWorkspaceOps must be used within WorkspaceProvider');
+  return ctx;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   PROVIDER — composes all three contexts
+   ────────────────────────────────────────────────────────────────────────────── */
 
 export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<WorkspaceState>(defaultState);
+  const [panelState, setPanelState] = useState<PanelState>(defaultPanelState);
+  const [selectionState, setSelectionState] = useState<SelectionState>(defaultSelectionState);
+  const [opsState, setOpsState] = useState<OpsState>(defaultOpsState);
 
+  /* Panel actions */
   const openPanel = useCallback((entityType: string, entityId: string) => {
-    setState((s) => ({
-      ...s,
-      panelOpen: true,
-      panelEntityType: entityType,
-      panelEntityId: entityId,
-    }));
+    setPanelState({ panelOpen: true, panelEntityType: entityType, panelEntityId: entityId });
   }, []);
 
   const closePanel = useCallback(() => {
-    setState((s) => ({
-      ...s,
-      panelOpen: false,
-      panelEntityType: null,
-      panelEntityId: null,
-    }));
+    setPanelState(defaultPanelState);
   }, []);
 
+  const panelValue = useMemo(() => ({
+    state: panelState,
+    openPanel,
+    closePanel,
+  }), [panelState, openPanel, closePanel]);
+
+  /* Selection actions */
   const toggleSelect = useCallback((id: string) => {
-    setState((s) => {
+    setSelectionState((s) => {
       const has = s.selectedIds.includes(id);
       const selectedIds = has
         ? s.selectedIds.filter((x) => x !== id)
         : [...s.selectedIds, id];
-      return { ...s, selectedIds, lastSelectedId: id };
+      return { selectedIds, lastSelectedId: id };
     });
   }, []);
 
   const selectAll = useCallback((ids: string[]) => {
-    setState((s) => ({ ...s, selectedIds: ids }));
+    setSelectionState((s) => ({ ...s, selectedIds: ids }));
   }, []);
 
   const clearSelection = useCallback(() => {
-    setState((s) => ({ ...s, selectedIds: [], lastSelectedId: null }));
+    setSelectionState({ selectedIds: [], lastSelectedId: null });
   }, []);
 
   const setSelectedIds = useCallback((ids: string[]) => {
-    setState((s) => ({ ...s, selectedIds: ids }));
+    setSelectionState((s) => ({ ...s, selectedIds: ids }));
   }, []);
 
+  const selectionValue = useMemo(() => ({
+    state: selectionState,
+    toggleSelect,
+    selectAll,
+    clearSelection,
+    setSelectedIds,
+  }), [selectionState, toggleSelect, selectAll, clearSelection, setSelectedIds]);
+
+  /* Ops actions */
   const toggleCompareMode = useCallback(() => {
-    setState((s) => ({
+    setOpsState((s) => ({
       ...s,
       compareMode: !s.compareMode,
       compareIds: !s.compareMode ? s.compareIds : [],
@@ -125,7 +184,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleCompareId = useCallback((id: string) => {
-    setState((s) => {
+    setOpsState((s) => {
       const has = s.compareIds.includes(id);
       const compareIds = has
         ? s.compareIds.filter((x) => x !== id)
@@ -135,11 +194,11 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clearCompare = useCallback(() => {
-    setState((s) => ({ ...s, compareMode: false, compareIds: [] }));
+    setOpsState((s) => ({ ...s, compareMode: false, compareIds: [] }));
   }, []);
 
   const setFilter = useCallback((key: string, value: string | string[] | null) => {
-    setState((s) => {
+    setOpsState((s) => {
       const activeFilters = { ...s.activeFilters };
       if (value === null) delete activeFilters[key];
       else activeFilters[key] = value;
@@ -148,51 +207,85 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clearFilters = useCallback(() => {
-    setState((s) => ({ ...s, activeFilters: {} }));
+    setOpsState((s) => ({ ...s, activeFilters: {} }));
   }, []);
 
   const setSearchQuery = useCallback((q: string) => {
-    setState((s) => ({ ...s, searchQuery: q }));
+    setOpsState((s) => ({ ...s, searchQuery: q }));
   }, []);
 
   const setSearchScope = useCallback((scope: string) => {
-    setState((s) => ({ ...s, searchScope: scope }));
+    setOpsState((s) => ({ ...s, searchScope: scope }));
   }, []);
 
   const clearSearch = useCallback(() => {
-    setState((s) => ({ ...s, searchQuery: '', searchScope: 'all' }));
+    setOpsState((s) => ({ ...s, searchQuery: '', searchScope: 'all' }));
   }, []);
 
-  const value = useMemo(
-    () => ({
-      state,
-      openPanel,
-      closePanel,
-      toggleSelect,
-      selectAll,
-      clearSelection,
-      setSelectedIds,
-      toggleCompareMode,
-      toggleCompareId,
-      clearCompare,
-      setFilter,
-      clearFilters,
-      setSearchQuery,
-      setSearchScope,
-      clearSearch,
-    }),
-    [state, openPanel, closePanel, toggleSelect, selectAll, clearSelection, setSelectedIds, toggleCompareMode, toggleCompareId, clearCompare, setFilter, clearFilters, setSearchQuery, setSearchScope, clearSearch]
-  );
+  const opsValue = useMemo(() => ({
+    state: opsState,
+    toggleCompareMode,
+    toggleCompareId,
+    clearCompare,
+    setFilter,
+    clearFilters,
+    setSearchQuery,
+    setSearchScope,
+    clearSearch,
+  }), [opsState, toggleCompareMode, toggleCompareId, clearCompare, setFilter, clearFilters, setSearchQuery, setSearchScope, clearSearch]);
 
   return (
-    <WorkspaceContext.Provider value={value}>
-      {children}
-    </WorkspaceContext.Provider>
+    <PanelContext.Provider value={panelValue}>
+      <SelectionContext.Provider value={selectionValue}>
+        <OpsContext.Provider value={opsValue}>
+          {children}
+        </OpsContext.Provider>
+      </SelectionContext.Provider>
+    </PanelContext.Provider>
   );
 }
 
+/* ──────────────────────────────────────────────────────────────────────────────
+   HOOKS — prefer specific hooks; useWorkspace() for backward compatibility
+   ────────────────────────────────────────────────────────────────────────────── */
+
+export function useWorkspacePanel() {
+  return usePanelContext();
+}
+
+export function useWorkspaceSelection() {
+  return useSelectionContext();
+}
+
+export function useWorkspaceOps() {
+  return useOpsContext();
+}
+
+/** @deprecated Prefer useWorkspacePanel, useWorkspaceSelection, or useWorkspaceOps for performance */
 export function useWorkspace() {
-  const ctx = useContext(WorkspaceContext);
-  if (!ctx) throw new Error('useWorkspace must be used within WorkspaceProvider');
-  return ctx;
+  const panel = usePanelContext();
+  const selection = useSelectionContext();
+  const ops = useOpsContext();
+
+  return useMemo(() => ({
+    state: {
+      ...panel.state,
+      ...selection.state,
+      ...ops.state,
+    },
+    openPanel: panel.openPanel,
+    closePanel: panel.closePanel,
+    toggleSelect: selection.toggleSelect,
+    selectAll: selection.selectAll,
+    clearSelection: selection.clearSelection,
+    setSelectedIds: selection.setSelectedIds,
+    toggleCompareMode: ops.toggleCompareMode,
+    toggleCompareId: ops.toggleCompareId,
+    clearCompare: ops.clearCompare,
+    setFilter: ops.setFilter,
+    clearFilters: ops.clearFilters,
+    setSearchQuery: ops.setSearchQuery,
+    setSearchScope: ops.setSearchScope,
+    clearSearch: ops.clearSearch,
+  }), [panel, selection, ops]);
 }

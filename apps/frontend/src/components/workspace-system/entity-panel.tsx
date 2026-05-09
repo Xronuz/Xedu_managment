@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { cn } from '@/lib/utils';
 import {
   X, User, Building2, GraduationCap, Wallet, FileText,
@@ -75,10 +75,10 @@ const ENTITY_CONFIG: Record<EntityType, { icon: React.ElementType; label: string
 const STATUS_CONFIG: Record<string, { label: string; dot: string; text: string }> = {
   active:   { label: 'Faol', dot: 'bg-xedu-primary', text: 'text-xedu-primary' },
   inactive: { label: 'Nofaol', dot: 'bg-xedu-slate-400', text: 'text-xedu-slate-500' },
-  pending:  { label: 'Kutilmoqda', dot: 'bg-amber-500', text: 'text-amber-600' },
+  pending:  { label: 'Kutilmoqda', dot: 'bg-xedu-amber-500', text: 'text-xedu-amber-600' },
   resolved: { label: 'Hal etildi', dot: 'bg-xedu-primary', text: 'text-xedu-primary' },
-  open:     { label: 'Ochiq', dot: 'bg-red-500', text: 'text-red-600' },
-  overdue:  { label: 'Kechikkan', dot: 'bg-red-500', text: 'text-red-600' },
+  open:     { label: 'Ochiq', dot: 'bg-xedu-ruby-500', text: 'text-xedu-ruby-600' },
+  overdue:  { label: 'Kechikkan', dot: 'bg-xedu-ruby-500', text: 'text-xedu-ruby-600' },
   paid:     { label: "To'landi", dot: 'bg-xedu-primary', text: 'text-xedu-primary' },
 };
 
@@ -168,24 +168,7 @@ export function EntityPanel({
 
         {/* Metrics */}
         {metrics && metrics.length > 0 && (
-          <div className="shrink-0 px-5 py-3 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
-            <div className="grid grid-cols-3 gap-2">
-              {metrics.map((m, i) => (
-                <div key={i} className="rounded-lg border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
-                  <p className="text-2xs font-semibold uppercase tracking-wider text-xedu-slate-400">{m.label}</p>
-                  <p className={cn(
-                    'text-sm font-bold tabular-nums',
-                    m.tone === 'urgent' ? 'text-red-600' :
-                    m.tone === 'attention' ? 'text-amber-600' :
-                    m.tone === 'success' ? 'text-xedu-primary' :
-                    'text-xedu-slate-800 dark:text-xedu-slate-200'
-                  )}>
-                    {m.value}
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <MetricsGrid metrics={metrics} />
         )}
 
         {/* Tabs */}
@@ -211,24 +194,14 @@ export function EntityPanel({
           </div>
         )}
 
-        {/* Content */}
+        {/* Content — lazy tab rendering */}
         <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
           {tabs && tabs.length > 0 ? (
-            tabs.find((t) => t.id === activeTab)?.content
+            <TabContent tabs={tabs} activeTab={activeTab} />
           ) : (
             <div className="p-5">
               {activity && activity.length > 0 && (
-                <div className="space-y-0">
-                  <p className="text-2xs font-bold uppercase tracking-[0.12em] text-xedu-slate-400 mb-2">
-                    Faollik tarixi
-                  </p>
-                  <div className="relative space-y-0">
-                    <div className="absolute left-[5px] top-1.5 bottom-1.5 w-px bg-xedu-slate-100 dark:bg-xedu-slate-800" />
-                    {activity.map((evt, idx) => (
-                      <TimelineRow key={idx} event={evt} />
-                    ))}
-                  </div>
-                </div>
+                <ActivityFeed activity={activity} />
               )}
             </div>
           )}
@@ -245,11 +218,59 @@ export function EntityPanel({
   );
 }
 
-function TimelineRow({ event }: { event: { label: string; value: string; timestamp?: string; tone?: 'calm' | 'attention' | 'urgent' | 'success' } }) {
+/* ── Memoized sub-components ─────────────────────────────────────────────── */
+
+const MetricsGrid = memo(function MetricsGrid({ metrics }: { metrics: EntityPanelProps['metrics'] }) {
+  if (!metrics || metrics.length === 0) return null;
+  return (
+    <div className="shrink-0 px-5 py-3 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
+      <div className="grid grid-cols-3 gap-2">
+        {metrics.map((m, i) => (
+          <div key={i} className="rounded-lg border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1.5">
+            <p className="text-2xs font-semibold uppercase tracking-wider text-xedu-slate-400">{m.label}</p>
+            <p className={cn(
+              'text-sm font-bold tabular-nums',
+              m.tone === 'urgent' ? 'text-xedu-ruby-600' :
+              m.tone === 'attention' ? 'text-xedu-amber-600' :
+              m.tone === 'success' ? 'text-xedu-primary' :
+              'text-xedu-slate-800 dark:text-xedu-slate-200'
+            )}>
+              {m.value}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+const TabContent = memo(function TabContent({ tabs, activeTab }: { tabs: NonNullable<EntityPanelProps['tabs']>; activeTab: string }) {
+  const active = tabs.find((t) => t.id === activeTab);
+  if (!active) return null;
+  return <div key={activeTab}>{active.content}</div>;
+});
+
+const ActivityFeed = memo(function ActivityFeed({ activity }: { activity: NonNullable<EntityPanelProps['activity']> }) {
+  return (
+    <div className="space-y-0">
+      <p className="text-2xs font-bold uppercase tracking-[0.12em] text-xedu-slate-400 mb-2">
+        Faollik tarixi
+      </p>
+      <div className="relative space-y-0">
+        <div className="absolute left-[5px] top-1.5 bottom-1.5 w-px bg-xedu-slate-100 dark:bg-xedu-slate-800" />
+        {activity.map((evt, idx) => (
+          <TimelineRow key={idx} event={evt} />
+        ))}
+      </div>
+    </div>
+  );
+});
+
+const TimelineRow = memo(function TimelineRow({ event }: { event: { label: string; value: string; timestamp?: string; tone?: 'calm' | 'attention' | 'urgent' | 'success' } }) {
   const dotColor = {
     calm: 'bg-xedu-slate-300',
-    attention: 'bg-amber-500',
-    urgent: 'bg-red-500',
+    attention: 'bg-xedu-amber-500',
+    urgent: 'bg-xedu-ruby-500',
     success: 'bg-xedu-primary',
   }[event.tone ?? 'calm'];
 
@@ -268,4 +289,4 @@ function TimelineRow({ event }: { event: { label: string; value: string; timesta
       </div>
     </div>
   );
-}
+});

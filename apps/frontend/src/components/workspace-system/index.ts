@@ -1,4 +1,4 @@
-export { WorkspaceProvider, useWorkspace } from './workspace-context';
+export { WorkspaceProvider, useWorkspace, useWorkspacePanel, useWorkspaceSelection, useWorkspaceOps } from './workspace-context';
 export {
   WorkspaceShell,
   WorkspaceHeader,
@@ -49,3 +49,6 @@ export {
   chartFillOpacity,
 } from './chart-palette';
 export type { ChartPalette } from './chart-palette';
+export { useDebouncedValue } from './use-debounced-value';
+export { useVirtualization } from './use-virtualization';
+export { MemoChart } from './memo-chart';

@@ -425,6 +425,7 @@ export class AuthService {
     role: string;
     schoolId: string | null;
     branchId?: string | null;
+    isFirstLogin?: boolean;
   }): Promise<TokenPair> {
     const isSuperAdmin = user.role === UserRole.SUPER_ADMIN;
 
@@ -447,6 +448,7 @@ export class AuthService {
       branchId: user.branchId!,
       assignedBranchIds,
       isSuperAdmin,
+      isFirstLogin: user.isFirstLogin,
     };
 
     const accessToken = this.jwtService.sign(payload, {

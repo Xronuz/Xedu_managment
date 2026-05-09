@@ -803,7 +803,7 @@ export function ScheduleWorkspace() {
   });
 
   const handleDelete = async (id: string) => {
-    if (await ask({ title: "Darsni o'chirishni tasdiqlaysizmi?", variant: 'destructive', confirmText: "O'chirish" })) {
+    if (await ask({ title: "Jadval qatorini o'chirishni tasdiqlang", description: "Bu jadval qatori o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" })) {
       deleteMutation.mutate(id);
     }
   };

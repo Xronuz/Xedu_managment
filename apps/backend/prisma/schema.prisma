@@ -305,19 +305,21 @@ enum Language {
 // ─── Schools ──────────────────────────────────────────────────────────────
 
 model School {
-  id               String           @id @default(uuid())
-  name             String
-  slug             String           @unique
-  address          String?
-  phone            String?
-  email            String?
-  logoUrl          String?
-  isActive         Boolean          @default(true)
-  subscriptionTier SubscriptionPlan @default(free)
-  financeType      FinanceType      @default(CENTRALIZED) // Moliya rejimi
-  timezone         String           @default("Asia/Tashkent") // IANA timezone — UTC saqlash uchun
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  id                 String           @id @default(uuid())
+  name               String
+  slug               String           @unique
+  address            String?
+  phone              String?
+  email              String?
+  logoUrl            String?
+  isActive           Boolean          @default(true)
+  subscriptionTier   SubscriptionPlan @default(free)
+  financeType        FinanceType      @default(CENTRALIZED) // Moliya rejimi
+  timezone           String           @default("Asia/Tashkent") // IANA timezone — UTC saqlash uchun
+  onboardingStep     Int              @default(0) // 0=not started, 1-5=steps, 6=completed
+  onboardingCompleted Boolean         @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
   users               User[]
   classes             Class[]

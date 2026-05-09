@@ -20,6 +20,7 @@ import { classesApi } from '@/lib/api/classes';
 import { subjectsApi } from '@/lib/api/subjects';
 import { usersApi } from '@/lib/api/users';
 import { scheduleApi } from '@/lib/api/schedule';
+import { systemConfigApi } from '@/lib/api/system-config';
 import type { DayOfWeek } from '@eduplatform/types';
 
 // ── Step constants ─────────────────────────────────────────────────────────────
@@ -31,7 +32,7 @@ const STEPS = [
   { id: 5, label: 'Jadval',      icon: Calendar,      desc: 'Dars jadvali' },
 ] as const;
 
-const ONBOARDING_STORAGE_KEY = 'xedu_onboarding_progress';
+// Onboarding progress is now persisted to the backend via systemConfigApi.
 
 const DAYS_UZ = [
   { value: 'monday',    label: 'Dushanba' },
@@ -551,33 +552,38 @@ export default function OnboardingPage() {
   const [completed, setCompleted] = useState<number[]>([]);
   const [done, setDone] = useState(false);
 
-  // Restore progress from localStorage on mount
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem(ONBOARDING_STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (parsed.step) setStep(parsed.step);
-        if (parsed.completed) setCompleted(parsed.completed);
-        if (parsed.done) setDone(parsed.done);
-      }
-    } catch {
-      // Ignore parse errors
-    }
-  }, []);
+  // Restore progress from backend on mount
+  const { data: onboardingStatus } = useQuery({
+    queryKey: ['onboarding-status'],
+    queryFn: systemConfigApi.getOnboardingStatus,
+    staleTime: Infinity,
+  });
 
-  // Persist progress to localStorage
   useEffect(() => {
-    localStorage.setItem(ONBOARDING_STORAGE_KEY, JSON.stringify({ step, completed, done }));
-  }, [step, completed, done]);
+    if (onboardingStatus) {
+      const backendStep = onboardingStatus.onboardingStep || 1;
+      setStep(Math.min(backendStep, STEPS.length));
+      const completedSteps = Array.from({ length: backendStep - 1 }, (_, i) => i + 1);
+      setCompleted(completedSteps);
+      if (onboardingStatus.onboardingCompleted) {
+        setDone(true);
+      }
+    }
+  }, [onboardingStatus]);
+
+  const updateOnboarding = useMutation({
+    mutationFn: systemConfigApi.updateOnboardingStatus,
+  });
 
   const markDone = (s: number) => {
-    setCompleted(p => Array.from(new Set([...p, s])));
-    if (s < STEPS.length) {
-      setStep(s + 1);
-    } else {
+    const nextCompleted = Array.from(new Set([...completed, s]));
+    setCompleted(nextCompleted);
+    const nextStep = s < STEPS.length ? s + 1 : s;
+    setStep(nextStep);
+    updateOnboarding.mutate({ onboardingStep: nextStep });
+    if (s >= STEPS.length) {
       setDone(true);
-      localStorage.removeItem(ONBOARDING_STORAGE_KEY);
+      updateOnboarding.mutate({ onboardingStep: STEPS.length, onboardingCompleted: true });
     }
   };
 

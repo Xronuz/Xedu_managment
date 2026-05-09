@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 import { join } from 'path';
 import { Logger } from 'nestjs-pino';
 import helmet from 'helmet';
@@ -9,12 +10,20 @@ import { AppModule } from './app.module';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { SanitizePipe } from './common/pipes/sanitize.pipe';
+import { initSentry } from './common/sentry/sentry.config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bufferLogs: true,
   });
   app.useLogger(app.get(Logger));
+
+  // Sentry — optional, no-op if SENTRY_DSN not set
+  const configService = app.get(ConfigService);
+  const sentryEnabled = initSentry(configService);
+  if (sentryEnabled) {
+    console.log('🛡️ Sentry initialized');
+  }
 
   // Lokal yuklangan fayllarni serve qilish (MinIO ishlatilmasa)
   app.useStaticAssets(join(process.cwd(), 'uploads'), { prefix: '/uploads' });

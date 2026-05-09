@@ -19,6 +19,17 @@ export class PrismaService extends PrismaClient implements OnModuleInit, OnModul
   async onModuleInit() {
     await this.$connect();
     this.logger.log('PostgreSQL ulanish o\'rnatildi');
+
+    // Optional slow query logging
+    const shouldLogQueries = process.env.LOG_QUERIES === 'true' || process.env.NODE_ENV !== 'production';
+    if (shouldLogQueries) {
+      // @ts-expect-error Prisma query event typing
+      this.$on('query', (e: { query: string; duration: number; params: string }) => {
+        if (e.duration > 500) {
+          this.logger.warn(`Slow Prisma query (${e.duration}ms): ${e.query.substring(0, 200)}`);
+        }
+      });
+    }
   }
 
   async onModuleDestroy() {

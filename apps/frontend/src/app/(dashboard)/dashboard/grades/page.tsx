@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   BarChart2, Plus, Loader2, Trash2, TrendingUp, Filter,
   BookOpen, Award, Search, LayoutList, Save, Pencil, Check, X as XIcon,
-  Download, AlertCircle,
+  Download, AlertCircle, FileSpreadsheet,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -25,8 +25,10 @@ import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/ui/use-toast';
 import { formatDate, getScoreColor } from '@/lib/utils';
 import { GradeType } from '@eduplatform/types';
+import { useConfirm } from '@/store/confirm.store';
 import { usePrint } from '@/hooks/use-print';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ImportDialog } from '@/components/import/import-dialog';
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid,
   RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
@@ -395,6 +397,7 @@ export default function GradesPage() {
   const { user , activeBranchId } = useAuthStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const ask = useConfirm();
 
   const isStudent = user?.role === 'student';
   const isTeacher = ['teacher', 'class_teacher'].includes(user?.role ?? '');
@@ -409,6 +412,7 @@ export default function GradesPage() {
   const [activeTab, setActiveTab] = useState('view');
   const [open, setOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -735,11 +739,19 @@ export default function GradesPage() {
           </h1>
           <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Sinf bo'yicha baholar</p>
         </div>
-        {selectedClass && grades.length > 0 && (
-          <Button variant="outline" size="sm" onClick={handlePrint}>
-            🖨 Chop etish
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {canManage && (
+            <Button variant="outline" size="sm" onClick={() => setImportOpen(true)}>
+              <FileSpreadsheet className="h-4 w-4 mr-1.5" />
+              Import
+            </Button>
+          )}
+          {selectedClass && grades.length > 0 && (
+            <Button variant="outline" size="sm" onClick={handlePrint}>
+              🖨 Chop etish
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}
@@ -936,7 +948,7 @@ export default function GradesPage() {
                                     variant="ghost"
                                     size="icon"
                                     className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
-                                    onClick={() => deleteMutation.mutate(g.id)}
+                                    onClick={async () => { if (await ask({ title: "Bahoni o'chirishni tasdiqlang", description: "Baho o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(g.id); }}
                                   >
                                     <Trash2 className="h-3.5 w-3.5" />
                                   </Button>
@@ -1139,6 +1151,14 @@ export default function GradesPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Excel import dialog */}
+      <ImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        type="grades"
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ['grades'] })}
+      />
     </div>
   );
 }

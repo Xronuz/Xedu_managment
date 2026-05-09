@@ -19,6 +19,7 @@ import { meetingsApi, MeetingStatus, MeetingMedium } from '@/lib/api/meetings';
 import { usersApi } from '@/lib/api/users';
 import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/ui/use-toast';
+import { useConfirm } from '@/store/confirm.store';
 
 // ── Config ────────────────────────────────────────────────────────────────────
 const STATUS_CONFIG: Record<MeetingStatus, { label: string; color: string }> = {
@@ -55,6 +56,7 @@ export default function MeetingsPage() {
   const [page, setPage] = useState(1);
   const [filterStatus, setFilterStatus] = useState<MeetingStatus | ''>('');
 
+  const ask = useConfirm();
   const canManage = ['director', 'vice_principal'].includes(user?.role ?? '');
 
   // ── Queries ─────────────────────────────────────────────────────────────────
@@ -268,7 +270,7 @@ export default function MeetingsPage() {
                             <CheckCircle2 className="h-3.5 w-3.5" />
                           </Button>
                           <Button variant="ghost" size="icon" className="h-7 w-7 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
-                            onClick={() => deleteMutation.mutate(meeting.id)} title="O'chirish">
+                            onClick={async () => { if (await ask({ title: "Uchrashuvni o'chirishni tasdiqlang", description: "Uchrashuv o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(meeting.id); }} title="O'chirish">
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>

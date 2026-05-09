@@ -28,6 +28,7 @@ import { usersApi } from '@/lib/api/users';
 import { branchesApi } from '@/lib/api/branches';
 import { subjectsApi } from '@/lib/api/subjects';
 import { scheduleApi } from '@/lib/api/schedule';
+import { useConfirm } from '@/store/confirm.store';
 import { gradesApi } from '@/lib/api/grades';
 
 import {
@@ -79,6 +80,7 @@ export function ClassesWorkspace() {
   const { toast } = useToast();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
+  const ask = useConfirm();
 
   const isDirector = user?.role === 'director';
   const isVP = user?.role === 'vice_principal';
@@ -595,7 +597,7 @@ export function ClassesWorkspace() {
                       icon={<Trash2 className="h-3.5 w-3.5" />}
                       title="O'chirish"
                       tone="danger"
-                      onClick={() => deleteMutation.mutate(c.id)}
+                      onClick={async () => { if (await ask({ title: "Sinfni o'chirishni tasdiqlang", description: "Sinf o'chiriladi. Barcha o'quvchilar va jadval ma'lumotlari bekor bo'ladi.", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(c.id); }}
                     />
                   )}
                 </>

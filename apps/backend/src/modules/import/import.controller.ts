@@ -1,5 +1,5 @@
 import {
-  Controller, Post, Get, Param, Body, UploadedFile,
+  Controller, Post, Get, Param, Body, UploadedFile, Query,
   UseInterceptors, Res, HttpCode, HttpStatus, UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -11,6 +11,7 @@ import { ImportService, ImportRow } from './import.service';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
+import { PrismaService } from '@/common/prisma/prisma.service';
 
 const MANAGERS = [UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL];
 
@@ -19,7 +20,10 @@ const MANAGERS = [UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL];
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller({ path: 'import', version: '1' })
 export class ImportController {
-  constructor(private readonly importService: ImportService) {}
+  constructor(
+    private readonly importService: ImportService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   // ─── Namuna Excel fayllar ─────────────────────────────────────────────────
 
@@ -135,5 +139,55 @@ export class ImportController {
   @ApiOperation({ summary: 'Davomatni bazaga saqlash' })
   commitAttendance(@Body() body: { rows: ImportRow[]; branchId?: string }, @CurrentUser() user: JwtPayload) {
     return this.importService.commitAttendance(body.rows, user, body.branchId ?? user.branchId);
+  }
+
+  // ─── Rollback ───────────────────────────────────────────────────────────────
+
+  @Post('rollback')
+  @Roles(...MANAGERS)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'So\'nggi importni bekor qilish (vaqt oralig\'i bo\'yicha)' })
+  async rollback(
+    @Query('type') type: 'students' | 'users' | 'schedule' | 'grades' | 'attendance',
+    @Query('since') since: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    const schoolId = user.schoolId!;
+    const sinceDate = new Date(since);
+    let deleted = 0;
+
+    switch (type) {
+      case 'students':
+        const studentIds = await this.prisma.user.findMany({
+          where: { schoolId, role: 'student', createdAt: { gte: sinceDate } },
+          select: { id: true },
+        });
+        await this.prisma.classStudent.deleteMany({ where: { studentId: { in: studentIds.map(s => s.id) } } });
+        const studentRes = await this.prisma.user.deleteMany({ where: { id: { in: studentIds.map(s => s.id) } } });
+        deleted = studentRes.count;
+        break;
+      case 'schedule':
+        const scheduleRes = await this.prisma.schedule.deleteMany({ where: { schoolId, createdAt: { gte: sinceDate } } });
+        deleted = scheduleRes.count;
+        break;
+      case 'grades':
+        const gradesRes = await this.prisma.grade.deleteMany({ where: { schoolId, createdAt: { gte: sinceDate } } });
+        deleted = gradesRes.count;
+        break;
+      case 'attendance':
+        const attendanceRes = await this.prisma.attendance.deleteMany({ where: { schoolId, createdAt: { gte: sinceDate } } });
+        deleted = attendanceRes.count;
+        break;
+      case 'users':
+        const userIds = await this.prisma.user.findMany({
+          where: { schoolId, role: { in: ['teacher', 'class_teacher', 'accountant', 'librarian', 'vice_principal'] }, createdAt: { gte: sinceDate } },
+          select: { id: true },
+        });
+        const userRes = await this.prisma.user.deleteMany({ where: { id: { in: userIds.map(u => u.id) } } });
+        deleted = userRes.count;
+        break;
+    }
+
+    return { rolledBack: deleted };
   }
 }

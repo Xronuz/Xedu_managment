@@ -1,5 +1,5 @@
 import { MiddlewareConsumer, NestModule, Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -58,6 +58,8 @@ import { AiAnalyticsModule } from './modules/ai-analytics/ai-analytics.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
 import { InvitationsModule } from './modules/invitations/invitations.module';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
+import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
+import { QueryTimingInterceptor } from './common/interceptors/query-timing.interceptor';
 import { envValidationSchema } from './common/config/env.validation';
 
 @Module({
@@ -147,10 +149,15 @@ import { envValidationSchema } from './common/config/env.validation';
   providers: [
     // Global rate limiting — barcha endpointlarga qo'llaniladi
     { provide: APP_GUARD, useClass: ThrottlerGuard },
+    // Request duration logging + slow query detection
+    { provide: APP_INTERCEPTOR, useClass: QueryTimingInterceptor },
   ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(CorrelationIdMiddleware)
+      .forRoutes('*');
     consumer
       .apply(TenantMiddleware)
       .forRoutes('*');

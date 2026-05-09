@@ -19,7 +19,7 @@ function decodeJwtPayload(token: string): Record<string, any> | null {
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const PUBLIC_PATHS = ['/login', '/forgot-password', '/reset-password', '/accept-invite', '/first-login'];
+const PUBLIC_PATHS = ['/login', '/forgot-password', '/reset-password', '/accept-invite', '/first-login', '/logout', '/auth/clear'];
 
 // Build ROLE_RESTRICTIONS from ROUTE_PERMISSIONS (single source of truth)
 const ROLE_RESTRICTIONS = Object.entries(ROUTE_PERMISSIONS).map(([path, roles]) => ({
@@ -50,8 +50,12 @@ export function middleware(request: NextRequest) {
 
   // ── 1. Public auth pages ──────────────────────────────────────────────
   if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
+    // First-login enforcement: even on public pages, force first-login users
+    if (isAuthenticated && payload?.isFirstLogin === true && pathname !== '/first-login') {
+      return NextResponse.redirect(new URL('/first-login', request.url));
+    }
     // Already logged in → redirect away from login pages
-    if (isAuthenticated) {
+    if (isAuthenticated && pathname !== '/first-login') {
       const home = ROLE_HOME[role as UserRole] ?? '/dashboard';
       return NextResponse.redirect(new URL(home, request.url));
     }
@@ -69,6 +73,11 @@ export function middleware(request: NextRequest) {
       const login = new URL('/login', request.url);
       login.searchParams.set('reason', 'session_expired');
       return NextResponse.redirect(login);
+    }
+
+    // First-login enforcement: must complete password change before accessing dashboard
+    if (payload?.isFirstLogin === true && pathname !== '/dashboard/onboarding') {
+      return NextResponse.redirect(new URL('/first-login', request.url));
     }
 
     // Branch guard: every authenticated non-super_admin must have a branchId

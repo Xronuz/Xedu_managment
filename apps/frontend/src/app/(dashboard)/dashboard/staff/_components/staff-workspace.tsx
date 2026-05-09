@@ -14,6 +14,7 @@ import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth.store';
+import { useConfirm } from '@/store/confirm.store';
 
 import { usersApi } from '@/lib/api/users';
 import { branchesApi } from '@/lib/api/branches';
@@ -74,6 +75,7 @@ export function StaffWorkspace() {
   const { toast } = useToast();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
+  const ask = useConfirm();
   const isDirector = user?.role === 'director';
   const isVP = user?.role === 'vice_principal';
   const isBranchAdmin = user?.role === 'branch_admin';
@@ -460,9 +462,10 @@ export function StaffWorkspace() {
                   icon={s.isActive ? <XCircle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
                   title={s.isActive ? 'Bloklash' : 'Faollashtirish'}
                   tone="danger"
-                  onClick={() => {
-                    if (s.isActive) blockMutation.mutate(s.id);
-                    else restoreMutation.mutate(s.id);
+                  onClick={async () => {
+                    if (s.isActive) {
+                      if (await ask({ title: "Xodimni bloklashni tasdiqlang", description: "Xodim bloklanadi.", variant: 'destructive', confirmText: 'Bloklash' })) blockMutation.mutate(s.id);
+                    } else restoreMutation.mutate(s.id);
                   }}
                 />
               )}
@@ -567,8 +570,10 @@ export function StaffWorkspace() {
             label: 'Bloklash',
             icon: XCircle,
             tone: 'danger' as const,
-            onClick: (ids: string[]) => {
-              ids.forEach((id) => blockMutation.mutate(id));
+            onClick: async (ids: string[]) => {
+              if (await ask({ title: `${ids.length} ta xodimni bloklashni tasdiqlang`, description: "Xodimlar bloklanadi.", variant: 'destructive', confirmText: 'Bloklash' })) {
+                ids.forEach((id) => blockMutation.mutate(id));
+              }
               clearSelection();
             },
           }] : []),

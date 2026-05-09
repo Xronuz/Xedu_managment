@@ -268,7 +268,7 @@ export default function NotificationsPage() {
                         size="icon"
                         variant="ghost"
                         className="h-7 w-7 shrink-0 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
-                        onClick={() => deleteMutation.mutate(n.id)}
+                        onClick={async () => { if (await ask({ title: "Xabarni o'chirishni tasdiqlang", description: "Xabar o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(n.id); }}
                         disabled={deleteMutation.isPending}
                       >
                         <X className="h-3.5 w-3.5" />

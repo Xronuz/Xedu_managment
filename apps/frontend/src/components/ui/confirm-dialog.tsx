@@ -11,9 +11,9 @@ export function ConfirmDialog() {
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) _onCancel(); }}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-w-[calc(100vw-2rem)]">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg">
             {variant === 'destructive' ? (
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-xedu-ruby/10 shrink-0">
                 <Trash2 className="h-4 w-4 text-xedu-ruby" />
@@ -26,14 +26,20 @@ export function ConfirmDialog() {
             {title}
           </DialogTitle>
           {description && (
-            <DialogDescription className="pl-10">{description}</DialogDescription>
+            <DialogDescription className="pl-10 text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
+              {description}
+            </DialogDescription>
           )}
         </DialogHeader>
-        <DialogFooter className="gap-2 pt-2">
-          <Button variant="outline" onClick={_onCancel}>
+        <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+          <Button variant="outline" onClick={_onCancel} className="w-full sm:w-auto">
             {cancelText}
           </Button>
-          <Button variant={variant === 'destructive' ? 'destructive' : 'default'} onClick={_onConfirm}>
+          <Button
+            variant={variant === 'destructive' ? 'destructive' : 'default'}
+            onClick={_onConfirm}
+            className="w-full sm:w-auto"
+          >
             {confirmText}
           </Button>
         </DialogFooter>

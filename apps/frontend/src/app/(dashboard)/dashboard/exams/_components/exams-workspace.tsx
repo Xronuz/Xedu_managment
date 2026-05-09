@@ -448,6 +448,7 @@ export function ExamsWorkspace() {
   const { user } = useAuthStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const ask = useConfirm();
   const canManage = ['director', 'vice_principal', 'teacher', 'class_teacher', 'branch_admin'].includes(user?.role ?? '');
   const isAdmin = ['director', 'vice_principal', 'branch_admin'].includes(user?.role ?? '');
   const isStudent = user?.role === 'student';
@@ -977,7 +978,7 @@ export function ExamsWorkspace() {
                 <IconAction
                   icon={<CheckCircle className="h-3.5 w-3.5" />}
                   title="E'lon qilish"
-                  onClick={() => publishMutation.mutate(e.id)}
+                  onClick={async () => { if (await ask({ title: "Imtihon natijalarini e'lon qilishni tasdiqlang", description: "Imtihon natijalari e'lon qilinadi. Keyin o'zgartirib bo'lmaydi.", variant: 'destructive', confirmText: "E'lon qilish" })) publishMutation.mutate(e.id); }}
                   tone="primary"
                 />
               )}
@@ -1008,7 +1009,7 @@ export function ExamsWorkspace() {
                   icon={<Trash2 className="h-3.5 w-3.5" />}
                   title="O'chirish"
                   tone="danger"
-                  onClick={() => deleteMutation.mutate(e.id)}
+                  onClick={async () => { if (await ask({ title: "Imtihonni o'chirishni tasdiqlang", description: "Imtihon o'chiriladi. Barcha savollar va natijalar bekor bo'ladi.", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(e.id); }}
                 />
               )}
             </>
@@ -1120,7 +1121,7 @@ export function ExamsWorkspace() {
         open={!!panelExam}
         onClose={() => setPanelExam(null)}
         canManage={canManage}
-        onPublish={canManage ? (id) => publishMutation.mutate(id) : undefined}
+        onPublish={canManage ? async (id) => { if (await ask({ title: "Imtihon natijalarini e'lon qilishni tasdiqlang", description: "Imtihon natijalari e'lon qilinadi. Keyin o'zgartirib bo'lmaydi.", variant: 'destructive', confirmText: "E'lon qilish" })) publishMutation.mutate(id); } : undefined}
       />
 
       {/* Exam Detail Dialog (Questions + Sessions) */}
@@ -1143,8 +1144,10 @@ export function ExamsWorkspace() {
             label: "E'lon qilish",
             icon: CheckCircle,
             tone: 'primary',
-            onClick: (ids: string[]) => {
-              ids.forEach((id) => publishMutation.mutate(id));
+            onClick: async (ids: string[]) => {
+              if (await ask({ title: `${ids.length} ta imtihon natijalarini e'lon qilishni tasdiqlang`, description: "Imtihon natijalari e'lon qilinadi. Keyin o'zgartirib bo'lmaydi.", variant: 'destructive', confirmText: "E'lon qilish" })) {
+                ids.forEach((id) => publishMutation.mutate(id));
+              }
               clearSelection();
             },
           },

@@ -42,6 +42,7 @@ export class CronService {
           school: { select: { name: true } },
         },
         distinct: ['subjectId'],
+        take: 10000,
       });
 
       const teacherMap = new Map<string, { teacher: any; lessons: string[]; school: any }>();
@@ -106,6 +107,7 @@ export class CronService {
           },
           school: { select: { name: true } },
         },
+        take: 50000,
       });
 
       let sent = 0;
@@ -150,6 +152,7 @@ export class CronService {
           },
           school: { select: { name: true } },
         },
+        take: 100000,
       });
 
       let sent = 0;
@@ -193,6 +196,7 @@ export class CronService {
       const schools = await this.prisma.school.findMany({
         where: { isActive: true },
         select: { id: true, name: true },
+        take: 10000,
       });
 
       for (const school of schools) {
@@ -267,6 +271,7 @@ export class CronService {
           ],
         },
         include: { school: { select: { id: true, name: true } } },
+        take: 10000,
       });
 
       if (!upcomingEvents.length) return;
@@ -355,6 +360,7 @@ export class CronService {
       const superAdmins = await this.prisma.user.findMany({
         where: { role: 'super_admin' as any, isActive: true, email: { not: undefined } },
         select: { email: true, firstName: true },
+        take: 100,
       });
 
       for (const admin of superAdmins) {
@@ -422,6 +428,7 @@ export class CronService {
           school: { select: { name: true } },
           submissions: { select: { studentId: true } },
         },
+        take: 10000,
       });
 
       let sent = 0;
@@ -461,6 +468,7 @@ export class CronService {
           book: { select: { title: true } },
           school: { select: { name: true } },
         },
+        take: 50000,
       });
 
       if (!overdueLoans.length) {
@@ -532,6 +540,7 @@ export class CronService {
       const feeStructures = await this.prisma.feeStructure.findMany({
         where: { isActive: true, frequency: 'monthly' },
         include: { school: { select: { id: true, name: true } } },
+        take: 10000,
       });
 
       if (!feeStructures.length) {
@@ -556,21 +565,27 @@ export class CronService {
         const students = await this.prisma.user.findMany({
           where: studentWhere,
           select: { id: true },
+          take: 10000,
         });
 
         if (!students.length) continue;
 
-        for (const student of students) {
-          // Bu oy uchun allaqachon payment yaratilganmi?
-          const exists = await this.prisma.payment.findFirst({
-            where: {
-              schoolId,
-              studentId: student.id,
-              description: { contains: monthLabel },
-            },
-          });
+        // N+1 fix: bitta query bilan mavjud paymentlarni olish
+        const existingPayments = await this.prisma.payment.findMany({
+          where: {
+            schoolId,
+            description: { contains: monthLabel },
+            studentId: { in: students.map(s => s.id) },
+          },
+          select: { studentId: true },
+        });
+        const existingStudentIds = new Set(existingPayments.map(p => p.studentId));
 
-          if (exists) { skipped++; continue; }
+        for (const student of students) {
+          if (existingStudentIds.has(student.id)) {
+            skipped++;
+            continue;
+          }
 
           await this.prisma.payment.create({
             data: {
@@ -594,6 +609,7 @@ export class CronService {
       const accountants = await this.prisma.user.findMany({
         where: { role: 'accountant' as any, isActive: true },
         select: { email: true, firstName: true, schoolId: true },
+        take: 1000,
       });
 
       for (const acc of accountants) {

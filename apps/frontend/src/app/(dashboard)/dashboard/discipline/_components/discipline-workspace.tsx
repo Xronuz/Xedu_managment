@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 
+import { useConfirm } from '@/store/confirm.store';
 import { disciplineApi, DisciplineType, DisciplineSeverity, DisciplineAction, DisciplineIncident } from '@/lib/api/discipline';
 import { classesApi } from '@/lib/api/classes';
 
@@ -91,6 +92,7 @@ export function DisciplineWorkspace() {
   const { toast } = useToast();
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
+  const ask = useConfirm();
 
   const canManage = ['director', 'vice_principal', 'teacher', 'class_teacher', 'branch_admin'].includes(user?.role ?? '');
   const isDirector = user?.role === 'director';
@@ -544,7 +546,7 @@ export function DisciplineWorkspace() {
                   icon={<Trash2 className="h-3.5 w-3.5" />}
                   title="O'chirish"
                   tone="danger"
-                  onClick={() => deleteMutation.mutate(i.id)}
+                  onClick={async () => { if (await ask({ title: "Hodisani o'chirishni tasdiqlang", description: "Hodisa o'chiriladi. Bu amal qaytarib bo'lmaydi.", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(i.id); }}
                 />
               )}
             </>

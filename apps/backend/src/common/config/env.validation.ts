@@ -56,4 +56,9 @@ export const envValidationSchema = Joi.object({
   GEMINI_API_KEY:    Joi.string().allow('').optional(),
   AI_TIMEOUT_MS:     Joi.number().positive().default(30000),
   AI_MAX_RETRIES:    Joi.number().min(0).max(5).default(3),
+
+  // ─── Sentry (optional) ─────────────────────────────────────────────────────
+  SENTRY_DSN:     Joi.string().uri().allow('').optional(),
+  SENTRY_RELEASE: Joi.string().allow('').optional(),
+  LOG_QUERIES:    Joi.boolean().default(false),
 });

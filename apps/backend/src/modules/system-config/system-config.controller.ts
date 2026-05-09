@@ -1,11 +1,12 @@
 import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
-import { IsOptional, IsNumber, IsString, Min, Max } from 'class-validator';
+import { IsOptional, IsNumber, IsString, Min, Max, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
+import { PrismaService } from '@/common/prisma/prisma.service';
 import { SystemConfigService, SystemConfigMap } from './system-config.service';
 
 class UpdateConfigDto implements Partial<SystemConfigMap> {
@@ -31,10 +32,21 @@ class UpdateConfigDto implements Partial<SystemConfigMap> {
   work_days?: number;
 }
 
+class UpdateOnboardingDto {
+  @IsOptional() @IsNumber() @Min(0) @Max(6) @Type(() => Number)
+  onboardingStep?: number;
+
+  @IsOptional() @IsBoolean()
+  onboardingCompleted?: boolean;
+}
+
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller({ path: 'system-config', version: '1' })
 export class SystemConfigController {
-  constructor(private readonly service: SystemConfigService) {}
+  constructor(
+    private readonly service: SystemConfigService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   /** GET /system-config — barcha konfiguratsiyalarni olish */
   @Get()
@@ -51,5 +63,32 @@ export class SystemConfigController {
   ) {
     await this.service.setBulk(user.schoolId!, dto as any);
     return this.service.getAll(user.schoolId!);
+  }
+
+  /** GET /system-config/onboarding — onboarding holati */
+  @Get('onboarding')
+  async getOnboardingStatus(@CurrentUser() user: JwtPayload) {
+    const school = await this.prisma.school.findUnique({
+      where: { id: user.schoolId! },
+      select: { onboardingStep: true, onboardingCompleted: true },
+    });
+    return school ?? { onboardingStep: 0, onboardingCompleted: false };
+  }
+
+  /** PATCH /system-config/onboarding — onboarding holatini yangilash */
+  @Patch('onboarding')
+  @Roles(UserRole.DIRECTOR, UserRole.SUPER_ADMIN)
+  async updateOnboardingStatus(
+    @CurrentUser() user: JwtPayload,
+    @Body() dto: UpdateOnboardingDto,
+  ) {
+    await this.prisma.school.update({
+      where: { id: user.schoolId! },
+      data: {
+        ...(dto.onboardingStep !== undefined && { onboardingStep: dto.onboardingStep }),
+        ...(dto.onboardingCompleted !== undefined && { onboardingCompleted: dto.onboardingCompleted }),
+      },
+    });
+    return { success: true };
   }
 }

@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { academicCalendarApi, type AcademicEventType } from '@/lib/api/academic-calendar';
 import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/ui/use-toast';
+import { useConfirm } from '@/store/confirm.store';
 
 const EVENT_TYPES: { value: AcademicEventType; label: string; color: string }[] = [
   { value: 'holiday',       label: "Ta'til",              color: '#22c55e' },
@@ -43,6 +44,7 @@ export default function AcademicCalendarPage() {
   const { user } = useAuthStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const ask = useConfirm();
 
   const canManage = ['director', 'vice_principal'].includes(user?.role ?? '');
 
@@ -225,7 +227,7 @@ export default function AcademicCalendarPage() {
                                   <span className="truncate">{e.title}</span>
                                   {canManage && (
                                     <button
-                                      onClick={() => deleteMutation.mutate(e.id)}
+                                      onClick={async () => { if (await ask({ title: "Tadbirni o'chirishni tasdiqlang", description: "Tadbir o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(e.id); }}
                                       className="ml-auto opacity-0 group-hover:opacity-100 shrink-0"
                                     >
                                       <Trash2 className="h-2.5 w-2.5" />
@@ -271,7 +273,7 @@ export default function AcademicCalendarPage() {
                   <Badge variant="secondary" className="text-xs">{typeConf?.label ?? e.type}</Badge>
                   {canManage && (
                     <Button variant="ghost" size="icon" className="h-7 w-7 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
-                      onClick={() => deleteMutation.mutate(e.id)}>
+                      onClick={async () => { if (await ask({ title: "Tadbirni o'chirishni tasdiqlang", description: "Tadbir o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(e.id); }}>
                       <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   )}

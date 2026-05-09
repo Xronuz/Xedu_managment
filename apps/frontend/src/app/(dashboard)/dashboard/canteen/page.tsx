@@ -23,6 +23,7 @@ import {
 import { canteenApi, MenuItem } from '@/lib/api/canteen';
 import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/ui/use-toast';
+import { useConfirm } from '@/store/confirm.store';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -69,6 +70,7 @@ export default function CanteenPage() {
   const { user, activeBranchId } = useAuthStore();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const ask = useConfirm();
 
   const canManage = ['director', 'vice_principal'].includes(user?.role ?? '');
 
@@ -354,7 +356,7 @@ export default function CanteenPage() {
                             variant="ghost"
                             size="icon"
                             className="h-7 w-7 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
-                            onClick={() => removeMutation.mutate(menu.id)}
+                            onClick={async () => { if (await ask({ title: "Menyu kuni o'chirishni tasdiqlang", description: "Menyu kuni o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" })) removeMutation.mutate(menu.id); }}
                             disabled={removeMutation.isPending}
                           >
                             <Trash2 className="h-3.5 w-3.5" />
@@ -492,7 +494,7 @@ export default function CanteenPage() {
                                       ) : <span />}
                                       {canManage && (
                                         <button
-                                          onClick={() => removeMutation.mutate(menu.id)}
+                                          onClick={async () => { if (await ask({ title: "Menyu kuni o'chirishni tasdiqlang", description: "Menyu kuni o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" })) removeMutation.mutate(menu.id); }}
                                           className="text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
                                         >
                                           <Trash2 className="h-3 w-3" />

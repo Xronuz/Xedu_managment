@@ -96,36 +96,38 @@ export class ImportService {
 
     for (const row of validRows) {
       try {
-        const existing = await this.prisma.user.findFirst({ where: { email: row.data.email, schoolId } });
-        if (existing) { skipped++; continue; }
+        await this.prisma.$transaction(async (tx) => {
+          const existing = await tx.user.findFirst({ where: { email: row.data.email, schoolId } });
+          if (existing) { skipped++; return; }
 
-        const rowBranchId = row.data.branchId ?? branchId ?? null;
-        const passwordHash = await bcrypt.hash(row.data.password ?? 'Student@123', 10);
-        const student = await this.prisma.user.create({
-          data: {
-            schoolId,
-            branchId: rowBranchId,
-            role: UserRole.STUDENT,
-            firstName: row.data.firstName,
-            lastName:  row.data.lastName,
-            email:     row.data.email,
-            phone:     row.data.phone,
-            passwordHash,
-          },
-        });
+          const rowBranchId = row.data.branchId ?? branchId ?? null;
+          const passwordHash = await bcrypt.hash(row.data.password ?? 'Student@123', 10);
+          const student = await tx.user.create({
+            data: {
+              schoolId,
+              branchId: rowBranchId,
+              role: UserRole.STUDENT,
+              firstName: row.data.firstName,
+              lastName:  row.data.lastName,
+              email:     row.data.email,
+              phone:     row.data.phone,
+              passwordHash,
+            },
+          });
 
-        // Sinfga biriktirish
-        if (row.data.classId) {
-          const cls = await this.prisma.class.findFirst({ where: { id: row.data.classId, schoolId } });
-          if (cls) {
-            await this.prisma.classStudent.upsert({
-              where: { classId_studentId: { classId: cls.id, studentId: student.id } },
-              create: { classId: cls.id, studentId: student.id },
-              update: {},
-            });
+          // Sinfga biriktirish
+          if (row.data.classId) {
+            const cls = await tx.class.findFirst({ where: { id: row.data.classId, schoolId } });
+            if (cls) {
+              await tx.classStudent.upsert({
+                where: { classId_studentId: { classId: cls.id, studentId: student.id } },
+                create: { classId: cls.id, studentId: student.id },
+                update: {},
+              });
+            }
           }
-        }
-        created++;
+          created++;
+        });
       } catch (e: any) {
         errors.push(`Qator ${row.row}: ${e.message}`);
       }
@@ -268,44 +270,46 @@ export class ImportService {
     const validRows = rows.filter(r => r.valid);
     let created = 0; let skipped = 0; const errors: string[] = [];
 
-    for (const row of validRows) {
-      try {
-        // Classdan branchId ni olish (agar override berilmagan bo'lsa)
-        let branchId = branchIdOverride;
-        if (!branchId) {
-          const cls = await this.prisma.class.findUnique({ where: { id: row.data.classId }, select: { branchId: true } });
-          branchId = cls!.branchId;
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        for (const row of validRows) {
+          // Classdan branchId ni olish (agar override berilmagan bo'lsa)
+          let branchId = branchIdOverride;
+          if (!branchId) {
+            const cls = await tx.class.findUnique({ where: { id: row.data.classId }, select: { branchId: true } });
+            branchId = cls!.branchId;
+          }
+
+          // Konflikt tekshirish
+          const conflict = await tx.schedule.findFirst({
+            where: {
+              schoolId,
+              dayOfWeek: row.data.dayOfWeek as any,
+              timeSlot: row.data.timeSlot,
+              classId: row.data.classId,
+            },
+          });
+          if (conflict) { skipped++; continue; }
+
+          await tx.schedule.create({
+            data: {
+              schoolId,
+              branchId,
+              classId:    row.data.classId,
+              subjectId:  row.data.subjectId,
+              teacherId:  row.data.teacherId,
+              dayOfWeek:  row.data.dayOfWeek as any,
+              timeSlot:   row.data.timeSlot,
+              startTime:  row.data.startTime,
+              endTime:    row.data.endTime,
+              roomNumber: row.data.roomNumber,
+            },
+          });
+          created++;
         }
-
-        // Konflikt tekshirish
-        const conflict = await this.prisma.schedule.findFirst({
-          where: {
-            schoolId,
-            dayOfWeek: row.data.dayOfWeek as any,
-            timeSlot: row.data.timeSlot,
-            classId: row.data.classId,
-          },
-        });
-        if (conflict) { skipped++; continue; }
-
-        await this.prisma.schedule.create({
-          data: {
-            schoolId,
-            branchId,
-            classId:    row.data.classId,
-            subjectId:  row.data.subjectId,
-            teacherId:  row.data.teacherId,
-            dayOfWeek:  row.data.dayOfWeek as any,
-            timeSlot:   row.data.timeSlot,
-            startTime:  row.data.startTime,
-            endTime:    row.data.endTime,
-            roomNumber: row.data.roomNumber,
-          },
-        });
-        created++;
-      } catch (e: any) {
-        errors.push(`Qator ${row.row}: ${e.message}`);
-      }
+      });
+    } catch (e: any) {
+      errors.push(e.message);
     }
     return { created, skipped, errors };
   }

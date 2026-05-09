@@ -23,6 +23,7 @@ import { usersApi } from '@/lib/api/users';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth.store';
 import { getInitials } from '@/lib/utils';
+import { useConfirm } from '@/store/confirm.store';
 
 const NEW_STUDENT_EMPTY = { firstName: '', lastName: '', email: '', password: '', phone: '' };
 
@@ -37,6 +38,7 @@ export default function ClassDetailPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [addSearch, setAddSearch] = useState('');
+  const ask = useConfirm();
   const [tab, setTab] = useState<'existing' | 'new'>('existing');
 
   // New student form state
@@ -276,7 +278,7 @@ export default function ClassDetailPage() {
                       variant="ghost"
                       size="icon"
                       className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-xedu-ruby hover:text-xedu-ruby hover:bg-xedu-ruby/10"
-                      onClick={() => removeMutation.mutate(student.id)}
+                      onClick={async () => { if (await ask({ title: "O'quvchini sinfdan olib tashlashni tasdiqlang", description: "O'quvchi sinfdan olib tashlanadi.", variant: 'destructive', confirmText: "Olib tashlash" })) removeMutation.mutate(student.id); }}
                       disabled={removeMutation.isPending}
                     >
                       <Trash2 className="h-3.5 w-3.5" />

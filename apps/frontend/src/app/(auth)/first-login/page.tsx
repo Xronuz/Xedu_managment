@@ -17,21 +17,9 @@ import { cn } from '@/lib/utils';
 // ═══════════════════════════════════════════════════════════════════════════════
 // FIRST-LOGIN / FORCED PASSWORD CHANGE PAGE
 // ═══════════════════════════════════════════════════════════════════════════════
-// TODO(BACKEND): This page currently relies on localStorage to track whether
-// the user has completed first-login password change. The backend should
-// ideally expose a flag like `user.isFirstLogin` or `user.requirePasswordChange`
-// that is set when an admin creates an account, and cleared after the user
-// changes their password via PUT /users/me/password.
-//
-// Integration requirements:
-//   1. Backend: add `isFirstLogin` boolean to User model (default true for
-//      admin-created accounts, false for self-registered).
-//   2. Backend: return `isFirstLogin` in /users/me and /auth/login responses.
-//   3. Frontend: read `isFirstLogin` from auth store instead of localStorage.
-//   4. Backend: middleware or guard to redirect first-login users to this page.
+// Enforced by middleware.ts via JWT `isFirstLogin` flag.
+// After successful password change, backend issues new token with isFirstLogin=false.
 // ═══════════════════════════════════════════════════════════════════════════════
-
-const FIRST_LOGIN_KEY = 'xedu_first_login_completed';
 
 function checkPasswordStrength(password: string) {
   const checks = [
@@ -80,13 +68,7 @@ export default function FirstLoginPage() {
   const [done, setDone] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  // Guard: if user already completed first-login, redirect to dashboard
-  useEffect(() => {
-    const completed = typeof window !== 'undefined' && localStorage.getItem(FIRST_LOGIN_KEY);
-    if (completed) {
-      router.replace('/dashboard');
-    }
-  }, [router]);
+  // First-login enforcement is handled by middleware.ts via JWT isFirstLogin flag
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
@@ -104,7 +86,6 @@ export default function FirstLoginPage() {
     setSubmitting(true);
     try {
       await authApi.firstLogin({ currentPassword, newPassword: password });
-      localStorage.setItem(FIRST_LOGIN_KEY, '1');
       setDone(true);
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? "Parolni o'zgartirishda xatolik yuz berdi";

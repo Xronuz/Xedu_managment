@@ -6,6 +6,7 @@ import {
 } from '@nestjs/terminus';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
+import { NotificationQueueService } from '@/modules/notifications/notification-queue.service';
 import { Public } from '@/common/decorators/public.decorator';
 
 @ApiTags('health')
@@ -17,6 +18,7 @@ export class HealthController {
     private memory: MemoryHealthIndicator,
     private prisma: PrismaService,
     @Optional() private readonly redis: RedisService,
+    @Optional() private readonly notificationQueue: NotificationQueueService,
   ) {}
 
   @Get()
@@ -46,6 +48,23 @@ export class HealthController {
         } catch (err: any) {
           // Redis down bo'lsa health check fail qilmasin — degraded deb belgilaydi
           return { redis: { status: 'up', message: `degraded: ${err.message}` } };
+        }
+      },
+      async () => {
+        if (!this.notificationQueue) {
+          return { queue: { status: 'up', message: 'not configured' } };
+        }
+        try {
+          const stats = await this.notificationQueue.getQueueStats();
+          if (!stats) {
+            return { queue: { status: 'up', message: 'not configured' } };
+          }
+          if (!stats.isHealthy) {
+            return { queue: { status: 'down', message: `failed: ${stats.failed}, waiting: ${stats.waiting}` } };
+          }
+          return { queue: { status: 'up', waiting: stats.waiting, active: stats.active, failed: stats.failed } };
+        } catch (err: any) {
+          return { queue: { status: 'up', message: `degraded: ${err.message}` } };
         }
       },
     ]);

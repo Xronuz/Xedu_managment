@@ -65,6 +65,7 @@ export interface JwtPayload {
   branchId: string | null;
   assignedBranchIds?: string[];
   isSuperAdmin: boolean;
+  isFirstLogin?: boolean;
 }
 
 export interface TokenPair {

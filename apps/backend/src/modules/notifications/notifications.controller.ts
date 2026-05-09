@@ -101,4 +101,12 @@ export class NotificationsController {
   deleteOne(@Param('id') id: string, @CurrentUser('sub') userId: string) {
     return this.notificationsService.deleteOne(id, userId);
   }
+
+  @Get('health/queue')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Bildirishnoma navbati sog\'lomi' })
+  async queueHealth() {
+    return this.notificationsService.getQueueHealth();
+  }
 }

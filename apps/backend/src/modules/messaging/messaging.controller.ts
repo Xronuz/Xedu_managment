@@ -126,4 +126,11 @@ export class MessagingController {
   leaveGroup(@Param('groupId') groupId: string, @CurrentUser() user: JwtPayload) {
     return this.messagingService.leaveGroup(groupId, user);
   }
+
+  @Delete('groups/messages/:messageId')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Guruh xabarini o\'chirish (soft delete)' })
+  deleteGroupMessage(@Param('messageId') messageId: string, @CurrentUser() user: JwtPayload) {
+    return this.messagingService.deleteGroupMessage(messageId, user);
+  }
 }

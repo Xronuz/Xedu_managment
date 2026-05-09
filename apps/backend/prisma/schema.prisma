@@ -172,6 +172,38 @@ enum NotificationChannel {
   in_app
 }
 
+enum NotificationCategory {
+  operational
+  alert
+  announcement
+  message
+  reminder
+  system
+}
+
+enum AnnouncementPriority {
+  low
+  normal
+  urgent
+}
+
+enum AnnouncementStatus {
+  draft
+  scheduled
+  active
+  expired
+  cancelled
+}
+
+enum DeliveryStatus {
+  pending
+  queued
+  sent
+  delivered
+  failed
+  cancelled
+}
+
 enum DayOfWeek {
   monday
   tuesday
@@ -308,6 +340,8 @@ model School {
   coinTransactions    CoinTransaction[]
   coinShopItems       CoinShopItem[]
   kpiMetrics          KpiMetric[]
+  groupMessages       GroupMessage[]
+  announcements       Announcement[]
 
   @@map("schools")
 }
@@ -353,6 +387,7 @@ model Branch {
   notifications       Notification[]
   disciplineIncidents DisciplineIncident[]
   auditLogs           AuditLog[]
+  announcements       Announcement[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
@@ -512,7 +547,8 @@ model User {
   // Common
   sentMessages             Message[]                 @relation("MessageSender")
   receivedMessages         Message[]                 @relation("MessageReceiver")
-  notifications            Notification[]
+  notifications            Notification[]            @relation("NotificationRecipient")
+  sentNotifications        Notification[]            @relation("NotificationSender")
   conversationsCreated     Conversation[]            @relation("ConversationCreator")
   conversationParticipants ConversationParticipant[]
   groupMessages            GroupMessage[]            @relation("GroupMessageSender")
@@ -577,6 +613,10 @@ model User {
 
   // Invitations
   createdInvitations Invitation[] @relation("InvitationCreator")
+
+  // Announcements
+  createdAnnouncements Announcement[]        @relation("AnnouncementCreator")
+  announcementReceipts AnnouncementReceipt[] @relation("AnnouncementReceiptUser")
 
   // Gamification
   coinTransactions CoinTransaction[]
@@ -923,26 +963,35 @@ model FeeStructure {
 // ─── Notifications ────────────────────────────────────────────────────────
 
 model Notification {
-  id          String              @id @default(uuid())
+  id          String               @id @default(uuid())
   schoolId    String
   branchId    String
   recipientId String
+  senderId    String?
   title       String
   body        String
-  type        NotificationChannel @default(in_app)
-  isRead      Boolean             @default(false)
+  type        NotificationChannel  @default(in_app)
+  category    NotificationCategory @default(system)
+  priority    String               @default("normal")
+  isRead      Boolean              @default(false)
+  readAt      DateTime?
+  expiresAt   DateTime?
   metadata    Json?
-  createdAt   DateTime            @default(now())
+  createdAt   DateTime             @default(now())
 
-  school    School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch    Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  recipient User   @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  school     School                 @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch     Branch                 @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  recipient  User                   @relation("NotificationRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+  sender     User?                  @relation("NotificationSender", fields: [senderId], references: [id], onDelete: SetNull)
+  deliveries NotificationDelivery[]
 
   @@index([schoolId, branchId])
   @@index([branchId])
   @@index([recipientId, isRead, createdAt])
   @@index([recipientId, createdAt])
   @@index([schoolId, createdAt])
+  @@index([category])
+  @@index([priority])
   @@map("notifications")
 }
 
@@ -998,16 +1047,90 @@ model ConversationParticipant {
 }
 
 model GroupMessage {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
+  schoolId       String
   conversationId String
   senderId       String
   content        String
-  createdAt      DateTime @default(now())
+  isDeleted      Boolean   @default(false)
+  deletedAt      DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
 
+  school       School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
   sender       User         @relation("GroupMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
 
+  @@index([schoolId])
+  @@index([conversationId, createdAt])
   @@map("group_messages")
+}
+
+// ─── Announcements ─────────────────────────────────────────────────────────
+
+model Announcement {
+  id              String               @id @default(uuid())
+  schoolId        String
+  branchId        String?
+  createdById     String
+  title           String
+  body            String
+  priority        AnnouncementPriority @default(normal)
+  status          AnnouncementStatus   @default(draft)
+  targetRoles     UserRole[]
+  targetClassId   String?
+  targetBranchIds String[]
+  scheduledAt     DateTime?
+  expiresAt       DateTime?
+  requireAck      Boolean              @default(false)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  school    School                @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch    Branch?               @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  createdBy User                  @relation("AnnouncementCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  receipts  AnnouncementReceipt[]
+
+  @@index([schoolId, status, createdAt])
+  @@index([schoolId, branchId, status])
+  @@index([status, scheduledAt])
+  @@map("announcements")
+}
+
+model AnnouncementReceipt {
+  id             String    @id @default(uuid())
+  announcementId String
+  userId         String
+  isRead         Boolean   @default(false)
+  readAt         DateTime?
+  acknowledgedAt DateTime?
+  createdAt      DateTime  @default(now())
+
+  announcement Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  user         User         @relation("AnnouncementReceiptUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([announcementId, userId])
+  @@index([userId, isRead, createdAt])
+  @@map("announcement_receipts")
+}
+
+model NotificationDelivery {
+  id             String              @id @default(uuid())
+  notificationId String
+  channel        NotificationChannel
+  status         DeliveryStatus      @default(pending)
+  attemptedAt    DateTime?
+  deliveredAt    DateTime?
+  failedAt       DateTime?
+  errorMessage   String?
+  retryCount     Int                 @default(0)
+  createdAt      DateTime            @default(now())
+
+  notification Notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
+
+  @@index([notificationId])
+  @@index([status, createdAt])
+  @@map("notification_deliveries")
 }
 
 // ─── Canteen (Phase 3 stub) ───────────────────────────────────────────────

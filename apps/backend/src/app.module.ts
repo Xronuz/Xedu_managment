@@ -22,6 +22,7 @@ import { HealthModule } from './modules/health/health.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { EventsModule } from './modules/gateway/events.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
+import { AnnouncementsModule } from './modules/announcements/announcements.module';
 import { ExamsModule } from './modules/exams/exams.module';
 import { HomeworkModule } from './modules/homework/homework.module';
 import { LibraryModule } from './modules/library/library.module';
@@ -108,6 +109,7 @@ import { envValidationSchema } from './common/config/env.validation';
     HealthModule,
     EventsModule,
     MessagingModule,
+    AnnouncementsModule,
     ExamsModule,
     HomeworkModule,
     LibraryModule,

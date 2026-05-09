@@ -254,7 +254,9 @@ export class MessagingService {
     return groups.map(g => {
       const me = g.participants.find(p => p.userId === currentUser.sub);
       const lastMessage = g.messages[0] ?? null;
-      const unreadCount = 0; // computed separately if needed
+      const unreadCount = lastMessage && me?.lastReadAt
+      ? (lastMessage.createdAt > me.lastReadAt ? 1 : 0)
+      : (lastMessage ? 1 : 0);
       return {
         id: g.id,
         name: g.name,
@@ -286,13 +288,13 @@ export class MessagingService {
     const skip = (page - 1) * limit;
     const [messages, total] = await Promise.all([
       this.prisma.groupMessage.findMany({
-        where: { conversationId: groupId },
+        where: { conversationId: groupId, isDeleted: false },
         orderBy: { createdAt: 'desc' },
         skip,
         take: limit,
         include: { sender: { select: { id: true, firstName: true, lastName: true, role: true } } },
       }),
-      this.prisma.groupMessage.count({ where: { conversationId: groupId } }),
+      this.prisma.groupMessage.count({ where: { conversationId: groupId, isDeleted: false } }),
     ]);
 
     // Update lastReadAt
@@ -319,7 +321,12 @@ export class MessagingService {
     if (!member) throw new Error('Siz bu guruh a\'zosi emassiz');
 
     const message = await this.prisma.groupMessage.create({
-      data: { conversationId: groupId, senderId: currentUser.sub, content },
+      data: {
+        schoolId: currentUser.schoolId!,
+        conversationId: groupId,
+        senderId: currentUser.sub,
+        content,
+      },
       include: { sender: { select: { id: true, firstName: true, lastName: true, role: true } } },
     });
 
@@ -381,5 +388,36 @@ export class MessagingService {
       where: { conversationId: groupId, userId: currentUser.sub },
     });
     return { message: 'Guruhdan chiqdingiz' };
+  }
+
+  /** Guruh xabarini soft delete qilish (faqat yuboruvchi yoki admin) */
+  async deleteGroupMessage(
+    messageId: string,
+    currentUser: JwtPayload,
+  ) {
+    const message = await this.prisma.groupMessage.findFirst({
+      where: { id: messageId, schoolId: currentUser.schoolId! },
+      include: {
+        conversation: { select: { id: true } },
+      },
+    });
+    if (!message) throw new NotFoundException('Xabar topilmadi');
+
+    // Check if user is sender or admin
+    const isSender = message.senderId === currentUser.sub;
+    const isAdmin = await this.prisma.conversationParticipant.findFirst({
+      where: { conversationId: message.conversationId, userId: currentUser.sub, isAdmin: true },
+    });
+
+    if (!isSender && !isAdmin) {
+      throw new ForbiddenException('Siz faqat o\'z xabaringizni o\'chirishingiz mumkin');
+    }
+
+    await this.prisma.groupMessage.update({
+      where: { id: messageId },
+      data: { isDeleted: true, deletedAt: new Date() },
+    });
+
+    return { message: 'Xabar o\'chirildi' };
   }
 }

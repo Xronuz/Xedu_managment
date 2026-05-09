@@ -133,6 +133,17 @@ export class LeaveRequestsService {
       newData: { startDate: dto.startDate, endDate: dto.endDate, reason: dto.reason },
     });
 
+    // Real-time school-wide broadcast so all dashboards refresh pending counts
+    this.eventsGateway?.emitToSchool(schoolId, 'leave-request:created', {
+      id: leaveRequest.id,
+      requesterId: leaveRequest.requesterId,
+      requesterName: `${leaveRequest.requester.firstName} ${leaveRequest.requester.lastName}`,
+      startDate: dto.startDate,
+      endDate: dto.endDate,
+      status: leaveRequest.status,
+      timestamp: new Date().toISOString(),
+    });
+
     return leaveRequest;
   }
 
@@ -320,6 +331,15 @@ export class LeaveRequestsService {
       entityId: id,
       oldData: { status: req.status },
       newData: { status: overallStatus, action: dto.action, comment: dto.comment },
+    });
+
+    // Real-time school-wide broadcast so approver dashboards refresh
+    this.eventsGateway?.emitToSchool(currentUser.schoolId!, 'leave-request:updated', {
+      id,
+      status: overallStatus,
+      requesterId: req.requesterId,
+      decidedBy: currentUser.sub,
+      timestamp: new Date().toISOString(),
     });
 
     return updated;

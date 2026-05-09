@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 import { CoinsService, COIN_RULES } from '@/modules/coins/coins.service';
+import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 
 // ─── Enums (mirror schema) ────────────────────────────────────────────────────
@@ -55,6 +56,7 @@ export class DisciplineService {
   constructor(
     private readonly prisma: PrismaService,
     @Optional() private readonly coinsService: CoinsService,
+    @Optional() private readonly eventsGateway: EventsGateway,
   ) {}
 
   async findAll(
@@ -173,6 +175,17 @@ export class DisciplineService {
       ).catch(() => {});
     }
 
+    // ── Realtime event ────────────────────────────────────────────────────────
+    this.eventsGateway?.emitToSchool(schoolId, 'discipline:created', {
+      id: incident.id,
+      studentId: incident.studentId,
+      studentName: `${incident.student.firstName} ${incident.student.lastName}`,
+      severity: incident.severity,
+      type: incident.type,
+      reportedBy: `${incident.reportedBy.firstName} ${incident.reportedBy.lastName}`,
+      timestamp: new Date().toISOString(),
+    });
+
     return incident;
   }
 
@@ -183,7 +196,7 @@ export class DisciplineService {
     if (!incident) throw new NotFoundException('Intizom hodisasi topilmadi');
     if (incident.resolved) throw new ForbiddenException('Allaqachon hal qilingan');
 
-    return this.prisma.disciplineIncident.update({
+    const updated = await this.prisma.disciplineIncident.update({
       where: { id },
       data: {
         resolved:   true,
@@ -195,6 +208,17 @@ export class DisciplineService {
         reportedBy: { select: { id: true, firstName: true, lastName: true } },
       },
     });
+
+    // ── Realtime event ────────────────────────────────────────────────────────
+    this.eventsGateway?.emitToSchool(currentUser.schoolId!, 'discipline:resolved', {
+      id: updated.id,
+      studentId: updated.studentId,
+      studentName: `${updated.student.firstName} ${updated.student.lastName}`,
+      resolvedBy: `${updated.reportedBy.firstName} ${updated.reportedBy.lastName}`,
+      timestamp: new Date().toISOString(),
+    });
+
+    return updated;
   }
 
   async remove(id: string, currentUser: JwtPayload) {

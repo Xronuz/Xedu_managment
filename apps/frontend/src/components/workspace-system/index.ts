@@ -52,3 +52,4 @@ export type { ChartPalette } from './chart-palette';
 export { useDebouncedValue } from './use-debounced-value';
 export { useVirtualization } from './use-virtualization';
 export { MemoChart } from './memo-chart';
+export { RealtimePulse } from './realtime-pulse';

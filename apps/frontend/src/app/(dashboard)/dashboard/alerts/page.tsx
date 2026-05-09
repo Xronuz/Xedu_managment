@@ -19,6 +19,7 @@ import { aiAnalyticsApi } from '@/lib/api/ai-analytics';
 import {
   SplitView, SplitViewListHeader, SplitViewListBody,
 } from '@/components/director-workspace/split-view';
+import { RealtimePulse } from '@/components/workspace-system';
 import { FloatingBulkToolbar } from '@/components/director-workspace/floating-bulk-toolbar';
 import { AuditDetailPane } from '@/components/director-workspace/audit-detail-pane';
 import Link from 'next/link';
@@ -268,6 +269,10 @@ export default function AlertCenterPage() {
             </span>
           )}
         </div>
+        <RealtimePulse
+          events={['discipline:created', 'discipline:resolved', 'leave-request:created', 'leave-request:updated', 'payment:received', 'class:created', 'class:updated', 'class:removed']}
+          label="Ma'lumot yangilandi"
+        />
       </div>
 
       <SplitView

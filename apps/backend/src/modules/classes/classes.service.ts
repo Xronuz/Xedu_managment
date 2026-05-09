@@ -1,9 +1,11 @@
 import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Optional } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
 import { JwtPayload } from '@eduplatform/types';
 import { CreateClassDto } from './dto/create-class.dto';
 import { PartialType } from '@nestjs/swagger';
+import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 
 const CLASS_TTL = 10 * 60; // 10 minutes
@@ -13,6 +15,7 @@ export class ClassesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
+    @Optional() private readonly eventsGateway: EventsGateway,
   ) {}
 
   private cacheKey(schoolId: string, branchId: string | null | undefined, suffix: string) {
@@ -97,6 +100,16 @@ export class ClassesService {
       },
     });
     await this.invalidate(currentUser.schoolId!);
+
+    // ── Realtime event ────────────────────────────────────────────────────────
+    this.eventsGateway?.emitToSchool(currentUser.schoolId!, 'class:created', {
+      id: result.id,
+      name: result.name,
+      gradeLevel: result.gradeLevel,
+      branchId: result.branchId,
+      timestamp: new Date().toISOString(),
+    });
+
     return result;
   }
 
@@ -140,6 +153,16 @@ export class ClassesService {
     if (branchId) updateData.branchId = branchId;
     const result = await this.prisma.class.update({ where: { id }, data: updateData });
     await this.invalidate(currentUser.schoolId!);
+
+    // ── Realtime event ────────────────────────────────────────────────────────
+    this.eventsGateway?.emitToSchool(currentUser.schoolId!, 'class:updated', {
+      id: result.id,
+      name: result.name,
+      gradeLevel: result.gradeLevel,
+      branchId: result.branchId,
+      timestamp: new Date().toISOString(),
+    });
+
     return result;
   }
 

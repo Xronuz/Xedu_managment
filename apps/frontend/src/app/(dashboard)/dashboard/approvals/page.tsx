@@ -16,6 +16,7 @@ import { disciplineApi, type DisciplineIncident } from '@/lib/api/discipline';
 import {
   SplitView, SplitViewListHeader, SplitViewListBody,
 } from '@/components/director-workspace/split-view';
+import { RealtimePulse } from '@/components/workspace-system';
 import { FloatingBulkToolbar } from '@/components/director-workspace/floating-bulk-toolbar';
 import { AuditDetailPane } from '@/components/director-workspace/audit-detail-pane';
 
@@ -221,6 +222,10 @@ export default function ApprovalInboxPage() {
             </span>
           )}
         </div>
+        <RealtimePulse
+          events={['leave-request:created', 'leave-request:updated', 'discipline:created', 'discipline:resolved']}
+          label="Yangi so'rov"
+        />
       </div>
 
       <SplitView

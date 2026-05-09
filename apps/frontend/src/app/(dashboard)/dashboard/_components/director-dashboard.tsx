@@ -41,6 +41,7 @@ import {
   WorkspaceMain,
   WorkspaceSidebar,
   WorkspaceSection,
+  RealtimePulse,
 } from '@/components/workspace-system';
 
 import {
@@ -219,6 +220,12 @@ export function DirectorDashboard() {
           title="Direktor paneli"
           subtitle={`Maktab umumiy holati · ${dayLabel}`}
           icon={<LayoutDashboard className="h-5 w-5 text-xedu-slate-500" />}
+          actions={
+            <RealtimePulse
+              events={['leave-request:created', 'leave-request:updated', 'discipline:created', 'discipline:resolved', 'payment:received', 'class:created', 'class:updated', 'class:removed', 'notification:broadcast']}
+              label="Ma'lumot yangilandi"
+            />
+          }
         />
 
         <div className="sticky top-0 z-20 -mx-2 px-2 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm space-y-1">

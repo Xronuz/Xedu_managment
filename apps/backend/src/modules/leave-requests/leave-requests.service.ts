@@ -82,6 +82,7 @@ export class LeaveRequestsService {
         reason: dto.reason,
         startDate: start,
         endDate: end,
+        createdById: currentUser.sub,
         approvals: {
           create: approvers.map((a) => ({
             approverId: a.id,
@@ -282,6 +283,7 @@ export class LeaveRequestsService {
                   date: dayStart,
                   status: 'excused' as any,
                   note: `Ta'til so'rovi #${id} tasdiqlandi`,
+                  createdById: currentUser.sub,
                 },
               });
             }

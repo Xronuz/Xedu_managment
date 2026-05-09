@@ -78,7 +78,7 @@ export class FeeStructuresService {
         description: dto.description,
         amount: dto.amount,
         currency: dto.currency ?? 'UZS',
-        frequency: dto.frequency ?? 'monthly',
+        frequency: (dto.frequency ?? 'monthly') as any,
         gradeLevel: dto.gradeLevel,
         academicYear: dto.academicYear,
         isActive: true,
@@ -103,7 +103,7 @@ export class FeeStructuresService {
 
     const updated = await this.prisma.feeStructure.update({
       where: { id },
-      data: dto,
+      data: dto as any,
     });
     this.auditService?.log({
       userId: currentUser.sub ?? undefined,

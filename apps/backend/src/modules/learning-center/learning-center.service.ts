@@ -526,7 +526,7 @@ export class LearningCenterService {
         title:       dto.title,
         description: dto.description,
         fileUrl:     dto.fileUrl,
-        type:        dto.type ?? 'document',
+        type:        (dto.type ?? 'document') as any,
         isPublic:    dto.isPublic ?? true,
         sortOrder:   dto.sortOrder ?? 0,
         createdById: currentUser.sub,

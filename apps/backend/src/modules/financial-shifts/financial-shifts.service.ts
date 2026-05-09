@@ -44,7 +44,7 @@ export class FinancialShiftsService {
     return this.prisma.financialShift.create({
       data: {
         schoolId,
-        branchId: treasury.branchId,
+        branchId: treasury.branchId || currentUser.branchId!,
         treasuryId: dto.treasuryId,
         openerId: currentUser.sub!,
         startingBalance: dto.startingBalance,

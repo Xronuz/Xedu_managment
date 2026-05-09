@@ -93,6 +93,7 @@ export class PaymentsService {
           // Naqd to'lov darhol "paid" hisoblanadi
           status: isCash ? ('paid' as any) : ('pending' as any),
           paidAt: isCash ? new Date() : undefined,
+          createdById: currentUser.sub,
         },
         include: {
           student: { select: { id: true, firstName: true, lastName: true } },

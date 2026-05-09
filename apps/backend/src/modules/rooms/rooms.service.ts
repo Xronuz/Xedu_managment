@@ -184,7 +184,7 @@ export class RoomsService {
         name:      dto.name,
         capacity:  dto.capacity ?? 30,
         floor:     dto.floor,
-        type:      dto.type ?? 'classroom',
+        type:      (dto.type ?? 'classroom') as any,
         isActive:  dto.isActive ?? true,
       },
       include: {

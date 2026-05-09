@@ -46,20 +46,16 @@ export class AuditService {
    */
   async log(opts: AuditLogOptions): Promise<void> {
     try {
-      // Embed branchId into newData for traceability until schema migration
-      const enrichedNewData = opts.branchId
-        ? { ...(opts.newData ?? {}), _meta: { ...(opts.newData?._meta ?? {}), branchId: opts.branchId } }
-        : opts.newData;
-
       await this.prisma.auditLog.create({
         data: {
           userId: opts.userId,
           schoolId: opts.schoolId,
+          branchId: opts.branchId,
           action: opts.action as any,
           entity: opts.entity,
           entityId: opts.entityId,
           oldData: opts.oldData as any,
-          newData: enrichedNewData as any,
+          newData: opts.newData as any,
           ipAddress: opts.ipAddress,
           userAgent: opts.userAgent,
         },

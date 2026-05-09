@@ -61,6 +61,7 @@ export class AttendanceService {
               date,
               status: entry.status as any,
               note: entry.note,
+              createdById: currentUser.sub,
             },
           });
         }

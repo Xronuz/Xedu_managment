@@ -155,6 +155,7 @@ enum PaymentStatus {
   failed
   refunded
   overdue
+  cancelled
 }
 
 enum PaymentProvider {
@@ -190,6 +191,54 @@ enum AuditAction {
   export
   assign_branch
   unassign_branch
+}
+
+// ─── Phase 23: New enums for previously String fields ──────────────────────
+
+enum CourseEnrollmentStatus {
+  active
+  completed
+  dropped
+  suspended
+}
+
+enum CourseMaterialType {
+  document
+  video
+  link
+  pdf
+  audio
+}
+
+enum RoomType {
+  classroom
+  lab
+  hall
+  gym
+  other
+}
+
+enum CoinTransactionType {
+  earn
+  deduct
+}
+
+enum CoinTransactionReason {
+  grade_excellent
+  attendance_weekly
+  discipline_praise
+  manual_award
+  shop_purchase
+  discipline_warning
+  manual_deduct
+}
+
+enum FeeFrequency {
+  monthly
+  yearly
+  quarterly
+  weekly
+  one_time
 }
 
 enum Language {
@@ -303,6 +352,7 @@ model Branch {
   feeStructures       FeeStructure[]
   notifications       Notification[]
   disciplineIncidents DisciplineIncident[]
+  auditLogs           AuditLog[]
 
   @@unique([schoolId, name])
   @@index([schoolId])
@@ -375,9 +425,9 @@ model Invitation {
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
-  school   School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch   Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  createdBy User  @relation("InvitationCreator", fields: [createdById], references: [id], onDelete: Cascade)
+  school    School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch    Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  createdBy User    @relation("InvitationCreator", fields: [createdById], references: [id], onDelete: Cascade)
 
   @@index([schoolId, status])
   @@index([email, schoolId])
@@ -450,8 +500,11 @@ model User {
   // Student relations
   studentClasses    ClassStudent[]
   attendance        Attendance[]
+  attendanceCreated Attendance[]         @relation("AttendanceCreator")
   grades            Grade[]
+  gradesCreated     Grade[]              @relation("GradeCreator")
   payments          Payment[]
+  paymentsCreated   Payment[]            @relation("PaymentCreator")
   submittedHomework HomeworkSubmission[]
   parentStudents    ParentStudent[]      @relation("ParentUser")
   childParents      ParentStudent[]      @relation("StudentUser")
@@ -467,8 +520,9 @@ model User {
   auditLogs                AuditLog[]
 
   // Leave requests
-  leaveRequests  LeaveRequest[]  @relation("LeaveRequests")
-  leaveApprovals LeaveApproval[] @relation("LeaveApprovals")
+  leaveRequests        LeaveRequest[]  @relation("LeaveRequests")
+  leaveRequestsCreated LeaveRequest[]  @relation("LeaveRequestCreator")
+  leaveApprovals       LeaveApproval[] @relation("LeaveApprovals")
 
   // Online exam sessions
   examSessions ExamSession[] @relation("ExamSessions")
@@ -528,13 +582,14 @@ model User {
   coinTransactions CoinTransaction[]
 
   // KPI
-  kpiRecords       KpiRecord[]
+  kpiRecords KpiRecord[]
 
   @@index([schoolId, branchId])
   @@index([branchId])
   @@index([schoolId, role, isActive])
   @@map("users")
 }
+
 model RefreshToken {
   id        String   @id @default(uuid())
   userId    String
@@ -574,7 +629,7 @@ model Class {
   updatedAt      DateTime @updatedAt
 
   school       School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch       Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch       Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
   classTeacher User?          @relation("ClassTeacher", fields: [classTeacherId], references: [id])
   students     ClassStudent[]
   subjects     Subject[]
@@ -588,6 +643,7 @@ model Class {
   @@index([branchId])
   @@map("classes")
 }
+
 model ClassStudent {
   id        String   @id @default(uuid())
   classId   String
@@ -613,7 +669,7 @@ model Subject {
   createdAt DateTime @default(now())
 
   school    School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch    Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch    Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)
   class     Class      @relation(fields: [classId], references: [id], onDelete: Cascade)
   teacher   User       @relation("TeacherSubjects", fields: [teacherId], references: [id])
   clubs     Club[]
@@ -649,7 +705,7 @@ model Schedule {
   updatedAt      DateTime  @updatedAt
 
   school     School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch     Branch      @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch     Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
   class      Class        @relation(fields: [classId], references: [id], onDelete: Cascade)
   subject    Subject      @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   teacher    User         @relation("ScheduleTeacher", fields: [teacherId], references: [id])
@@ -660,29 +716,33 @@ model Schedule {
   @@index([schoolId, dayOfWeek])
   @@index([teacherId, dayOfWeek])
   @@index([branchId, dayOfWeek])
+  @@index([classId, dayOfWeek])
+  @@index([roomId, dayOfWeek])
   @@map("schedules")
 }
 
 // ─── Attendance ───────────────────────────────────────────────────────────
 
 model Attendance {
-  id         String           @id @default(uuid())
-  schoolId   String
-  branchId   String
-  classId    String
-  studentId  String
-  scheduleId String?
-  date       DateTime         @db.Date
-  status     AttendanceStatus @default(present)
-  note       String?
-  createdAt  DateTime         @default(now())
-  updatedAt  DateTime         @updatedAt
+  id          String           @id @default(uuid())
+  schoolId    String
+  branchId    String
+  classId     String
+  studentId   String
+  scheduleId  String?
+  date        DateTime         @db.Date
+  status      AttendanceStatus @default(present)
+  note        String?
+  createdById String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 
-  school   School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch   Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  class    Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
-  student  User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  schedule Schedule? @relation(fields: [scheduleId], references: [id])
+  school    School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch    Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  class     Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student   User      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  schedule  Schedule? @relation(fields: [scheduleId], references: [id])
+  createdBy User?     @relation("AttendanceCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@unique([studentId, scheduleId, date])
   @@index([classId, date])
@@ -695,25 +755,27 @@ model Attendance {
 
 // ─── Grades ───────────────────────────────────────────────────────────────
 model Grade {
-  id        String    @id @default(uuid())
-  schoolId  String
-  branchId  String
-  classId   String
-  studentId String
-  subjectId String
-  type      GradeType
-  score     Float
-  maxScore  Float     @default(100)
-  date      DateTime  @db.Date
-  comment   String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String    @id @default(uuid())
+  schoolId    String
+  branchId    String
+  classId     String
+  studentId   String
+  subjectId   String
+  type        GradeType
+  score       Float
+  maxScore    Float     @default(100)
+  date        DateTime  @db.Date
+  comment     String?
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
-  school  School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch  Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
-  student User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  school    School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch    Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  class     Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student   User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  createdBy User?   @relation("GradeCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([schoolId, branchId])
   @@index([studentId, subjectId])
@@ -742,7 +804,7 @@ model Exam {
   updatedAt   DateTime      @updatedAt
 
   school    School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch    Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch    Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
   class     Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
   subject   Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   questions ExamQuestion[]
@@ -750,6 +812,8 @@ model Exam {
 
   @@index([schoolId, branchId])
   @@index([branchId])
+  @@index([classId])
+  @@index([subjectId])
   @@map("exams")
 }
 
@@ -766,13 +830,15 @@ model Homework {
   createdAt   DateTime @default(now())
 
   school      School               @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch      Branch              @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch      Branch               @relation(fields: [branchId], references: [id], onDelete: Cascade)
   class       Class                @relation(fields: [classId], references: [id], onDelete: Cascade)
   subject     Subject              @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   submissions HomeworkSubmission[]
 
   @@index([schoolId, branchId])
   @@index([branchId])
+  @@index([classId])
+  @@index([subjectId])
   @@map("homeworks")
 }
 
@@ -809,37 +875,42 @@ model Payment {
   description     String?
   dueDate         DateTime?
   paidAt          DateTime?
+  createdById     String?
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
-  school   School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch   Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  student  User            @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  treasury Treasury?       @relation(fields: [treasuryId], references: [id], onDelete: SetNull)
-  shift    FinancialShift? @relation(fields: [shiftId], references: [id], onDelete: SetNull)
+  school    School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch    Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  student   User            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdBy User?           @relation("PaymentCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  treasury  Treasury?       @relation(fields: [treasuryId], references: [id], onDelete: SetNull)
+  shift     FinancialShift? @relation(fields: [shiftId], references: [id], onDelete: SetNull)
 
   @@index([schoolId, status, dueDate])
   @@index([branchId, status])
   @@index([studentId, status])
   @@index([treasuryId])
+  @@index([studentId, createdAt])
+  @@index([schoolId, createdAt])
+  @@index([status, createdAt])
   @@map("payments")
 }
 
 // ─── Fee Structures ───────────────────────────────────────────────────────
 model FeeStructure {
-  id           String   @id @default(uuid())
+  id           String       @id @default(uuid())
   schoolId     String
   branchId     String?
-  name         String   @db.VarChar(200)
+  name         String       @db.VarChar(200)
   description  String?
   amount       Float
-  currency     String   @default("UZS")
-  frequency    String   @default("monthly")
+  currency     String       @default("UZS")
+  frequency    FeeFrequency @default(monthly)
   gradeLevel   Int?
   academicYear String
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
 
   school School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   branch Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
@@ -863,12 +934,15 @@ model Notification {
   metadata    Json?
   createdAt   DateTime            @default(now())
 
-  school    School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school    School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   branch    Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  recipient User    @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  recipient User   @relation(fields: [recipientId], references: [id], onDelete: Cascade)
 
   @@index([schoolId, branchId])
   @@index([branchId])
+  @@index([recipientId, isRead, createdAt])
+  @@index([recipientId, createdAt])
+  @@index([schoolId, createdAt])
   @@map("notifications")
 }
 
@@ -983,6 +1057,8 @@ model LibraryLoan {
   school School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   book   LibraryBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
 
+  @@index([studentId, returnDate])
+  @@index([bookId, returnDate])
   @@map("library_loans")
 }
 
@@ -991,6 +1067,7 @@ model LibraryLoan {
 model AuditLog {
   id        String      @id @default(uuid())
   schoolId  String?
+  branchId  String?
   userId    String?
   action    AuditAction
   entity    String
@@ -1002,10 +1079,13 @@ model AuditLog {
   createdAt DateTime    @default(now())
 
   school School? @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  branch Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
   user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([schoolId, createdAt(sort: Desc)])
   @@index([schoolId, entity])
+  @@index([schoolId, entity, createdAt])
+  @@index([userId, createdAt])
   @@map("audit_logs")
 }
 
@@ -1027,19 +1107,24 @@ model LeaveRequest {
   startDate   DateTime    @db.Date
   endDate     DateTime    @db.Date
   status      LeaveStatus @default(pending)
+  createdById String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
   school    School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch    Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch    Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
   requester User            @relation("LeaveRequests", fields: [requesterId], references: [id], onDelete: Cascade)
+  createdBy User?           @relation("LeaveRequestCreator", fields: [createdById], references: [id], onDelete: SetNull)
   approvals LeaveApproval[]
 
   @@index([schoolId, status]) // D-2: status filtr O(1)
   @@index([requesterId]) // D-2: talaba/xodim so'rovlari O(1)
   @@index([schoolId, startDate]) // D-2: sana oralig'i qidirish
+  @@index([requesterId, status])
+  @@index([branchId, status])
   @@map("leave_requests")
 }
+
 model LeaveApproval {
   id             String      @id @default(uuid())
   leaveRequestId String
@@ -1130,13 +1215,14 @@ model StaffSalary {
   updatedAt            DateTime        @updatedAt
 
   school       School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch       Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch       Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
   user         User            @relation("StaffSalary", fields: [userId], references: [id], onDelete: Cascade)
   advances     SalaryAdvance[]
   payrollItems PayrollItem[]
 
   @@map("staff_salaries")
 }
+
 model SalaryAdvance {
   id            String        @id @default(uuid())
   schoolId      String
@@ -1290,6 +1376,9 @@ model ExamSession {
 
   @@unique([examId, studentId])
   @@index([examId, status])
+  @@index([studentId, status])
+  @@index([schoolId, status])
+  @@index([examId, studentId, status])
   @@map("exam_sessions")
 }
 
@@ -1360,6 +1449,7 @@ model AcademicEvent {
   createdBy User   @relation("AcademicEventCreator", fields: [createdById], references: [id])
 
   @@index([schoolId, startDate])
+  @@index([createdById])
   @@map("academic_events")
 }
 
@@ -1405,15 +1495,17 @@ model DisciplineIncident {
   createdAt    DateTime           @default(now())
   updatedAt    DateTime           @updatedAt
 
-  school     School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school     School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   branch     Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  student    User    @relation("DisciplineStudent", fields: [studentId], references: [id], onDelete: Cascade)
-  reportedBy User    @relation("DisciplineReporter", fields: [reportedById], references: [id], onDelete: Cascade)
+  student    User   @relation("DisciplineStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  reportedBy User   @relation("DisciplineReporter", fields: [reportedById], references: [id], onDelete: Cascade)
 
   @@index([schoolId, date])
   @@index([schoolId, branchId])
   @@index([branchId])
   @@index([studentId])
+  @@index([studentId, date])
+  @@index([schoolId, resolved, date])
   @@map("discipline_incidents")
 }
 
@@ -1430,6 +1522,7 @@ enum MeetingMedium {
   phone
   video
 }
+
 model ParentMeeting {
   id          String        @id @default(uuid())
   schoolId    String
@@ -1476,7 +1569,7 @@ model TransportRoute {
   updatedAt     DateTime @updatedAt
 
   school      School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch      Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch      Branch             @relation(fields: [branchId], references: [id], onDelete: Cascade)
   assignments TransportStudent[]
 
   @@unique([schoolId, name])
@@ -1484,6 +1577,7 @@ model TransportRoute {
   @@index([branchId])
   @@map("transport_routes")
 }
+
 model TransportStudent {
   id        String   @id @default(uuid())
   schoolId  String
@@ -1505,7 +1599,7 @@ model TransportStudent {
 // ─── Learning Center ─────────────────────────────────────────────────────────
 
 model Course {
-  id          String      @id @default(uuid())
+  id          String    @id @default(uuid())
   schoolId    String
   branchId    String
   name        String
@@ -1513,15 +1607,15 @@ model Course {
   teacherId   String?
   duration    Int? // weeks
   price       Float?
-  maxStudents Int         @default(30)
-  isActive    Boolean     @default(true)
+  maxStudents Int       @default(30)
+  isActive    Boolean   @default(true)
   startDate   DateTime?
   endDate     DateTime?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   school      School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch      Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch      Branch             @relation(fields: [branchId], references: [id], onDelete: Cascade)
   teacher     User?              @relation("CourseTeacher", fields: [teacherId], references: [id])
   enrollments CourseEnrollment[]
   materials   CourseMaterial[]
@@ -1535,18 +1629,18 @@ model Course {
 // ─── Course Materials (Shared — schoolId bo'yicha, branchdan mustaqil) ─────
 // Har qaysi filial o'qituvchisi maktabning markaziy materiallariga kira oladi.
 model CourseMaterial {
-  id          String   @id @default(uuid())
+  id          String             @id @default(uuid())
   schoolId    String
   courseId    String
   title       String
   description String?
   fileUrl     String?
-  type        String   @default("document") // document | video | link | pdf | audio
-  isPublic    Boolean  @default(true)
-  sortOrder   Int      @default(0)
+  type        CourseMaterialType @default(document)
+  isPublic    Boolean            @default(true)
+  sortOrder   Int                @default(0)
   createdById String? // Qaysi o'qituvchi qo'shgan
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 
   school    School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   course    Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
@@ -1558,12 +1652,12 @@ model CourseMaterial {
 }
 
 model CourseEnrollment {
-  id         String   @id @default(uuid())
+  id         String                 @id @default(uuid())
   schoolId   String
   courseId   String
   studentId  String
-  enrolledAt DateTime @default(now())
-  status     String   @default("active") // active | completed | dropped
+  enrolledAt DateTime               @default(now())
+  status     CourseEnrollmentStatus @default(active)
   grade      Float?
   notes      String?
 
@@ -1574,6 +1668,8 @@ model CourseEnrollment {
   @@unique([courseId, studentId])
   @@index([schoolId])
   @@index([studentId])
+  @@index([studentId, status])
+  @@index([courseId, status])
   @@map("course_enrollments")
 }
 
@@ -1598,7 +1694,7 @@ model Club {
   updatedAt         DateTime     @updatedAt
 
   school       School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch       Branch           @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch       Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
   leader       User              @relation("ClubLeader", fields: [leaderId], references: [id])
   subject      Subject?          @relation(fields: [subjectId], references: [id])
   members      ClubMember[]
@@ -1609,6 +1705,7 @@ model Club {
   @@index([subjectId])
   @@map("clubs")
 }
+
 model ClubMember {
   id        String   @id @default(uuid())
   clubId    String
@@ -1648,7 +1745,7 @@ model ClubJoinRequest {
 model Treasury {
   id        String       @id @default(uuid())
   schoolId  String
-  branchId  String
+  branchId  String? // CENTRALIZED mode: null; DECENTRALIZED: branchId
   name      String // "Asosiy kassa", "Chilonzor naqd"
   type      TreasuryType @default(CASH)
   balance   Float        @default(0) // Hozirgi balans (UZS)
@@ -1658,7 +1755,7 @@ model Treasury {
   updatedAt DateTime     @updatedAt
 
   school School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
   payments        Payment[]
   financialShifts FinancialShift[]
@@ -1690,15 +1787,14 @@ model FinancialShift {
   updatedAt       DateTime    @updatedAt
 
   school   School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch   Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch   Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
   treasury Treasury @relation(fields: [treasuryId], references: [id], onDelete: Cascade)
-
-  @@index([schoolId, branchId])
   opener   User     @relation("ShiftOpener", fields: [openerId], references: [id])
   closer   User?    @relation("ShiftCloser", fields: [closerId], references: [id])
 
   payments Payment[]
 
+  @@index([schoolId, branchId])
   @@index([schoolId, status])
   @@index([branchId, status])
   @@index([treasuryId, status])
@@ -1716,7 +1812,7 @@ model Room {
   name      String // "201-xona", "Fizika lab", "Sport zal"
   capacity  Int      @default(30)
   floor     Int? // Qavat raqami
-  type      String   @default("classroom") // classroom | lab | hall | gym | other
+  type      RoomType @default(classroom)
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1761,10 +1857,10 @@ model Lead {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
-  school     School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  school     School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   branch     Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  assignedTo User?   @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
-  createdBy  User?   @relation("LeadCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  assignedTo User?  @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy  User?  @relation("LeadCreator", fields: [createdById], references: [id], onDelete: SetNull)
 
   comments LeadComment[]
 
@@ -1774,6 +1870,9 @@ model Lead {
   @@index([schoolId, branchId])
   @@index([schoolId, source])
   @@index([assignedToId])
+  @@index([branchId, status])
+  @@index([assignedToId, status])
+  @@index([schoolId, nextContactDate])
   @@map("leads")
 }
 
@@ -1798,15 +1897,15 @@ model LeadComment {
 // ─── Gamification: Coin tranzaksiyalari ───────────────────────────────────────
 
 model CoinTransaction {
-  id        String   @id @default(uuid())
+  id        String                @id @default(uuid())
   userId    String
   schoolId  String
   amount    Int
-  type      String // 'earn' | 'deduct'
-  reason    String // 'grade_excellent' | 'attendance_weekly' | 'discipline_praise' | 'manual_award' | 'discipline_warning' | 'shop_purchase'
+  type      CoinTransactionType
+  reason    CoinTransactionReason
   balance   Int // Tranzaksiyadan keyingi balans
   metadata  Json?
-  createdAt DateTime @default(now())
+  createdAt DateTime              @default(now())
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
@@ -1871,9 +1970,9 @@ model KpiMetric {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  school   School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch   Branch?      @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  records  KpiRecord[]
+  school  School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch  Branch?     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  records KpiRecord[]
 
   @@index([schoolId])
   @@index([schoolId, category])
@@ -1894,9 +1993,9 @@ model KpiRecord {
   metric    KpiMetric @relation(fields: [metricId], references: [id], onDelete: Cascade)
   createdBy User?     @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
+  @@unique([metricId, periodStart])
   @@index([metricId])
   @@index([metricId, periodStart])
   @@index([metricId, periodEnd])
-  @@unique([metricId, periodStart])
   @@map("kpi_records")
 }

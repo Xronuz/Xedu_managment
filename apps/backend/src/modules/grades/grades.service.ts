@@ -72,6 +72,7 @@ export class GradesService {
         type: dto.type as any,
         schoolId: currentUser.schoolId!,
         branchId: currentUser.branchId!,
+        createdById: currentUser.sub,
       },
       include: {
         student: { select: { id: true, firstName: true, lastName: true } },
@@ -190,6 +191,7 @@ export class GradesService {
         maxScore: item.maxScore ?? dto.maxScore,
         comment: item.comment,
         date,
+        createdById: currentUser.sub,
       })),
     });
 

@@ -174,6 +174,7 @@ export class ParentService {
         reason: `[Ota-ona so'rovi] ${dto.reason}`,
         startDate: start,
         endDate: end,
+        createdById: currentUser.sub,
         approvals: {
           create: approvers.map(a => ({ approverId: a.id })),
         },

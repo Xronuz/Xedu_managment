@@ -35,7 +35,7 @@ export function StatPill({ label, value, suffix = '', tone = 'calm' }: StatPillP
   return (
     <div className="rounded-lg border border-xedu-slate-100 dark:border-xedu-slate-800 px-2.5 py-2">
       <p className="text-2xs font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</p>
-      <p className={cn('text-sm font-bold tabular-nums', color[tone])}>
+      <p className={cn('text-sm font-bold tabular-nums truncate', color[tone])}>
         {value}{suffix}
       </p>
     </div>

@@ -246,7 +246,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
             {canManage && addingQ && (
               <div className="rounded-lg border p-4 space-y-3 bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
                 <p className="text-sm font-medium">Yangi savol</p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-xs">Tur</Label>
                     <Select value={qForm.type} onValueChange={v => setQForm(f => ({
@@ -837,8 +837,8 @@ export function ExamsWorkspace() {
 
       {/* Toolbar */}
       <div className="w-full lg:col-span-2">
-        <WorkspaceToolbar sticky className="flex-wrap">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+        <WorkspaceToolbar sticky>
+          <div className="relative flex-1 min-w-[140px] sm:min-w-[200px] max-w-sm">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-xedu-slate-400" />
             <input
               type="text"
@@ -1176,7 +1176,7 @@ export function ExamsWorkspace() {
               <Input placeholder="Masalan: 1-chorak imtihoni" value={sForm.title} onChange={inp(setSForm)('title')} />
               {sErrors.title && <p className="text-xs text-xedu-ruby">{sErrors.title}</p>}
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Sinf <span className="text-xedu-ruby">*</span></Label>
                 <Select value={sForm.classId} onValueChange={sel(setSForm)('classId')}>
@@ -1194,7 +1194,7 @@ export function ExamsWorkspace() {
                 {sErrors.subjectId && <p className="text-xs text-xedu-ruby">{sErrors.subjectId}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Tur <span className="text-xedu-ruby">*</span></Label>
                 <Select value={sForm.frequency} onValueChange={sel(setSForm)('frequency')}>
@@ -1208,7 +1208,7 @@ export function ExamsWorkspace() {
                 <Input type="number" min="1" value={sForm.maxScore} onChange={inp(setSForm)('maxScore')} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Sana va vaqt <span className="text-xedu-ruby">*</span></Label>
                 <Input type="datetime-local" value={sForm.scheduledAt} onChange={inp(setSForm)('scheduledAt')} />
@@ -1243,7 +1243,7 @@ export function ExamsWorkspace() {
               <Input placeholder="Masalan: Oylik imtihon — Mart 2026" value={bForm.title} onChange={inp(setBForm)('title')} />
               {bErrors.title && <p className="text-xs text-xedu-ruby">{bErrors.title}</p>}
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Tur <span className="text-xedu-ruby">*</span></Label>
                 <Select value={bForm.frequency} onValueChange={sel(setBForm)('frequency')}>
@@ -1258,7 +1258,7 @@ export function ExamsWorkspace() {
                 {bErrors.scheduledAt && <p className="text-xs text-xedu-ruby">{bErrors.scheduledAt}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Max ball</Label>
                 <Input type="number" min="1" value={bForm.maxScore} onChange={inp(setBForm)('maxScore')} />
@@ -1268,7 +1268,7 @@ export function ExamsWorkspace() {
                 <Input type="number" placeholder="90" min="1" value={bForm.duration} onChange={inp(setBForm)('duration')} />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
                   <Label>Sinflar <span className="text-xedu-ruby">*</span></Label>

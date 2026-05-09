@@ -400,8 +400,8 @@ export function DisciplineWorkspace() {
 
       {/* Toolbar */}
       <div className="w-full lg:col-span-2">
-        <WorkspaceToolbar sticky className="flex-wrap">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+        <WorkspaceToolbar sticky>
+          <div className="relative flex-1 min-w-[140px] sm:min-w-[200px] max-w-sm">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-xedu-slate-400" />
             <input
               type="text"
@@ -727,7 +727,7 @@ export function DisciplineWorkspace() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             {/* Class + Student */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Sinf</Label>
                 <Select value={filterClassForModal} onValueChange={(v) => { setFilterClassForModal(v); setForm((f) => ({ ...f, studentId: '' })); }}>
@@ -750,7 +750,7 @@ export function DisciplineWorkspace() {
             </div>
 
             {/* Type + Severity */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Hodisa turi</Label>
                 <Select value={form.type} onValueChange={(v) => setForm((f) => ({ ...f, type: v as DisciplineType }))}>
@@ -772,7 +772,7 @@ export function DisciplineWorkspace() {
             </div>
 
             {/* Action + Date */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Ko&apos;rilgan chora</Label>
                 <Select value={form.action} onValueChange={(v) => setForm((f) => ({ ...f, action: v as DisciplineAction }))}>

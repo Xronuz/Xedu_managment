@@ -34,7 +34,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        'fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 p-6 duration-200',
+        'fixed left-[50%] top-[50%] z-50 grid w-full max-w-[calc(100vw-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 p-6 duration-200',
         // Premium surface — matches Card language
         'rounded-2xl border-0 bg-white dark:bg-xedu-slate-900 text-xedu-slate-900 dark:text-xedu-slate-100',
         'shadow-dialog',

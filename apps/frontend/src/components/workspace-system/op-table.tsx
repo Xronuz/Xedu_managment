@@ -126,7 +126,7 @@ export function OpTable<T>({
                   <button
                     type="button"
                     onClick={onSelectAll}
-                    className="flex items-center justify-center"
+                    className="flex items-center justify-center min-h-[44px] min-w-[44px]"
                     aria-label={allSelected ? "Barchasini bekor qilish" : "Barchasini tanlash"}
                   >
                     {allSelected ? (
@@ -205,7 +205,7 @@ export function OpTable<T>({
                     <td className={cn(densityPadding, 'w-10')} onClick={(e) => e.preventDefault()}>
                       <button
                         onClick={(e) => { e.stopPropagation(); onSelect?.(key); }}
-                        className="flex items-center justify-center"
+                        className="flex items-center justify-center min-h-[44px] min-w-[44px]"
                       >
                         {isSelected ? (
                           <CheckSquare className="h-4 w-4 text-xedu-primary" />

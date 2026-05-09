@@ -922,7 +922,7 @@ export function ScheduleWorkspace() {
 
       {/* Toolbar */}
       <div className="w-full lg:col-span-2">
-        <WorkspaceToolbar sticky className="flex-wrap">
+        <WorkspaceToolbar sticky>
           <div className="flex items-center rounded-lg border p-1 gap-1">
             <Button
               variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
@@ -1143,7 +1143,7 @@ export function ScheduleWorkspace() {
             <DialogDescription>Haftalik jadvalga dars kiriting</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Sinf <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.classId} onValueChange={sel('classId')}>
@@ -1169,7 +1169,7 @@ export function ScheduleWorkspace() {
               </Select>
               {errors.teacherId && <p className="text-xs text-xedu-ruby">{errors.teacherId}</p>}
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Kun <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.dayOfWeek} onValueChange={sel('dayOfWeek')}>
@@ -1191,7 +1191,7 @@ export function ScheduleWorkspace() {
                 {errors.timeSlot && <p className="text-xs text-xedu-ruby">{errors.timeSlot}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="space-y-1.5">
                 <Label>Boshlanish</Label>
                 <Input type="time" value={form.startTime} onChange={e => setForm(f => ({ ...f, startTime: e.target.value }))} />

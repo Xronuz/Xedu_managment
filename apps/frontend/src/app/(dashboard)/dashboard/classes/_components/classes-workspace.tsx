@@ -452,8 +452,8 @@ export function ClassesWorkspace() {
 
       {/* Toolbar */}
       <div className="w-full lg:col-span-2">
-        <WorkspaceToolbar sticky className="flex-wrap">
-          <div className="relative flex-1 min-w-[200px] max-w-sm">
+        <WorkspaceToolbar sticky>
+          <div className="relative flex-1 min-w-[140px] sm:min-w-[200px] max-w-sm">
             <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-xedu-slate-400" />
             <input
               type="text"
@@ -732,7 +732,7 @@ export function ClassesWorkspace() {
               {errors.name && <p className="text-xs text-xedu-ruby">{errors.name}</p>}
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Sinf darajasi <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.gradeLevel} onValueChange={sel('gradeLevel')}>

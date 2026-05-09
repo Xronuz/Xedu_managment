@@ -1190,7 +1190,7 @@ export function ReportsWorkspace() {
 
       {/* Toolbar: tabs + filters */}
       <div className="w-full">
-        <WorkspaceToolbar sticky className="flex-wrap">
+        <WorkspaceToolbar sticky>
           {/* Tab switcher */}
           <div className="flex gap-1 bg-muted/40 rounded-xl p-1">
             {tabs.map(({ key, label, icon: Icon, premium }) => (

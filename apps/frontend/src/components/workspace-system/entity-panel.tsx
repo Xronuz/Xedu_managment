@@ -190,7 +190,7 @@ export function EntityPanel({
 
         {/* Tabs */}
         {tabs && tabs.length > 0 && (
-          <div className="shrink-0 flex items-center gap-0 px-5 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
+          <div className="shrink-0 flex items-center gap-0 px-5 border-b border-xedu-slate-100 dark:border-xedu-slate-800 overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => (
               <button
                 key={tab.id}

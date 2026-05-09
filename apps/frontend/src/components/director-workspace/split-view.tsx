@@ -43,7 +43,8 @@ export function SplitView({
         <div className="lg:hidden flex items-center gap-2 px-4 py-2 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
           <button
             onClick={onHideDetail}
-            className="flex items-center gap-1 text-sm font-medium text-xedu-slate-600 hover:text-xedu-slate-900 transition-colors"
+            className="flex items-center gap-1 text-sm font-medium text-xedu-slate-600 hover:text-xedu-slate-900 transition-colors min-h-[44px] min-w-[44px] px-2"
+            type="button"
           >
             <ArrowLeft className="h-4 w-4" />
             Orqaga

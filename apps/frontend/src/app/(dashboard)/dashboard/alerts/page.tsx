@@ -281,7 +281,7 @@ export default function AlertCenterPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={selectAllVisible}
-                className="flex items-center justify-center h-6 w-6 rounded hover:bg-xedu-slate-100 transition-colors"
+                className="flex items-center justify-center h-6 w-6 min-h-[44px] min-w-[44px] rounded hover:bg-xedu-slate-100 transition-colors"
               >
                 {selectedIds.size === filtered.length && filtered.length > 0 ? (
                   <CheckSquare className="h-4 w-4 text-xedu-primary" />
@@ -404,7 +404,7 @@ function FilterChip({
     <button
       onClick={onClick}
       className={cn(
-        'px-2 py-1 rounded-md text-[11px] font-semibold transition-colors',
+        'px-2 py-1 min-h-[44px] min-w-[44px] rounded-md text-[11px] font-semibold transition-colors',
         active
           ? 'bg-xedu-slate-900 text-white dark:bg-white dark:text-xedu-slate-900'
           : 'text-xedu-slate-500 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800'

@@ -372,7 +372,7 @@ export function AttendanceWorkspace() {
 
       {/* Control bar */}
       <div className="w-full lg:col-span-2">
-        <WorkspaceToolbar sticky className="flex-wrap">
+        <WorkspaceToolbar sticky>
           {/* Class pills */}
           <div className="flex flex-wrap gap-1.5 flex-1">
             {classList.map((cls: any) => {
@@ -478,11 +478,11 @@ export function AttendanceWorkspace() {
                         <button
                           onClick={() => toggleSelect(s.id)}
                           className={cn(
-                            'h-4 w-4 rounded border transition-colors shrink-0',
+                            'h-11 w-11 sm:h-4 sm:w-4 rounded border transition-colors shrink-0 flex items-center justify-center',
                             isSelected ? 'bg-xedu-primary border-xedu-primary' : 'border-xedu-slate-300 hover:border-xedu-primary'
                           )}
                         >
-                          {isSelected && <CheckCheck className="h-3 w-3 text-white" />}
+                          {isSelected && <CheckCheck className="h-5 w-5 sm:h-3 sm:w-3 text-white" />}
                         </button>
 
                         <span className="w-5 text-2xs font-mono text-xedu-slate-400 text-right shrink-0">{idx + 1}</span>
@@ -509,7 +509,7 @@ export function AttendanceWorkspace() {
                             <button
                               key={status}
                               className={cn(
-                                'h-7 w-7 flex items-center justify-center rounded-md transition-colors',
+                                'h-11 w-11 sm:h-7 sm:w-7 flex items-center justify-center rounded-md transition-colors',
                                 isActive
                                   ? 'bg-xedu-slate-800 text-white dark:bg-white dark:text-xedu-slate-900'
                                   : cn('hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800', c.color)

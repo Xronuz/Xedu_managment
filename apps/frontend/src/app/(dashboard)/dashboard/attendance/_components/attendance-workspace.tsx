@@ -71,10 +71,10 @@ interface ClassStudent {
 }
 
 const STATUS_CONFIG = {
-  present: { label: 'Keldi', icon: CheckCircle2, color: 'text-green-600', ring: 'ring-green-500 bg-green-50 dark:bg-green-950', dot: 'bg-green-500', border: 'border-green-200', bgSoft: 'bg-green-50/60' },
-  absent:  { label: 'Kelmadi', icon: XCircle, color: 'text-red-600', ring: 'ring-red-500 bg-red-50 dark:bg-red-950', dot: 'bg-red-500', border: 'border-red-200', bgSoft: 'bg-red-50/60' },
-  late:    { label: 'Kechikdi', icon: Clock, color: 'text-yellow-600', ring: 'ring-yellow-500 bg-yellow-50 dark:bg-yellow-950', dot: 'bg-yellow-500', border: 'border-yellow-200', bgSoft: 'bg-yellow-50/60' },
-  excused: { label: 'Uzrli', icon: AlertCircle, color: 'text-blue-600', ring: 'ring-blue-500 bg-blue-50 dark:bg-blue-950', dot: 'bg-blue-500', border: 'border-blue-200', bgSoft: 'bg-blue-50/60' },
+  present: { label: 'Keldi', icon: CheckCircle2, color: 'text-xedu-emerald-600', ring: 'ring-xedu-emerald-500 bg-xedu-emerald-50 dark:bg-xedu-emerald-950', dot: 'bg-xedu-emerald-500', border: 'border-xedu-emerald-200', bgSoft: 'bg-xedu-emerald-50/60' },
+  absent:  { label: 'Kelmadi', icon: XCircle, color: 'text-xedu-ruby-600', ring: 'ring-xedu-ruby-500 bg-xedu-ruby-50 dark:bg-xedu-ruby-950', dot: 'bg-xedu-ruby-500', border: 'border-xedu-ruby-200', bgSoft: 'bg-xedu-ruby-50/60' },
+  late:    { label: 'Kechikdi', icon: Clock, color: 'text-xedu-amber-600', ring: 'ring-xedu-amber-500 bg-xedu-amber-50 dark:bg-xedu-amber-950', dot: 'bg-xedu-amber-500', border: 'border-xedu-amber-200', bgSoft: 'bg-xedu-amber-50/60' },
+  excused: { label: 'Uzrli', icon: AlertCircle, color: 'text-xedu-sky-600', ring: 'ring-xedu-sky-500 bg-xedu-sky-50 dark:bg-xedu-sky-950', dot: 'bg-xedu-sky-500', border: 'border-xedu-sky-200', bgSoft: 'bg-xedu-sky-50/60' },
 } as const;
 
 type Status = keyof typeof STATUS_CONFIG;
@@ -83,10 +83,10 @@ type Status = keyof typeof STATUS_CONFIG;
 function HeatCell({ pct }: { pct: number | null }) {
   if (pct === null) return <div className="w-5 h-5 rounded-sm bg-xedu-slate-100 dark:bg-xedu-slate-800/60" title="Ma'lumot yo'q" />;
   const bg =
-    pct >= 95 ? 'bg-green-500' :
-    pct >= 80 ? 'bg-green-300 dark:bg-green-700' :
-    pct >= 60 ? 'bg-yellow-400' :
-    pct >= 40 ? 'bg-orange-400' : 'bg-red-500';
+    pct >= 95 ? 'bg-xedu-emerald-500' :
+    pct >= 80 ? 'bg-xedu-emerald-300 dark:bg-xedu-emerald-700' :
+    pct >= 60 ? 'bg-xedu-amber-400' :
+    pct >= 40 ? 'bg-xedu-amber-500' : 'bg-xedu-ruby-500';
   return (
     <div className={`w-5 h-5 rounded-sm ${bg} opacity-80 hover:opacity-100 transition-opacity cursor-default`} title={`${pct}% keldi`} />
   );
@@ -318,7 +318,7 @@ export function AttendanceWorkspace() {
   if (classesError) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
-        <AlertCircle className="h-10 w-10 text-red-400" />
+        <AlertCircle className="h-10 w-10 text-xedu-ruby-400" />
         <p className="text-lg font-semibold text-xedu-slate-700">Ma'lumot yuklanmadi</p>
         <p className="text-sm text-xedu-slate-500">Server bilan bog'lanishda xato yuz berdi.</p>
       </div>
@@ -428,7 +428,7 @@ export function AttendanceWorkspace() {
                   <p className="text-xs text-xedu-slate-400">
                     {selectedDate === today ? 'Bugun' : selectedDate}
                     {unmarkedCount > 0 && (
-                      <span className="ml-2 text-amber-600 font-semibold">{unmarkedCount} ta belgilanmagan</span>
+                      <span className="ml-2 text-xedu-amber-600 font-semibold">{unmarkedCount} ta belgilanmagan</span>
                     )}
                   </p>
                 </div>
@@ -623,7 +623,7 @@ export function AttendanceWorkspace() {
                 </table>
                 <div className="flex items-center gap-2 mt-3 pt-2 border-t border-xedu-slate-100 text-2xs text-xedu-slate-400 flex-wrap">
                   <span>Davomat:</span>
-                  {[['bg-red-500', '< 40%'], ['bg-orange-400', '40–59%'], ['bg-yellow-400', '60–79%'], ['bg-green-300', '80–94%'], ['bg-green-500', '95–100%']].map(([c, l]) => (
+                  {[['bg-xedu-ruby-500', '< 40%'], ['bg-xedu-amber-500', '40–59%'], ['bg-xedu-amber-400', '60–79%'], ['bg-xedu-emerald-300', '80–94%'], ['bg-xedu-emerald-500', '95–100%']].map(([c, l]) => (
                     <span key={l} className="flex items-center gap-1">
                       <span className={`w-2.5 h-2.5 rounded-sm ${c} inline-block`} />
                       {l}
@@ -671,8 +671,8 @@ export function AttendanceWorkspace() {
             </div>
             {unmarkedCount > 0 && (
               <div className="flex items-start gap-2 mt-2 px-1">
-                <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
-                <p className="text-xs font-medium text-amber-700">{unmarkedCount} ta o'quvchi belgilanmagan</p>
+                <AlertTriangle className="h-3.5 w-3.5 text-xedu-amber-500 shrink-0 mt-0.5" />
+                <p className="text-xs font-medium text-xedu-amber-700">{unmarkedCount} ta o'quvchi belgilanmagan</p>
               </div>
             )}
           </WorkspaceSection>
@@ -680,7 +680,7 @@ export function AttendanceWorkspace() {
 
         {/* Absence streak alerts */}
         {absenceStreaks.length > 0 && view === 'history' && (
-          <WorkspaceSection title="Diqqat talab" icon={<AlertTriangle className="h-4 w-4 text-red-500" />}>
+          <WorkspaceSection title="Diqqat talab" icon={<AlertTriangle className="h-4 w-4 text-xedu-ruby-500" />}>
             <div className="space-y-1">
               {absenceStreaks.map((s) => (
                 <button
@@ -689,7 +689,7 @@ export function AttendanceWorkspace() {
                   className="w-full flex items-center justify-between rounded-md px-2 py-1.5 text-left hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
                 >
                   <span className="text-xs font-medium text-xedu-slate-700 truncate">{s.name}</span>
-                  <span className="text-2xs font-bold text-red-600 shrink-0">{s.streak} kun kelmagan</span>
+                  <span className="text-2xs font-bold text-xedu-ruby-600 shrink-0">{s.streak} kun kelmagan</span>
                 </button>
               ))}
             </div>
@@ -820,7 +820,7 @@ function StudentAttendancePanel({
                 <span className={cn('text-sm font-bold', getScoreColor(rate))}>{rate}%</span>
               </div>
               <div className="h-2 w-full rounded-full bg-xedu-slate-100 overflow-hidden">
-                <div className={cn('h-full rounded-full transition-all', rate >= 80 ? 'bg-xedu-primary' : rate >= 60 ? 'bg-yellow-400' : 'bg-red-500')} style={{ width: `${rate}%` }} />
+                <div className={cn('h-full rounded-full transition-all', rate >= 80 ? 'bg-xedu-primary' : rate >= 60 ? 'bg-xedu-amber-400' : 'bg-xedu-ruby-500')} style={{ width: `${rate}%` }} />
               </div>
             </div>
           )}

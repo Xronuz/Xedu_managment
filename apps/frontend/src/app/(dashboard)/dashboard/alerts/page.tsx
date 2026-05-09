@@ -258,12 +258,12 @@ export default function AlertCenterPage() {
             Ogohlantirishlar markazi
           </h1>
           {criticalCount > 0 && (
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-100">
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-xedu-ruby-50 text-xedu-ruby-600 border border-xedu-ruby-100">
               {criticalCount} ta jiddiy
             </span>
           )}
           {warningCount > 0 && (
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-xedu-amber-50 text-xedu-amber-600 border border-xedu-amber-100">
               {warningCount} ta etibor
             </span>
           )}
@@ -429,9 +429,9 @@ function AlertRow({
   onToggleCheck: () => void;
 }) {
   const severityConfig = {
-    critical: { icon: AlertCircle, dot: 'bg-red-500', text: 'text-red-600' },
-    warning: { icon: AlertTriangle, dot: 'bg-amber-500', text: 'text-amber-600' },
-    info: { icon: Info, dot: 'bg-blue-400', text: 'text-blue-500' },
+    critical: { icon: AlertCircle, dot: 'bg-xedu-ruby-500', text: 'text-xedu-ruby-600' },
+    warning: { icon: AlertTriangle, dot: 'bg-xedu-amber-500', text: 'text-xedu-amber-600' },
+    info: { icon: Info, dot: 'bg-xedu-sky-400', text: 'text-xedu-sky-500' },
   };
   const cfg = severityConfig[item.severity];
   const Icon = cfg.icon;
@@ -491,9 +491,9 @@ function AlertRow({
 
 function SeverityBadge({ severity }: { severity: AlertSeverity }) {
   const map = {
-    critical: { label: 'Jiddiy', bg: 'bg-red-50 text-red-600 border-red-100' },
-    warning: { label: 'Ogohlantirish', bg: 'bg-amber-50 text-amber-600 border-amber-100' },
-    info: { label: "Ma'lumot", bg: 'bg-blue-50 text-blue-600 border-blue-100' },
+    critical: { label: 'Jiddiy', bg: 'bg-xedu-ruby-50 text-xedu-ruby-600 border-xedu-ruby-100' },
+    warning: { label: 'Ogohlantirish', bg: 'bg-xedu-amber-50 text-xedu-amber-600 border-xedu-amber-100' },
+    info: { label: "Ma'lumot", bg: 'bg-xedu-sky-50 text-xedu-sky-600 border-xedu-sky-100' },
   };
   const cfg = map[severity];
   return (

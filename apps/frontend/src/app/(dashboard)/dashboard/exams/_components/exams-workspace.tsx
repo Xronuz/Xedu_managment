@@ -229,10 +229,10 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
                     {expandedQ === q.id && q.options.length > 0 && (
                       <div className="px-3 pb-3 pt-0 space-y-1 border-t mt-1">
                         {q.options.map((opt, oi) => (
-                          <div key={opt.id} className={`flex items-center gap-2 text-xs rounded px-2 py-1 ${opt.isCorrect ? 'bg-green-50 dark:bg-green-950/30 text-green-700 dark:text-green-400' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
+                          <div key={opt.id} className={`flex items-center gap-2 text-xs rounded px-2 py-1 ${opt.isCorrect ? 'bg-xedu-emerald-50 dark:bg-xedu-emerald-950/30 text-xedu-emerald-700 dark:text-xedu-emerald-400' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
                             <span className="font-bold">{String.fromCharCode(65 + oi)}.</span>
                             <span>{opt.text}</span>
-                            {opt.isCorrect && <CheckCircle className="ml-auto h-3.5 w-3.5 text-green-600 shrink-0" />}
+                            {opt.isCorrect && <CheckCircle className="ml-auto h-3.5 w-3.5 text-xedu-emerald-600 shrink-0" />}
                           </div>
                         ))}
                         {q.explanation && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 italic mt-2 px-2">Izoh: {q.explanation}</p>}
@@ -333,7 +333,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
             ) : (
               <div className="space-y-2">
                 {(sessions as any[]).map((s: any) => {
-                  const statusColor = s.status === 'submitted' || s.status === 'graded' ? 'text-green-600' : s.status === 'timed_out' ? 'text-red-500' : 'text-blue-500';
+                  const statusColor = s.status === 'submitted' || s.status === 'graded' ? 'text-xedu-emerald-600' : s.status === 'timed_out' ? 'text-xedu-ruby-500' : 'text-xedu-sky-500';
                   const statusLabel = { in_progress: 'Jarayonda', submitted: 'Topshirildi', timed_out: 'Vaqt tugadi', graded: 'Baholandi', not_started: 'Boshlanmagan' }[s.status as string] ?? s.status;
                   return (
                     <div key={s.id} className="flex items-center justify-between rounded-lg border px-3 py-2.5 bg-white dark:bg-xedu-slate-900">
@@ -344,7 +344,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
                       <div className="text-right">
                         {s.score !== null && s.score !== undefined ? (
                           <p className="text-sm font-bold flex items-center gap-1 justify-end">
-                            <Star className="h-3.5 w-3.5 text-yellow-500" /> {s.score} / {exam.maxScore}
+                            <Star className="h-3.5 w-3.5 text-xedu-amber-500" /> {s.score} / {exam.maxScore}
                           </p>
                         ) : <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">—</p>}
                         {s.percentage !== null && s.percentage !== undefined && (
@@ -720,7 +720,7 @@ export function ExamsWorkspace() {
             {e.isPublished ? (
               <span className="text-2xs text-xedu-primary font-medium">E&apos;lon qilingan</span>
             ) : (
-              <span className="text-2xs text-amber-500 font-medium">Qoralama</span>
+              <span className="text-2xs text-xedu-amber-500 font-medium">Qoralama</span>
             )}
           </div>
         </div>
@@ -795,7 +795,7 @@ export function ExamsWorkspace() {
             <CheckCircle className="h-3 w-3" /> Faol
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 text-2xs font-bold text-amber-500">
+          <span className="inline-flex items-center gap-1 text-2xs font-bold text-xedu-amber-500">
             <Clock className="h-3 w-3" /> Kutilmoqda
           </span>
         );
@@ -878,7 +878,7 @@ export function ExamsWorkspace() {
               className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
-              <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
+              <button onClick={f.onClear} className="hover:text-xedu-ruby-500 transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -887,7 +887,7 @@ export function ExamsWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterClass(''); setFilterSubject(''); setFilterFrequency(''); setFilterTimeRange(''); setFilterPublished(''); }}
-              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-xedu-ruby-500 transition-colors"
             >
               Tozalash
             </button>
@@ -1089,7 +1089,7 @@ export function ExamsWorkspace() {
         )}
 
         {unpublishedExams.length > 0 && (
-          <WorkspaceSection title="Qoralamalar" icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}>
+          <WorkspaceSection title="Qoralamalar" icon={<AlertTriangle className="h-4 w-4 text-xedu-amber-500" />}>
             <div className="space-y-1">
               {unpublishedExams.slice(0, 5).map((e) => (
                 <button
@@ -1097,7 +1097,7 @@ export function ExamsWorkspace() {
                   onClick={() => setPanelExam(e)}
                   className="w-full flex items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
                 >
-                  <FileQuestion className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+                  <FileQuestion className="h-3.5 w-3.5 text-xedu-amber-500 shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-xedu-slate-700 truncate">{e.title}</p>
                     <p className="text-2xs text-xedu-slate-400">{e.class?.name} · {formatDate(e.scheduledAt)}</p>

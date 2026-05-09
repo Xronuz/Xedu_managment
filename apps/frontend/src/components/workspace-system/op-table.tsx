@@ -181,10 +181,18 @@ export function OpTable<T>({
 
               const toneBg = {
                 neutral: '',
-                attention: 'bg-amber-50/40 dark:bg-amber-900/10',
-                urgent: 'bg-red-50/40 dark:bg-red-900/10',
-                success: 'bg-xedu-primary-light/20 dark:bg-xedu-primary/10',
+                attention: 'bg-xedu-amber-50/60 dark:bg-xedu-amber-900/15',
+                urgent: 'bg-xedu-ruby-50/60 dark:bg-xedu-ruby-900/15',
+                success: 'bg-xedu-emerald-50/60 dark:bg-xedu-emerald-900/15',
                 muted: 'opacity-60',
+              }[tone];
+
+              const toneBorder = {
+                neutral: '',
+                attention: 'border-l-2 border-l-xedu-amber-400',
+                urgent: 'border-l-2 border-l-xedu-ruby-400',
+                success: 'border-l-2 border-l-xedu-emerald-400',
+                muted: '',
               }[tone];
 
               return (
@@ -193,6 +201,7 @@ export function OpTable<T>({
                   className={cn(
                     'group transition-colors touch-manipulation',
                     toneBg,
+                    toneBorder,
                     isSelected && 'bg-xedu-primary-light/30',
                     !isSelected && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30',
                     href && 'cursor-pointer'

@@ -53,11 +53,11 @@ export function AuditDetailPane({
   }
 
   const statusConfig = {
-    pending:   { label: 'Kutilmoqda', dot: 'bg-amber-500', text: 'text-amber-600' },
+    pending:   { label: 'Kutilmoqda', dot: 'bg-xedu-amber-500', text: 'text-xedu-amber-600' },
     approved:  { label: 'Tasdiqlandi', dot: 'bg-xedu-primary', text: 'text-xedu-primary' },
-    rejected:  { label: 'Rad etildi', dot: 'bg-red-500', text: 'text-red-600' },
+    rejected:  { label: 'Rad etildi', dot: 'bg-xedu-ruby-500', text: 'text-xedu-ruby-600' },
     resolved:  { label: 'Hal etildi', dot: 'bg-xedu-primary', text: 'text-xedu-primary' },
-    open:      { label: 'Ochiq', dot: 'bg-red-500', text: 'text-red-600' },
+    open:      { label: 'Ochiq', dot: 'bg-xedu-ruby-500', text: 'text-xedu-ruby-600' },
   };
 
   const cfg = status ? statusConfig[status] : null;
@@ -151,8 +151,8 @@ function TimelineRow({ event }: { event: AuditEvent }) {
 
   const dotColor = {
     calm: 'bg-xedu-slate-300',
-    attention: 'bg-amber-500',
-    urgent: 'bg-red-500',
+    attention: 'bg-xedu-amber-500',
+    urgent: 'bg-xedu-ruby-500',
     success: 'bg-xedu-primary',
   }[tone];
 

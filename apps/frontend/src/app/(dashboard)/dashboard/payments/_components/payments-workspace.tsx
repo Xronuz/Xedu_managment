@@ -54,9 +54,9 @@ import { FloatingBulkToolbar } from '@/components/director-workspace/floating-bu
 
 const STATUS_CONFIG: Record<string, { label: string; dot: string; text: string; badge: string }> = {
   paid:     { label: "To'landi",         dot: 'bg-xedu-primary',      text: 'text-xedu-primary',      badge: 'border-xedu-primary bg-xedu-primary-light text-xedu-primary' },
-  pending:  { label: 'Kutilmoqda',       dot: 'bg-amber-500',         text: 'text-amber-600',         badge: 'border-amber-200 bg-amber-50 text-amber-600' },
-  overdue:  { label: "Muddati o'tgan",   dot: 'bg-red-500',           text: 'text-red-600',           badge: 'border-red-200 bg-red-50 text-red-600' },
-  failed:   { label: 'Muvaffaqiyatsiz',  dot: 'bg-red-400',           text: 'text-red-500',           badge: 'border-red-100 bg-red-50 text-red-500' },
+  pending:  { label: 'Kutilmoqda',       dot: 'bg-xedu-amber-500',         text: 'text-xedu-amber-600',         badge: 'border-xedu-amber-200 bg-xedu-amber-50 text-xedu-amber-600' },
+  overdue:  { label: "Muddati o'tgan",   dot: 'bg-xedu-ruby-500',           text: 'text-xedu-ruby-600',           badge: 'border-xedu-ruby-200 bg-xedu-ruby-50 text-xedu-ruby-600' },
+  failed:   { label: 'Muvaffaqiyatsiz',  dot: 'bg-xedu-ruby-400',           text: 'text-xedu-ruby-500',           badge: 'border-xedu-ruby-100 bg-xedu-ruby-50 text-xedu-ruby-500' },
   refunded: { label: 'Qaytarildi',       dot: 'bg-xedu-slate-400',    text: 'text-xedu-slate-500',    badge: 'border-xedu-slate-200 bg-xedu-slate-50 text-xedu-slate-500' },
 };
 
@@ -380,7 +380,7 @@ export function PaymentsWorkspace() {
       cell: (p: PaymentRow) => {
         const isOverdue = p.dueDate && new Date(p.dueDate) < new Date() && p.status !== 'paid';
         return (
-          <span className={cn('text-xs', isOverdue ? 'text-red-500 font-bold' : 'text-xedu-slate-500')}>
+          <span className={cn('text-xs', isOverdue ? 'text-xedu-ruby-500 font-bold' : 'text-xedu-slate-500')}>
             {p.dueDate ? formatDate(p.dueDate) : '—'}
           </span>
         );
@@ -463,7 +463,7 @@ export function PaymentsWorkspace() {
               className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
-              <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
+              <button onClick={f.onClear} className="hover:text-xedu-ruby-500 transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -472,7 +472,7 @@ export function PaymentsWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterStatus(''); setFilterClass(''); setFilterFrom(''); setFilterTo(''); }}
-              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-xedu-ruby-500 transition-colors"
             >
               Tozalash
             </button>
@@ -632,7 +632,7 @@ export function PaymentsWorkspace() {
                       <span className="text-xs font-medium text-xedu-slate-700 truncate">{c.className}</span>
                       <span className="text-2xs text-xedu-slate-400 ml-1">{c.debtorCount} ta</span>
                     </div>
-                    <span className="text-xs font-bold tabular-nums text-red-600">
+                    <span className="text-xs font-bold tabular-nums text-xedu-ruby-600">
                       {formatCurrency(c.totalDebt)}
                     </span>
                   </div>
@@ -792,9 +792,9 @@ function PaymentPanel({
           )}
 
           {isOverdue && (
-            <div className="flex items-start gap-2 rounded-md border border-red-100 bg-red-50 px-2.5 py-2">
-              <AlertTriangle className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" />
-              <p className="text-xs font-medium text-red-700">
+            <div className="flex items-start gap-2 rounded-md border border-xedu-ruby-100 bg-xedu-ruby-50 px-2.5 py-2">
+              <AlertTriangle className="h-3.5 w-3.5 text-xedu-ruby-500 shrink-0 mt-0.5" />
+              <p className="text-xs font-medium text-xedu-ruby-700">
                 To'lov muddati o'tgan. Eslatma yuborish tavsiya etiladi.
               </p>
             </div>

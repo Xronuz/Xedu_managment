@@ -98,8 +98,8 @@ export function AcademicSnapshot({
             </div>
             <div className="flex items-center gap-3">
               <MiniStat label="Keldi" value={attendanceSummary?.present ?? 0} color="text-xedu-primary" />
-              <MiniStat label="Kelmadi" value={attendanceSummary?.absent ?? 0} color="text-red-500" />
-              <MiniStat label="Kechikdi" value={attendanceSummary?.late ?? 0} color="text-amber-500" />
+              <MiniStat label="Kelmadi" value={attendanceSummary?.absent ?? 0} color="text-xedu-ruby-500" />
+              <MiniStat label="Kechikdi" value={attendanceSummary?.late ?? 0} color="text-xedu-amber-500" />
             </div>
           </div>
         )}
@@ -125,9 +125,9 @@ function AcademicPill({
 }) {
   const valueColor =
     tone === 'urgent'
-      ? 'text-red-600 dark:text-red-400'
+      ? 'text-xedu-ruby-600 dark:text-xedu-ruby-400'
       : tone === 'attention'
-      ? 'text-amber-600 dark:text-amber-400'
+      ? 'text-xedu-amber-600 dark:text-xedu-amber-400'
       : 'text-xedu-slate-900 dark:text-xedu-slate-100';
 
   const Wrapper = href ? Link : 'div';

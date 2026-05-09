@@ -71,15 +71,15 @@ const SLOT_TIMES: Record<number, { start: string; end: string }> = {
 };
 
 const SUBJECT_COLORS = [
-  'bg-blue-100 border-blue-300 text-blue-800 dark:bg-blue-900/40 dark:border-blue-700 dark:text-blue-200',
-  'bg-green-100 border-green-300 text-green-800 dark:bg-green-900/40 dark:border-green-700 dark:text-green-200',
+  'bg-xedu-sky-100 border-xedu-sky-300 text-xedu-sky-800 dark:bg-xedu-sky-900/40 dark:border-xedu-sky-700 dark:text-xedu-sky-200',
+  'bg-xedu-emerald-100 border-xedu-emerald-300 text-xedu-emerald-800 dark:bg-xedu-emerald-900/40 dark:border-xedu-emerald-700 dark:text-xedu-emerald-200',
   'bg-purple-100 border-purple-300 text-purple-800 dark:bg-purple-900/40 dark:border-purple-700 dark:text-purple-200',
-  'bg-orange-100 border-orange-300 text-orange-800 dark:bg-orange-900/40 dark:border-orange-700 dark:text-orange-200',
+  'bg-xedu-amber-100 border-xedu-amber-300 text-xedu-amber-800 dark:bg-xedu-amber-900/40 dark:border-xedu-amber-700 dark:text-xedu-amber-200',
   'bg-pink-100 border-pink-300 text-pink-800 dark:bg-pink-900/40 dark:border-pink-700 dark:text-pink-200',
   'bg-teal-100 border-teal-300 text-teal-800 dark:bg-teal-900/40 dark:border-teal-700 dark:text-teal-200',
   'bg-indigo-100 border-indigo-300 text-indigo-800 dark:bg-indigo-900/40 dark:border-indigo-700 dark:text-indigo-200',
   'bg-rose-100 border-rose-300 text-rose-800 dark:bg-rose-900/40 dark:border-rose-700 dark:text-rose-200',
-  'bg-amber-100 border-amber-300 text-amber-800 dark:bg-amber-900/40 dark:border-amber-700 dark:text-amber-200',
+  'bg-xedu-amber-100 border-xedu-amber-300 text-xedu-amber-800 dark:bg-xedu-amber-900/40 dark:border-xedu-amber-700 dark:text-xedu-amber-200',
   'bg-cyan-100 border-cyan-300 text-cyan-800 dark:bg-cyan-900/40 dark:border-cyan-700 dark:text-cyan-200',
 ];
 
@@ -288,9 +288,9 @@ function WeeklyGrid({
               return (
                 <div key={day} className="space-y-1">
                   {hasConflict && (
-                    <div className="flex items-center gap-1 rounded px-1 py-0.5 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-700">
-                      <AlertTriangle className="h-2.5 w-2.5 text-red-500 shrink-0" />
-                      <span className="text-2xs text-red-600 dark:text-red-400 font-medium leading-tight">
+                    <div className="flex items-center gap-1 rounded px-1 py-0.5 bg-xedu-ruby-100 dark:bg-xedu-ruby-900/30 border border-xedu-ruby-300 dark:border-xedu-ruby-700">
+                      <AlertTriangle className="h-2.5 w-2.5 text-xedu-ruby-500 shrink-0" />
+                      <span className="text-2xs text-xedu-ruby-600 dark:text-xedu-ruby-400 font-medium leading-tight">
                         {teacherConflict ? "O'qituvchi ziddiyati" : roomConflict ? 'Xona ziddiyati' : 'Ziddiyat'}
                       </span>
                     </div>
@@ -310,7 +310,7 @@ function WeeklyGrid({
                         className={`relative rounded-lg border p-2 text-xs group transition-shadow cursor-pointer
                           ${isCross ? 'cursor-not-allowed' : 'hover:shadow-sm'}
                           ${colorCls}
-                          ${hasConflict && !isCross ? 'ring-1 ring-red-400 dark:ring-red-600' : ''}`}
+                          ${hasConflict && !isCross ? 'ring-1 ring-xedu-ruby-400 dark:ring-xedu-ruby-600' : ''}`}
                       >
                         {isCross && (
                           <span className="absolute top-0.5 right-0.5 rounded text-[8px] px-1 bg-muted-foreground/20 text-xedu-slate-500 dark:text-xedu-slate-400">
@@ -370,10 +370,10 @@ function ListView({
   onSelect: (slot: ScheduleSlot) => void;
 }) {
   const LIST_COLORS = [
-    'bg-blue-100 dark:bg-blue-900/40',
-    'bg-green-100 dark:bg-green-900/40',
+    'bg-xedu-sky-100 dark:bg-xedu-sky-900/40',
+    'bg-xedu-emerald-100 dark:bg-xedu-emerald-900/40',
     'bg-purple-100 dark:bg-purple-900/40',
-    'bg-orange-100 dark:bg-orange-900/40',
+    'bg-xedu-amber-100 dark:bg-xedu-amber-900/40',
     'bg-pink-100 dark:bg-pink-900/40',
   ];
 
@@ -910,11 +910,11 @@ export function ScheduleWorkspace() {
       )}
       {conflictCount > 0 && (
         <div className="w-full lg:col-span-2">
-          <div className="flex items-center gap-3 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 px-4 py-3">
-            <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
+          <div className="flex items-center gap-3 rounded-lg border border-xedu-amber-300 bg-xedu-amber-50 dark:bg-xedu-amber-950/30 dark:border-xedu-amber-700 px-4 py-3">
+            <AlertTriangle className="h-5 w-5 text-xedu-amber-600 shrink-0" />
             <div>
-              <p className="text-sm font-semibold text-amber-700 dark:text-amber-400">{conflictCount} ta ziddiyat aniqlandi</p>
-              <p className="text-xs text-amber-600 dark:text-amber-500">Bir xil vaqtda bir nechta dars belgilangan.</p>
+              <p className="text-sm font-semibold text-xedu-amber-700 dark:text-xedu-amber-400">{conflictCount} ta ziddiyat aniqlandi</p>
+              <p className="text-xs text-xedu-amber-600 dark:text-xedu-amber-500">Bir xil vaqtda bir nechta dars belgilangan.</p>
             </div>
           </div>
         </div>
@@ -966,7 +966,7 @@ export function ScheduleWorkspace() {
               className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
-              <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
+              <button onClick={f.onClear} className="hover:text-xedu-ruby-500 transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -975,7 +975,7 @@ export function ScheduleWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterClass(''); setFilterTeacher(''); }}
-              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-xedu-ruby-500 transition-colors"
             >
               Tozalash
             </button>
@@ -1207,13 +1207,13 @@ export function ScheduleWorkspace() {
             </div>
           </div>
           {conflictData?.hasConflict && (
-            <div className="rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-700 px-3 py-2 space-y-1">
-              <div className="flex items-center gap-1.5 text-sm font-medium text-amber-700 dark:text-amber-400">
+            <div className="rounded-lg border border-xedu-amber-300 bg-xedu-amber-50 dark:bg-xedu-amber-950/30 dark:border-xedu-amber-700 px-3 py-2 space-y-1">
+              <div className="flex items-center gap-1.5 text-sm font-medium text-xedu-amber-700 dark:text-xedu-amber-400">
                 <AlertTriangle className="h-4 w-4" />
                 Ziddiyat aniqlandi
               </div>
               {conflictData.conflicts.map((c, i) => (
-                <p key={i} className="text-xs text-amber-600 dark:text-amber-500 pl-5">{c.message}</p>
+                <p key={i} className="text-xs text-xedu-amber-600 dark:text-xedu-amber-500 pl-5">{c.message}</p>
               ))}
             </div>
           )}

@@ -474,7 +474,7 @@ export function SubjectsWorkspace() {
             {s.teacher?.firstName?.[0]}{s.teacher?.lastName?.[0]}
           </div>
           <span className="text-xs text-xedu-slate-600 truncate">
-            {s.teacher ? `${s.teacher.firstName} ${s.teacher.lastName}` : <span className="text-amber-500">Biriktirilmagan</span>}
+            {s.teacher ? `${s.teacher.firstName} ${s.teacher.lastName}` : <span className="text-xedu-amber-500">Biriktirilmagan</span>}
           </span>
         </div>
       ),
@@ -554,7 +554,7 @@ export function SubjectsWorkspace() {
               className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
-              <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
+              <button onClick={f.onClear} className="hover:text-xedu-ruby-500 transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -563,7 +563,7 @@ export function SubjectsWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterClass(''); setFilterTeacher(''); }}
-              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-xedu-ruby-500 transition-colors"
             >
               Tozalash
             </button>

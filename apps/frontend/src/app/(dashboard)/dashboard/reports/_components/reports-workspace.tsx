@@ -118,7 +118,7 @@ function KPICard({
             {trend && (
               <div className={`flex items-center gap-1 text-xs font-medium ${
                 trend.dir === 'up' ? 'text-xedu-primary dark:text-xedu-primary'
-                  : trend.dir === 'down' ? 'text-rose-500 dark:text-rose-400'
+                  : trend.dir === 'down' ? 'text-xedu-ruby-500 dark:text-rose-400'
                   : 'text-slate-500'
               }`}>
                 {trend.dir === 'up'   ? <ArrowUpRight className="h-3.5 w-3.5" />
@@ -263,16 +263,16 @@ function AnalyticsSurface({ branchFilter, months }: { branchFilter: string; mont
             value={formatCurrency(pulse?.monthlyRevenue ?? 0)}
             sub={`${pulse?.newLeadsThisWeek ?? 0} yangi lead hafta ichida`}
             icon={TrendingUp}
-            iconBg="bg-violet-500/10"
-            iconColor="text-violet-500"
+            iconBg="bg-xedu-violet-500/10"
+            iconColor="text-xedu-violet-500"
           />
           <KPICard
             label="Qarzdorlik"
             value={formatCurrency(pulse?.pendingDebt.amount ?? 0)}
             sub={`${pulse?.pendingDebt.count ?? 0} ta to'lov kutilmoqda`}
             icon={AlertTriangle}
-            iconBg="bg-amber-500/10"
-            iconColor="text-amber-500"
+            iconBg="bg-xedu-amber-500/10"
+            iconColor="text-xedu-amber-500"
             trend={
               (pulse?.pendingDebt.count ?? 0) > 50
                 ? { dir: 'down', label: 'Yuqori qarzdorlik' }
@@ -536,7 +536,7 @@ function AnalyticsSurface({ branchFilter, months }: { branchFilter: string; mont
           {!alertLoading && (alerts ?? []).length > 0 && (
             <span className="ml-auto flex gap-1.5">
               {alertCounts.danger  > 0 && <Badge variant="destructive" className="text-2xs h-4 px-1.5">{alertCounts.danger} xavfli</Badge>}
-              {alertCounts.warning > 0 && <Badge className="text-2xs h-4 px-1.5 bg-amber-500 hover:bg-amber-600">{alertCounts.warning} ogohlantirish</Badge>}
+              {alertCounts.warning > 0 && <Badge className="text-2xs h-4 px-1.5 bg-xedu-amber-500 hover:bg-xedu-amber-600">{alertCounts.warning} ogohlantirish</Badge>}
               {alertCounts.info    > 0 && <Badge variant="secondary" className="text-2xs h-4 px-1.5">{alertCounts.info} ma'lumot</Badge>}
             </span>
           )}
@@ -623,8 +623,8 @@ function AttendanceSurface({ dateRange, dateKey }: { dateRange: { from: string; 
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-4">
         <KPICard label="Jami keldi"  value={summary.present} icon={CheckCircle}  iconBg="bg-xedu-primary/10" iconColor="text-xedu-primary" />
-        <KPICard label="Kelmadi"     value={summary.absent}  icon={XCircle}      iconBg="bg-rose-500/10"    iconColor="text-rose-500"    />
-        <KPICard label="Kechikdi"    value={summary.late}    icon={Clock}        iconBg="bg-amber-500/10"   iconColor="text-amber-500"   />
+        <KPICard label="Kelmadi"     value={summary.absent}  icon={XCircle}      iconBg="bg-rose-500/10"    iconColor="text-xedu-ruby-500"    />
+        <KPICard label="Kechikdi"    value={summary.late}    icon={Clock}        iconBg="bg-xedu-amber-500/10"   iconColor="text-xedu-amber-500"   />
         <KPICard
           label="Davomat %"
           value={total > 0 ? `${Math.round((summary.present / total) * 100)}%` : '—'}
@@ -665,7 +665,7 @@ function AttendanceSurface({ dateRange, dateKey }: { dateRange: { from: string; 
                     <th className="text-left py-1.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">#</th>
                     <th className="text-left py-1.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Ism</th>
                     <th className="text-center py-1.5 font-medium text-xedu-primary"></th>
-                    <th className="text-center py-1.5 font-medium text-rose-500">❌</th>
+                    <th className="text-center py-1.5 font-medium text-xedu-ruby-500">❌</th>
                     <th className="text-right py-1.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">%</th>
                   </tr>
                 </thead>
@@ -678,9 +678,9 @@ function AttendanceSurface({ dateRange, dateKey }: { dateRange: { from: string; 
                         <td className="py-2 text-xedu-slate-500 dark:text-xedu-slate-400">{i + 1}</td>
                         <td className="py-2 font-medium">{row.name}</td>
                         <td className="py-2 text-center text-xedu-primary">{row.present}</td>
-                        <td className="py-2 text-center text-rose-500">{row.absent}</td>
+                        <td className="py-2 text-center text-xedu-ruby-500">{row.absent}</td>
                         <td className="py-2 text-right">
-                          <span className={`font-bold ${pct >= 80 ? 'text-xedu-primary' : pct >= 60 ? 'text-amber-600' : 'text-rose-500'}`}>
+                          <span className={`font-bold ${pct >= 80 ? 'text-xedu-primary' : pct >= 60 ? 'text-xedu-amber-600' : 'text-xedu-ruby-500'}`}>
                             {pct}%
                           </span>
                         </td>
@@ -872,8 +872,8 @@ function FinanceSurface({ dateRange, dateKey }: { dateRange: { from: string; to:
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <KPICard label="Jami to'langan" value={formatCurrency(totalPaid)}    icon={CheckCircle}  iconBg="bg-xedu-primary/10" iconColor="text-xedu-primary" />
-        <KPICard label="Kutilmoqda"     value={formatCurrency(totalPending)} icon={AlertTriangle} iconBg="bg-amber-500/10"   iconColor="text-amber-500"   />
-        <KPICard label="Qarzdorlar"     value={`${debtors.length} o'quvchi`} icon={Users}        iconBg="bg-rose-500/10"    iconColor="text-rose-500"    />
+        <KPICard label="Kutilmoqda"     value={formatCurrency(totalPending)} icon={AlertTriangle} iconBg="bg-xedu-amber-500/10"   iconColor="text-xedu-amber-500"   />
+        <KPICard label="Qarzdorlar"     value={`${debtors.length} o'quvchi`} icon={Users}        iconBg="bg-rose-500/10"    iconColor="text-xedu-ruby-500"    />
       </div>
 
       {monthlyData.length > 0 && (
@@ -967,7 +967,7 @@ function IntelligenceSidebar({ activeTab }: { activeTab: string }) {
   return (
     <>
       {/* Pulse */}
-      <WorkspaceSection title="Pulse" icon={<Zap className="h-4 w-4 text-amber-500" />}>
+      <WorkspaceSection title="Pulse" icon={<Zap className="h-4 w-4 text-xedu-amber-500" />}>
         {pulseLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-8 rounded-lg" />
@@ -987,7 +987,7 @@ function IntelligenceSidebar({ activeTab }: { activeTab: string }) {
       {/* Alerts */}
       <WorkspaceSection
         title="Smart Alerts"
-        icon={<ShieldAlert className="h-4 w-4 text-red-500" />}
+        icon={<ShieldAlert className="h-4 w-4 text-xedu-ruby-500" />}
         action={
           !alertLoading && (alerts ?? []).length > 0 ? (
             <span className="text-2xs font-bold text-xedu-slate-400">{(alerts ?? []).length} ta</span>
@@ -1206,7 +1206,7 @@ export function ReportsWorkspace() {
                 <Icon className="h-4 w-4" />
                 {label}
                 {premium && (
-                  <span className="ml-0.5 text-2xs font-bold text-violet-500 bg-violet-500/10 rounded px-1 py-0.5 leading-none">
+                  <span className="ml-0.5 text-2xs font-bold text-xedu-violet-500 bg-xedu-violet-500/10 rounded px-1 py-0.5 leading-none">
                     PRO
                   </span>
                 )}

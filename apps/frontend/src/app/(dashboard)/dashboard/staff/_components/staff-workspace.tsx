@@ -243,8 +243,8 @@ export function StaffWorkspace() {
         return (
           <span className={cn(
             'inline-flex items-center gap-1 text-2xs font-bold px-1.5 py-0.5 rounded border',
-            s.role === 'teacher' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-            s.role === 'class_teacher' ? 'bg-violet-50 text-violet-600 border-violet-100' :
+            s.role === 'teacher' ? 'bg-xedu-sky-50 text-xedu-sky-600 border-xedu-sky-100' :
+            s.role === 'class_teacher' ? 'bg-xedu-violet-50 text-xedu-violet-600 border-xedu-violet-100' :
             s.role === 'director' ? 'bg-xedu-slate-100 text-xedu-slate-700 border-xedu-slate-200' :
             'bg-xedu-slate-50 text-xedu-slate-600 border-xedu-slate-100'
           )}>
@@ -268,7 +268,7 @@ export function StaffWorkspace() {
       cell: (s: StaffRow) => (
         <span className={cn(
           'text-xs font-bold tabular-nums',
-          s.assignedClasses && s.assignedClasses.length > 0 ? 'text-xedu-slate-700' : 'text-amber-500'
+          s.assignedClasses && s.assignedClasses.length > 0 ? 'text-xedu-slate-700' : 'text-xedu-amber-500'
         )}>
           {s.assignedClasses?.length ?? 0}
         </span>
@@ -290,8 +290,8 @@ export function StaffWorkspace() {
       width: '80px',
       cell: (s: StaffRow) => (
         <div className="flex items-center gap-1.5">
-          <div className={cn('h-2 w-2 rounded-full', s.isActive ? 'bg-xedu-primary' : 'bg-red-400')} />
-          <span className={cn('text-2xs font-bold', s.isActive ? 'text-xedu-primary' : 'text-red-500')}>
+          <div className={cn('h-2 w-2 rounded-full', s.isActive ? 'bg-xedu-primary' : 'bg-xedu-ruby-400')} />
+          <span className={cn('text-2xs font-bold', s.isActive ? 'text-xedu-primary' : 'text-xedu-ruby-500')}>
             {s.isActive ? 'Faol' : 'Nofaol'}
           </span>
         </div>
@@ -372,7 +372,7 @@ export function StaffWorkspace() {
               className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
-              <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
+              <button onClick={f.onClear} className="hover:text-xedu-ruby-500 transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -381,7 +381,7 @@ export function StaffWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterRole(''); setFilterBranch(''); setFilterStatus(''); }}
-              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-xedu-ruby-500 transition-colors"
             >
               Tozalash
             </button>
@@ -520,9 +520,9 @@ export function StaffWorkspace() {
 
         {/* Staffing intelligence alerts */}
         {unassignedTeachers > 0 && (
-          <WorkspaceSection title="Diqqat talab" icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}>
+          <WorkspaceSection title="Diqqat talab" icon={<AlertTriangle className="h-4 w-4 text-xedu-amber-500" />}>
             <div className="flex items-start gap-2 px-1 py-1">
-              <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+              <AlertTriangle className="h-3.5 w-3.5 text-xedu-amber-500 shrink-0 mt-0.5" />
               <p className="text-[12px] font-medium text-xedu-slate-700 leading-snug">
                 {unassignedTeachers} ta o&apos;qituvchi sinfga biriktirilmagan
               </p>
@@ -647,7 +647,7 @@ function StaffPanel({
               <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">O'tadigan fanlar</p>
               <div className="flex flex-wrap gap-1">
                 {staff.assignedSubjects.map((s) => (
-                  <span key={s.id} className="text-2xs font-bold px-1.5 py-0.5 rounded border border-blue-100 bg-blue-50 text-blue-600">
+                  <span key={s.id} className="text-2xs font-bold px-1.5 py-0.5 rounded border border-xedu-sky-100 bg-xedu-sky-50 text-xedu-sky-600">
                     {s.name}
                   </span>
                 ))}

@@ -197,15 +197,15 @@ function ActivityRow({ item }: { item: ActivityItem }) {
 
   const toneColor = {
     neutral: 'text-xedu-slate-400',
-    attention: 'text-amber-500',
-    urgent: 'text-red-500',
+    attention: 'text-xedu-amber-500',
+    urgent: 'text-xedu-ruby-500',
     success: 'text-xedu-primary',
   }[tone];
 
   const bgColor = {
     neutral: 'transparent',
-    attention: 'bg-amber-50/50 dark:bg-amber-900/10',
-    urgent: 'bg-red-50/50 dark:bg-red-900/10',
+    attention: 'bg-xedu-amber-50/50 dark:bg-xedu-amber-900/10',
+    urgent: 'bg-xedu-ruby-50/50 dark:bg-xedu-ruby-900/10',
     success: 'bg-xedu-primary-light/20',
   }[tone];
 

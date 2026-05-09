@@ -117,11 +117,11 @@ export function BranchHealthMap({
                   <div
                     className={cn(
                       'h-2 w-2 rounded-full',
-                      branch.isActive ? 'bg-xedu-primary' : 'bg-red-400'
+                      branch.isActive ? 'bg-xedu-primary' : 'bg-xedu-ruby-400'
                     )}
                   />
                   {hasAttention && (
-                    <div className="absolute inset-0 h-2 w-2 rounded-full bg-red-400 animate-ping opacity-40" />
+                    <div className="absolute inset-0 h-2 w-2 rounded-full bg-xedu-ruby-400 animate-ping opacity-40" />
                   )}
                 </div>
               </div>
@@ -140,7 +140,7 @@ export function BranchHealthMap({
                   {pressureLevel !== 'normal' && (
                     <span className={cn(
                       'shrink-0 flex items-center gap-0.5 text-[9px] font-bold px-1 py-0 rounded',
-                      pressureLevel === 'critical' ? 'bg-red-50 text-red-600' : 'bg-amber-50 text-amber-600'
+                      pressureLevel === 'critical' ? 'bg-xedu-ruby-50 text-xedu-ruby-600' : 'bg-xedu-amber-50 text-xedu-amber-600'
                     )}>
                       <AlertTriangle className="h-2.5 w-2.5" />
                       {branchAlerts + branchPending}
@@ -234,8 +234,8 @@ function OpIndicator({
   tone?: 'calm' | 'attention' | 'urgent';
 }) {
   const color =
-    tone === 'urgent' ? 'text-red-500' :
-    tone === 'attention' ? 'text-amber-500' :
+    tone === 'urgent' ? 'text-xedu-ruby-500' :
+    tone === 'attention' ? 'text-xedu-amber-500' :
     'text-xedu-slate-400';
 
   return (

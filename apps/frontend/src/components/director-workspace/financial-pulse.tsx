@@ -66,8 +66,8 @@ export function FinancialPulse({ financeData, isLoading }: FinancialPulseProps) 
             {formatCurrency(thisMonth)}
           </p>
           <div className="flex items-center gap-0.5">
-            <GrowthIcon className={`h-3 w-3 ${growthPositive ? 'text-xedu-primary' : 'text-red-500'}`} />
-            <span className={`text-[11px] font-bold ${growthPositive ? 'text-xedu-primary' : 'text-red-500'}`}>
+            <GrowthIcon className={`h-3 w-3 ${growthPositive ? 'text-xedu-primary' : 'text-xedu-ruby-500'}`} />
+            <span className={`text-[11px] font-bold ${growthPositive ? 'text-xedu-primary' : 'text-xedu-ruby-500'}`}>
               {Math.abs(growth).toFixed(1)}%
             </span>
           </div>
@@ -87,9 +87,9 @@ export function FinancialPulse({ financeData, isLoading }: FinancialPulseProps) 
 function FinPill({ label, value, tone = 'calm' }: { label: string; value: string; tone?: 'calm' | 'attention' | 'urgent' }) {
   const valueColor =
     tone === 'urgent'
-      ? 'text-red-600 dark:text-red-400'
+      ? 'text-xedu-ruby-600 dark:text-xedu-ruby-400'
       : tone === 'attention'
-      ? 'text-amber-600 dark:text-amber-400'
+      ? 'text-xedu-amber-600 dark:text-xedu-amber-400'
       : 'text-xedu-slate-700 dark:text-xedu-slate-300';
 
   return (

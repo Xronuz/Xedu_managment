@@ -123,10 +123,10 @@ function AttentionRow({
   href: string;
   tone?: 'attention' | 'urgent';
 }) {
-  const dotColor = tone === 'urgent' ? 'bg-red-500' : 'bg-amber-500';
+  const dotColor = tone === 'urgent' ? 'bg-xedu-ruby-500' : 'bg-xedu-amber-500';
   const bgColor = tone === 'urgent'
-    ? 'hover:bg-red-50 dark:hover:bg-red-900/10'
-    : 'hover:bg-amber-50 dark:hover:bg-amber-900/10';
+    ? 'hover:bg-xedu-ruby-50 dark:hover:bg-xedu-ruby-900/10'
+    : 'hover:bg-xedu-amber-50 dark:hover:bg-xedu-amber-900/10';
 
   return (
     <Link

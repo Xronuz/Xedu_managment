@@ -119,12 +119,12 @@ function SummaryItem({
   const TrendIcon = effectiveTrend === 'up' ? ArrowUpRight : effectiveTrend === 'down' ? ArrowDownRight : Minus;
   const trendColor =
     effectiveTrend === 'up' ? 'text-xedu-primary' :
-    effectiveTrend === 'down' ? 'text-red-500' :
+    effectiveTrend === 'down' ? 'text-xedu-ruby-500' :
     'text-xedu-slate-300';
 
   const pressureColor =
-    pressure === 'critical' ? 'bg-red-500' :
-    pressure === 'elevated' ? 'bg-amber-500' :
+    pressure === 'critical' ? 'bg-xedu-ruby-500' :
+    pressure === 'elevated' ? 'bg-xedu-amber-500' :
     'bg-xedu-slate-300';
 
   return (

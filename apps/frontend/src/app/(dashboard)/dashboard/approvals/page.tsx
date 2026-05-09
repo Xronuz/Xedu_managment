@@ -216,7 +216,7 @@ export default function ApprovalInboxPage() {
             Tasdiqlash inbox
           </h1>
           {pendingCount > 0 && (
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-600 border border-amber-100">
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-xedu-amber-50 text-xedu-amber-600 border border-xedu-amber-100">
               {pendingCount} ta kutilmoqda
             </span>
           )}
@@ -324,7 +324,7 @@ export default function ApprovalInboxPage() {
                     <button
                       onClick={() => reviewMutation.mutate({ id: selectedItem.raw.id, action: 'reject' })}
                       disabled={reviewMutation.isPending}
-                      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50"
+                      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold border border-xedu-ruby-200 text-xedu-ruby-600 hover:bg-xedu-ruby-50 transition-colors disabled:opacity-50"
                     >
                       <XCircle className="h-3.5 w-3.5" />
                       Rad etish
@@ -434,7 +434,7 @@ function ApprovalRow({
           <TypeBadge type={item.type} />
           {item.severity && <SeverityBadge severity={item.severity} />}
           {isPending && (
-            <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600">
+            <span className="flex items-center gap-1 text-[10px] font-bold text-xedu-amber-600">
               <Clock className="h-2.5 w-2.5" />
               {age}
             </span>
@@ -465,7 +465,7 @@ function ApprovalRow({
         <div
           className={cn(
             'h-2 w-2 rounded-full',
-            isPending ? 'bg-amber-500' : 'bg-xedu-primary'
+            isPending ? 'bg-xedu-amber-500' : 'bg-xedu-primary'
           )}
         />
       </div>
@@ -475,8 +475,8 @@ function ApprovalRow({
 
 function TypeBadge({ type }: { type: ApprovalType }) {
   const config = {
-    leave: { label: "Ta'til", bg: 'bg-blue-50 text-blue-600 border-blue-100' },
-    discipline: { label: 'Intizom', bg: 'bg-red-50 text-red-600 border-red-100' },
+    leave: { label: "Ta'til", bg: 'bg-xedu-sky-50 text-xedu-sky-600 border-xedu-sky-100' },
+    discipline: { label: 'Intizom', bg: 'bg-xedu-ruby-50 text-xedu-ruby-600 border-xedu-ruby-100' },
   };
   const cfg = config[type];
   return (
@@ -488,8 +488,8 @@ function TypeBadge({ type }: { type: ApprovalType }) {
 
 function SeverityBadge({ severity }: { severity: string }) {
   const color =
-    severity === 'high' ? 'bg-red-50 text-red-600 border-red-100' :
-    severity === 'medium' ? 'bg-amber-50 text-amber-600 border-amber-100' :
+    severity === 'high' ? 'bg-xedu-ruby-50 text-xedu-ruby-600 border-xedu-ruby-100' :
+    severity === 'medium' ? 'bg-xedu-amber-50 text-xedu-amber-600 border-xedu-amber-100' :
     'bg-xedu-slate-50 text-xedu-slate-500 border-xedu-slate-100';
   return (
     <span className={cn('text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded border', color)}>

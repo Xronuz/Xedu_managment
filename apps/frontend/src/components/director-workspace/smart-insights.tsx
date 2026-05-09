@@ -189,14 +189,14 @@ function InsightRow({ insight }: { insight: Insight }) {
 
   const toneColor = {
     calm: 'text-xedu-slate-400',
-    attention: 'text-amber-500',
-    urgent: 'text-red-500',
+    attention: 'text-xedu-amber-500',
+    urgent: 'text-xedu-ruby-500',
   }[tone];
 
   const bgColor = {
     calm: 'transparent',
-    attention: 'bg-amber-50/30 dark:bg-amber-900/10',
-    urgent: 'bg-red-50/30 dark:bg-red-900/10',
+    attention: 'bg-xedu-amber-50/30 dark:bg-xedu-amber-900/10',
+    urgent: 'bg-xedu-ruby-50/30 dark:bg-xedu-ruby-900/10',
   }[tone];
 
   return (

@@ -33,7 +33,7 @@ export function TrendIndicator({
 
   const color =
     effectiveDir === 'up' ? 'text-xedu-primary' :
-    effectiveDir === 'down' ? 'text-red-500' :
+    effectiveDir === 'down' ? 'text-xedu-ruby-500' :
     'text-xedu-slate-300';
 
   const iconSize = size === 'sm' ? 'h-3.5 w-3.5' : 'h-2.5 w-2.5';
@@ -78,7 +78,7 @@ export function Sparkline({ data, width = 48, height = 16, className }: Sparklin
     <svg
       width={width}
       height={height}
-      className={cn('shrink-0', trend === 'up' ? 'text-xedu-primary' : 'text-red-400', className)}
+      className={cn('shrink-0', trend === 'up' ? 'text-xedu-primary' : 'text-xedu-ruby-400', className)}
     >
       <polyline
         fill="none"

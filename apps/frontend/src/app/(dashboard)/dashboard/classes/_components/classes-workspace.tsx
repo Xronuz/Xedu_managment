@@ -359,7 +359,7 @@ export function ClassesWorkspace() {
       cell: (c: ClassRow) => {
         if (!c.classTeacher) {
           return (
-            <span className="inline-flex items-center gap-1 text-2xs font-bold text-amber-600">
+            <span className="inline-flex items-center gap-1 text-2xs font-bold text-xedu-amber-600">
               <AlertTriangle className="h-3 w-3" />
               Biriktirilmagan
             </span>
@@ -386,7 +386,7 @@ export function ClassesWorkspace() {
         return (
           <div className="flex items-center gap-1">
             <Users className="h-3 w-3 text-xedu-slate-400" />
-            <span className={cn('text-xs font-bold tabular-nums', count === 0 ? 'text-amber-500' : 'text-xedu-slate-700')}>
+            <span className={cn('text-xs font-bold tabular-nums', count === 0 ? 'text-xedu-amber-500' : 'text-xedu-slate-700')}>
               {count}
             </span>
           </div>
@@ -412,7 +412,7 @@ export function ClassesWorkspace() {
         const noStudents = (c._count?.students ?? 0) === 0;
         if (noTeacher || noStudents) {
           return (
-            <span className="inline-flex items-center gap-1 text-2xs font-bold text-amber-600">
+            <span className="inline-flex items-center gap-1 text-2xs font-bold text-xedu-amber-600">
               <AlertTriangle className="h-3 w-3" />
               Diqqat
             </span>
@@ -493,7 +493,7 @@ export function ClassesWorkspace() {
               className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
-              <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
+              <button onClick={f.onClear} className="hover:text-xedu-ruby-500 transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -502,7 +502,7 @@ export function ClassesWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterBranch(''); setFilterTeacher(''); setFilterGrade(''); }}
-              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-xedu-ruby-500 transition-colors"
             >
               Tozalash
             </button>
@@ -653,11 +653,11 @@ export function ClassesWorkspace() {
 
         {/* Intelligence alerts */}
         {(withoutTeacher > 0 || withoutStudents > 0) && (
-          <WorkspaceSection title="Diqqat talab" icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}>
+          <WorkspaceSection title="Diqqat talab" icon={<AlertTriangle className="h-4 w-4 text-xedu-amber-500" />}>
             <div className="space-y-1.5">
               {withoutTeacher > 0 && (
                 <div className="flex items-start gap-2 px-1">
-                  <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-3.5 w-3.5 text-xedu-amber-500 shrink-0 mt-0.5" />
                   <p className="text-[12px] font-medium text-xedu-slate-700 leading-snug">
                     {withoutTeacher} ta sinfga rahbar biriktirilmagan
                   </p>
@@ -665,7 +665,7 @@ export function ClassesWorkspace() {
               )}
               {withoutStudents > 0 && (
                 <div className="flex items-start gap-2 px-1">
-                  <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-3.5 w-3.5 text-xedu-amber-500 shrink-0 mt-0.5" />
                   <p className="text-[12px] font-medium text-xedu-slate-700 leading-snug">
                     {withoutStudents} ta sinfda o&apos;quvchi yo&apos;q
                   </p>
@@ -887,7 +887,7 @@ function ClassPanel({
               <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">Fanlar</p>
               <div className="flex flex-wrap gap-1">
                 {classSubjects.slice(0, 8).map((s: any) => (
-                  <span key={s.id} className="text-2xs font-bold px-1.5 py-0.5 rounded border border-blue-100 bg-blue-50 text-blue-600">
+                  <span key={s.id} className="text-2xs font-bold px-1.5 py-0.5 rounded border border-xedu-sky-100 bg-xedu-sky-50 text-xedu-sky-600">
                     {s.name}
                   </span>
                 ))}
@@ -1070,7 +1070,7 @@ function ClassPanel({
                       <span className="text-xs font-medium text-xedu-slate-700">{s.name}</span>
                       <span className={cn(
                         'text-xs font-bold tabular-nums',
-                        s.gpa >= 4 ? 'text-xedu-primary' : s.gpa >= 3 ? 'text-xedu-slate-600' : 'text-amber-600'
+                        s.gpa >= 4 ? 'text-xedu-primary' : s.gpa >= 3 ? 'text-xedu-slate-600' : 'text-xedu-amber-600'
                       )}>
                         {s.gpa?.toFixed(2) ?? '—'}
                       </span>

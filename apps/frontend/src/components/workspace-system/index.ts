@@ -35,3 +35,17 @@ export {
   SectionLabel,
 } from './workspace-helpers';
 export type { StatTone } from './workspace-helpers';
+export { StatusBadge, StatusDot } from './status-badge';
+export type { StatusVariant } from './status-badge';
+export {
+  chartAttendance,
+  chartFinance,
+  chartAcademic,
+  chartDiscipline,
+  chartNeutral,
+  chartRisk,
+  chartPremium,
+  chartColorSequence,
+  chartFillOpacity,
+} from './chart-palette';
+export type { ChartPalette } from './chart-palette';

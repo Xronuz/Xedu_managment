@@ -60,9 +60,9 @@ const TYPE_LABELS: Record<DisciplineType, string> = {
 };
 
 const SEVERITY_CONFIG: Record<DisciplineSeverity, { label: string; dot: string; text: string; badge: string }> = {
-  low:    { label: 'Past',    dot: 'bg-yellow-400', text: 'text-yellow-600', badge: 'border-yellow-200 bg-yellow-50 text-yellow-600' },
-  medium: { label: "O'rta",  dot: 'bg-orange-400', text: 'text-orange-600', badge: 'border-orange-200 bg-orange-50 text-orange-600' },
-  high:   { label: 'Yuqori', dot: 'bg-red-500',    text: 'text-red-600',    badge: 'border-red-200 bg-red-50 text-red-600' },
+  low:    { label: 'Past',    dot: 'bg-xedu-amber-400', text: 'text-xedu-amber-600', badge: 'border-xedu-amber-200 bg-xedu-amber-50 text-xedu-amber-600' },
+  medium: { label: "O'rta",  dot: 'bg-xedu-amber-500', text: 'text-xedu-amber-600', badge: 'border-xedu-amber-200 bg-xedu-amber-50 text-xedu-amber-600' },
+  high:   { label: 'Yuqori', dot: 'bg-xedu-ruby-500',    text: 'text-xedu-ruby-600',    badge: 'border-xedu-ruby-200 bg-xedu-ruby-50 text-xedu-ruby-600' },
 };
 
 const ACTION_LABELS: Record<DisciplineAction, string> = {
@@ -359,7 +359,7 @@ export function DisciplineWorkspace() {
           'inline-flex items-center gap-1 text-2xs font-bold',
           i.resolved ? 'text-xedu-primary' : 'text-xedu-slate-500'
         )}>
-          <span className={cn('h-1.5 w-1.5 rounded-full', i.resolved ? 'bg-xedu-primary' : 'bg-amber-400')} />
+          <span className={cn('h-1.5 w-1.5 rounded-full', i.resolved ? 'bg-xedu-primary' : 'bg-xedu-amber-400')} />
           {i.resolved ? 'Yechilgan' : 'Ochiq'}
         </span>
       ),
@@ -441,7 +441,7 @@ export function DisciplineWorkspace() {
               className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
-              <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
+              <button onClick={f.onClear} className="hover:text-xedu-ruby-500 transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -450,7 +450,7 @@ export function DisciplineWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterClass(''); setFilterSeverity(''); setFilterStatus(''); setFilterType(''); }}
-              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-xedu-ruby-500 transition-colors"
             >
               Tozalash
             </button>
@@ -633,7 +633,7 @@ export function DisciplineWorkspace() {
 
         {/* Repeated incidents */}
         {repeatedIncidents.length > 0 && (
-          <WorkspaceSection title="Takroriy hodisalar" icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}>
+          <WorkspaceSection title="Takroriy hodisalar" icon={<AlertTriangle className="h-4 w-4 text-xedu-amber-500" />}>
             <div className="space-y-1">
               {repeatedIncidents.map((r) => (
                 <Link
@@ -642,7 +642,7 @@ export function DisciplineWorkspace() {
                   className="flex items-center justify-between rounded-md px-2 py-1.5 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
                 >
                   <span className="text-xs font-medium text-xedu-slate-700 truncate">{r.student.firstName} {r.student.lastName}</span>
-                  <span className="text-2xs font-bold text-amber-600 shrink-0">{r.count} ta</span>
+                  <span className="text-2xs font-bold text-xedu-amber-600 shrink-0">{r.count} ta</span>
                 </Link>
               ))}
             </div>
@@ -651,7 +651,7 @@ export function DisciplineWorkspace() {
 
         {/* Recent high severity */}
         {recentHighSeverity.length > 0 && (
-          <WorkspaceSection title="Jiddiy hodisalar" icon={<ShieldAlert className="h-4 w-4 text-red-500" />}>
+          <WorkspaceSection title="Jiddiy hodisalar" icon={<ShieldAlert className="h-4 w-4 text-xedu-ruby-500" />}>
             <div className="space-y-1">
               {recentHighSeverity.map((i) => (
                 <button
@@ -659,7 +659,7 @@ export function DisciplineWorkspace() {
                   onClick={() => setPanelIncident(i)}
                   className="w-full flex items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
                 >
-                  <AlertTriangle className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-3.5 w-3.5 text-xedu-ruby-500 shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-xedu-slate-700 truncate">
                       {i.student ? `${i.student.firstName} ${i.student.lastName}` : "Noma'lum"}

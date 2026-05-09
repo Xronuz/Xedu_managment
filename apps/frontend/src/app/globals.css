@@ -61,12 +61,91 @@
     --sidebar-collapsed:   84px;
     --header-height:       60px;
 
-    /* ── Accents (limited palette) ── */
-    --xedu-gold:   #D4A843;
-    --xedu-ruby:   #DC2626;
-    --xedu-amber:  #D97706;
-    --xedu-sky:    #0EA5E9;
-    --xedu-violet: #7C3AED;
+    /* ── Semantic Color Scales ─────────────────────────────────────────────── */
+    /* xedu-ruby — danger, error, urgent, rejected, failed, overdue */
+    --xedu-ruby-50:  #FEF2F2;
+    --xedu-ruby-100: #FEE2E2;
+    --xedu-ruby-200: #FECACA;
+    --xedu-ruby-300: #FCA5A5;
+    --xedu-ruby-400: #F87171;
+    --xedu-ruby-500: #EF4444;
+    --xedu-ruby-600: #DC2626;
+    --xedu-ruby-700: #B91C1C;
+    --xedu-ruby-800: #991B1B;
+    --xedu-ruby-900: #7F1D1D;
+    --xedu-ruby-950: #450A0A;
+
+    /* xedu-amber — warning, attention, pending */
+    --xedu-amber-50:  #FFFBEB;
+    --xedu-amber-100: #FEF3C7;
+    --xedu-amber-200: #FDE68A;
+    --xedu-amber-300: #FCD34D;
+    --xedu-amber-400: #FBBF24;
+    --xedu-amber-500: #F59E0B;
+    --xedu-amber-600: #D97706;
+    --xedu-amber-700: #B45309;
+    --xedu-amber-800: #92400E;
+    --xedu-amber-900: #78350F;
+    --xedu-amber-950: #451A03;
+
+    /* xedu-emerald — success, positive, approved, paid, active */
+    --xedu-emerald-50:  #ECFDF5;
+    --xedu-emerald-100: #D1FAE5;
+    --xedu-emerald-200: #A7F3D0;
+    --xedu-emerald-300: #6EE7B7;
+    --xedu-emerald-400: #34D399;
+    --xedu-emerald-500: #10B981;
+    --xedu-emerald-600: #059669;
+    --xedu-emerald-700: #047857;
+    --xedu-emerald-800: #065F46;
+    --xedu-emerald-900: #064E3B;
+    --xedu-emerald-950: #022C22;
+
+    /* xedu-sky — info, neutral-action, published, resolved */
+    --xedu-sky-50:  #F0F9FF;
+    --xedu-sky-100: #E0F2FE;
+    --xedu-sky-200: #BAE6FD;
+    --xedu-sky-300: #7DD3FC;
+    --xedu-sky-400: #38BDF8;
+    --xedu-sky-500: #0EA5E9;
+    --xedu-sky-600: #0284C7;
+    --xedu-sky-700: #0369A1;
+    --xedu-sky-800: #075985;
+    --xedu-sky-900: #0C4A6E;
+    --xedu-sky-950: #082F49;
+
+    /* xedu-violet — ai, analytics, premium insights */
+    --xedu-violet-50:  #F5F3FF;
+    --xedu-violet-100: #EDE9FE;
+    --xedu-violet-200: #DDD6FE;
+    --xedu-violet-300: #C4B5FD;
+    --xedu-violet-400: #A78BFA;
+    --xedu-violet-500: #8B5CF6;
+    --xedu-violet-600: #7C3AED;
+    --xedu-violet-700: #6D28D9;
+    --xedu-violet-800: #5B21B6;
+    --xedu-violet-900: #4C1D95;
+    --xedu-violet-950: #2E1065;
+
+    /* xedu-gold — premium, achievement, coins, rewards */
+    --xedu-gold-50:  #FDF9F0;
+    --xedu-gold-100: #F9F0DB;
+    --xedu-gold-200: #F3E2B8;
+    --xedu-gold-300: #EAD08A;
+    --xedu-gold-400: #DDBB5C;
+    --xedu-gold-500: #D4A843;
+    --xedu-gold-600: #B88E36;
+    --xedu-gold-700: #96732B;
+    --xedu-gold-800: #7A5E24;
+    --xedu-gold-900: #634E1F;
+    --xedu-gold-950: #382A10;
+
+    /* Backward-compatible aliases */
+    --xedu-gold:   var(--xedu-gold-500);
+    --xedu-ruby:   var(--xedu-ruby-600);
+    --xedu-amber:  var(--xedu-amber-600);
+    --xedu-sky:    var(--xedu-sky-500);
+    --xedu-violet: var(--xedu-violet-600);
 
     /* ── Shadows (elevation system) ── */
     --xedu-shadow-xs:          0 1px 2px rgba(0,0,0,0.04);
@@ -143,6 +222,85 @@
     --xedu-shadow-glow-ruby:    0 4px 14px 0 rgba(220,38,38,0.25);
     --xedu-shadow-glow-sky:     0 4px 14px 0 rgba(14,165,233,0.25);
     --xedu-shadow-glow-violet:  0 4px 14px 0 rgba(124,58,237,0.25);
+
+    /* ── Semantic Color Scales (dark mode) ─────────────────────────────────── */
+    /* xedu-ruby */
+    --xedu-ruby-50:  #2A1212;
+    --xedu-ruby-100: #3B1515;
+    --xedu-ruby-200: #4C1A1A;
+    --xedu-ruby-300: #7F2A2A;
+    --xedu-ruby-400: #B91C1C;
+    --xedu-ruby-500: #DC2626;
+    --xedu-ruby-600: #EF4444;
+    --xedu-ruby-700: #F87171;
+    --xedu-ruby-800: #FCA5A5;
+    --xedu-ruby-900: #FECACA;
+    --xedu-ruby-950: #FEF2F2;
+
+    /* xedu-amber */
+    --xedu-amber-50:  #2A1F0D;
+    --xedu-amber-100: #3D2A0E;
+    --xedu-amber-200: #5C3D0F;
+    --xedu-amber-300: #78350F;
+    --xedu-amber-400: #92400E;
+    --xedu-amber-500: #B45309;
+    --xedu-amber-600: #D97706;
+    --xedu-amber-700: #F59E0B;
+    --xedu-amber-800: #FCD34D;
+    --xedu-amber-900: #FEF3C7;
+    --xedu-amber-950: #FFFBEB;
+
+    /* xedu-emerald */
+    --xedu-emerald-50:  #0D261E;
+    --xedu-emerald-100: #103826;
+    --xedu-emerald-200: #145234;
+    --xedu-emerald-300: #065F46;
+    --xedu-emerald-400: #047857;
+    --xedu-emerald-500: #059669;
+    --xedu-emerald-600: #10B981;
+    --xedu-emerald-700: #34D399;
+    --xedu-emerald-800: #6EE7B7;
+    --xedu-emerald-900: #D1FAE5;
+    --xedu-emerald-950: #ECFDF5;
+
+    /* xedu-sky */
+    --xedu-sky-50:  #0F2433;
+    --xedu-sky-100: #133045;
+    --xedu-sky-200: #16405E;
+    --xedu-sky-300: #075985;
+    --xedu-sky-400: #0369A1;
+    --xedu-sky-500: #0284C7;
+    --xedu-sky-600: #0EA5E9;
+    --xedu-sky-700: #38BDF8;
+    --xedu-sky-800: #7DD3FC;
+    --xedu-sky-900: #E0F2FE;
+    --xedu-sky-950: #F0F9FF;
+
+    /* xedu-violet */
+    --xedu-violet-50:  #1E1A33;
+    --xedu-violet-100: #261D45;
+    --xedu-violet-200: #32255E;
+    --xedu-violet-300: #4C1D95;
+    --xedu-violet-400: #5B21B6;
+    --xedu-violet-500: #6D28D9;
+    --xedu-violet-600: #7C3AED;
+    --xedu-violet-700: #8B5CF6;
+    --xedu-violet-800: #A78BFA;
+    --xedu-violet-900: #EDE9FE;
+    --xedu-violet-950: #F5F3FF;
+
+    /* xedu-gold */
+    --xedu-gold-50:  #2A2312;
+    --xedu-gold-100: #382D15;
+    --xedu-gold-200: #4C3D1A;
+    --xedu-gold-300: #634E1F;
+    --xedu-gold-400: #7A5E24;
+    --xedu-gold-500: #96732B;
+    --xedu-gold-600: #B88E36;
+    --xedu-gold-700: #D4A843;
+    --xedu-gold-800: #EAD08A;
+    --xedu-gold-900: #F9F0DB;
+    --xedu-gold-950: #FDF9F0;
 
     /* ── shadcn/ui dark overrides ── */
     --background:         222 47% 5%;
@@ -228,6 +386,81 @@
   .dark .empty-state {
     border-color: var(--xedu-slate-700);
     background: var(--xedu-bg-elevated);
+  }
+
+  /* ── Surface utilities ───────────────────────────────────────────────────── */
+  .surface-base {
+    background: var(--xedu-bg-elevated);
+    border: 1px solid var(--xedu-border);
+  }
+  .dark .surface-base {
+    background: var(--xedu-bg-elevated);
+    border-color: var(--xedu-border);
+  }
+
+  .surface-muted {
+    background: var(--xedu-bg);
+    border: 1px solid var(--xedu-border);
+  }
+  .dark .surface-muted {
+    background: var(--xedu-bg);
+    border-color: var(--xedu-border);
+  }
+
+  .surface-elevated {
+    background: var(--xedu-bg-elevated);
+    border: 1px solid var(--xedu-border);
+    box-shadow: var(--xedu-shadow-sm);
+  }
+  .dark .surface-elevated {
+    background: var(--xedu-bg-elevated);
+    border-color: var(--xedu-border);
+    box-shadow: var(--xedu-shadow-xs);
+  }
+
+  .surface-inset {
+    background: var(--xedu-bg-subtle);
+    border: 1px solid var(--xedu-border);
+  }
+  .dark .surface-inset {
+    background: var(--xedu-bg-subtle);
+    border-color: var(--xedu-border);
+  }
+
+  .surface-selected {
+    background: var(--xedu-primary-muted);
+    border: 1px solid var(--xedu-primary-light);
+  }
+  .dark .surface-selected {
+    background: rgba(15,123,83,0.15);
+    border-color: rgba(15,123,83,0.25);
+  }
+
+  .surface-warning {
+    background: var(--xedu-amber-50);
+    border: 1px solid var(--xedu-amber-200);
+  }
+  .dark .surface-warning {
+    background: var(--xedu-amber-900/20);
+    border-color: var(--xedu-amber-800);
+  }
+
+  .surface-danger {
+    background: var(--xedu-ruby-50);
+    border: 1px solid var(--xedu-ruby-200);
+  }
+  .dark .surface-danger {
+    background: var(--xedu-ruby-900/20);
+    border-color: var(--xedu-ruby-800);
+  }
+
+  .surface-success {
+    background: var(--xedu-emerald-50);
+    border: 1px solid var(--xedu-emerald-200);
+  }
+  .dark .surface-success {
+    background: var(--xedu-emerald-900/20);
+    border-color: var(--xedu-emerald-800);
   }
 
   /* ── Tables ──────────────────────────────────────────────────────────────── */

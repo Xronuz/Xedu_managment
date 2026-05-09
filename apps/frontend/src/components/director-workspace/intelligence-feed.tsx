@@ -230,7 +230,7 @@ function FeedSection({
   children: React.ReactNode;
 }) {
   const accentColor =
-    tone === 'urgent' ? 'bg-red-500' : tone === 'risk' ? 'bg-amber-500' : 'bg-xedu-slate-300';
+    tone === 'urgent' ? 'bg-xedu-ruby-500' : tone === 'risk' ? 'bg-xedu-amber-500' : 'bg-xedu-slate-300';
 
   return (
     <div className="border border-xedu-slate-100 dark:border-xedu-slate-800 rounded-xl overflow-hidden bg-white dark:bg-xedu-slate-900">
@@ -255,15 +255,15 @@ function StreamRow({ item }: { item: StreamItem }) {
   const Icon = priorityIcon ?? Info;
 
   const priorityColor = {
-    critical: 'text-red-500',
-    high: 'text-amber-500',
+    critical: 'text-xedu-ruby-500',
+    high: 'text-xedu-amber-500',
     medium: 'text-xedu-slate-500',
     low: 'text-xedu-slate-400',
   }[priority];
 
   const priorityBg = {
-    critical: 'bg-red-50 dark:bg-red-900/20',
-    high: 'bg-amber-50 dark:bg-amber-900/20',
+    critical: 'bg-xedu-ruby-50 dark:bg-xedu-ruby-900/20',
+    high: 'bg-xedu-amber-50 dark:bg-xedu-amber-900/20',
     medium: 'bg-xedu-slate-50 dark:bg-xedu-slate-800/40',
     low: 'transparent',
   }[priority];

@@ -77,7 +77,7 @@ export function BranchComparison({
                     {branch.name}
                     <button
                       onClick={() => onRemove(branch.id)}
-                      className="ml-1 text-xedu-slate-300 hover:text-red-500 transition-colors"
+                      className="ml-1 text-xedu-slate-300 hover:text-xedu-ruby-500 transition-colors"
                     >
                       <X className="h-2.5 w-2.5" />
                     </button>
@@ -167,8 +167,8 @@ function CompareRow({
             <div className="flex items-center gap-2">
               <span className={cn(
                 'text-[13px] font-bold tabular-nums',
-                shouldHighlight && tone === 'urgent' ? 'text-red-600' :
-                shouldHighlight && tone === 'attention' ? 'text-amber-600' :
+                shouldHighlight && tone === 'urgent' ? 'text-xedu-ruby-600' :
+                shouldHighlight && tone === 'attention' ? 'text-xedu-amber-600' :
                 isMax ? 'text-xedu-primary' : 'text-xedu-slate-800 dark:text-xedu-slate-200'
               )}>
                 {value}

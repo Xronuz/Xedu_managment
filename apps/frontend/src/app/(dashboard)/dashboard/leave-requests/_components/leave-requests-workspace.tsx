@@ -70,9 +70,9 @@ interface LeaveRequest {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; dot: string; text: string; badge: string }> = {
-  pending:   { label: 'Kutilmoqda',    dot: 'bg-amber-400', text: 'text-amber-600', badge: 'border-amber-200 bg-amber-50 text-amber-600' },
+  pending:   { label: 'Kutilmoqda',    dot: 'bg-xedu-amber-400', text: 'text-xedu-amber-600', badge: 'border-xedu-amber-200 bg-xedu-amber-50 text-xedu-amber-600' },
   approved:  { label: 'Tasdiqlandi',   dot: 'bg-xedu-primary', text: 'text-xedu-primary', badge: 'border-xedu-primary-light bg-xedu-primary-light text-xedu-primary' },
-  rejected:  { label: 'Rad etildi',    dot: 'bg-red-500', text: 'text-red-600', badge: 'border-red-200 bg-red-50 text-red-600' },
+  rejected:  { label: 'Rad etildi',    dot: 'bg-xedu-ruby-500', text: 'text-xedu-ruby-600', badge: 'border-xedu-ruby-200 bg-xedu-ruby-50 text-xedu-ruby-600' },
   cancelled: { label: 'Bekor qilindi', dot: 'bg-xedu-slate-400', text: 'text-xedu-slate-500', badge: 'border-xedu-slate-200 bg-xedu-slate-50 text-xedu-slate-500' },
 };
 
@@ -579,7 +579,7 @@ export function LeaveRequestsWorkspace() {
               className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
-              <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
+              <button onClick={f.onClear} className="hover:text-xedu-ruby-500 transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -588,7 +588,7 @@ export function LeaveRequestsWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterStatus(''); setFilterType(''); }}
-              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-xedu-ruby-500 transition-colors"
             >
               Tozalash
             </button>
@@ -708,7 +708,7 @@ export function LeaveRequestsWorkspace() {
         </WorkspaceSection>
 
         {canReview && myPendingApprovals.length > 0 && (
-          <WorkspaceSection title="Mening tasdiqlashim" icon={<AlertTriangle className="h-4 w-4 text-amber-500" />}>
+          <WorkspaceSection title="Mening tasdiqlashim" icon={<AlertTriangle className="h-4 w-4 text-xedu-amber-500" />}>
             <div className="space-y-1">
               {myPendingApprovals.map((r) => (
                 <button
@@ -716,7 +716,7 @@ export function LeaveRequestsWorkspace() {
                   onClick={() => setPanelRequest(r)}
                   className="w-full flex items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
                 >
-                  <Clock className="h-3.5 w-3.5 text-amber-500 shrink-0 mt-0.5" />
+                  <Clock className="h-3.5 w-3.5 text-xedu-amber-500 shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-xedu-slate-700 truncate">
                       {r.requester?.firstName} {r.requester?.lastName}
@@ -732,7 +732,7 @@ export function LeaveRequestsWorkspace() {
         )}
 
         {overlappingRequests.length > 0 && (
-          <WorkspaceSection title="Ustma-ust tushish" icon={<AlertTriangle className="h-4 w-4 text-red-500" />}>
+          <WorkspaceSection title="Ustma-ust tushish" icon={<AlertTriangle className="h-4 w-4 text-xedu-ruby-500" />}>
             <div className="space-y-1">
               {overlappingRequests.map((o) => (
                 <button
@@ -740,7 +740,7 @@ export function LeaveRequestsWorkspace() {
                   onClick={() => setPanelRequest(o.req)}
                   className="w-full flex items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
                 >
-                  <AlertTriangle className="h-3.5 w-3.5 text-red-500 shrink-0 mt-0.5" />
+                  <AlertTriangle className="h-3.5 w-3.5 text-xedu-ruby-500 shrink-0 mt-0.5" />
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-xedu-slate-700 truncate">
                       {o.req.requester?.firstName} {o.req.requester?.lastName}
@@ -840,7 +840,7 @@ export function LeaveRequestsWorkspace() {
               <Textarea placeholder="Ta'tilga chiqish sababini kiriting..." rows={4} value={form.reason} onChange={e => { setForm(f => ({ ...f, reason: e.target.value })); setFormErrors(er => { const n = { ...er }; delete n.reason; return n; }); }} className="resize-none" />
               {formErrors.reason && <p className="text-xs text-xedu-ruby">{formErrors.reason}</p>}
             </div>
-            <div className="rounded-lg bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 p-3 text-xs text-amber-700 dark:text-amber-400 space-y-1">
+            <div className="rounded-lg bg-xedu-amber-50 dark:bg-xedu-amber-950/20 border border-xedu-amber-200 dark:border-xedu-amber-800 p-3 text-xs text-xedu-amber-700 dark:text-xedu-amber-400 space-y-1">
               <p className="font-medium">Diqqat</p>
               <p>So'rovingiz direktor va o'quv ishlari bo'yicha direktorga yuboriladi. Ikkalasi ham tasdiqlasa so'rovingiz qabul qilinadi.</p>
             </div>

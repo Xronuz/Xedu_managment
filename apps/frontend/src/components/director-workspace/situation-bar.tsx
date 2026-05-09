@@ -113,7 +113,7 @@ interface SituationItemProps {
 
 function SituationItem({ icon: Icon, label, value, sub, tone = 'calm', href, onClick, clickable }: SituationItemProps) {
   const dotColor =
-    tone === 'urgent' ? 'bg-red-500' : tone === 'attention' ? 'bg-amber-500' : 'bg-xedu-primary';
+    tone === 'urgent' ? 'bg-xedu-ruby-500' : tone === 'attention' ? 'bg-xedu-amber-500' : 'bg-xedu-primary';
 
   const Wrapper = href ? Link : onClick ? 'button' : 'div';
   const wrapperProps = href ? { href } : onClick ? { onClick } : {};

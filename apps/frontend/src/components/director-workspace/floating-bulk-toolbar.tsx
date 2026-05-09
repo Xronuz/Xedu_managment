@@ -61,7 +61,7 @@ export function FloatingBulkToolbar({
             const Icon = action.icon;
             const toneColor =
               action.tone === 'danger'
-                ? 'text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20'
+                ? 'text-xedu-ruby-600 hover:text-xedu-ruby-700 hover:bg-xedu-ruby-50 dark:hover:bg-xedu-ruby-900/20'
                 : action.tone === 'primary'
                 ? 'text-xedu-primary hover:text-xedu-primary-hover hover:bg-xedu-primary-light/40'
                 : 'text-xedu-slate-600 hover:text-xedu-slate-800 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800';

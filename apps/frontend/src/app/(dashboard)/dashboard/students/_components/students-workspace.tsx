@@ -212,8 +212,8 @@ export function StudentsWorkspace() {
       width: '80px',
       cell: (s: StudentRow) => (
         <div className="flex items-center gap-1.5">
-          <div className={cn('h-2 w-2 rounded-full', s.isActive ? 'bg-xedu-primary' : 'bg-red-400')} />
-          <span className={cn('text-xs font-semibold', s.isActive ? 'text-xedu-primary' : 'text-red-500')}>
+          <div className={cn('h-2 w-2 rounded-full', s.isActive ? 'bg-xedu-primary' : 'bg-xedu-ruby-400')} />
+          <span className={cn('text-xs font-semibold', s.isActive ? 'text-xedu-primary' : 'text-xedu-ruby-500')}>
             {s.isActive ? 'Faol' : 'Nofaol'}
           </span>
         </div>
@@ -322,7 +322,7 @@ export function StudentsWorkspace() {
               className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
             >
               {f.label}
-              <button onClick={f.onClear} className="hover:text-red-500 transition-colors">
+              <button onClick={f.onClear} className="hover:text-xedu-ruby-500 transition-colors">
                 <X className="h-3 w-3" />
               </button>
             </span>
@@ -331,7 +331,7 @@ export function StudentsWorkspace() {
           {activeFilters.length > 0 && (
             <button
               onClick={() => { setFilterClass(''); setFilterBranch(''); setFilterStatus(''); }}
-              className="text-xs font-semibold text-xedu-slate-400 hover:text-red-500 transition-colors"
+              className="text-xs font-semibold text-xedu-slate-400 hover:text-xedu-ruby-500 transition-colors"
             >
               Tozalash
             </button>

@@ -28,10 +28,8 @@ export class InvitationsController {
   @ApiOperation({ summary: 'Yangi taklif yuborish' })
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
   async create(@Body() dto: CreateInvitationDto, @CurrentUser() user: JwtPayload) {
-    const { invitation, rawToken } = await this.invitationsService.create(dto, user);
-    // rawToken is returned ONLY in the response for immediate debugging/testing.
-    // In production, the token is sent via email and should NOT be returned here.
-    return { invitation, rawToken };
+    const { invitation } = await this.invitationsService.create(dto, user);
+    return { invitation, message: 'Taklif yuborildi' };
   }
 
   @Get()
@@ -64,7 +62,8 @@ export class InvitationsController {
   @ApiOperation({ summary: 'Taklifni qayta yuborish' })
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
   async resend(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    return this.invitationsService.resend(id, user);
+    const { invitation } = await this.invitationsService.resend(id, user);
+    return { invitation, message: 'Taklif qayta yuborildi' };
   }
 
   @Delete(':id')

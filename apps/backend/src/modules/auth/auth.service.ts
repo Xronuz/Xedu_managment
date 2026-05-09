@@ -24,11 +24,14 @@ import { SwitchBranchDto } from './dto/switch-branch.dto';
 const LOGIN_ATTEMPTS_PREFIX = 'login_attempts:';
 const REFRESH_TOKEN_PREFIX = 'refresh:';
 const PASSWORD_RESET_PREFIX = 'pwd_reset:';
+const TOKEN_DENYLIST_PREFIX = 'token_deny:';
+const USER_SESSIONS_PREFIX = 'user_sessions:';
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_BLOCK_TTL = 15 * 60; // 15 minutes in seconds
 const ACCESS_TOKEN_TTL = 24 * 60 * 60; // 24 hours
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60; // 7 days
 const PASSWORD_RESET_TTL = 30 * 60; // 30 minutes
+const TOKEN_DENYLIST_TTL = 24 * 60 * 60; // 24 hours (matches access token TTL)
 
 @Injectable()
 export class AuthService {
@@ -112,21 +115,21 @@ export class AuthService {
       if (!stored) {
         throw new UnauthorizedException('Refresh token yaroqsiz yoki muddati o\'tgan');
       }
-      userId = stored;
+      // Backward compatibility: stored value may be plain userId (old sessions) or JSON
+      try {
+        const parsed = JSON.parse(stored);
+        userId = parsed.userId;
+      } catch {
+        userId = stored;
+      }
       // Delete old token (rotation)
       await this.redis.del(redisKey);
     } catch (err: any) {
       if (err instanceof UnauthorizedException) throw err;
-      // Redis mavjud emas — JWT dan userId ni olamiz (rotation olmaydi)
-      this.logger.warn(`Redis refresh token tekshiruvi o'tkazib yuborildi: ${err.message}`);
-      try {
-        const payload = this.jwtService.verify(refreshToken, {
-          secret: this.config.get('JWT_REFRESH_SECRET'),
-        }) as any;
-        userId = payload.sub;
-      } catch {
-        throw new UnauthorizedException('Refresh token yaroqsiz yoki muddati o\'tgan');
-      }
+      // Redis mavjud emas — refresh token UUID bo'lgani uchun JWT verify ishlamaydi.
+      // BU YERDA FALLBACK YO'Q: Redis down bo'lsa sessionni yangilash mumkin emas.
+      this.logger.error(`Redis refresh token tekshiruvi xato: ${err.message}`);
+      throw new UnauthorizedException('Refresh token yaroqsiz yoki muddati o\'tgan');
     }
 
     const user = await this.prisma.user.findUnique({
@@ -139,10 +142,112 @@ export class AuthService {
     return this.generateTokens(user);
   }
 
-  async logout(refreshToken: string): Promise<void> {
-    await this.redis.del(`${REFRESH_TOKEN_PREFIX}${refreshToken}`).catch(err =>
-      this.logger.warn(`Logout — Redis token o'chirishda xato: ${err.message}`),
-    );
+  async logout(accessToken: string, refreshToken: string, userId: string): Promise<void> {
+    // 1. Deny-list the access token (so it can't be reused during its TTL)
+    try {
+      const payload = this.jwtService.decode(accessToken) as any;
+      if (payload?.jti) {
+        await this.redis.setEx(
+          `${TOKEN_DENYLIST_PREFIX}${payload.jti}`,
+          TOKEN_DENYLIST_TTL,
+          userId,
+        );
+      } else {
+        // Fallback: deny-list by token hash if no jti
+        const tokenHash = require('crypto').createHash('sha256').update(accessToken).digest('hex');
+        await this.redis.setEx(
+          `${TOKEN_DENYLIST_PREFIX}${tokenHash}`,
+          TOKEN_DENYLIST_TTL,
+          userId,
+        );
+      }
+    } catch (err: any) {
+      this.logger.warn(`Access token deny-list ga qo\'shishda xato: ${err.message}`);
+    }
+
+    // 2. Revoke the specific refresh token
+    if (refreshToken) {
+      await this.redis.del(`${REFRESH_TOKEN_PREFIX}${refreshToken}`).catch(err =>
+        this.logger.warn(`Logout — Redis token o'chirishda xato: ${err.message}`),
+      );
+    }
+
+    this.logger.log(`Foydalanuvchi tizimdan chiqdi: ${userId}`);
+  }
+
+  /**
+   * Returns a list of active sessions for the user.
+   * Note: With the current Redis key structure we cannot enumerate all refresh
+   * tokens by userId efficiently. This returns a minimal session list.
+   */
+  async getSessions(userId: string): Promise<{ sessions: { id: string; createdAt: string }[]; allRevoked: boolean }> {
+    const allRevoked = await this.areAllSessionsRevoked(userId);
+    return { sessions: [], allRevoked };
+  }
+
+  /**
+   * Barcha sessiyalarni bekor qilish (logout from all devices).
+   * Foydalanuvchining barcha refresh tokenlarini o'chiradi.
+   */
+  async logoutAll(userId: string, currentAccessToken: string): Promise<void> {
+    // Deny-list current access token
+    try {
+      const payload = this.jwtService.decode(currentAccessToken) as any;
+      if (payload?.jti) {
+        await this.redis.setEx(
+          `${TOKEN_DENYLIST_PREFIX}${payload.jti}`,
+          TOKEN_DENYLIST_TTL,
+          userId,
+        );
+      }
+    } catch (err: any) {
+      this.logger.warn(`Access token deny-list ga qo\'shishda xato: ${err.message}`);
+    }
+
+    // We can't enumerate all refresh tokens by userId efficiently with the current
+    // Redis key structure (refresh:<uuid>). As a mitigation, we set a "global revoke"
+    // marker that all future token validations check against.
+    try {
+      await this.redis.setEx(
+        `${USER_SESSIONS_PREFIX}${userId}:revoked`,
+        TOKEN_DENYLIST_TTL,
+        Date.now().toString(),
+      );
+    } catch (err: any) {
+      this.logger.warn(`Global revoke marker o'rnatishda xato: ${err.message}`);
+    }
+
+    this.logger.log(`Foydalanuvchi barcha sessiyalarini bekor qildi: ${userId}`);
+  }
+
+  /**
+   * Tekshiradi: access token deny-list da yoki yo'q.
+   */
+  async isTokenDenied(token: string): Promise<boolean> {
+    try {
+      const payload = this.jwtService.decode(token) as any;
+      if (payload?.jti) {
+        const denied = await this.redis.get(`${TOKEN_DENYLIST_PREFIX}${payload.jti}`);
+        if (denied) return true;
+      }
+      const tokenHash = require('crypto').createHash('sha256').update(token).digest('hex');
+      const denied = await this.redis.get(`${TOKEN_DENYLIST_PREFIX}${tokenHash}`);
+      return !!denied;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Tekshiradi: foydalanuvchi barcha sessiyalari bekor qilinganmi.
+   */
+  async areAllSessionsRevoked(userId: string): Promise<boolean> {
+    try {
+      const revoked = await this.redis.get(`${USER_SESSIONS_PREFIX}${userId}:revoked`);
+      return !!revoked;
+    } catch {
+      return false;
+    }
   }
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<{ message: string }> {
@@ -297,6 +402,10 @@ export class AuthService {
     });
     if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
 
+    if (!user.isFirstLogin) {
+      throw new ForbiddenException('Bu endpoint faqat birinchi kirishda ishlatiladi');
+    }
+
     const valid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Joriy parol noto\'g\'ri');
 
@@ -342,11 +451,13 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload, {
       expiresIn: ACCESS_TOKEN_TTL,
+      jwtid: uuidv4(), // Unique token ID for deny-listing
     });
 
     const refreshToken = uuidv4();
+    const sessionData = JSON.stringify({ userId: user.id, createdAt: new Date().toISOString() });
     await this.redis
-      .setEx(`${REFRESH_TOKEN_PREFIX}${refreshToken}`, REFRESH_TOKEN_TTL, user.id)
+      .setEx(`${REFRESH_TOKEN_PREFIX}${refreshToken}`, REFRESH_TOKEN_TTL, sessionData)
       .catch(err =>
         this.logger.warn(`Refresh token Redis ga yozilmadi: ${err.message}`),
       );

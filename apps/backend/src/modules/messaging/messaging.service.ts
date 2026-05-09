@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Optional } from '@nestjs/common';
+import { Injectable, NotFoundException, Optional, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload } from '@eduplatform/types';
 import { SendMessageDto } from './dto/send-message.dto';
@@ -357,6 +357,15 @@ export class MessagingService {
       where: { conversationId: groupId, userId: currentUser.sub, isAdmin: true },
     });
     if (!admin) throw new Error('Faqat guruh admini a\'zo qo\'sha oladi');
+
+    // Verify target user belongs to same school
+    const targetUser = await this.prisma.user.findFirst({
+      where: { id: userId, schoolId: currentUser.schoolId!, isActive: true },
+      select: { id: true },
+    });
+    if (!targetUser) {
+      throw new ForbiddenException('Foydalanuvchi topilmadi yoki boshqa maktabga tegishli');
+    }
 
     await this.prisma.conversationParticipant.upsert({
       where: { conversationId_userId: { conversationId: groupId, userId } },

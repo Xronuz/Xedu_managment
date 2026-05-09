@@ -3,8 +3,13 @@ import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 import { JwtPayload } from '@eduplatform/types';
+import { createHash } from 'crypto';
+
+const TOKEN_DENYLIST_PREFIX = 'token_deny:';
+const USER_SESSIONS_PREFIX = 'user_sessions:';
 
 @Injectable()
 export class JwtAuthGuard implements CanActivate {
@@ -13,6 +18,7 @@ export class JwtAuthGuard implements CanActivate {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -33,6 +39,18 @@ export class JwtAuthGuard implements CanActivate {
       const payload: JwtPayload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.getOrThrow('JWT_SECRET'),
       });
+
+      // Check deny-list (token revoked after logout)
+      const isDenied = await this.isTokenDenied(token);
+      if (isDenied) {
+        throw new UnauthorizedException('Token bekor qilingan');
+      }
+
+      // Check global session revocation (logout-all)
+      const allRevoked = await this.areAllSessionsRevoked(payload.sub);
+      if (allRevoked) {
+        throw new UnauthorizedException('Barcha sessiyalar bekor qilingan');
+      }
 
       const user = await this.prisma.user.findUnique({
         where: { id: payload.sub, isActive: true },
@@ -64,5 +82,29 @@ export class JwtAuthGuard implements CanActivate {
     }
 
     return null;
+  }
+
+  private async isTokenDenied(token: string): Promise<boolean> {
+    try {
+      const decoded = this.jwtService.decode(token) as any;
+      if (decoded?.jti) {
+        const denied = await this.redis.get(`${TOKEN_DENYLIST_PREFIX}${decoded.jti}`);
+        if (denied) return true;
+      }
+      const tokenHash = createHash('sha256').update(token).digest('hex');
+      const denied = await this.redis.get(`${TOKEN_DENYLIST_PREFIX}${tokenHash}`);
+      return !!denied;
+    } catch {
+      return false;
+    }
+  }
+
+  private async areAllSessionsRevoked(userId: string): Promise<boolean> {
+    try {
+      const revoked = await this.redis.get(`${USER_SESSIONS_PREFIX}${userId}:revoked`);
+      return !!revoked;
+    } catch {
+      return false;
+    }
   }
 }

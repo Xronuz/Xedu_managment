@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, UseGuards, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, HttpCode, HttpStatus, UseGuards, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
@@ -62,6 +62,7 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 60_000, limit: 20 } })
   @ApiOperation({ summary: 'Access token yangilash' })
   async refresh(@Body() dto: RefreshTokenDto, @Res({ passthrough: true }) res: Response) {
     // Prefer cookie if body is empty (cookie-based auth flow)
@@ -79,16 +80,54 @@ export class AuthController {
     return tokens;
   }
 
-  @Public()
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Tizimdan chiqish' })
-  logout(@Body() dto: LogoutDto, @Res({ passthrough: true }) res: Response) {
+  async logout(
+    @Body() dto: LogoutDto,
+    @CurrentUser() user: JwtPayload,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     res.clearCookie('access_token', this.cookieOptions);
     res.clearCookie('refresh_token', this.cookieOptions);
     const cookieRefresh = (res.req as any)?.headers?.cookie?.match(/refresh_token=([^;]+)/);
     const refreshToken = dto?.refreshToken || (cookieRefresh ? decodeURIComponent(cookieRefresh[1]) : '');
-    return this.authService.logout(refreshToken ?? '');
+
+    // Extract access token from Authorization header or cookie
+    const authHeader = (res.req as any)?.headers?.authorization;
+    const accessToken = authHeader?.replace('Bearer ', '') || (res.req as any)?.cookies?.access_token || '';
+
+    await this.authService.logout(accessToken, refreshToken ?? '', user.sub);
+    return { message: 'Muvaffaqiyatli chiqildi' };
+  }
+
+  @Post('logout-all')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @Throttle({ default: { ttl: 60_000, limit: 3 } })
+  @ApiOperation({ summary: 'Barcha qurilmalardan chiqish' })
+  async logoutAll(@CurrentUser() user: JwtPayload, @Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token', this.cookieOptions);
+    res.clearCookie('refresh_token', this.cookieOptions);
+
+    const authHeader = (res.req as any)?.headers?.authorization;
+    const accessToken = authHeader?.replace('Bearer ', '') || (res.req as any)?.cookies?.access_token || '';
+
+    await this.authService.logoutAll(user.sub, accessToken);
+    return { message: 'Barcha sessiyalar bekor qilindi' };
+  }
+
+  @Get('sessions')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT')
+  @ApiOperation({ summary: 'Aktiv sessiyalar ro\'yxati' })
+  async getSessions(@CurrentUser() user: JwtPayload) {
+    return this.authService.getSessions(user.sub);
   }
 
   @Public()
@@ -103,6 +142,7 @@ export class AuthController {
   @Public()
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @ApiOperation({ summary: 'Yangi parol o\'rnatish' })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);

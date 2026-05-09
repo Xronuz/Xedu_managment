@@ -167,8 +167,12 @@ export class FinancialShiftsService {
   }
 
   async findOne(id: string, currentUser: JwtPayload) {
+    const where: any = { id, schoolId: currentUser.schoolId! };
+    if (currentUser.branchId && currentUser.role !== UserRole.DIRECTOR && currentUser.role !== UserRole.SUPER_ADMIN) {
+      where.branchId = currentUser.branchId;
+    }
     const shift = await this.prisma.financialShift.findFirst({
-      where: { id, schoolId: currentUser.schoolId! },
+      where,
       include: {
         treasury: { select: { id: true, name: true, type: true, balance: true } },
         opener:   { select: { id: true, firstName: true, lastName: true } },

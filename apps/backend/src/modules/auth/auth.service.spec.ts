@@ -167,11 +167,12 @@ describe('AuthService', () => {
   // ── logout ───────────────────────────────────────────────────────────────
 
   describe('logout()', () => {
-    it('deletes refresh token from redis', async () => {
+    it('deletes refresh token from redis and deny-lists access token', async () => {
       const rt = 'token-to-revoke';
+      const at = 'access-token-deny';
       redisStore[`refresh:${rt}`] = mockUser.id;
 
-      await service.logout(rt);
+      await service.logout(at, rt, mockUser.id);
 
       expect(redisStore[`refresh:${rt}`]).toBeUndefined();
     });

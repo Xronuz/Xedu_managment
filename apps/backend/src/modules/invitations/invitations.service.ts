@@ -66,6 +66,16 @@ export class InvitationsService {
   private async assertCanInviteToBranch(currentUser: JwtPayload, branchId?: string): Promise<void> {
     if (currentUser.isSuperAdmin) return;
     if (!branchId) return;
+
+    // Validate branchId belongs to inviter's school
+    const branch = await this.prisma.branch.findFirst({
+      where: { id: branchId, schoolId: currentUser.schoolId! },
+      select: { id: true },
+    });
+    if (!branch) {
+      throw new ForbiddenException('Filial topilmadi yoki sizning maktabingizga tegishli emas');
+    }
+
     // Director/vice_principal can invite to any branch in their school
     if (currentUser.role === UserRole.DIRECTOR || currentUser.role === UserRole.VICE_PRINCIPAL) return;
     // Branch admin can only invite to their own branch
@@ -86,7 +96,7 @@ export class InvitationsService {
 
   // ── Create ───────────────────────────────────────────────────────────────────
 
-  async create(dto: { email: string; firstName?: string; lastName?: string; role: UserRole; branchId?: string }, currentUser: JwtPayload): Promise<{ invitation: Invitation; rawToken: string }> {
+  async create(dto: { email: string; firstName?: string; lastName?: string; role: UserRole; branchId?: string }, currentUser: JwtPayload): Promise<{ invitation: Invitation }> {
     this.validateRoleCreation(currentUser.role as UserRole, dto.role);
     await this.assertCanInviteToBranch(currentUser, dto.branchId);
 
@@ -127,7 +137,7 @@ export class InvitationsService {
       },
     });
 
-    // Send email asynchronously
+    // Send email asynchronously (rawToken ONLY goes to email, never API response)
     await this.sendInvitationEmail(invitation, rawToken);
 
     // Audit log
@@ -140,7 +150,7 @@ export class InvitationsService {
       newData: { email: invitation.email, role: invitation.role, branchId: invitation.branchId },
     });
 
-    return { invitation, rawToken };
+    return { invitation };
   }
 
   // ── List ─────────────────────────────────────────────────────────────────────
@@ -189,7 +199,7 @@ export class InvitationsService {
 
   // ── Resend ───────────────────────────────────────────────────────────────────
 
-  async resend(id: string, currentUser: JwtPayload): Promise<{ invitation: Invitation; rawToken: string }> {
+  async resend(id: string, currentUser: JwtPayload): Promise<{ invitation: Invitation }> {
     const invitation = await this.findOne(id, currentUser);
 
     if (invitation.status !== InvitationStatus.PENDING && invitation.status !== InvitationStatus.EXPIRED) {
@@ -209,6 +219,7 @@ export class InvitationsService {
       },
     });
 
+    // rawToken ONLY goes to email, never API response
     await this.sendInvitationEmail(updated, rawToken);
 
     await this.auditService.log({
@@ -221,7 +232,7 @@ export class InvitationsService {
       newData: { status: InvitationStatus.PENDING },
     });
 
-    return { invitation: updated, rawToken };
+    return { invitation: updated };
   }
 
   // ── Revoke ───────────────────────────────────────────────────────────────────
@@ -290,59 +301,63 @@ export class InvitationsService {
 
   async accept(token: string, password: string): Promise<{ userId: string }> {
     const tokenHash = this.hashToken(token);
-    const invitation = await this.prisma.invitation.findUnique({
-      where: { tokenHash },
+
+    return this.prisma.$transaction(async (tx) => {
+      const invitation = await tx.invitation.findUnique({
+        where: { tokenHash },
+      });
+
+      if (!invitation) {
+        throw new BadRequestException('Taklif havolasi noto\'g\'ri yoki muddati o\'tgan');
+      }
+
+      if (invitation.status !== InvitationStatus.PENDING || invitation.expiresAt < new Date()) {
+        throw new BadRequestException('Taklif havolasi noto\'g\'ri yoki muddati o\'tgan');
+      }
+
+      // Check if user already exists (FOR UPDATE to prevent race condition)
+      const existing = await tx.user.findFirst({
+        where: { email: invitation.email, schoolId: invitation.schoolId },
+      });
+
+      if (existing) {
+        throw new ConflictException('Bu email bilan foydalanuvchi allaqachon mavjud');
+      }
+
+      const passwordHash = await bcrypt.hash(password, 12);
+
+      const user = await tx.user.create({
+        data: {
+          email: invitation.email,
+          firstName: invitation.firstName ?? '',
+          lastName: invitation.lastName ?? '',
+          role: invitation.role,
+          schoolId: invitation.schoolId,
+          branchId: invitation.branchId,
+          passwordHash,
+          isActive: true,
+          isFirstLogin: true,
+          language: 'uz',
+        },
+      });
+
+      await tx.invitation.update({
+        where: { id: invitation.id },
+        data: { status: InvitationStatus.ACCEPTED, acceptedAt: new Date() },
+      });
+
+      return { userId: user.id };
+    }).then(async (result) => {
+      // Audit log outside transaction (non-critical)
+      await this.auditService.log({
+        schoolId: (await this.prisma.invitation.findUnique({ where: { tokenHash }, select: { schoolId: true } }))?.schoolId,
+        action: 'create',
+        entity: 'User',
+        entityId: result.userId,
+        newData: { source: 'invitation_acceptance' },
+      }).catch(() => null);
+      return result;
     });
-
-    if (!invitation) {
-      throw new BadRequestException('Taklif havolasi noto\'g\'ri yoki muddati o\'tgan');
-    }
-
-    if (invitation.status !== InvitationStatus.PENDING || invitation.expiresAt < new Date()) {
-      throw new BadRequestException('Taklif havolasi noto\'g\'ri yoki muddati o\'tgan');
-    }
-
-    // Check if user already exists
-    const existing = await this.prisma.user.findFirst({
-      where: { email: invitation.email, schoolId: invitation.schoolId },
-    });
-
-    if (existing) {
-      throw new ConflictException('Bu email bilan foydalanuvchi allaqachon mavjud');
-    }
-
-    const passwordHash = await bcrypt.hash(password, 12);
-
-    const user = await this.prisma.user.create({
-      data: {
-        email: invitation.email,
-        firstName: invitation.firstName ?? '',
-        lastName: invitation.lastName ?? '',
-        role: invitation.role,
-        schoolId: invitation.schoolId,
-        branchId: invitation.branchId,
-        passwordHash,
-        isActive: true,
-        isFirstLogin: true,
-        language: 'uz',
-      },
-    });
-
-    await this.prisma.invitation.update({
-      where: { id: invitation.id },
-      data: { status: InvitationStatus.ACCEPTED, acceptedAt: new Date() },
-    });
-
-    // Audit log (no userId since this is a public endpoint)
-    await this.auditService.log({
-      schoolId: invitation.schoolId,
-      action: 'create',
-      entity: 'User',
-      entityId: user.id,
-      newData: { email: user.email, role: user.role, source: 'invitation_acceptance' },
-    });
-
-    return { userId: user.id };
   }
 
   // ── Email ────────────────────────────────────────────────────────────────────

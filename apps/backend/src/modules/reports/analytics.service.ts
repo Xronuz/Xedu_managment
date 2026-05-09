@@ -12,15 +12,41 @@
  *  getSmartAlerts()          — Avtomatik ogohlantirish (treasury farq, teacher gap, ...)
  */
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { JwtPayload } from '@eduplatform/types';
+import { JwtPayload, UserRole } from '@eduplatform/types';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 import ExcelJS from 'exceljs';
 
 @Injectable()
 export class AnalyticsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * Validates that the requested branchId is within the user's permitted branches.
+   * Super admins and directors can access any branch in their school.
+   * Branch admins and below can only access their assigned/primary branch.
+   */
+  private async assertBranchAccess(currentUser: JwtPayload, branchId?: string): Promise<void> {
+    if (!branchId) return;
+    if (currentUser.isSuperAdmin) return;
+    if (currentUser.role === UserRole.DIRECTOR || currentUser.role === UserRole.VICE_PRINCIPAL) {
+      // Verify branch belongs to user's school
+      const branch = await this.prisma.branch.findFirst({
+        where: { id: branchId, schoolId: currentUser.schoolId! },
+        select: { id: true },
+      });
+      if (!branch) {
+        throw new ForbiddenException('Filial topilmadi yoki sizga ruxsat berilmagan');
+      }
+      return;
+    }
+    // Branch-scoped roles: only primary or assigned branches
+    const allowed = [currentUser.branchId, ...(currentUser.assignedBranchIds ?? [])].filter(Boolean);
+    if (!allowed.includes(branchId)) {
+      throw new ForbiddenException('Siz bu filialga kirish huquqiga ega emassiz');
+    }
+  }
 
   // ── Date helpers ──────────────────────────────────────────────────────────
 
@@ -64,6 +90,7 @@ export class AnalyticsService {
     months = 12,
     branchId?: string,
   ) {
+    await this.assertBranchAccess(currentUser, branchId);
     const schoolId = currentUser.schoolId!;
     const months_  = this.lastNMonths(months);
     const start    = new Date(months_[0].year, months_[0].month - 1, 1);
@@ -321,6 +348,7 @@ export class AnalyticsService {
    * CONVERTED lead → o'quvchi → avg payment amount.
    */
   async getMarketingROI(currentUser: JwtPayload, branchId?: string) {
+    await this.assertBranchAccess(currentUser, branchId);
     const schoolId = currentUser.schoolId!;
     const where: any = { schoolId, ...(branchId ? { branchId } : {}) };
 
@@ -636,6 +664,7 @@ export class AnalyticsService {
     type: 'students' | 'payments' | 'attendance',
     branchId?: string,
   ): Promise<Buffer> {
+    await this.assertBranchAccess(currentUser, branchId);
     const schoolId = currentUser.schoolId!;
     const wb       = new ExcelJS.Workbook();
 

@@ -58,8 +58,17 @@ export const coinsApi = {
     apiClient.post('/coins/spend', { itemId }).then(r => r.data),
 
   // Admin: award / deduct
-  award: (studentId: string, amount: number) =>
-    apiClient.post('/coins/award', { studentId, amount }).then(r => r.data),
+  award: (studentId: string, amount: number, comment?: string) =>
+    apiClient.post('/coins/award', { studentId, amount, comment }).then(r => r.data),
+
+  getAuditTrail: (days?: number) =>
+    apiClient.get('/coins/admin/audit', { params: { days } }).then(r => r.data as CoinTransaction[]),
+
+  getAbuseReport: () =>
+    apiClient.get('/coins/admin/abuse-report').then(r => r.data),
+
+  reverseTransaction: (transactionId: string, reason: string) =>
+    apiClient.post(`/coins/admin/reverse/${transactionId}`, { reason }).then(r => r.data),
 
   getStudentBalances: () =>
     apiClient.get('/coins/admin/balances').then(r => r.data as StudentBalance[]),

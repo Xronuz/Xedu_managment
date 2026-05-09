@@ -10,9 +10,16 @@ import { CurrentUser }   from '@/common/decorators/current-user.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 import { CoinsService, CreateShopItemDto } from './coins.service';
 import { SpendCoinsDto } from './dto/spend-coins.dto';
+import { EngagementConfigService } from '@/modules/engagement/engagement-config.service';
+import { RequireEngagement } from '@/modules/engagement/require-engagement.decorator';
+import { RequireEngagementGuard } from '@/modules/engagement/require-engagement.guard';
 
 const ADMIN_ROLES = [
-  UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL,
+  UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.SUPER_ADMIN,
+];
+
+const TEACHER_ROLES = [
+  UserRole.TEACHER, UserRole.CLASS_TEACHER, ...ADMIN_ROLES,
 ];
 
 @ApiTags('coins')
@@ -20,12 +27,17 @@ const ADMIN_ROLES = [
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller({ path: 'coins', version: '1' })
 export class CoinsController {
-  constructor(private readonly coinsService: CoinsService) {}
+  constructor(
+    private readonly coinsService: CoinsService,
+    private readonly engagementConfig: EngagementConfigService,
+  ) {}
 
   // ─── Student endpoints ────────────────────────────────────────────────────
 
   @Get('balance')
   @Roles(UserRole.STUDENT)
+  @RequireEngagement()
+  @UseGuards(RequireEngagementGuard)
   @ApiOperation({ summary: "O'z coin balansini ko'rish" })
   getBalance(@CurrentUser() user: JwtPayload) {
     return this.coinsService.getBalance(user);
@@ -33,6 +45,8 @@ export class CoinsController {
 
   @Get('history')
   @Roles(UserRole.STUDENT)
+  @RequireEngagement()
+  @UseGuards(RequireEngagementGuard)
   @ApiOperation({ summary: "Coin tarixi (so'nggi N ta)" })
   @ApiQuery({ name: 'limit', required: false })
   getHistory(
@@ -44,6 +58,8 @@ export class CoinsController {
 
   @Get('shop')
   @Roles(UserRole.STUDENT, ...ADMIN_ROLES)
+  @RequireEngagement('engagement_shop')
+  @UseGuards(RequireEngagementGuard)
   @ApiOperation({ summary: "Do'kon — faol mahsulotlar (student ko'rishi uchun)" })
   getShopItems(@CurrentUser() user: JwtPayload) {
     return this.coinsService.getShopItems(user.schoolId!);
@@ -51,6 +67,8 @@ export class CoinsController {
 
   @Post('spend')
   @Roles(UserRole.STUDENT)
+  @RequireEngagement('engagement_shop')
+  @UseGuards(RequireEngagementGuard)
   @ApiOperation({ summary: 'Coinlarni sarflash (xarid qilish)' })
   spendCoins(
     @Body() dto: SpendCoinsDto,
@@ -113,13 +131,60 @@ export class CoinsController {
     return this.coinsService.getShopOrders(user);
   }
 
+  // ─── Award / Deduct ───────────────────────────────────────────────────────
+
   @Post('award')
-  @Roles(...ADMIN_ROLES)
-  @ApiOperation({ summary: "Admin: o'quvchiga qo'lda coin berish/ayirish" })
-  awardManual(
-    @Body() body: { studentId: string; amount: number },
+  @Roles(...TEACHER_ROLES)
+  @RequireEngagement('engagement_teacher_award')
+  @UseGuards(RequireEngagementGuard)
+  @ApiOperation({ summary: "O'quvchiga qo'lda coin berish/ayirish" })
+  async awardManual(
+    @Body() body: { studentId: string; amount: number; comment?: string },
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.coinsService.awardManual(body.studentId, body.amount, user);
+    // Teacherlar faqat berishi mumkin, ayira olmaydi (agar alohida ruxsat berilmasa)
+    if (user.role === UserRole.TEACHER || user.role === UserRole.CLASS_TEACHER) {
+      if (body.amount < 0) {
+        const canDeduct = await this.engagementConfig.get(user.schoolId!, 'engagement_teacher_deduct');
+        if (!canDeduct) {
+          return { error: "O'qituvchilar coin ayira olmaydi" };
+        }
+      }
+    }
+    return this.coinsService.awardManual(body.studentId, body.amount, user, body.comment);
+  }
+
+  // ─── Reversal ─────────────────────────────────────────────────────────────
+
+  @Post('admin/reverse/:transactionId')
+  @Roles(...ADMIN_ROLES)
+  @ApiOperation({ summary: 'Tranzaksiyani bekor qilish' })
+  reverseTransaction(
+    @Param('transactionId') transactionId: string,
+    @Body() body: { reason: string },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.coinsService.reverseTransaction(transactionId, user, body.reason);
+  }
+
+  // ─── Audit ────────────────────────────────────────────────────────────────
+
+  @Get('admin/audit')
+  @Roles(...ADMIN_ROLES)
+  @ApiOperation({ summary: 'Coin harakatlari audit jurnali' })
+  getAuditTrail(
+    @CurrentUser() user: JwtPayload,
+    @Query('days', new DefaultValuePipe(30), ParseIntPipe) days: number,
+  ) {
+    return this.coinsService.getAuditTrail(user, days);
+  }
+
+  // ─── Abuse Report ─────────────────────────────────────────────────────────
+
+  @Get('admin/abuse-report')
+  @Roles(...ADMIN_ROLES)
+  @ApiOperation({ summary: 'Mukofot sui\'ist\'mol xabari' })
+  getAbuseReport(@CurrentUser() user: JwtPayload) {
+    return this.coinsService.getAbuseReport(user);
   }
 }

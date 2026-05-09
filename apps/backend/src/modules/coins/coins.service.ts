@@ -2,13 +2,9 @@ import { Injectable, BadRequestException, NotFoundException, ForbiddenException 
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload } from '@eduplatform/types';
-
-export const COIN_RULES = {
-  GRADE_EXCELLENT:    10,
-  ATTENDANCE_WEEKLY:  20,
-  DISCIPLINE_PRAISE:  100,
-  DISCIPLINE_WARNING: -50,
-} as const;
+import { EngagementConfigService } from '@/modules/engagement/engagement-config.service';
+import { AuditLogService } from '@/common/audit/audit-log.service';
+import { RecoveryService } from '@/modules/engagement/recovery.service';
 
 export interface CreateShopItemDto {
   name:        string;
@@ -18,9 +14,31 @@ export interface CreateShopItemDto {
   stock?:      number | null;
 }
 
+/** Legacy fallback defaults (per-school config overrides these) */
+export const COIN_RULES = {
+  GRADE_EXCELLENT:    10,
+  ATTENDANCE_WEEKLY:  20,
+  ATTENDANCE_MONTHLY: 50,
+  DISCIPLINE_PRAISE:  100,
+  DISCIPLINE_WARNING: -50,
+} as const;
+
+export const COIN_RULES_FALLBACK = {
+  GRADE_EXCELLENT:    10,
+  ATTENDANCE_WEEKLY:  20,
+  ATTENDANCE_MONTHLY: 50,
+  DISCIPLINE_PRAISE:  100,
+  DISCIPLINE_WARNING: -50,
+} as const;
+
 @Injectable()
 export class CoinsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly engagementConfig: EngagementConfigService,
+    private readonly auditLog: AuditLogService,
+    private readonly recoveryService: RecoveryService,
+  ) {}
 
   // ─── Internal helpers ──────────────────────────────────────────────────────
 
@@ -28,13 +46,14 @@ export class CoinsService {
     userId:   string,
     schoolId: string,
     amount:   number,
-    reason:   'grade_excellent' | 'attendance_weekly' | 'discipline_praise' | 'manual_award',
+    reason:   string,
     metadata?: Record<string, unknown>,
+    awardedBy?: string,
+    comment?: string,
   ) {
     if (amount <= 0) return null;
 
     return this.prisma.$transaction(async (tx) => {
-      // Defense-in-depth: verify user belongs to the school before updating
       const user = await tx.user.findFirst({
         where: { id: userId, schoolId },
         select: { id: true, coins: true },
@@ -55,8 +74,14 @@ export class CoinsService {
           reason:  reason as any,
           balance: updated.coins,
           metadata: (metadata ?? null) as any,
+          awardedBy,
+          comment,
         },
       });
+
+      // Reputation improvement
+      await this.recoveryService.improveReputation(userId, schoolId, 1).catch(() => {});
+
       return updated;
     });
   }
@@ -65,8 +90,10 @@ export class CoinsService {
     userId:   string,
     schoolId: string,
     amount:   number,
-    reason:   'discipline_warning' | 'shop_purchase' | 'manual_deduct',
+    reason:   string,
     metadata?: Record<string, unknown>,
+    awardedBy?: string,
+    comment?: string,
   ) {
     if (amount <= 0) return null;
 
@@ -84,7 +111,6 @@ export class CoinsService {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      // Re-verify scoped ownership inside transaction
       const owned = await tx.user.findFirst({ where: { id: userId, schoolId }, select: { id: true } });
       if (!owned) throw new NotFoundException('O\'quvchi topilmadi');
 
@@ -102,9 +128,171 @@ export class CoinsService {
           reason:  reason as any,
           balance: updated.coins,
           metadata: (metadata ?? null) as any,
+          awardedBy,
+          comment,
         },
       });
+
+      // Reputation deduction
+      await tx.engagementReputation.upsert({
+        where: { userId },
+        create: {
+          userId,
+          schoolId,
+          score: Math.max(0, 100 - deduct),
+          consecutiveGood: 0,
+          lastDeductionAt: new Date(),
+        },
+        update: {
+          score: { decrement: deduct },
+          consecutiveGood: 0,
+          lastDeductionAt: new Date(),
+        },
+      });
+
       return updated;
+    });
+  }
+
+  // ─── Rate limit & abuse detection ──────────────────────────────────────────
+
+  async checkTeacherRateLimit(teacherId: string, schoolId: string, studentId?: string): Promise<void> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const dailyCount = await this.prisma.coinTransaction.count({
+      where: {
+        schoolId,
+        awardedBy: teacherId,
+        createdAt: { gte: today },
+      },
+    });
+
+    if (dailyCount >= 50) {
+      throw new ForbiddenException('Kunlik mukofot chegarasiga yetildi (50 ta)');
+    }
+
+    if (studentId) {
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+      const weeklyStudentCount = await this.prisma.coinTransaction.count({
+        where: {
+          schoolId,
+          awardedBy: teacherId,
+          userId: studentId,
+          createdAt: { gte: weekAgo },
+        },
+      });
+      if (weeklyStudentCount >= 20) {
+        throw new ForbiddenException('Bu o\'quvchiga haftalik mukofot chegarasiga yetildi (20 ta)');
+      }
+    }
+  }
+
+  async detectAbuse(schoolId: string, teacherId: string): Promise<{
+    flagged: boolean;
+    reason?: string;
+    dailyCount: number;
+    avgDailyCount: number;
+  }> {
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const teacherDaily = await this.prisma.coinTransaction.groupBy({
+      by: ['awardedBy'],
+      where: { schoolId, awardedBy: { not: null }, createdAt: { gte: since } },
+      _count: true,
+    });
+
+    const teacherCounts = teacherDaily.map((t) => t._count);
+    const avgCount = teacherCounts.length > 0
+      ? teacherCounts.reduce((a, b) => a + b, 0) / teacherCounts.length
+      : 0;
+
+    const thisTeacher = teacherDaily.find((t) => t.awardedBy === teacherId)?._count ?? 0;
+
+    const flagged = thisTeacher > avgCount * 3 && avgCount > 0;
+
+    return {
+      flagged,
+      reason: flagged ? 'O\'rtacha mukofotdan 3 baravar ko\'p' : undefined,
+      dailyCount: thisTeacher,
+      avgDailyCount: Math.round(avgCount * 10) / 10,
+    };
+  }
+
+  // ─── Reversal ──────────────────────────────────────────────────────────────
+
+  async reverseTransaction(
+    transactionId: string,
+    currentUser: JwtPayload,
+    reversalReason: string,
+  ) {
+    const tx = await this.prisma.coinTransaction.findFirst({
+      where: { id: transactionId, schoolId: currentUser.schoolId! },
+    });
+    if (!tx) throw new NotFoundException('Tranzaksiya topilmadi');
+    if (tx.reversedBy) throw new BadRequestException('Bu tranzaksiya allaqachon bekor qilingan');
+
+    const reverseAmount = Math.abs(tx.amount);
+    const isEarn = tx.type === 'earn';
+
+    return this.prisma.$transaction(async (prismaTx) => {
+      // Original tranzaksiyani belgilash
+      await prismaTx.coinTransaction.update({
+        where: { id: transactionId },
+        data: { reversedBy: currentUser.sub },
+      });
+
+      // Teskari tranzaksiya yaratish
+      const user = await prismaTx.user.findUnique({
+        where: { id: tx.userId },
+        select: { coins: true },
+      });
+      if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+
+      if (isEarn) {
+        // Earned coins were given → deduct them back
+        if (user.coins < reverseAmount) {
+          throw new BadRequestException('Bekor qilish uchun yetarli coin yo\'q');
+        }
+        await prismaTx.user.update({
+          where: { id: tx.userId },
+          data: { coins: { decrement: reverseAmount } },
+        });
+      } else {
+        // Deducted coins were taken → give them back
+        await prismaTx.user.update({
+          where: { id: tx.userId },
+          data: { coins: { increment: reverseAmount } },
+        });
+      }
+
+      const newBalance = isEarn ? user.coins - reverseAmount : user.coins + reverseAmount;
+
+      await prismaTx.coinTransaction.create({
+        data: {
+          userId: tx.userId,
+          schoolId: tx.schoolId,
+          amount: isEarn ? -reverseAmount : reverseAmount,
+          type: isEarn ? 'deduct' : 'earn',
+          reason: 'manual_deduct',
+          balance: newBalance,
+          awardedBy: currentUser.sub,
+          comment: `Bekor qilish: ${reversalReason}`,
+          reversalOfId: transactionId,
+        },
+      });
+
+      // Audit log
+      await this.auditLog.create({
+        schoolId: currentUser.schoolId!,
+        userId: currentUser.sub,
+        action: 'update',
+        entity: 'CoinTransaction',
+        entityId: transactionId,
+        newData: { reversalReason, reversedBy: currentUser.sub },
+      });
+
+      return { message: 'Tranzaksiya bekor qilindi', originalTxId: transactionId };
     });
   }
 
@@ -196,14 +384,12 @@ export class CoinsService {
     }
 
     await this.prisma.$transaction(async (tx) => {
-      // Deduct stock
       if (item.stock !== null) {
         await tx.coinShopItem.update({
           where: { id: itemId },
           data:  { stock: { decrement: 1 } },
         });
       }
-      // Deduct coins (throws if insufficient)
       const user = await tx.user.findUnique({ where: { id: currentUser.sub }, select: { coins: true } });
       if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
       if (user.coins < item.cost) {
@@ -236,9 +422,14 @@ export class CoinsService {
     };
   }
 
-  // ─── Admin: manual award ───────────────────────────────────────────────────
+  // ─── Admin/Teacher: manual award ───────────────────────────────────────────
 
-  async awardManual(studentId: string, amount: number, currentUser: JwtPayload) {
+  async awardManual(
+    studentId: string,
+    amount: number,
+    currentUser: JwtPayload,
+    comment?: string,
+  ) {
     const student = await this.prisma.user.findFirst({
       where:  { id: studentId, schoolId: currentUser.schoolId! },
       select: { id: true, firstName: true, lastName: true, role: true },
@@ -246,21 +437,33 @@ export class CoinsService {
     if (!student) throw new NotFoundException('O\'quvchi topilmadi');
     if (student.role !== 'student') {
       throw new BadRequestException(
-        `${student.firstName} ${student.lastName} o'quvchi emas. Coin faqat o'quvchilarga berilishi mumkin`,
+        `${student.firstName} ${student.lastName} o'quvchi emas`,
       );
     }
+
+    // Rate limit tekshirish
+    await this.checkTeacherRateLimit(currentUser.sub, currentUser.schoolId!, studentId);
 
     if (amount > 0) {
       await this.earnCoins(studentId, currentUser.schoolId!, amount, 'manual_award', {
         awardedBy: currentUser.sub,
-      });
+      }, currentUser.sub, comment);
     } else {
       await this.deductCoins(studentId, currentUser.schoolId!, Math.abs(amount), 'manual_deduct', {
         deductedBy: currentUser.sub,
-      });
+      }, currentUser.sub, comment);
     }
 
-    return { studentId, amount };
+    // Audit log
+    await this.auditLog.create({
+      schoolId: currentUser.schoolId!,
+      userId: currentUser.sub,
+      action: 'update',
+      entity: 'CoinTransaction',
+      newData: { studentId, amount, comment, type: amount > 0 ? 'award' : 'deduct' },
+    });
+
+    return { studentId, amount, comment };
   }
 
   // ─── Admin: all students coin balances ─────────────────────────────────────
@@ -286,9 +489,59 @@ export class CoinsService {
     });
   }
 
+  // ─── Admin: audit trail ───────────────────────────────────────────────────
+
+  async getAuditTrail(currentUser: JwtPayload, days = 30) {
+    const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+    return this.prisma.coinTransaction.findMany({
+      where: {
+        schoolId: currentUser.schoolId!,
+        awardedBy: { not: null },
+        createdAt: { gte: since },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+      include: {
+        user: { select: { id: true, firstName: true, lastName: true } },
+      },
+    });
+  }
+
+  // ─── Admin: abuse report ──────────────────────────────────────────────────
+
+  async getAbuseReport(currentUser: JwtPayload) {
+    const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+
+    const teacherStats = await this.prisma.coinTransaction.groupBy({
+      by: ['awardedBy'],
+      where: {
+        schoolId: currentUser.schoolId!,
+        awardedBy: { not: null },
+        createdAt: { gte: since },
+      },
+      _count: true,
+      _sum: { amount: true },
+    });
+
+    const avgCount = teacherStats.length > 0
+      ? teacherStats.reduce((sum, t) => sum + t._count, 0) / teacherStats.length
+      : 0;
+
+    const flagged = teacherStats
+      .filter((t) => t._count > avgCount * 3 && avgCount > 0)
+      .map((t) => ({
+        teacherId: t.awardedBy,
+        actionCount: t._count,
+        totalCoins: t._sum.amount ?? 0,
+        flagReason: 'O\'rtacha mukofotdan 3 baravar ko\'p',
+      }));
+
+    return { averageDailyActions: Math.round(avgCount), flaggedTeachers: flagged };
+  }
+
   // ─── Cron: weekly GPA decline alert → notify parents ──────────────────────
 
-  @Cron('0 18 * * 5') // Har juma soat 18:00 da
+  @Cron('0 18 * * 5')
   async weeklyGpaDeclineAlert() {
     const now        = new Date();
     const day        = now.getDay();
@@ -307,7 +560,6 @@ export class CoinsService {
     });
 
     for (const school of schools) {
-      // Get the first active branch for this school (cron runs school-wide)
       const branch = await this.prisma.branch.findFirst({
         where: { schoolId: school.id, isActive: true },
         select: { id: true },
@@ -376,6 +628,13 @@ export class CoinsService {
     });
 
     for (const school of schools) {
+      // Per-school config o'qish
+      const config = await this.engagementConfig.getAll(school.id).catch(() => null);
+      if (config && !config.engagement_enabled) continue;
+
+      const rules = config?.coin_rules_positive ?? COIN_RULES_FALLBACK;
+      const weeklyBonus = (rules as any).attendance_weekly ?? COIN_RULES_FALLBACK.ATTENDANCE_WEEKLY;
+
       const students = await this.prisma.user.findMany({
         where:  { schoolId: school.id, role: 'student' as any, isActive: true },
         select: { id: true },
@@ -394,7 +653,7 @@ export class CoinsService {
           await this.earnCoins(
             student.id,
             school.id,
-            COIN_RULES.ATTENDANCE_WEEKLY,
+            weeklyBonus,
             'attendance_weekly',
             { weekStart: monday.toISOString().slice(0, 10) },
           ).catch(() => {});

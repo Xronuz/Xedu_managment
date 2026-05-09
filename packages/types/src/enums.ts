@@ -52,6 +52,9 @@ export enum ModuleName {
   TRANSPORT = 'transport',
   INVENTORY = 'inventory',
   PSYCHOLOGY = 'psychology',
+  CLUBS = 'clubs',
+  KPI = 'kpi',
+  ENGAGEMENT = 'engagement',
 }
 
 export enum AttendanceStatus {
@@ -119,6 +122,15 @@ export enum AuditAction {
   EXPORT = 'export',
   ASSIGN_BRANCH = 'assign_branch',
   UNASSIGN_BRANCH = 'unassign_branch',
+}
+
+export enum AchievementCategory {
+  ACADEMIC_EFFORT = 'academic_effort',
+  ATTENDANCE = 'attendance',
+  IMPROVEMENT = 'improvement',
+  PARTICIPATION = 'participation',
+  RECOVERY = 'recovery',
+  DISCIPLINE_RECOVERY = 'discipline_recovery',
 }
 
 export enum Language {

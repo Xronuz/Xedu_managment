@@ -67,6 +67,7 @@ enum ModuleName {
   psychology
   clubs
   kpi
+  engagement
 }
 
 enum ClubCategory {
@@ -256,13 +257,35 @@ enum CoinTransactionType {
 }
 
 enum CoinTransactionReason {
+  // Positive reinforcement
   grade_excellent
   attendance_weekly
+  attendance_monthly
   discipline_praise
   manual_award
+  homework_consistency
+  exam_high_score
+  improvement_milestone
+  participation
+  recovery_bonus
+  // Corrective accountability
   shop_purchase
   discipline_warning
   manual_deduct
+  repeated_absence
+  repeated_lateness
+  exam_low_score
+  cheating_incident
+  severe_discipline
+}
+
+enum AchievementCategory {
+  academic_effort
+  attendance
+  improvement
+  participation
+  recovery
+  discipline_recovery
 }
 
 enum FeeFrequency {
@@ -339,6 +362,8 @@ model School {
   leadComments        LeadComment[]
   coinTransactions    CoinTransaction[]
   coinShopItems       CoinShopItem[]
+  achievements        Achievement[]
+  engagementReputations EngagementReputation[]
   kpiMetrics          KpiMetric[]
   groupMessages       GroupMessage[]
   announcements       Announcement[]
@@ -620,6 +645,8 @@ model User {
 
   // Gamification
   coinTransactions CoinTransaction[]
+  achievements     UserAchievement[]
+  engagementReputation EngagementReputation?
 
   // KPI
   kpiRecords KpiRecord[]
@@ -2020,15 +2047,19 @@ model LeadComment {
 // ─── Gamification: Coin tranzaksiyalari ───────────────────────────────────────
 
 model CoinTransaction {
-  id        String                @id @default(uuid())
-  userId    String
-  schoolId  String
-  amount    Int
-  type      CoinTransactionType
-  reason    CoinTransactionReason
-  balance   Int // Tranzaksiyadan keyingi balans
-  metadata  Json?
-  createdAt DateTime              @default(now())
+  id          String                @id @default(uuid())
+  userId      String
+  schoolId    String
+  amount      Int
+  type        CoinTransactionType
+  reason      CoinTransactionReason
+  balance     Int // Tranzaksiyadan keyingi balans
+  metadata    Json?
+  comment     String?
+  awardedBy   String? // user ID of teacher/admin who triggered
+  reversedBy  String? // user ID who reversed
+  reversalOfId String? // reference to original transaction
+  createdAt   DateTime              @default(now())
 
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
@@ -2121,4 +2152,63 @@ model KpiRecord {
   @@index([metricId, periodStart])
   @@index([metricId, periodEnd])
   @@map("kpi_records")
+}
+
+// ─── Engagement & Achievement System ─────────────────────────────────────────
+
+model Achievement {
+  id          String              @id @default(uuid())
+  schoolId    String
+  name        String
+  description String?
+  category    AchievementCategory
+  criteria    Json // { type: "homework_streak", threshold: 5, window: "days" }
+  rewardCoins Int                 @default(0)
+  isActive    Boolean             @default(true)
+  isPositive  Boolean             @default(true) // true = reward, false = accountability marker
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  school     School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  unlockedBy UserAchievement[]
+
+  @@index([schoolId])
+  @@index([schoolId, category])
+  @@map("achievements")
+}
+
+model UserAchievement {
+  id            String    @id @default(uuid())
+  userId        String
+  achievementId String
+  progress      Json // { current: 3, target: 5 }
+  unlockedAt    DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
+  @@map("user_achievements")
+}
+
+model EngagementReputation {
+  id              String   @id @default(uuid())
+  userId          String   @unique
+  schoolId        String
+  score           Int      @default(100) // 0-100 institutional reputation score
+  consecutiveGood Int      @default(0) // days/weeks of positive behavior
+  lastDeductionAt DateTime?
+  recoveredAt     DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId])
+  @@map("engagement_reputations")
 }

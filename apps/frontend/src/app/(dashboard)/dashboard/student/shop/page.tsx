@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Coins, ShoppingBag, ArrowLeft, Loader2, History, Sparkles } from 'lucide-react';
+import { Coins, ShoppingBag, ArrowLeft, Loader2, History, Award, BookOpen, Calendar, Laptop } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import { coinsApi, type ShopItem, type CoinTransaction } from '@/lib/api/coins';
+import { AcademicEmptyState } from '@/components/workspace-system/academic-empty-state';
+
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+  library: BookOpen,
+  event: Calendar,
+  academic: Award,
+  digital: Laptop,
+  default: Award,
+};
+
+function getCategory(name: string): string {
+  const lower = name.toLowerCase();
+  if (lower.includes('kitob') || lower.includes('kutub')) return 'library';
+  if (lower.includes('tadbir') || lower.includes('event')) return 'event';
+  if (lower.includes('digital') || lower.includes('app') || lower.includes('online')) return 'digital';
+  return 'academic';
+}
 
 export default function StudentShopPage() {
   const router = useRouter();
@@ -36,7 +53,7 @@ export default function StudentShopPage() {
   const spendMutation = useMutation({
     mutationFn: (itemId: string) => coinsApi.spend(itemId),
     onSuccess: () => {
-      toast({ title: ' Sotib olindi!' });
+      toast({ title: 'Muvaffaqiyatli sotib olindi' });
       queryClient.invalidateQueries({ queryKey: ['coins'] });
     },
     onError: (err: any) => {
@@ -51,6 +68,27 @@ export default function StudentShopPage() {
   const balance = balanceData?.coins ?? 0;
   const activeItems = (shopItems ?? []).filter((i: ShopItem) => i.isActive);
 
+  const reasonLabels: Record<string, string> = {
+    grade_excellent: "A'lo baho",
+    attendance_weekly: 'Davomat bonusi',
+    attendance_monthly: 'Oylik davomat',
+    discipline_praise: 'Intizom maqtovi',
+    manual_award: 'Mukofot',
+    manual_deduct: 'Hisobdorlik',
+    homework_consistency: "Uyga vazifa intizomi",
+    exam_high_score: "Yuqori imtihon natijasi",
+    improvement_milestone: "O'sish",
+    participation: 'Faol ishtirok',
+    recovery_bonus: 'Tiklanish',
+    shop_purchase: 'Sotib olish',
+    discipline_warning: 'Intizom ogohlantiruvi',
+    repeated_absence: 'Takroriy dars qoldirish',
+    repeated_lateness: 'Takroriy kechikish',
+    exam_low_score: 'Past imtihon natijasi',
+    cheating_incident: 'Nopishtonlik',
+    severe_discipline: 'Jiddiy intizom buzilishi',
+  };
+
   return (
     <div className="space-y-6 p-6 max-w-4xl mx-auto">
       {/* Header */}
@@ -60,19 +98,21 @@ export default function StudentShopPage() {
             <ArrowLeft className="h-4 w-4 mr-1" /> Orqaga
           </Button>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-              <ShoppingBag className="h-6 w-6 text-primary" />
-              EduCoin Do'kon
+            <h1 className="text-xl font-bold tracking-tight flex items-center gap-2">
+              <ShoppingBag className="h-5 w-5 text-xedu-primary" />
+              Mukofotlar markazi
             </h1>
-            <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-sm">Mukofotlarni tangalarga almashtiring</p>
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">
+              Erishgan mukofotlarni tanlang
+            </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 rounded-full bg-yellow-50 border border-yellow-200 px-4 py-2">
-          <Coins className="h-5 w-5 text-yellow-600" />
-          <span className="text-lg font-bold text-yellow-700">
-            {balanceLoading ? <Skeleton className="h-6 w-12 inline-block" /> : balance}
+        <div className="flex items-center gap-2 rounded-lg bg-emerald-50 border border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-800 px-4 py-2">
+          <Coins className="h-4 w-4 text-emerald-600" />
+          <span className="text-base font-bold text-emerald-700 dark:text-emerald-400">
+            {balanceLoading ? <Skeleton className="h-5 w-10 inline-block" /> : balance}
           </span>
-          <span className="text-xs text-yellow-600 font-medium">EduCoin</span>
+          <span className="text-xs text-emerald-600 dark:text-emerald-500 font-medium">coin</span>
         </div>
       </div>
 
@@ -83,7 +123,7 @@ export default function StudentShopPage() {
           size="sm"
           onClick={() => setTab('shop')}
         >
-          <Sparkles className="h-4 w-4 mr-1.5" /> Do'kon
+          <Award className="h-4 w-4 mr-1.5" /> Mukofotlar
         </Button>
         <Button
           variant={tab === 'history' ? 'default' : 'outline'}
@@ -96,114 +136,131 @@ export default function StudentShopPage() {
 
       {/* Shop tab */}
       {tab === 'shop' && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <>
           {shopLoading ? (
-            [...Array(6)].map((_, i) => (
-              <Card key={i} className="h-40">
-                <CardHeader><Skeleton className="h-5 w-24" /></CardHeader>
-                <CardContent className="space-y-2">
-                  <Skeleton className="h-4 w-full" />
-                  <Skeleton className="h-8 w-20" />
-                </CardContent>
-              </Card>
-            ))
-          ) : activeItems.length === 0 ? (
-            <div className="col-span-full text-center py-12 text-xedu-slate-500 dark:text-xedu-slate-400">
-              <ShoppingBag className="h-12 w-12 mx-auto mb-3 opacity-30" />
-              <p className="font-medium">Do'konda hozircha mahsulot yo'q</p>
-              <p className="text-sm mt-1">Keyinroq qayta tekshiring</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <Skeleton key={i} className="h-32 rounded-xl" />
+              ))}
             </div>
+          ) : activeItems.length === 0 ? (
+            <AcademicEmptyState
+              context="general"
+              title="Mukofotlar yo'q"
+              description="Hozircha do'konda hech qanday mukofot yo'q"
+            />
           ) : (
-            activeItems.map((item: ShopItem) => {
-              const canAfford = balance >= item.cost;
-              return (
-                <Card key={item.id} className="flex flex-col">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <span className="text-xl">{item.emoji ?? '🎁'}</span>
-                        {item.name}
-                      </CardTitle>
-                      {item.stock !== null && item.stock !== undefined && (
-                        <Badge variant="secondary" className="text-[10px]">
-                          {item.stock} ta qoldi
-                        </Badge>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col justify-end space-y-3">
-                    {item.description && (
-                      <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{item.description}</p>
-                    )}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1 text-yellow-700 font-bold">
-                        <Coins className="h-4 w-4" />
-                        {item.cost}
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {activeItems.map((item: ShopItem) => {
+                const canAfford = balance >= item.cost;
+                const outOfStock = item.stock !== null && item.stock !== undefined && item.stock <= 0;
+                const category = getCategory(item.name);
+                const CategoryIcon = CATEGORY_ICONS[category] ?? CATEGORY_ICONS.default;
+
+                return (
+                  <Card
+                    key={item.id}
+                    className={`overflow-hidden transition-all ${
+                      canAfford && !outOfStock
+                        ? 'hover:shadow-sm'
+                        : 'opacity-70'
+                    }`}
+                  >
+                    <CardContent className="p-4">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-xedu-slate-100 dark:bg-xedu-slate-800 text-xedu-slate-500">
+                          <CategoryIcon className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-semibold truncate">{item.name}</h3>
+                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 line-clamp-2 mt-0.5">
+                            {item.description || 'Tavsif yo\'q'}
+                          </p>
+                          <div className="flex items-center gap-2 mt-2">
+                            <Badge variant="outline" className="text-xs border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400">
+                              <Coins className="h-3 w-3 mr-1" />
+                              {item.cost}
+                            </Badge>
+                            {item.stock !== null && item.stock !== undefined && (
+                              <span className="text-xs text-xedu-slate-400">
+                                Qoldi: {item.stock}
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </div>
                       <Button
                         size="sm"
-                        disabled={!canAfford || spendMutation.isPending}
+                        className="w-full mt-3 h-8 text-xs"
+                        disabled={!canAfford || outOfStock || spendMutation.isPending}
                         onClick={() => spendMutation.mutate(item.id)}
                       >
-                        {spendMutation.isPending && spendMutation.variables === item.id ? (
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        ) : null}
-                        {canAfford ? 'Sotib olish' : 'Tanga yetarli emas'}
+                        {spendMutation.isPending ? (
+                          <Loader2 className="h-3 w-3 animate-spin mr-1" />
+                        ) : outOfStock ? (
+                          'Tugagan'
+                        ) : !canAfford ? (
+                          "Yetarli coin yo'q"
+                        ) : (
+                          'Sotib olish'
+                        )}
                       </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
           )}
-        </div>
+        </>
       )}
 
       {/* History tab */}
       {tab === 'history' && (
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm flex items-center gap-2">
-              <History className="h-4 w-4 text-primary" />
-              Tranzaksiya tarixi
-            </CardTitle>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium">Coin harakatlari</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             {historyLoading ? (
-              <div className="space-y-2">
-                {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+              <div className="p-4 space-y-3">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-12 rounded-lg" />
+                ))}
               </div>
             ) : !history || history.length === 0 ? (
-              <div className="text-center py-8 text-xedu-slate-500 dark:text-xedu-slate-400">
-                <History className="h-10 w-10 mx-auto mb-2 opacity-30" />
-                <p>Hali tranzaksiyalar yo'q</p>
+              <div className="py-8">
+                <AcademicEmptyState
+                  context="general"
+                  title="Tarix bo'sh"
+                  description="Hali hech qanday coin harakati yo'q"
+                  compact
+                />
               </div>
             ) : (
-              <ScrollArea className="max-h-[400px]">
-                <div className="space-y-2">
-                  {(history as CoinTransaction[]).map((tx) => (
-                    <div
-                      key={tx.id}
-                      className="flex items-center justify-between p-3 rounded-lg border hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className={`h-8 w-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                          tx.amount > 0 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }`}>
-                          {tx.amount > 0 ? '+' : ''}{tx.amount}
+              <ScrollArea className="h-[400px]">
+                <div className="divide-y">
+                  {(history as CoinTransaction[]).map((tx) => {
+                    const isEarn = tx.amount > 0;
+                    return (
+                      <div key={tx.id} className="flex items-center gap-3 px-4 py-3">
+                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${isEarn ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600' : 'bg-xedu-slate-100 dark:bg-xedu-slate-800 text-xedu-slate-500'}`}>
+                          {isEarn ? '+' : '-'}
                         </div>
-                        <div>
-                          <p className="text-sm font-medium">{tx.reason}</p>
-                          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium">{reasonLabels[tx.reason] ?? tx.reason}</p>
+                          <p className="text-xs text-xedu-slate-500">
                             {new Date(tx.createdAt).toLocaleDateString('uz-UZ')}
                           </p>
                         </div>
+                        <div className="text-right">
+                          <p className={`text-sm font-semibold ${isEarn ? 'text-emerald-600' : 'text-xedu-slate-600'}`}>
+                            {isEarn ? '+' : ''}{tx.amount}
+                          </p>
+                          <p className="text-xs text-xedu-slate-400">{tx.balance} coin</p>
+                        </div>
                       </div>
-                      <Badge variant={tx.amount > 0 ? 'default' : 'secondary'} className="text-[10px]">
-                        {tx.amount > 0 ? 'Topdim' : 'Sarfladim'}
-                      </Badge>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </ScrollArea>
             )}

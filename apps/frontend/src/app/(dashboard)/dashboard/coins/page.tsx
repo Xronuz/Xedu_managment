@@ -10,6 +10,7 @@ import {
   Coins, TrendingUp, TrendingDown, ShoppingBag, History,
   Plus, Loader2, Award, Search, Edit3, Trash2, Package,
   ToggleLeft, ToggleRight, Trophy, Users, ShoppingCart,
+  BarChart3, ShieldAlert, BookOpen, RotateCcw, AlertTriangle,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -29,11 +30,22 @@ function reasonLabel(reason: string) {
   const map: Record<string, string> = {
     grade_excellent:   "A'lo baho",
     attendance_weekly: 'Davomat bonusi',
-    discipline_praise: 'Maqtov',
-    manual_award:      'Admin mukofoti',
-    manual_deduct:     'Admin jarimasi',
-    discipline_warning:'Intizom jarima',
-    shop_purchase:     "Do'kondan xarid",
+    attendance_monthly: 'Oylik davomat',
+    discipline_praise: 'Intizom maqtovi',
+    manual_award:      'Mukofot',
+    manual_deduct:     'Hisobdorlik',
+    homework_consistency: "Uyga vazifa intizomi",
+    exam_high_score:   "Yuqori imtihon",
+    improvement_milestone: "O'sish",
+    participation:     'Faol ishtirok',
+    recovery_bonus:    'Tiklanish',
+    shop_purchase:     "Sotib olish",
+    discipline_warning:'Intizom ogohlantiruvi',
+    repeated_absence:  'Takroriy dars qoldirish',
+    repeated_lateness: 'Takroriy kechikish',
+    exam_low_score:    'Past imtihon',
+    cheating_incident: 'Nopishtonlik',
+    severe_discipline: 'Jiddiy intizom',
   };
   return map[reason] ?? reason;
 }
@@ -42,15 +54,17 @@ function reasonLabel(reason: string) {
 
 function BalanceCard({ coins }: { coins: number }) {
   return (
-    <Card className="bg-gradient-to-br from-amber-400 to-orange-500 text-white border-0 shadow-md">
+    <Card className="border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20">
       <CardContent className="pt-6 pb-5">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-amber-100 text-sm font-medium mb-1">Coin balansi</p>
-            <p className="text-4xl font-bold tracking-tight">{coins.toLocaleString()}</p>
-            <p className="text-amber-100 text-xs mt-1">EduCoin</p>
+            <p className="text-emerald-600 dark:text-emerald-400 text-sm font-medium mb-1">Coin balansi</p>
+            <p className="text-4xl font-bold tracking-tight text-emerald-700 dark:text-emerald-300">{coins.toLocaleString()}</p>
+            <p className="text-emerald-500 dark:text-emerald-500 text-xs mt-1">Faoliyat mukofoti</p>
           </div>
-          <Coins className="h-14 w-14 text-amber-200/60" />
+          <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/30">
+            <Coins className="h-7 w-7 text-emerald-600 dark:text-emerald-400" />
+          </div>
         </div>
       </CardContent>
     </Card>
@@ -141,6 +155,7 @@ function AwardDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
   const [search, setSearch] = useState('');
   const [studentId, setStudentId] = useState('');
   const [amount, setAmount] = useState('');
+  const [comment, setComment] = useState('');
 
   const { data: usersResp } = useQuery({
     queryKey: ['users-list'],
@@ -154,12 +169,12 @@ function AwardDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
   );
 
   const mutation = useMutation({
-    mutationFn: () => coinsApi.award(studentId, Number(amount)),
+    mutationFn: () => coinsApi.award(studentId, Number(amount), comment),
     onSuccess: () => {
       toast({ title: `${Number(amount) > 0 ? '+' : ''}${amount} coin berildi` });
       qc.invalidateQueries({ queryKey: ['coin-balances'] });
       onClose();
-      setStudentId(''); setAmount(''); setSearch('');
+      setStudentId(''); setAmount(''); setSearch(''); setComment('');
     },
     onError: (e: any) => toast({ title: 'Xatolik', description: e?.response?.data?.message, variant: 'destructive' }),
   });
@@ -184,6 +199,10 @@ function AwardDialog({ open, onClose }: { open: boolean; onClose: () => void }) 
           <div className="space-y-1.5">
             <Label>Miqdor (manfiy = ayirish)</Label>
             <Input type="number" placeholder="+100 yoki -50" value={amount} onChange={e => setAmount(e.target.value)} />
+          </div>
+          <div className="space-y-1.5">
+            <Label>Izoh (majburiy)</Label>
+            <Input placeholder="Nima uchun?" value={comment} onChange={e => setComment(e.target.value)} />
           </div>
         </div>
         <DialogFooter className="pt-2">
@@ -503,6 +522,61 @@ function AdminBalancesTab() {
   );
 }
 
+// ─── Admin: audit tab ─────────────────────────────────────────────────────────
+
+function AdminAuditTab() {
+  const { data = [], isLoading } = useQuery({
+    queryKey: ['coin-audit'],
+    queryFn: () => coinsApi.getAuditTrail ? coinsApi.getAuditTrail() : Promise.resolve([]),
+  });
+
+  if (isLoading) {
+    return <div className="space-y-2">{Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 rounded-lg" />)}</div>;
+  }
+
+  const audit = data as any[];
+  if (audit.length === 0) {
+    return <p className="text-center text-sm text-xedu-slate-500 py-8">Audit ma\'lumoti yo\'q</p>;
+  }
+
+  return (
+    <div className="space-y-1.5">
+      {audit.map((tx: any) => {
+        const isEarn = tx.amount > 0;
+        return (
+          <div key={tx.id} className="flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm">
+            <div className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${isEarn ? 'bg-emerald-100 text-emerald-600' : 'bg-xedu-slate-100 text-xedu-slate-500'}`}>
+              {isEarn ? '+' : '-'}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-medium truncate">{tx.user?.firstName} {tx.user?.lastName}</p>
+              <p className="text-xs text-xedu-slate-500">{tx.comment || tx.reason}</p>
+            </div>
+            <div className="text-right shrink-0">
+              <p className={`font-semibold ${isEarn ? 'text-emerald-600' : 'text-xedu-slate-600'}`}>{tx.amount > 0 ? '+' : ''}{tx.amount}</p>
+              <p className="text-xs text-xedu-slate-400">{new Date(tx.createdAt).toLocaleDateString('uz-UZ')}</p>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Admin: analytics tab ─────────────────────────────────────────────────────
+
+function AdminAnalyticsTab() {
+  return (
+    <div className="space-y-4 py-4 text-center">
+      <BarChart3 className="h-10 w-10 text-xedu-slate-300 mx-auto" />
+      <p className="text-sm text-xedu-slate-500">Analitika ma\'lumotlari</p>
+      <p className="text-xs text-xedu-slate-400 max-w-sm mx-auto">
+        Batafsil analitika (sinf ishtiroki, mukofot taqsimoti, imtihon bog\'liqligi) tez orada qo\'shiladi.
+      </p>
+    </div>
+  );
+}
+
 // ─── Page ──────────────────────────────────────────────────────────────────────
 
 export default function CoinsPage() {
@@ -631,7 +705,7 @@ export default function CoinsPage() {
         </div>
 
         <Tabs defaultValue="shop">
-          <TabsList className="w-full">
+          <TabsList className="w-full flex-wrap">
             <TabsTrigger value="shop" className="flex-1">
               <Package className="h-4 w-4 mr-1.5" />Do'kon
             </TabsTrigger>
@@ -639,7 +713,13 @@ export default function CoinsPage() {
               <ShoppingCart className="h-4 w-4 mr-1.5" />Xaridlar
             </TabsTrigger>
             <TabsTrigger value="balances" className="flex-1">
-              <Trophy className="h-4 w-4 mr-1.5" />Reytingi
+              <Trophy className="h-4 w-4 mr-1.5" />Reyting
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="flex-1">
+              <ShieldAlert className="h-4 w-4 mr-1.5" />Audit
+            </TabsTrigger>
+            <TabsTrigger value="analytics" className="flex-1">
+              <BarChart3 className="h-4 w-4 mr-1.5" />Analitika
             </TabsTrigger>
           </TabsList>
 
@@ -672,6 +752,28 @@ export default function CoinsPage() {
               </CardHeader>
               <CardContent className="pt-4">
                 <AdminBalancesTab />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="audit" className="mt-4">
+            <Card>
+              <CardHeader className="pb-0">
+                <CardTitle className="text-base">Audit jurnali</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <AdminAuditTab />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-4">
+            <Card>
+              <CardHeader className="pb-0">
+                <CardTitle className="text-base">Engagement analitikasi</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-4">
+                <AdminAnalyticsTab />
               </CardContent>
             </Card>
           </TabsContent>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useMemo, useCallback } from 'react';
+import { useDebouncedValue } from '@/components/workspace-system/use-debounced-value';
 import { useQuery } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -80,17 +81,12 @@ export function StaffWorkspace() {
 
   // ── Filters ────────────────────────────────────────────────────────────────
   const [search, setSearch] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search, 300);
   const [filterRole, setFilterRole] = useState('');
   const [filterBranch, setFilterBranch] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
-  const handleSearch = useCallback((v: string) => {
-    setSearch(v);
-    window.clearTimeout((handleSearch as any)._t);
-    (handleSearch as any)._t = window.setTimeout(() => setDebouncedSearch(v), 300);
-  }, []);
 
   // ── Data fetching ──────────────────────────────────────────────────────────
   const { data: staffData, isLoading } = useQuery({
@@ -337,12 +333,12 @@ export function StaffWorkspace() {
             <input
               type="text"
               value={search}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
               placeholder="Ism, familiya, email, telefon..."
               className="w-full h-8 pl-8 pr-3 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-800 dark:text-xedu-slate-200 outline-none focus:ring-1 focus:ring-xedu-primary"
             />
             {search && (
-              <button onClick={() => { setSearch(''); setDebouncedSearch(''); }} className="absolute right-2 top-1/2 -translate-y-1/2">
+              <button onClick={() => { setSearch(''); }} className="absolute right-2 top-1/2 -translate-y-1/2">
                 <X className="h-3 w-3 text-xedu-slate-400" />
               </button>
             )}

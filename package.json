@@ -13,6 +13,7 @@
     "db:generate": "cd apps/backend && npx prisma generate",
     "db:migrate": "cd apps/backend && npx prisma migrate deploy && npx prisma generate",
     "db:seed": "cd apps/backend && npx prisma db seed",
+    "db:seed:demo": "cd apps/backend && npx ts-node prisma/seed-demo.ts",
     "db:studio": "cd apps/backend && npx prisma studio",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",

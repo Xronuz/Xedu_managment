@@ -50,6 +50,7 @@ export class SystemConfigController {
 
   /** GET /system-config — barcha konfiguratsiyalarni olish */
   @Get()
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT, UserRole.LIBRARIAN, UserRole.STUDENT, UserRole.PARENT)
   getAll(@CurrentUser() user: JwtPayload) {
     return this.service.getAll(user.schoolId!);
   }
@@ -67,6 +68,7 @@ export class SystemConfigController {
 
   /** GET /system-config/onboarding — onboarding holati */
   @Get('onboarding')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT, UserRole.LIBRARIAN, UserRole.STUDENT, UserRole.PARENT)
   async getOnboardingStatus(@CurrentUser() user: JwtPayload) {
     const school = await this.prisma.school.findUnique({
       where: { id: user.schoolId! },

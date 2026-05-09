@@ -2,6 +2,7 @@ import { Injectable, CanActivate, ExecutionContext, ForbiddenException, BadReque
 import { Reflector } from '@nestjs/core';
 import { UserRole, JwtPayload } from '@eduplatform/types';
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import { ANY_AUTHENTICATED_KEY } from '../decorators/any-authenticated.decorator';
 
 /** Roles that indicate a school-scoped endpoint */
 const SCHOOL_ROLES = new Set<UserRole>([
@@ -30,21 +31,25 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
+    const anyAuthenticated = this.reflector.getAllAndOverride<boolean>(ANY_AUTHENTICATED_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (anyAuthenticated) return true;
+
     if (!requiredRoles || requiredRoles.length === 0) return true;
 
     const { user } = context.switchToHttp().getRequest<{ user: JwtPayload }>();
 
     if (!user) return false;
 
-    // super_admin bypasses role restrictions but MUST have schoolId when the
-    // endpoint is school-scoped (i.e. its @Roles list contains school-level roles).
-    // Without schoolId the service layer would receive undefined and crash with 500.
-    if (user.role === UserRole.SUPER_ADMIN) {
-      // Super admin can access any endpoint; service layer handles isSuperAdmin branching
-      return true;
-    }
-
     const hasRole = requiredRoles.includes(user.role as UserRole);
+
+    // super_admin is NO LONGER blanket-bypassed.
+    // super_admin may only access endpoints where SUPER_ADMIN is explicitly listed in @Roles().
+    // This prevents super_admin from accessing school-scoped endpoints and seeing all schools' data.
+    // Super admin endpoints (e.g. /api/super-admin/*) use @Roles(UserRole.SUPER_ADMIN) explicitly.
     if (!hasRole) {
       throw new ForbiddenException(
         `Bu amalni bajarish uchun ruxsatingiz yo'q. Talab qilinadi: ${requiredRoles.join(', ')}`,

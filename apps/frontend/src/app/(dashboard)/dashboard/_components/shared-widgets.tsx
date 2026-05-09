@@ -195,10 +195,12 @@ export function OnboardingChecklist({ classList, usersData, subjectsCount }: {
   subjectsCount: number;
 }) {
   const router = useRouter();
-  const [dismissed, setDismissed] = useState(() => {
-    if (typeof window !== 'undefined') return !!localStorage.getItem('onboarding_dismissed');
-    return false;
-  });
+  const [dismissed, setDismissed] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setDismissed(!!localStorage.getItem('onboarding_dismissed'));
+    }
+  }, []);
 
   const totalUsers = usersData?.meta?.total ?? 0;
   const teacherCount = usersData?.data?.filter((u: any) => ['teacher', 'class_teacher'].includes(u.role)).length ?? 0;

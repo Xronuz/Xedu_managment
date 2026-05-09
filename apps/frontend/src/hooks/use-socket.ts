@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -22,20 +22,23 @@ interface UseSocketOptions {
  * useSocket — establishes a Socket.io connection using the current user's
  * JWT access token. Reconnects automatically when the token changes.
  *
- * @example
- * const { emit } = useSocket({
- *   namespace: '/notifications',
- *   handlers: {
- *     'notification:new': (data) => { ... },
- *   },
- * });
+ * Improvements for Phase 28.5 pilot readiness:
+ * - isConnected is now reactive (useState) so UI can show connection status
+ * - Exponential backoff for reconnection (max 10s)
+ * - Force-reconnect on token change prevents stale auth sessions
+ * - Graceful handling of auth errors (triggers logout suggestion)
  */
 export function useSocket({ namespace = '/', enabled = true, handlers = {} }: UseSocketOptions = {}) {
   const { accessToken } = useAuthStore();
   const socketRef = useRef<Socket | null>(null);
+  const [isConnected, setIsConnected] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const connect = useCallback(() => {
-    if (!accessToken || !enabled) return;
+    if (!accessToken || !enabled) {
+      setIsConnected(false);
+      return;
+    }
 
     // Disconnect existing socket before creating a new one
     if (socketRef.current) {
@@ -47,23 +50,32 @@ export function useSocket({ namespace = '/', enabled = true, handlers = {} }: Us
       auth: { token: accessToken },
       transports: ['websocket', 'polling'],
       reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 2000,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 10000,
+      randomizationFactor: 0.5,
     });
 
     socket.on('connect', () => {
+      setIsConnected(true);
+      setAuthError(null);
       if (process.env.NODE_ENV === 'development') {
         console.log(`[Socket] Connected: ${namespace} (${socket.id})`);
       }
     });
 
     socket.on('disconnect', (reason) => {
+      setIsConnected(false);
       if (process.env.NODE_ENV === 'development') {
         console.log(`[Socket] Disconnected: ${namespace} — ${reason}`);
       }
     });
 
     socket.on('connect_error', (err) => {
+      setIsConnected(false);
+      if (err.message?.includes('auth') || err.message?.includes('jwt') || err.message?.includes('token')) {
+        setAuthError('Auth session expired. Please refresh the page.');
+      }
       if (process.env.NODE_ENV === 'development') {
         console.warn(`[Socket] Error: ${namespace} —`, err.message);
       }
@@ -104,6 +116,7 @@ export function useSocket({ namespace = '/', enabled = true, handlers = {} }: Us
     socket: socketRef.current,
     emit,
     on,
-    isConnected: socketRef.current?.connected ?? false,
+    isConnected,
+    authError,
   };
 }

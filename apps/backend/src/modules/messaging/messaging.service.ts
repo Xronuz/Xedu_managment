@@ -279,9 +279,13 @@ export class MessagingService {
     page = 1,
     limit = 30,
   ) {
-    // Check membership
+    // Check membership (scoped to user's school)
     const member = await this.prisma.conversationParticipant.findFirst({
-      where: { conversationId: groupId, userId: currentUser.sub },
+      where: {
+        conversationId: groupId,
+        userId: currentUser.sub,
+        conversation: { schoolId: currentUser.schoolId! },
+      },
     });
     if (!member) throw new Error('Siz bu guruh a\'zosi emassiz');
 
@@ -316,7 +320,11 @@ export class MessagingService {
     currentUser: JwtPayload,
   ) {
     const member = await this.prisma.conversationParticipant.findFirst({
-      where: { conversationId: groupId, userId: currentUser.sub },
+      where: {
+        conversationId: groupId,
+        userId: currentUser.sub,
+        conversation: { schoolId: currentUser.schoolId! },
+      },
     });
     if (!member) throw new Error('Siz bu guruh a\'zosi emassiz');
 

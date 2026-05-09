@@ -13,10 +13,12 @@ import { JwtPayload, UserRole } from '@eduplatform/types';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(
   UserRole.DIRECTOR,
-  UserRole.DIRECTOR,
   UserRole.VICE_PRINCIPAL,
+  UserRole.BRANCH_ADMIN,
   UserRole.TEACHER,
   UserRole.CLASS_TEACHER,
+  UserRole.ACCOUNTANT,
+  UserRole.LIBRARIAN,
   UserRole.STUDENT,
   UserRole.PARENT,
 )

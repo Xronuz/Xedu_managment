@@ -6,6 +6,7 @@ import { NotificationsService, SendNotificationDto } from './notifications.servi
 import { NotificationQueueService } from './notification-queue.service';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
+import { AnyAuthenticated } from '@/common/decorators/any-authenticated.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 
 @ApiTags('notifications')
@@ -36,6 +37,7 @@ export class NotificationsController {
   }
 
   @Get()
+  @AnyAuthenticated()
   @ApiOperation({ summary: 'O\'z bildirishnomalar' })
   getMyNotifications(
     @CurrentUser('sub') userId: string,
@@ -46,24 +48,28 @@ export class NotificationsController {
   }
 
   @Put(':id/read')
+  @AnyAuthenticated()
   @ApiOperation({ summary: 'O\'qildi deb belgilash' })
   markAsRead(@Param('id') id: string, @CurrentUser('sub') userId: string) {
     return this.notificationsService.markAsRead(id, userId);
   }
 
   @Put('read-all')
+  @AnyAuthenticated()
   @ApiOperation({ summary: 'Hammasini o\'qildi deb belgilash' })
   markAllAsRead(@CurrentUser('sub') userId: string) {
     return this.notificationsService.markAllAsRead(userId);
   }
 
   @Get('preferences')
+  @AnyAuthenticated()
   @ApiOperation({ summary: 'Bildirishnoma sozlamalarini olish' })
   getPreferences(@CurrentUser('sub') userId: string) {
     return this.notificationsService.getPreferences(userId);
   }
 
   @Patch('preferences')
+  @AnyAuthenticated()
   @ApiOperation({ summary: 'Bildirishnoma sozlamalarini yangilash' })
   updatePreferences(
     @CurrentUser('sub') userId: string,
@@ -80,6 +86,7 @@ export class NotificationsController {
   }
 
   @Delete('all')
+  @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Barcha o\'z bildirishnomalarni o\'chirish' })
   deleteAll(@CurrentUser('sub') userId: string) {
@@ -96,6 +103,7 @@ export class NotificationsController {
   }
 
   @Delete(':id')
+  @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Bitta bildirishnomani o\'chirish' })
   deleteOne(@Param('id') id: string, @CurrentUser('sub') userId: string) {

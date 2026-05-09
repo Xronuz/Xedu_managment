@@ -10,6 +10,7 @@ import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
+import { AnyAuthenticated } from '@/common/decorators/any-authenticated.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { UserRole, JwtPayload } from '@eduplatform/types';
 
@@ -43,6 +44,7 @@ export class AnnouncementsController {
   }
 
   @Get('my')
+  @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Mening e\'lonlarim (recipient view)' })
   async findMyAnnouncements(
@@ -59,6 +61,7 @@ export class AnnouncementsController {
   }
 
   @Get(':id')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT, UserRole.LIBRARIAN, UserRole.STUDENT, UserRole.PARENT)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Bitta e\'lon haqida ma\'lumot' })
   async findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
@@ -66,6 +69,7 @@ export class AnnouncementsController {
   }
 
   @Post(':id/read')
+  @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'E\'lonni o\'qildi deb belgilash' })
   async markAsRead(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
@@ -73,6 +77,7 @@ export class AnnouncementsController {
   }
 
   @Post(':id/acknowledge')
+  @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'E\'lonni tasdiqlash (agar talab qilingan bo\'lsa)' })
   async acknowledge(@Param('id') id: string, @CurrentUser() user: JwtPayload) {

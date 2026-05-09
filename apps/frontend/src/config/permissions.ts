@@ -42,7 +42,10 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   '/dashboard/schools':        ['super_admin'],
   '/dashboard/schools/new':    ['super_admin'],
   '/dashboard/system-health':  ['super_admin'],
-  '/dashboard/subscriptions':  ['super_admin'],
+  // ═══════════════════════════════════════════════════════════════════════════════
+  // ONBOARDING
+  // ═══════════════════════════════════════════════════════════════════════════════
+  '/dashboard/onboarding':     ['director', 'vice_principal'],
 
   // ═══════════════════════════════════════════════════════════════════════════════
   // DIRECTOR — Maktab boshqaruvi (bird's eye view, CRUD faqat strategic narsalarda)
@@ -158,11 +161,18 @@ export const ROLE_HOME: Record<UserRole, string> = {
 
 /** Middleware va RoleGuard uchun helper */
 export function canAccessRoute(role: string, pathname: string): boolean {
+  // Explicitly allow the dashboard root for all authenticated roles
+  if (pathname === '/dashboard' || pathname === '/dashboard/') {
+    return true;
+  }
+
   for (const [route, roles] of Object.entries(ROUTE_PERMISSIONS)) {
     if (pathname === route || pathname.startsWith(route + '/')) {
       return roles.includes(role as UserRole);
     }
   }
-  // Agar route permissions'da yo'q bo'lsa — ochiq (public dashboard)
-  return pathname === '/dashboard' || pathname.startsWith('/dashboard');
+
+  // UNKNOWN route — DENY by default (security first)
+  // Developers must explicitly register new routes in ROUTE_PERMISSIONS.
+  return false;
 }

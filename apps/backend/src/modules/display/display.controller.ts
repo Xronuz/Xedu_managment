@@ -1,4 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { Public } from '@/common/decorators/public.decorator';
 import { ApiTags, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { DisplayService } from './display.service';
 import { Throttle } from '@nestjs/throttler';
@@ -12,6 +13,7 @@ export class DisplayController {
    * Public endpoint — autentifikatsiya talab qilinmaydi.
    * Zal ekraniga bugungi dars jadvalini ko'rsatish uchun ishlatiladi.
    */
+  @Public()
   @Get(':schoolSlug')
   @Throttle({ default: { ttl: 60000, limit: 60 } }) // 60 req/min — display sahifasi uchun yetarli
   @ApiOperation({ summary: 'Public: bugungi dars jadvali (zal ekrani)' })

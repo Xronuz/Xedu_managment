@@ -161,11 +161,13 @@ export class FeeStructuresService {
       for (const cs of cls.students) {
         payments.push({
           schoolId: currentUser.schoolId!,
+          branchId: fee.branchId ?? cls.branchId ?? currentUser.branchId!,
           studentId: cs.studentId,
           amount: fee.amount,
           currency: fee.currency,
           description: `${fee.name} — ${fee.academicYear}`,
           dueDate,
+          createdById: currentUser.sub,
         });
       }
     }

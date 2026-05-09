@@ -184,7 +184,7 @@ export class ExamsService {
    */
   async getResults(id: string, currentUser: JwtPayload) {
     const exam = await this.prisma.exam.findFirst({
-      where: { id, schoolId: currentUser.schoolId! },
+      where: { id, ...buildTenantWhere(currentUser) },
       include: {
         class: { select: { id: true, name: true } },
         subject: { select: { id: true, name: true } },
@@ -291,7 +291,7 @@ export class ExamsService {
    */
   async submitBulkResults(examId: string, dto: BulkResultsDto, currentUser: JwtPayload) {
     const exam = await this.prisma.exam.findFirst({
-      where: { id: examId, schoolId: currentUser.schoolId! },
+      where: { id: examId, ...buildTenantWhere(currentUser) },
     });
     if (!exam) throw new NotFoundException('Imtihon topilmadi');
 

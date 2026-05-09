@@ -16,6 +16,7 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { AssignBranchDto } from './dto/assign-branch.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
+import { AnyAuthenticated } from '@/common/decorators/any-authenticated.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 
 @ApiTags('users')
@@ -46,6 +47,7 @@ export class UsersController {
   }
 
   @Get('me')
+  @AnyAuthenticated()
   @ApiOperation({ summary: 'O\'z profili' })
   getMe(@CurrentUser('sub') userId: string) {
     return this.usersService.getMe(userId);
@@ -144,6 +146,7 @@ export class UsersController {
   }
 
   @Put('me/password')
+  @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Parol o\'zgartirish' })
   changePassword(
@@ -154,6 +157,7 @@ export class UsersController {
   }
 
   @Put('me/avatar')
+  @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
   @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
   @ApiOperation({ summary: 'Profil rasmini yangilash (JPEG/PNG/WebP, max 5MB)' })

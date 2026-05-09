@@ -16,7 +16,11 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "ts-node prisma/seed.ts",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "qa:permissions": "ts-node scripts/audit-permissions.ts",
+    "qa:routes": "ts-node scripts/audit-routes.ts",
+    "qa:demo": "ts-node scripts/validate-demo.ts",
+    "qa:all": "npm run qa:permissions && npm run qa:routes && npm run qa:demo"
   },
   "dependencies": {
     "@eduplatform/types": "workspace:*",

@@ -158,9 +158,9 @@ export function EntityPanel({
                 type="button"
                 onClick={onClose}
                 aria-label="Yopish"
-                className="h-7 w-7 rounded-md flex items-center justify-center hover:bg-xedu-slate-100 dark:hover:bg-xedu-slate-800 transition-colors"
+                className="h-9 w-9 min-h-[44px] min-w-[44px] rounded-lg flex items-center justify-center hover:bg-xedu-slate-100 dark:hover:bg-xedu-slate-800 transition-colors"
               >
-                <X className="h-4 w-4 text-xedu-slate-400" />
+                <X className="h-5 w-5 text-xedu-slate-400" />
               </button>
             </div>
           </div>
@@ -212,7 +212,7 @@ export function EntityPanel({
         )}
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto pb-[env(safe-area-inset-bottom)]">
           {tabs && tabs.length > 0 ? (
             tabs.find((t) => t.id === activeTab)?.content
           ) : (

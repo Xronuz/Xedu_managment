@@ -100,11 +100,11 @@ export function WorkspaceHeader({
           ))}
         </nav>
       )}
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-start justify-between gap-3 flex-wrap">
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             {icon && <span className="shrink-0">{icon}</span>}
-            <h1 className="text-3xl font-black tracking-tight leading-none text-xedu-slate-900 dark:text-xedu-slate-100">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-none text-xedu-slate-900 dark:text-xedu-slate-100">
               {title}
             </h1>
           </div>
@@ -128,13 +128,15 @@ interface WorkspaceToolbarProps {
   children: React.ReactNode;
   className?: string;
   sticky?: boolean;
+  scrollable?: boolean;
 }
 
-export function WorkspaceToolbar({ children, className, sticky = false }: WorkspaceToolbarProps) {
+export function WorkspaceToolbar({ children, className, sticky = false, scrollable = false }: WorkspaceToolbarProps) {
   return (
     <div
       className={cn(
-        'flex items-center gap-2 flex-wrap',
+        'flex items-center gap-2',
+        scrollable ? 'overflow-x-auto scrollbar-hide flex-nowrap' : 'overflow-x-auto scrollbar-hide flex-nowrap md:flex-wrap md:overflow-visible',
         sticky && 'sticky top-0 z-10 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm -mx-2 px-2',
         className
       )}
@@ -232,7 +234,7 @@ export function WorkspacePanel({ open, onClose, children, className, title }: Wo
             </button>
           </div>
         )}
-        <div className="h-[calc(100%-53px)] overflow-y-auto">
+        <div className="h-[calc(100%-53px)] overflow-y-auto pb-[env(safe-area-inset-bottom)]">
           {children}
         </div>
       </div>
@@ -250,7 +252,7 @@ interface WorkspaceBottomProps {
 export function WorkspaceBottom({ children, className }: WorkspaceBottomProps) {
   return (
     <div className={cn('fixed bottom-0 left-0 right-0 z-30 pointer-events-none', className)}>
-      <div className="pointer-events-auto flex justify-center pb-4 px-4">
+      <div className="pointer-events-auto flex justify-center pb-4 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
         {children}
       </div>
     </div>

@@ -50,7 +50,7 @@ export function PrimaryAction({
       aria-busy={loading}
       className={cn(
         'inline-flex items-center justify-center gap-1.5',
-        'rounded-lg px-3.5 py-2',
+        'rounded-lg px-3.5 py-2.5 min-h-[44px]',
         'text-xs font-bold text-white',
         'bg-xedu-primary hover:bg-xedu-primary-hover active:bg-xedu-primary-active',
         'transition-colors',
@@ -89,7 +89,7 @@ export function SecondaryAction({
       disabled={disabled}
       className={cn(
         'inline-flex items-center justify-center gap-1.5',
-        'rounded-lg px-3 py-2',
+        'rounded-lg px-3 py-2.5 min-h-[44px]',
         'text-xs font-bold text-xedu-slate-700 dark:text-xedu-slate-300',
         'border border-xedu-slate-200 dark:border-xedu-slate-700',
         'bg-white dark:bg-xedu-slate-900',
@@ -129,7 +129,7 @@ export function TertiaryAction({
       disabled={disabled}
       className={cn(
         'inline-flex items-center justify-center gap-1.5',
-        'rounded-lg px-2 py-1.5',
+        'rounded-lg px-2 py-2 min-h-[44px]',
         'text-xs font-semibold text-xedu-slate-500',
         'hover:text-xedu-slate-800 dark:hover:text-xedu-slate-200',
         'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50',
@@ -169,7 +169,7 @@ export function DestructiveAction({
       disabled={disabled}
       className={cn(
         'inline-flex items-center justify-center gap-1.5',
-        'rounded-lg px-3 py-2',
+        'rounded-lg px-3 py-2.5 min-h-[44px]',
         'text-xs font-bold text-red-600',
         'border border-red-200 dark:border-red-900/30',
         'bg-white dark:bg-xedu-slate-900',
@@ -219,7 +219,7 @@ export function IconAction({
       aria-label={title}
       className={cn(
         'inline-flex items-center justify-center',
-        'h-7 w-7 rounded-md',
+        'h-9 w-9 min-h-[44px] min-w-[44px] rounded-lg',
         'transition-colors',
         toneClass,
         'disabled:opacity-40 disabled:cursor-not-allowed',

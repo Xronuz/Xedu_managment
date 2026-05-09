@@ -297,7 +297,7 @@ function AnalyticsSurface({ branchFilter, months }: { branchFilter: string; mont
                 Ma'lumot yo'q
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={260}>
+              <ResponsiveContainer width="100%" height={200}>
                 <AreaChart data={monthlyChart} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                   <defs>
                     <linearGradient id="gPaid" x1="0" y1="0" x2="0" y2="1">
@@ -383,7 +383,7 @@ function AnalyticsSurface({ branchFilter, months }: { branchFilter: string; mont
                   Ma'lumot yo'q
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={240}>
+                <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={branches} barSize={20} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.07} />
                     <XAxis dataKey="code" tick={{ fontSize: 11 }} />
@@ -471,7 +471,7 @@ function AnalyticsSurface({ branchFilter, months }: { branchFilter: string; mont
                   Lead ma'lumotlari yo'q
                 </div>
               ) : (
-                <ResponsiveContainer width="100%" height={240}>
+                <ResponsiveContainer width="100%" height={180}>
                   <BarChart data={funnelChart} barSize={18} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.07} />
                     <XAxis dataKey="name" tick={{ fontSize: 10 }} />
@@ -637,7 +637,7 @@ function AttendanceSurface({ dateRange, dateKey }: { dateRange: { from: string; 
           <Card>
             <CardHeader><CardTitle className="text-sm font-medium">Davomat taqsimoti</CardTitle></CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={260}>
+              <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={60} outerRadius={100}
                     paddingAngle={4} dataKey="value"
@@ -757,7 +757,7 @@ function GradesSurface({ dateRange, dateKey }: { dateRange: { from: string; to: 
         <Card>
           <CardHeader><CardTitle className="text-sm font-medium">Baho taqsimoti</CardTitle></CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={240}>
+            <ResponsiveContainer width="100%" height={180}>
               <BarChart data={distribution} barSize={44}>
                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.07} />
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
@@ -775,7 +775,7 @@ function GradesSurface({ dateRange, dateKey }: { dateRange: { from: string; to: 
           <Card>
             <CardHeader><CardTitle className="text-sm font-medium">Fan bo'yicha o'rtacha (%)</CardTitle></CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={240}>
+              <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={subjectData} layout="vertical" barSize={16}>
                   <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.07} />
                   <XAxis type="number" domain={[0, 100]} tick={{ fontSize: 10 }} />
@@ -883,7 +883,7 @@ function FinanceSurface({ dateRange, dateKey }: { dateRange: { from: string; to:
             <CardDescription>So'nggi 6 oy</CardDescription>
           </CardHeader>
           <CardContent>
-            <ResponsiveContainer width="100%" height={260}>
+            <ResponsiveContainer width="100%" height={200}>
               <BarChart data={monthlyData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.07} />
                 <XAxis dataKey="month" tick={{ fontSize: 11 }} />

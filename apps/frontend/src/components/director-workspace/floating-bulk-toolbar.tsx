@@ -43,14 +43,14 @@ export function FloatingBulkToolbar({
   if (!visible || selectedIds.length === 0) return null;
 
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-xl">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-xl mb-[env(safe-area-inset-bottom)]">
       <div className="flex items-center gap-1 rounded-xl border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white/95 dark:bg-xedu-slate-900/95 backdrop-blur-sm shadow-premium-md px-2 py-1.5">
         {/* Count */}
         <div className="flex items-center gap-2 px-3 py-1.5 border-r border-xedu-slate-100 dark:border-xedu-slate-800 shrink-0">
           <span className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 tabular-nums">
             {selectedIds.length}
           </span>
-          <span className="text-[11px] font-medium text-xedu-slate-500">
+          <span className="text-xs font-medium text-xedu-slate-500">
             ta tanlandi
           </span>
         </div>
@@ -72,7 +72,7 @@ export function FloatingBulkToolbar({
                 onClick={() => action.onClick(selectedIds)}
                 disabled={action.disabled}
                 className={cn(
-                  'flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11px] font-semibold transition-colors shrink-0',
+                  'flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-semibold transition-colors shrink-0 min-h-[44px]',
                   toneColor,
                   action.disabled && 'opacity-40 cursor-not-allowed'
                 )}
@@ -87,7 +87,7 @@ export function FloatingBulkToolbar({
         {/* Clear */}
         <button
           onClick={onClear}
-          className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-[11px] font-semibold text-xedu-slate-400 hover:text-xedu-slate-600 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors shrink-0"
+          className="flex items-center gap-1 rounded-lg px-3 py-2.5 text-xs font-semibold text-xedu-slate-400 hover:text-xedu-slate-600 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors shrink-0 min-h-[44px]"
         >
           <X className="h-3.5 w-3.5" />
         </button>

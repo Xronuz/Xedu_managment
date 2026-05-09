@@ -191,7 +191,7 @@ export function OpTable<T>({
                 <tr
                   key={key}
                   className={cn(
-                    'group transition-colors',
+                    'group transition-colors touch-manipulation',
                     toneBg,
                     isSelected && 'bg-xedu-primary-light/30',
                     !isSelected && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30',
@@ -233,7 +233,9 @@ export function OpTable<T>({
                     <td className={cn(densityPadding, 'w-0')}>
                       <div className={cn(
                         'flex items-center gap-1 transition-opacity',
-                        isHovered || isSelected ? 'opacity-100' : 'opacity-0'
+                        'opacity-100',
+                        'md:opacity-0 md:group-hover:opacity-100',
+                        (isHovered || isSelected) && 'md:opacity-100'
                       )}>
                         {rowActions(row)}
                       </div>

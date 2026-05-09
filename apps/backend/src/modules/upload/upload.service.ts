@@ -78,14 +78,16 @@ export class UploadService {
   async uploadFile(
     file: Express.Multer.File,
     folder = 'general',
+    tenantPrefix?: string,
   ): Promise<UploadResult> {
     this.validateFile(file);
 
     const ext = path.extname(file.originalname).toLowerCase();
-    const key = `${folder}/${uuidv4()}${ext}`;
+    const scopedFolder = tenantPrefix ? `${tenantPrefix}/${folder}` : folder;
+    const key = `${scopedFolder}/${uuidv4()}${ext}`;
 
     if (this.useLocal) {
-      return this.uploadLocal(file, key, folder);
+      return this.uploadLocal(file, key, scopedFolder);
     }
     return this.uploadMinio(file, key);
   }

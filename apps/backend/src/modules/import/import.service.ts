@@ -96,7 +96,7 @@ export class ImportService {
 
     for (const row of validRows) {
       try {
-        const existing = await this.prisma.user.findUnique({ where: { email: row.data.email } });
+        const existing = await this.prisma.user.findFirst({ where: { email: row.data.email, schoolId } });
         if (existing) { skipped++; continue; }
 
         const rowBranchId = row.data.branchId ?? branchId ?? null;
@@ -185,7 +185,7 @@ export class ImportService {
 
     for (const row of validRows) {
       try {
-        const existing = await this.prisma.user.findUnique({ where: { email: row.data.email } });
+        const existing = await this.prisma.user.findFirst({ where: { email: row.data.email, schoolId: currentUser.schoolId! } });
         if (existing) { skipped++; continue; }
 
         // Re-use UsersService.create() so that role authorization, branchId

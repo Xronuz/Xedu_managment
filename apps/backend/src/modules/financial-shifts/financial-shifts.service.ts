@@ -3,9 +3,10 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { JwtPayload } from '@eduplatform/types';
+import { JwtPayload, UserRole } from '@eduplatform/types';
 import { OpenShiftDto, CloseShiftDto } from './dto/shifts.dto';
 
 @Injectable()
@@ -23,9 +24,11 @@ export class FinancialShiftsService {
     const schoolId = currentUser.schoolId!;
 
     // Treasury maktabga tegishli ekanligini tekshirish
-    const treasury = await this.prisma.treasury.findFirst({
-      where: { id: dto.treasuryId, schoolId, isActive: true },
-    });
+    const treasuryWhere: any = { id: dto.treasuryId, schoolId, isActive: true };
+    if (currentUser.branchId && currentUser.role !== UserRole.DIRECTOR && currentUser.role !== UserRole.SUPER_ADMIN) {
+      treasuryWhere.branchId = currentUser.branchId;
+    }
+    const treasury = await this.prisma.treasury.findFirst({ where: treasuryWhere });
     if (!treasury) throw new NotFoundException("G'azna topilmadi");
 
     // Allaqachon ochiq smena bormi?
@@ -63,8 +66,12 @@ export class FinancialShiftsService {
    * discrepancy = expectedBalance - actualBalance
    */
   async closeShift(id: string, dto: CloseShiftDto, currentUser: JwtPayload) {
+    const shiftWhere: any = { id, schoolId: currentUser.schoolId! };
+    if (currentUser.branchId && currentUser.role !== UserRole.DIRECTOR && currentUser.role !== UserRole.SUPER_ADMIN) {
+      shiftWhere.branchId = currentUser.branchId;
+    }
     const shift = await this.prisma.financialShift.findFirst({
-      where: { id, schoolId: currentUser.schoolId! },
+      where: shiftWhere,
       include: { treasury: true },
     });
 

@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ConflictException,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
@@ -75,8 +76,13 @@ export class TreasuryService {
   }
 
   async findOne(id: string, currentUser: JwtPayload) {
+    const where: any = { id, schoolId: currentUser.schoolId! };
+    // Branch-scoped users can only see their own branch treasury
+    if (!SCHOOL_WIDE_ROLES.has(currentUser.role) && currentUser.branchId) {
+      where.branchId = currentUser.branchId;
+    }
     const treasury = await this.prisma.treasury.findFirst({
-      where: { id, schoolId: currentUser.schoolId! },
+      where,
       include: {
         branch: { select: { id: true, name: true, code: true } },
         _count: { select: { payments: true, financialShifts: true } },
@@ -117,9 +123,11 @@ export class TreasuryService {
   }
 
   async update(id: string, dto: UpdateTreasuryDto, currentUser: JwtPayload) {
-    const treasury = await this.prisma.treasury.findFirst({
-      where: { id, schoolId: currentUser.schoolId! },
-    });
+    const where: any = { id, schoolId: currentUser.schoolId! };
+    if (!SCHOOL_WIDE_ROLES.has(currentUser.role) && currentUser.branchId) {
+      where.branchId = currentUser.branchId;
+    }
+    const treasury = await this.prisma.treasury.findFirst({ where });
     if (!treasury) throw new NotFoundException(`G'azna topilmadi (id: ${id})`);
 
     return this.prisma.treasury.update({
@@ -133,8 +141,12 @@ export class TreasuryService {
   }
 
   async remove(id: string, currentUser: JwtPayload) {
+    const where: any = { id, schoolId: currentUser.schoolId! };
+    if (!SCHOOL_WIDE_ROLES.has(currentUser.role) && currentUser.branchId) {
+      where.branchId = currentUser.branchId;
+    }
     const treasury = await this.prisma.treasury.findFirst({
-      where: { id, schoolId: currentUser.schoolId! },
+      where,
       select: { id: true, name: true, balance: true, _count: { select: { payments: true } } },
     });
     if (!treasury) throw new NotFoundException(`G'azna topilmadi (id: ${id})`);
@@ -164,6 +176,10 @@ export class TreasuryService {
     financeType: 'CENTRALIZED' | 'DECENTRALIZED',
     currentUser: JwtPayload,
   ) {
+    // Prevent cross-school finance policy changes
+    if (schoolId !== currentUser.schoolId && !currentUser.isSuperAdmin) {
+      throw new ForbiddenException('Boshqa maktabning moliya rejimini o\'zgartirish taqiqlangan');
+    }
     return this.prisma.school.update({
       where: { id: schoolId },
       data: { financeType: financeType as any },

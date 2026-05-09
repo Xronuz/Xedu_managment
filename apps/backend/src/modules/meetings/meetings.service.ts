@@ -159,9 +159,9 @@ export class MeetingsService {
     });
     if (!student) throw new NotFoundException('O\'quvchi topilmadi');
 
-    // Verify parent is a user
+    // Verify parent belongs to same school
     const parent = await this.prisma.user.findFirst({
-      where: { id: dto.parentId },
+      where: { id: dto.parentId, schoolId },
     });
     if (!parent) throw new NotFoundException('Ota-ona topilmadi');
 
@@ -171,6 +171,7 @@ export class MeetingsService {
 
     const conflict = await this.prisma.parentMeeting.findFirst({
       where: {
+        schoolId,
         teacherId:   dto.teacherId,
         status:      'scheduled' as any,
         scheduledAt: { lt: endTime },

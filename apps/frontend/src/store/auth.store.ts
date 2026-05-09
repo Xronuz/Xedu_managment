@@ -91,6 +91,8 @@ export const useAuthStore = create<AuthState>()(
         if (typeof window !== 'undefined') {
           localStorage.removeItem('auth-storage');
           localStorage.removeItem('branch-storage');
+          // Signal QueryProvider to clear cache (defense against stale data on next login)
+          window.dispatchEvent(new CustomEvent('xedu:logout'));
         }
       },
 

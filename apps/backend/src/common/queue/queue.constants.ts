@@ -15,12 +15,16 @@ export interface EmailJobData {
   html: string;
   text?: string;
   replyTo?: string;
+  /** Tenant context for observability and future per-school rate limiting */
+  schoolId?: string;
 }
 
 export interface SmsJobData {
   to: string;        // tel raqam: +998901234567
   message: string;
   from?: string;
+  /** Tenant context for observability and future per-school rate limiting */
+  schoolId?: string;
 }
 
 export interface AttendanceAlertData {
@@ -30,6 +34,7 @@ export interface AttendanceAlertData {
   date: string;
   status: string;   // 'absent' | 'late'
   schoolName: string;
+  schoolId?: string;
 }
 
 export interface PaymentReminderData {
@@ -39,6 +44,7 @@ export interface PaymentReminderData {
   amount: number;
   dueDate: string;
   schoolName: string;
+  schoolId?: string;
 }
 
 export interface GradeNotificationData {
@@ -50,4 +56,5 @@ export interface GradeNotificationData {
   maxScore: number;
   gradeType: string;   // 'exam' | 'homework' | 'quiz' | etc.
   schoolName: string;
+  schoolId?: string;
 }

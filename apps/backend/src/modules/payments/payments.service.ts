@@ -382,7 +382,7 @@ export class PaymentsService {
 
   private async paymeCheckPerform(id: any, params: any) {
     const payment = await this.prisma.payment.findFirst({
-      where: { id: params?.account?.order_id },
+      where: { id: params?.account?.order_id, provider: 'payme' as any },
     });
     if (!payment) return { id, error: PAYME_ERRORS.OBJECT_NOT_FOUND };
 
@@ -395,7 +395,7 @@ export class PaymentsService {
 
   private async paymeCreateTransaction(id: any, params: any) {
     const payment = await this.prisma.payment.findFirst({
-      where: { id: params?.account?.order_id },
+      where: { id: params?.account?.order_id, provider: 'payme' as any },
     });
     if (!payment) return { id, error: PAYME_ERRORS.OBJECT_NOT_FOUND };
 
@@ -425,7 +425,7 @@ export class PaymentsService {
 
   private async paymePerformTransaction(id: any, params: any) {
     const payment = await this.prisma.payment.findFirst({
-      where: { providerOrderId: params?.id },
+      where: { providerOrderId: params?.id, provider: 'payme' as any },
     });
     if (!payment) return { id, error: PAYME_ERRORS.TRANSACTION_NOT_FOUND };
     if ((payment.status as string) === 'paid') {
@@ -468,7 +468,7 @@ export class PaymentsService {
 
   private async paymeCancelTransaction(id: any, params: any) {
     const payment = await this.prisma.payment.findFirst({
-      where: { providerOrderId: params?.id },
+      where: { providerOrderId: params?.id, provider: 'payme' as any },
     });
     if (!payment) return { id, error: PAYME_ERRORS.TRANSACTION_NOT_FOUND };
     if ((payment.status as string) === 'paid') {
@@ -493,7 +493,7 @@ export class PaymentsService {
 
   private async paymeCheckTransaction(id: any, params: any) {
     const payment = await this.prisma.payment.findFirst({
-      where: { providerOrderId: params?.id },
+      where: { providerOrderId: params?.id, provider: 'payme' as any },
     });
     if (!payment) return { id, error: PAYME_ERRORS.TRANSACTION_NOT_FOUND };
 
@@ -521,13 +521,13 @@ export class PaymentsService {
       return { id, error: { code: -32400, message: { uz: 'Vaqt oralig\'i 31 kundan oshmasin' } } };
     }
 
-    const payments = await this.prisma.payment.findMany({
-      where: {
-        provider:        'payme' as any,   // faqat Payme to'lovlari
-        providerOrderId: { not: null },
-        createdAt:       { gte: from, lte: to },
-      },
-    });
+    // SECURITY: GetStatement requires per-school merchant configuration.
+    // Currently all schools share one Payme merchant, so we must not return
+    // cross-school transactions. Until per-school webhooks are implemented,
+    // return empty to prevent data leakage between tenants.
+    // TODO(Phase 22): Add per-school Payme merchant config (PAYME_SECRET_KEY_{schoolId})
+    // and parse school from webhook path or merchant ID.
+    const payments: any[] = [];
 
     return {
       id,

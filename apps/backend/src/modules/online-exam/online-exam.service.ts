@@ -11,6 +11,7 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { AuditService } from '@/common/audit/audit.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
+import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 
 // ─── DTOs ─────────────────────────────────────────────────────────────────────
 
@@ -92,7 +93,7 @@ export class OnlineExamService {
 
   async getQuestions(examId: string, currentUser: JwtPayload) {
     const exam = await this.prisma.exam.findFirst({
-      where: { id: examId, schoolId: currentUser.schoolId! },
+      where: { id: examId, ...buildTenantWhere(currentUser) },
     });
     if (!exam) throw new NotFoundException('Imtihon topilmadi');
 
@@ -105,7 +106,7 @@ export class OnlineExamService {
 
   async addQuestion(examId: string, dto: CreateQuestionDto, currentUser: JwtPayload) {
     const exam = await this.prisma.exam.findFirst({
-      where: { id: examId, schoolId: currentUser.schoolId! },
+      where: { id: examId, ...buildTenantWhere(currentUser) },
     });
     if (!exam) throw new NotFoundException('Imtihon topilmadi');
     if (!TEACHER_ROLES.includes(currentUser.role as any)) {
@@ -144,19 +145,23 @@ export class OnlineExamService {
 
   async updateQuestion(qId: string, dto: UpdateQuestionDto, currentUser: JwtPayload) {
     const q = await this.prisma.examQuestion.findFirst({
-      where: { id: qId },
-      include: { exam: { select: { schoolId: true } } },
+      where: { id: qId, exam: { ...buildTenantWhere(currentUser) } },
     });
-    if (!q || q.exam.schoolId !== currentUser.schoolId) throw new NotFoundException('Savol topilmadi');
+    if (!q) throw new NotFoundException('Savol topilmadi');
+    if (!TEACHER_ROLES.includes(currentUser.role as any)) {
+      throw new ForbiddenException("Savol tahrirlash huquqi yo'q");
+    }
     return this.prisma.examQuestion.update({ where: { id: qId }, data: dto });
   }
 
   async deleteQuestion(qId: string, currentUser: JwtPayload) {
     const q = await this.prisma.examQuestion.findFirst({
-      where: { id: qId },
-      include: { exam: { select: { schoolId: true } } },
+      where: { id: qId, exam: { ...buildTenantWhere(currentUser) } },
     });
-    if (!q || q.exam.schoolId !== currentUser.schoolId) throw new NotFoundException('Savol topilmadi');
+    if (!q) throw new NotFoundException('Savol topilmadi');
+    if (!TEACHER_ROLES.includes(currentUser.role as any)) {
+      throw new ForbiddenException("Savol o'chirish huquqi yo'q");
+    }
     await this.prisma.examQuestion.delete({ where: { id: qId } });
     return { message: 'Savol o\'chirildi' };
   }
@@ -182,9 +187,12 @@ export class OnlineExamService {
     currentUser: JwtPayload,
   ) {
     const exam = await this.prisma.exam.findFirst({
-      where: { id: examId, schoolId: currentUser.schoolId! },
+      where: { id: examId, ...buildTenantWhere(currentUser) },
     });
     if (!exam) throw new NotFoundException('Imtihon topilmadi');
+    if (!TEACHER_ROLES.includes(currentUser.role as any)) {
+      throw new ForbiddenException("DocX import huquqi yo'q");
+    }
 
     // DocX → raw text
     const result = await mammoth.extractRawText({ buffer });
@@ -468,7 +476,7 @@ export class OnlineExamService {
 
   async getExamSessions(examId: string, currentUser: JwtPayload) {
     const exam = await this.prisma.exam.findFirst({
-      where: { id: examId, schoolId: currentUser.schoolId! },
+      where: { id: examId, ...buildTenantWhere(currentUser) },
     });
     if (!exam) throw new NotFoundException('Imtihon topilmadi');
 

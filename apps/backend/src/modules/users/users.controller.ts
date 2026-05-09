@@ -9,6 +9,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery, ApiConsumes, ApiBody } 
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { UsersService } from './users.service';
+import { UploadService } from '@/modules/upload/upload.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -22,7 +23,10 @@ import { JwtPayload, UserRole } from '@eduplatform/types';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller({ path: 'users', version: '1' })
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly uploadService: UploadService,
+  ) {}
 
   @Get()
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.ACCOUNTANT, UserRole.TEACHER, UserRole.CLASS_TEACHER)
@@ -159,12 +163,10 @@ export class UsersController {
     @UploadedFile(new ParseFilePipe({
       validators: [new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 })],
     })) file: Express.Multer.File,
-    @CurrentUser('sub') userId: string,
+    @CurrentUser() user: JwtPayload,
   ) {
-    // Upload modulidan foydalanish uchun UploadService inject qilinishi mumkin,
-    // hozircha URL ni to'g'ridan-to'g'ri saqlaymiz
-    const avatarUrl = `/uploads/avatars/${file.originalname}`;
-    return this.usersService.updateAvatar(userId, avatarUrl);
+    const result = await this.uploadService.uploadFile(file, 'avatars', user.schoolId ?? undefined);
+    return this.usersService.updateAvatar(user.sub, result.url);
   }
 
   @Post('import/csv')

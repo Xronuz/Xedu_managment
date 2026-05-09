@@ -1,4 +1,4 @@
-import { Injectable, Logger, Optional } from '@nestjs/common';
+import { Injectable, Logger, Optional, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload } from '@eduplatform/types';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
@@ -24,12 +24,15 @@ export class NotificationsService {
   ) {}
 
   async send(dto: SendNotificationDto, currentUser: JwtPayload) {
-    // Recipient branch for denormalization
-    const recipient = await this.prisma.user.findUnique({
-      where: { id: dto.recipientId },
-      select: { branchId: true },
+    // Recipient validation — cross-tenant injection prevention
+    const recipient = await this.prisma.user.findFirst({
+      where: { id: dto.recipientId, schoolId: currentUser.schoolId! },
+      select: { branchId: true, schoolId: true },
     });
-    const branchId = recipient?.branchId!;
+    if (!recipient) {
+      throw new ForbiddenException('Qabul qiluvchi topilmadi yoki boshqa maktabga tegishli');
+    }
+    const branchId = recipient.branchId!;
 
     const notification = await this.prisma.notification.create({
       data: {
@@ -45,14 +48,14 @@ export class NotificationsService {
     // H-5: BullMQ orqali SMS/push yuborish (Phase 2 implementation)
     // Agar type 'sms' yoki 'push' bo'lsa — queue orqali asinxron yuboramiz
     if (dto.type === 'sms' || dto.type === 'push') {
-      const recipient = await this.prisma.user.findUnique({
-        where: { id: dto.recipientId },
+      const recipientForSms = await this.prisma.user.findFirst({
+        where: { id: dto.recipientId, schoolId: currentUser.schoolId! },
         select: { phone: true, email: true, firstName: true, lastName: true },
       }).catch(() => null);
 
-      if (recipient?.phone && dto.type === 'sms') {
+      if (recipientForSms?.phone && dto.type === 'sms') {
         await this.notificationQueue?.queueSms({
-          to: recipient.phone,
+          to: recipientForSms.phone,
           message: `${dto.title}: ${dto.body}`,
         }).catch(() => { /* Queue bo'lmasa davom etadi */ });
       }

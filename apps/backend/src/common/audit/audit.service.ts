@@ -8,6 +8,8 @@ export type AuditAction = 'create' | 'update' | 'delete' | 'hard_delete' | 'logi
 export interface AuditLogOptions {
   userId?: string;
   schoolId?: string;
+  /** Branch scope — stored in newData._meta.branchId until schema migration adds native branchId column */
+  branchId?: string;
   action: AuditAction;
   entity: string;      // e.g. 'User', 'Grade', 'Attendance'
   entityId?: string;
@@ -44,6 +46,11 @@ export class AuditService {
    */
   async log(opts: AuditLogOptions): Promise<void> {
     try {
+      // Embed branchId into newData for traceability until schema migration
+      const enrichedNewData = opts.branchId
+        ? { ...(opts.newData ?? {}), _meta: { ...(opts.newData?._meta ?? {}), branchId: opts.branchId } }
+        : opts.newData;
+
       await this.prisma.auditLog.create({
         data: {
           userId: opts.userId,
@@ -52,7 +59,7 @@ export class AuditService {
           entity: opts.entity,
           entityId: opts.entityId,
           oldData: opts.oldData as any,
-          newData: opts.newData as any,
+          newData: enrichedNewData as any,
           ipAddress: opts.ipAddress,
           userAgent: opts.userAgent,
         },

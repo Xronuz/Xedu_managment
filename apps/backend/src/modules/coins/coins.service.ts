@@ -34,6 +34,13 @@ export class CoinsService {
     if (amount <= 0) return null;
 
     return this.prisma.$transaction(async (tx) => {
+      // Defense-in-depth: verify user belongs to the school before updating
+      const user = await tx.user.findFirst({
+        where: { id: userId, schoolId },
+        select: { id: true, coins: true },
+      });
+      if (!user) throw new NotFoundException('O\'quvchi topilmadi');
+
       const updated = await tx.user.update({
         where:  { id: userId },
         data:   { coins: { increment: amount } },
@@ -63,8 +70,8 @@ export class CoinsService {
   ) {
     if (amount <= 0) return null;
 
-    const user = await this.prisma.user.findUnique({
-      where:  { id: userId },
+    const user = await this.prisma.user.findFirst({
+      where:  { id: userId, schoolId },
       select: { coins: true },
     });
     if (!user) throw new NotFoundException('O\'quvchi topilmadi');
@@ -77,6 +84,10 @@ export class CoinsService {
     }
 
     return this.prisma.$transaction(async (tx) => {
+      // Re-verify scoped ownership inside transaction
+      const owned = await tx.user.findFirst({ where: { id: userId, schoolId }, select: { id: true } });
+      if (!owned) throw new NotFoundException('O\'quvchi topilmadi');
+
       const updated = await tx.user.update({
         where:  { id: userId },
         data:   { coins: { decrement: deduct } },

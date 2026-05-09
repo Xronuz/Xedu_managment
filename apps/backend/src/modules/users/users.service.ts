@@ -127,12 +127,16 @@ export class UsersService {
   }
 
   async findOne(id: string, currentUser: JwtPayload) {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
+    // Defense-in-depth: scope the query by school to prevent ID enumeration
+    const user = await this.prisma.user.findFirst({
+      where: currentUser.isSuperAdmin
+        ? { id }
+        : { id, schoolId: currentUser.schoolId! },
       select: { ...this.userSelectFields(), schoolId: true },
     });
     if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
 
+    // Secondary guard for super_admin viewing cross-school users
     if (!currentUser.isSuperAdmin && user.schoolId !== currentUser.schoolId) {
       throw new ForbiddenException('Boshqa maktab foydalanuvchisiga kirish taqiqlangan');
     }
@@ -457,7 +461,7 @@ export class UsersService {
   }
 
   async getMe(userId: string) {
-    const user = await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findFirst({
       where: { id: userId },
       select: { ...this.userSelectFields(), schoolId: true, language: true, createdAt: true },
     });
@@ -466,8 +470,8 @@ export class UsersService {
   }
 
   async checkEmail(email: string, currentUser: JwtPayload) {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
+    const user = await this.prisma.user.findFirst({
+      where: { email, schoolId: currentUser.schoolId! },
       include: {
         branch: { select: { id: true, name: true } },
         branchAssignments: {
@@ -478,7 +482,7 @@ export class UsersService {
     });
 
     // Privacy: faqat o'z maktab — boshqa maktab email'ini ochib bermaslik
-    if (!user || user.schoolId !== currentUser.schoolId) {
+    if (!user) {
       return { exists: false };
     }
 
@@ -515,9 +519,10 @@ export class UsersService {
   }
 
   async changePassword(userId: string, dto: ChangePasswordDto) {
-    const user = await this.prisma.user.findUnique({
+    // Defense-in-depth: self-service only — verify the user exists and matches
+    const user = await this.prisma.user.findFirst({
       where: { id: userId },
-      select: { passwordHash: true },
+      select: { passwordHash: true, schoolId: true },
     });
     if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
 

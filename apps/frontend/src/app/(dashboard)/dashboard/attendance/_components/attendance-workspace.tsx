@@ -168,7 +168,7 @@ export function AttendanceWorkspace() {
   const markMutation = useMutation({
     mutationFn: attendanceApi.mark,
     onMutate: async (payload) => {
-      const reportKey = ['attendance', 'report', selectedClass, selectedDate];
+      const reportKey = ['attendance', 'report', selectedClass, selectedDate, activeBranchId];
       await queryClient.cancelQueries({ queryKey: reportKey });
       const snapshot = queryClient.getQueryData<AttendanceRecord[]>(reportKey);
 

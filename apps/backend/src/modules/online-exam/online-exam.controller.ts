@@ -6,8 +6,10 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
+import { RolesGuard } from '@/common/guards/roles.guard';
+import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
-import { JwtPayload } from '@eduplatform/types';
+import { JwtPayload, UserRole } from '@eduplatform/types';
 import {
   OnlineExamService,
   CreateQuestionDto,
@@ -15,7 +17,7 @@ import {
   SubmitAnswerDto,
 } from './online-exam.service';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller({ path: 'online-exam', version: '1' })
 export class OnlineExamController {
   constructor(private readonly service: OnlineExamService) {}
@@ -24,6 +26,7 @@ export class OnlineExamController {
 
   /** GET /online-exam/:examId/questions — barcha savollar (teacher) */
   @Get(':examId/questions')
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
   getQuestions(
     @Param('examId') examId: string,
     @CurrentUser() user: JwtPayload,
@@ -33,6 +36,7 @@ export class OnlineExamController {
 
   /** POST /online-exam/:examId/questions — yangi savol qo'shish */
   @Post(':examId/questions')
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
   addQuestion(
     @Param('examId') examId: string,
     @Body() dto: CreateQuestionDto,
@@ -43,6 +47,7 @@ export class OnlineExamController {
 
   /** PUT /online-exam/:examId/questions/:qId — savolni tahrirlash */
   @Put(':examId/questions/:qId')
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
   updateQuestion(
     @Param('qId') qId: string,
     @Body() dto: UpdateQuestionDto,
@@ -54,6 +59,7 @@ export class OnlineExamController {
   /** DELETE /online-exam/:examId/questions/:qId — savolni o'chirish */
   @Delete(':examId/questions/:qId')
   @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
   deleteQuestion(
     @Param('qId') qId: string,
     @CurrentUser() user: JwtPayload,
@@ -69,6 +75,7 @@ export class OnlineExamController {
    */
   @Post(':examId/import-docx')
   @UseInterceptors(FileInterceptor('file'))
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
   importFromDocx(
     @Param('examId') examId: string,
     @UploadedFile(
@@ -101,6 +108,7 @@ export class OnlineExamController {
    * GET /online-exam/:examId/sessions — barcha sessiyalar (teacher)
    */
   @Get(':examId/sessions')
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
   getExamSessions(
     @Param('examId') examId: string,
     @CurrentUser() user: JwtPayload,

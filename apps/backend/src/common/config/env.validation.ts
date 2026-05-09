@@ -48,4 +48,12 @@ export const envValidationSchema = Joi.object({
   PAYME_SECRET_KEY:  Joi.string().allow('').optional(),
   CLICK_MERCHANT_ID: Joi.string().allow('').optional(),
   CLICK_SECRET_KEY:  Joi.string().allow('').optional(),
+
+  // ─── AI Providers (optional) ───────────────────────────────────────────────
+  OPENAI_API_KEY:    Joi.string().allow('').optional(),
+  OPENAI_BASE_URL:   Joi.string().uri().allow('').optional(),
+  ANTHROPIC_API_KEY: Joi.string().allow('').optional(),
+  GEMINI_API_KEY:    Joi.string().allow('').optional(),
+  AI_TIMEOUT_MS:     Joi.number().positive().default(30000),
+  AI_MAX_RETRIES:    Joi.number().min(0).max(5).default(3),
 });

@@ -68,6 +68,7 @@ enum ModuleName {
   clubs
   kpi
   engagement
+  ai
 }
 
 enum ClubCategory {
@@ -364,6 +365,8 @@ model School {
   coinShopItems       CoinShopItem[]
   achievements        Achievement[]
   engagementReputations EngagementReputation[]
+  aiUsageRecords      AiUsage[]
+  aiQuotas            AiQuota[]
   kpiMetrics          KpiMetric[]
   groupMessages       GroupMessage[]
   announcements       Announcement[]
@@ -647,6 +650,10 @@ model User {
   coinTransactions CoinTransaction[]
   achievements     UserAchievement[]
   engagementReputation EngagementReputation?
+
+  // AI
+  aiUsageRecords   AiUsage[]
+  entitlement      UserEntitlement?
 
   // KPI
   kpiRecords KpiRecord[]
@@ -2211,4 +2218,63 @@ model EngagementReputation {
 
   @@index([schoolId])
   @@map("engagement_reputations")
+}
+
+// ─── AI & Machine Learning Infrastructure ────────────────────────────────────
+
+model AiUsage {
+  id          String   @id @default(uuid())
+  schoolId    String
+  userId      String
+  feature     String
+  provider    String
+  model       String
+  tokensIn    Int      @default(0)
+  tokensOut   Int      @default(0)
+  latencyMs   Int      @default(0)
+  costUsd     Float    @default(0)
+  status      String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, createdAt])
+  @@index([userId, createdAt])
+  @@index([schoolId, feature])
+  @@map("ai_usage")
+}
+
+model AiQuota {
+  id            String   @id @default(uuid())
+  schoolId      String
+  feature       String
+  periodStart   DateTime
+  periodEnd     DateTime
+  limit         Int
+  used          Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, feature, periodStart])
+  @@index([schoolId, feature])
+  @@map("ai_quota")
+}
+
+model UserEntitlement {
+  id          String    @id @default(uuid())
+  userId      String    @unique
+  tier        String    @default("free")
+  features    Json      @default("{}")
+  expiresAt   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("user_entitlements")
 }

@@ -6,8 +6,9 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ClipboardCheck, Users, TrendingUp, TrendingDown,
   CheckCircle2, ShieldAlert, Bell, BarChart2, Activity, Coins,
-  ArrowUpRight, GitCompare, X, LayoutDashboard,
+  ArrowUpRight, GitCompare, X, LayoutDashboard, Sparkles, BarChart3, Zap,
 } from 'lucide-react';
+import { AiPlaceholderCard } from '@/components/ai/ai-placeholder-card';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -498,6 +499,22 @@ export function DirectorDashboard() {
           <AiRiskCard aiSummary={aiSummary} />
           <EduCoinCard coinStats={coinStats} />
         </div>
+
+        {/* AI Placeholders */}
+        <WorkspaceSection title="AI xususiyatlar" icon={<Sparkles className="h-4 w-4" />}>
+          <div className="space-y-2">
+            <AiPlaceholderCard
+              title="Teacher Pro"
+              description="AI imtihon yaratuvchi, uyga vazifa tekshiruvchi"
+              icon={<Zap className="h-4 w-4" />}
+            />
+            <AiPlaceholderCard
+              title="AI Insights"
+              description="Bashoratli tahlil va avtomatik tavsiyalar"
+              icon={<BarChart3 className="h-4 w-4" />}
+            />
+          </div>
+        </WorkspaceSection>
       </WorkspaceSidebar>
 
       {/* ── Right Contextual Panel ──────────────────────────────────────────── */}

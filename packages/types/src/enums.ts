@@ -133,6 +133,29 @@ export enum AchievementCategory {
   DISCIPLINE_RECOVERY = 'discipline_recovery',
 }
 
+export enum AiProvider {
+  OPENAI = 'openai',
+  ANTHROPIC = 'anthropic',
+  GEMINI = 'gemini',
+  LOCAL = 'local',
+}
+
+export enum AiFeature {
+  EXAM_GENERATOR = 'ai_exam_generator',
+  HOMEWORK_REVIEW = 'ai_homework_review',
+  PARENT_SUMMARY = 'ai_parent_summary',
+  TUTOR = 'ai_tutor',
+  INSIGHTS = 'ai_insights',
+  CONTENT_CREATOR = 'ai_content_creator',
+}
+
+export enum ProTier {
+  FREE = 'free',
+  TEACHER_PRO = 'teacher_pro',
+  STUDENT_PRO = 'student_pro',
+  PARENT_PRO = 'parent_pro',
+}
+
 export enum Language {
   UZ = 'uz',
   RU = 'ru',

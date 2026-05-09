@@ -4,8 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Users, School, ClipboardCheck, Calendar, GraduationCap,
   BookOpen, BookMarked, Clock, AlertCircle, ArrowUpRight,
-  CheckCircle2, BarChart2,
+  CheckCircle2, BarChart2, Sparkles, FileText, Brain,
 } from 'lucide-react';
+import { AiPlaceholderCard } from '@/components/ai/ai-placeholder-card';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -196,6 +197,23 @@ export function TeacherDashboard() {
           </div>
         </PCard>
       )}
+
+      {/* ── AI Placeholders ── */}
+      <div className="space-y-3">
+        <p className="text-sm font-semibold text-xedu-slate-600 dark:text-xedu-slate-300">AI yordamchilar</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <AiPlaceholderCard
+            title="AI imtihon yordamchisi"
+            description="Avtomatik imtihon savollari yaratish"
+            icon={<FileText className="h-4 w-4" />}
+          />
+          <AiPlaceholderCard
+            title="AI uyga vazifa tekshiruvi"
+            description="Uyga vazifalarni avtomatik baholash"
+            icon={<Brain className="h-4 w-4" />}
+          />
+        </div>
+      </div>
 
       {/* ── Academic Calendar ── */}
       <AcademicCalendarWidget canEdit={false} />

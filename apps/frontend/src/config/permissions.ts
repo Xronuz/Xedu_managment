@@ -128,7 +128,7 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   '/dashboard/profile':        ['super_admin', 'director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher', 'accountant', 'librarian', 'student', 'parent'],
   '/dashboard/kpi':            ['director', 'vice_principal', 'branch_admin'],
   '/dashboard/kpi/metrics':    ['director', 'vice_principal', 'branch_admin'],
-  '/dashboard/ai-analytics':   ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher'],
+  '/dashboard/insights':       ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher'],
   '/dashboard/marketing':      ['director', 'vice_principal', 'branch_admin'],
 };
 

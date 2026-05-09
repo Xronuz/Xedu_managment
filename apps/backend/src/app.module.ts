@@ -52,6 +52,7 @@ import { RoomsModule }  from './modules/rooms/rooms.module';
 import { LeadsModule }  from './modules/leads/leads.module';
 import { CoinsModule }  from './modules/coins/coins.module';
 import { EngagementModule } from './modules/engagement/engagement.module';
+import { AiModule } from './modules/ai/ai.module';
 import { KpiModule }  from './modules/kpi/kpi.module';
 import { AiAnalyticsModule } from './modules/ai-analytics/ai-analytics.module';
 import { MarketingModule } from './modules/marketing/marketing.module';
@@ -137,6 +138,7 @@ import { envValidationSchema } from './common/config/env.validation';
     LeadsModule,             // CRM Lead boshqaruvi (Phase 5)
     CoinsModule,
     EngagementModule,
+    AiModule,
     KpiModule,
     AiAnalyticsModule,
     MarketingModule,             // Gamification — Coin & Reward system (Phase 7)

@@ -21,8 +21,10 @@ import {
   Send,
   Loader2,
   FileText,
-
+  Brain,
+  BarChart3,
 } from 'lucide-react';
+import { AiPlaceholderCard } from '@/components/ai/ai-placeholder-card';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -1065,6 +1067,23 @@ export default function ParentPage() {
               )}
             </TabsContent>
           </Tabs>
+
+          {/* ── AI Placeholders ── */}
+          <div className="space-y-3 pt-4">
+            <p className="text-sm font-semibold text-xedu-slate-600 dark:text-xedu-slate-300">AI yordamchilar</p>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <AiPlaceholderCard
+                title="AI xulosa"
+                description="Farzandingiz haqida umumiy tahlil"
+                icon={<Brain className="h-4 w-4" />}
+              />
+              <AiPlaceholderCard
+                title="Advanced analitika"
+                description="Chuqurroq tahlil va tavsiyalar"
+                icon={<BarChart3 className="h-4 w-4" />}
+              />
+            </div>
+          </div>
         </>
       )}
     </div>

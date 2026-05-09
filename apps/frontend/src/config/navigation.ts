@@ -100,7 +100,7 @@ export const DIRECTOR_NAV: NavGroup[] = [
     items: [
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
       { label: 'KPI Dashboard', href: '/dashboard/kpi', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/kpi'] },
-      { label: 'AI Analytics', href: '/dashboard/ai-analytics', icon: Brain, roles: ROUTE_PERMISSIONS['/dashboard/ai-analytics'] },
+      { label: 'Insights', href: '/dashboard/insights', icon: Brain, roles: ROUTE_PERMISSIONS['/dashboard/insights'] },
       { label: 'Marketing', href: '/dashboard/marketing', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/marketing'] },
     ],
   },
@@ -258,7 +258,7 @@ export const TEACHER_NAV: NavGroup[] = [
   {
     title: 'Analitika',
     items: [
-      { label: 'AI Analytics', href: '/dashboard/ai-analytics', icon: Brain, roles: ROUTE_PERMISSIONS['/dashboard/ai-analytics'] },
+      { label: 'Insights', href: '/dashboard/insights', icon: Brain, roles: ROUTE_PERMISSIONS['/dashboard/insights'] },
     ],
   },
 ];

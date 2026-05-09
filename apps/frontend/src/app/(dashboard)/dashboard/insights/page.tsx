@@ -5,8 +5,9 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Brain, AlertTriangle, TrendingUp, TrendingDown, Minus,
   Users, GraduationCap, Calendar, ShieldAlert, ChevronDown, ChevronUp,
-  Loader2, Search, Lightbulb,
+  Loader2, Search, Lightbulb, Sparkles, BarChart3, Zap,
 } from 'lucide-react';
+import { AiPlaceholderCard } from '@/components/ai/ai-placeholder-card';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -151,7 +152,7 @@ export default function AiAnalyticsPage() {
       <div>
         <div className="flex items-center gap-2">
           <Brain className="h-6 w-6 text-indigo-500" />
-          <h1 className="text-2xl font-bold tracking-tight">AI Analytics</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Insights</h1>
         </div>
         <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
           O'quvchilar holatini tahlil qilish va risk baholash tizimi
@@ -230,6 +231,25 @@ export default function AiAnalyticsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* AI Placeholders */}
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <AiPlaceholderCard
+          title="AI tavsiyalar"
+          description="Sun'iy intellekt yordamida xavf signallarini oldindan bashorat qilish"
+          icon={<Sparkles className="h-4 w-4" />}
+        />
+        <AiPlaceholderCard
+          title="Bashoratli tahlil"
+          description="O'quvchi natijalarini oldindan bashorat qilish modelli"
+          icon={<BarChart3 className="h-4 w-4" />}
+        />
+        <AiPlaceholderCard
+          title="Smart Insights"
+          description="Avtomatik tavsiyalar va harakat rejalari"
+          icon={<Zap className="h-4 w-4" />}
+        />
+      </div>
 
       {/* Student profiles */}
       <div>

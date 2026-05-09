@@ -74,7 +74,8 @@ export function CommandPalette({
       setQuery('');
       setSelectedIndex(0);
       setActiveScope('all');
-      setTimeout(() => inputRef.current?.focus(), 50);
+      const t = setTimeout(() => inputRef.current?.focus(), 50);
+      return () => clearTimeout(t);
     }
   }, [open]);
 

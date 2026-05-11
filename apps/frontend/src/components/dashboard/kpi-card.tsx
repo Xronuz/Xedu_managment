@@ -71,7 +71,7 @@ export function KpiCard({
       {...(href ? { href } : {})}
       {...(onClick ? { onClick, type: 'button' } : {})}
       className={cn(
-        'group relative flex flex-col justify-between rounded-2xl border border-xedu-slate-100 bg-white p-5 transition-all duration-[var(--xedu-duration)] dark:border-xedu-slate-800 dark:bg-xedu-slate-900',
+        'group relative flex flex-col justify-between rounded-2xl border border-xedu-border bg-xedu-bg-panel p-5 transition-all duration-[var(--xedu-duration)] dark:bg-xedu-bg-panel',
         (href || onClick) && 'cursor-pointer hover:border-xedu-slate-200 hover:shadow-sm dark:hover:border-xedu-slate-700',
         className,
       )}

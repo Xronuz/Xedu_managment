@@ -93,7 +93,7 @@ export function RightContextualPanel({
       {/* Panel */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 xedu-surface-panel border-l',
+          'fixed inset-y-0 right-0 z-50 bg-xedu-bg-rail dark:bg-xedu-bg-rail border-l border-xedu-border-strong',
           'w-full md:w-[460px] lg:w-[500px]',
           'transform transition-transform duration-200 ease-out',
           open ? 'translate-x-0' : 'translate-x-full'

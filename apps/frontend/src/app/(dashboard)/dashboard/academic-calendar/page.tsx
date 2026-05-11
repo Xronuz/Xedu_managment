@@ -205,7 +205,7 @@ export default function AcademicCalendarPage() {
                   return (
                     <div
                       key={idx}
-                      className={`bg-white dark:bg-xedu-slate-950 min-h-[80px] p-1 ${!isCurrentMonth ? 'opacity-30' : ''}`}
+                      className={`bg-xedu-bg-panel dark:bg-xedu-bg-panel min-h-[80px] p-1 ${!isCurrentMonth ? 'opacity-30' : ''}`}
                     >
                       {isCurrentMonth && (
                         <>

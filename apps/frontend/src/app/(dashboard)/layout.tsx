@@ -117,7 +117,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <HeaderActionsProvider>
       <WorkspaceProvider>
         {/* White sidebar + header, gray content with rounded-tl-2xl inner corner */}
-        <div className="flex h-screen bg-xedu-bg-elevated dark:bg-xedu-slate-900 overflow-hidden">
+        <div className="flex h-screen bg-xedu-bg-canvas dark:bg-xedu-bg-canvas overflow-hidden">
           <RealtimeProvider />
 
           <div className="hidden md:flex shrink-0">
@@ -127,7 +127,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="flex flex-1 min-w-0 flex-col overflow-hidden">
             <Header />
             <main
-              className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg dark:bg-xedu-slate-950 rounded-tl-2xl p-6"
+              className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg-canvas dark:bg-xedu-bg-canvas rounded-tl-2xl p-6"
               onClick={() => { if (!sidebarCollapsed) setSidebarCollapsed(true); }}
             >
               <BreadcrumbNav />

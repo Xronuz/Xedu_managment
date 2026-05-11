@@ -214,7 +214,7 @@ export function WorkspacePanel({ open, onClose, children, className, title }: Wo
       {/* Panel */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] xedu-surface-panel shadow-xl border-l transform transition-transform duration-200 ease-out',
+          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-xedu-bg-rail dark:bg-xedu-bg-rail shadow-xl border-l border-xedu-border-strong transform transition-transform duration-200 ease-out',
           open ? 'translate-x-0' : 'translate-x-full',
           'lg:absolute lg:inset-y-0 lg:right-0 lg:translate-x-0 lg:transition-none lg:shadow-none lg:border-l lg:w-[380px] lg:hidden',
           open && 'lg:block',
@@ -280,7 +280,7 @@ export function WorkspaceSection({
   padded = true,
 }: WorkspaceSectionProps) {
   return (
-    <div className={cn('rounded-xl xedu-surface-panel overflow-hidden', className)}>
+    <div className={cn('rounded-xl bg-xedu-bg-panel dark:bg-xedu-bg-panel border border-xedu-border shadow-sm overflow-hidden', className)}>
       {(title || action) && (
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
           <div className="flex items-center gap-2">

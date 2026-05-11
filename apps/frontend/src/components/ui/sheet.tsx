@@ -94,14 +94,15 @@ export function Sheet({
         <div className="fixed inset-0 z-50 flex">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm"
+            className="fixed inset-0 backdrop-blur-sm"
+            style={{ background: 'var(--xedu-overlay)' }}
             onClick={() => handleChange(false)}
             aria-hidden
           />
           {/* Panel */}
           <div
             className={cn(
-              'fixed z-50 flex flex-col bg-xedu-bg-elevated shadow-md overflow-y-auto',
+              'fixed z-50 flex flex-col bg-xedu-bg-panel dark:bg-xedu-bg-panel border-xedu-border-strong shadow-premium-lg overflow-y-auto',
               sideClasses[side],
             )}
           >

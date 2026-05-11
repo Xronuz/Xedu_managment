@@ -30,7 +30,7 @@ export function ChartContainer({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-xedu-slate-100 bg-white p-5 dark:border-xedu-slate-800 dark:bg-xedu-slate-900',
+        'rounded-2xl border border-xedu-border bg-xedu-bg-panel p-5 dark:bg-xedu-bg-panel',
         className,
       )}
     >

@@ -44,7 +44,7 @@ export function FloatingBulkToolbar({
 
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-[calc(100%-2rem)] max-w-xl mb-[env(safe-area-inset-bottom)]">
-      <div className="flex items-center gap-1 rounded-xl xedu-surface-floating px-2 py-1.5">
+      <div className="flex items-center gap-1 rounded-xl bg-xedu-bg-floating dark:bg-xedu-bg-floating border border-xedu-border-strong shadow-premium-lg px-2 py-1.5">
         {/* Count */}
         <div className="flex items-center gap-2 px-3 py-1.5 border-r border-xedu-slate-100 dark:border-xedu-slate-800 shrink-0">
           <span className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 tabular-nums">

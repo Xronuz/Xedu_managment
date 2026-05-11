@@ -25,7 +25,7 @@ function Skeleton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>)
 
 export function SkeletonStatCard() {
   return (
-    <div className="rounded-2xl border border-xedu-slate-100 bg-white p-6 dark:border-xedu-slate-800 dark:bg-xedu-slate-900">
+    <div className="rounded-2xl border border-xedu-border bg-xedu-bg-panel p-6 dark:bg-xedu-bg-panel">
       <div className="flex items-start justify-between mb-4">
         <Skeleton className="h-3 w-20" />
         <Skeleton className="h-10 w-10 rounded-2xl" />

@@ -40,9 +40,11 @@
     --xedu-slate-900: #0F172A;
     --xedu-slate-950: #020617;
 
-    /* ── Surface ── */
-    --xedu-bg:          #F5F7F6;
-    --xedu-bg-canvas:   #F5F7F6;
+    /* ── Surface — Elevation Ladder (light) ── */
+    --xedu-bg:          #F0F2F1;
+    --xedu-bg-canvas:   #F0F2F1;
+    --xedu-bg-sidebar:  #E8EBEA;
+    --xedu-bg-rail:     #F5F7F6;
     --xedu-bg-panel:    #FFFFFF;
     --xedu-bg-elevated: #FFFFFF;
     --xedu-bg-subtle:   #F8FAF8;
@@ -212,7 +214,9 @@
     /* ── Xedu dark overrides ── */
     --xedu-bg:            #0B1320;
     --xedu-bg-canvas:     #0B1320;
-    --xedu-bg-panel:      #141d2e;
+    --xedu-bg-sidebar:    #080F1A;
+    --xedu-bg-rail:       #101a2b;
+    --xedu-bg-panel:      #1E293B;
     --xedu-bg-elevated:   #1E293B;
     --xedu-bg-subtle:     #1a2235;
     --xedu-bg-floating:   #1E293B;
@@ -677,16 +681,15 @@
   }
 
   /* ── Floating surface (command palette, action bars, modals) ── */
+  /* ── Floating surface (command palette, action bars, modals) — solid, stronger shadow ── */
   .xedu-surface-floating {
-    background: rgba(255,255,255,0.95);
-    border: 1px solid var(--xedu-border);
+    background: var(--xedu-bg-floating);
+    border: 1px solid var(--xedu-border-strong);
     box-shadow: var(--xedu-shadow-floating);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
   }
   .dark .xedu-surface-floating {
-    background: rgba(30,41,59,0.95);
-    border-color: var(--xedu-border);
+    background: var(--xedu-bg-floating);
+    border-color: var(--xedu-border-strong);
     box-shadow: var(--xedu-shadow-floating);
   }
 
@@ -700,28 +703,26 @@
     background: rgba(15,23,42,0.80);
   }
 
-  /* ── Material header (top nav bar) ── */
+  /* ── Material header (top nav bar) — solid, not frosted ── */
   .xedu-material-header {
-    background: rgba(255,255,255,0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--xedu-border);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    background: var(--xedu-bg-panel);
+    border-bottom: 1px solid var(--xedu-border-strong);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
   }
   .dark .xedu-material-header {
-    background: rgba(15,23,42,0.85);
-    border-color: var(--xedu-border);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.20);
+    background: var(--xedu-bg-panel);
+    border-color: var(--xedu-border-strong);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.15);
   }
 
-  /* ── Material sidebar ── */
+  /* ── Material sidebar — darker structural rail ── */
   .xedu-material-sidebar {
-    background: var(--xedu-bg-panel);
-    border-right: 1px solid var(--xedu-border);
+    background: var(--xedu-bg-sidebar);
+    border-right: 1px solid var(--xedu-border-strong);
   }
   .dark .xedu-material-sidebar {
-    background: var(--xedu-bg-panel);
-    border-color: var(--xedu-border);
+    background: var(--xedu-bg-sidebar);
+    border-color: var(--xedu-border-strong);
   }
 
   /* ── Hover depth (card lift on hover) ── */

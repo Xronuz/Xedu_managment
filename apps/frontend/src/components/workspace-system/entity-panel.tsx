@@ -112,9 +112,9 @@ export function EntityPanel({
       <div
         className={cn(
           'fixed inset-y-0 right-0 z-50 w-full sm:w-[440px]',
-          'bg-xedu-bg-elevated',
-          'border-l border-xedu-slate-100 dark:border-xedu-slate-800',
-          'shadow-2xl',
+          'bg-xedu-bg-panel dark:bg-xedu-bg-panel',
+          'border-l border-xedu-border-strong',
+          'shadow-premium-xl',
           'flex flex-col',
           className
         )}

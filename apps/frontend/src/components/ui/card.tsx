@@ -12,10 +12,10 @@ const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElemen
       ref={ref}
       className={cn(
         // Surface — larger radius for premium feel
-        'rounded-2xl bg-xedu-bg-elevated dark:bg-xedu-slate-900',
+        'rounded-2xl bg-xedu-bg-panel dark:bg-xedu-bg-panel',
         'text-xedu-slate-900 dark:text-xedu-slate-100',
-        // NO border at all — lush premium dual-layer shadow only
-        'border-0',
+        // Subtle tonal border + floating shadow for clear elevation
+        'border border-xedu-border',
         'shadow-floating',
         'dark:shadow-floating',
         // Smooth hover transitions

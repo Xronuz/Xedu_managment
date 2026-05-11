@@ -34,7 +34,7 @@ export function DashboardCard({
   return (
     <div
       className={cn(
-        'rounded-2xl border border-xedu-slate-100 bg-white dark:border-xedu-slate-800 dark:bg-xedu-slate-900',
+        'rounded-2xl border border-xedu-border bg-xedu-bg-panel dark:bg-xedu-bg-panel',
         className,
       )}
     >

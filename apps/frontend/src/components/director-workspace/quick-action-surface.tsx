@@ -23,8 +23,8 @@ export function QuickActionSurface({ onOpenCommandPalette, activeAction }: Quick
 
   return (
     <>
-      {/* Desktop dock — integrated bottom-left */}
-      <div className="hidden md:flex fixed bottom-5 left-5 z-30 items-center rounded-xl border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white/95 dark:bg-xedu-slate-900/95 backdrop-blur-sm shadow-premium-sm overflow-hidden">
+      {/* Desktop dock — centered bottom */}
+      <div className="hidden md:flex fixed bottom-5 left-1/2 -translate-x-1/2 z-30 items-center rounded-xl border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white/95 dark:bg-xedu-slate-900 backdrop-blur-sm shadow-premium-sm overflow-hidden">
         {actions.map((action) => (
           <DockItem
             key={action.id}

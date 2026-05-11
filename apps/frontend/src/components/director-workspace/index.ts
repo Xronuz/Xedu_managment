@@ -14,3 +14,4 @@ export { TrendIndicator, Sparkline } from './trend-indicator';
 export { ActivityStream } from './activity-stream';
 export { BranchComparison } from './branch-comparison';
 export { SmartInsights } from './smart-insights';
+export { ExecutiveBriefing, type ExecutiveBriefingData } from './executive-briefing';

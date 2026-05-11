@@ -37,7 +37,7 @@ export function TrendIndicator({
     'text-xedu-slate-300';
 
   const iconSize = size === 'sm' ? 'h-3.5 w-3.5' : 'h-2.5 w-2.5';
-  const textSize = size === 'sm' ? 'text-xs' : 'text-[10px]';
+  const textSize = size === 'sm' ? 'text-sm' : 'text-xs';
 
   return (
     <span className={cn('inline-flex items-center gap-0.5', color, className)}>

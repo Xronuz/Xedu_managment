@@ -130,7 +130,7 @@ export function StatCard({
 
       {/* Top row */}
       <div className="flex items-start justify-between mb-4">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>
+        <p className="text-xs font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>
           {title}
         </p>
         <div
@@ -156,7 +156,7 @@ export function StatCard({
 
       {/* Description */}
       {description && (
-        <p className="flex items-center gap-1.5 text-[12px] font-medium" style={{ color: C.muted }}>
+        <p className="flex items-center gap-1.5 text-sm font-medium" style={{ color: C.muted }}>
           {trend === 'up'   && <TrendingUp  className="h-3.5 w-3.5 text-xedu-primary shrink-0" />}
           {trend === 'down' && <TrendingDown className="h-3.5 w-3.5 text-red-500 shrink-0" />}
           {description}
@@ -550,7 +550,7 @@ export function ClassTeacherMyClassSection() {
       {gpaData && gpaData.students.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
           <PCard className="p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-widest mb-4" style={{ color: C.muted }}>Eng yuqori GPA</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: C.muted }}>Eng yuqori GPA</p>
             <div className="space-y-2">
               {gpaData.students.slice(0, 3).map((s: any, i: number) => (
                 <div key={s.studentId} className="flex items-center justify-between text-sm">
@@ -567,7 +567,7 @@ export function ClassTeacherMyClassSection() {
             </div>
           </PCard>
           <PCard className="p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-widest mb-4" style={{ color: C.muted }}>Diqqat talab</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: C.muted }}>Diqqat talab</p>
             <div className="space-y-2">
               {gpaData.students.slice(-3).reverse().filter((s: any) => s.gpa < 70).map((s: any) => (
                 <div key={s.studentId} className="flex items-center justify-between text-sm">
@@ -668,7 +668,7 @@ export function VicePrincipalSection() {
 
   return (
     <div className="space-y-4">
-      <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: C.muted }}>O'rinbosar ko'rsatkichlari</p>
+      <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: C.muted }}>O'rinbosar ko'rsatkichlari</p>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {items.map(({ title, value, desc, icon, color, href }) => (
           <StatCard key={title} title={title} value={value} icon={icon} color={color} description={desc} onClick={() => router.push(href)} />
@@ -789,7 +789,7 @@ export function AdminChartsSection() {
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="font-bold text-[15px]" style={{ color: C.text }}>Oylik daromad</p>
-            <p className="text-[12px] mt-1 font-medium" style={{ color: C.muted }}>So&apos;nggi 6 oy (so&apos;m)</p>
+            <p className="text-sm mt-1 font-medium" style={{ color: C.muted }}>So&apos;nggi 6 oy (so&apos;m)</p>
           </div>
           <div className="h-10 w-10 rounded-2xl flex items-center justify-center" style={{ background: '#DBEAFE' }}>
             <BarChart2 className="h-5 w-5 text-blue-600" />
@@ -824,7 +824,7 @@ export function AdminChartsSection() {
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="font-bold text-[15px]" style={{ color: C.text }}>Davomat trendi</p>
-            <p className="text-[12px] mt-1 font-medium" style={{ color: C.muted }}>So&apos;nggi 7 kun (%)</p>
+            <p className="text-sm mt-1 font-medium" style={{ color: C.muted }}>So&apos;nggi 7 kun (%)</p>
           </div>
           <div className="h-10 w-10 rounded-2xl flex items-center justify-center" style={{ background: C.primaryLight }}>
             <TrendingUp className="h-5 w-5" style={{ color: C.primary }} />
@@ -877,7 +877,7 @@ export function QuickActions({ items }: { items: { label: string; href: string; 
           >
             <Icon className="h-4 w-4 shrink-0" style={{ color: iconColor }} />
           </div>
-          <span className="text-[13px] font-semibold" style={{ color: C.text }}>{label}</span>
+          <span className="text-sm font-semibold" style={{ color: C.text }}>{label}</span>
         </Link>
       ))}
     </div>
@@ -936,9 +936,9 @@ export function SuperAdminServiceStatus() {
             <div className="flex items-center gap-2.5">
               <div className={`h-2 w-2 rounded-full shadow-sm ${dot[s]}`} />
               <span className="text-xs font-medium">{name}</span>
-              <span className="text-[11px] text-xedu-slate-500 dark:text-xedu-slate-400">{detail}</span>
+              <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{detail}</span>
             </div>
-            <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${badge[s]}`}>
+            <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${badge[s]}`}>
               {labels[s]}
             </span>
           </div>
@@ -1088,7 +1088,7 @@ export function AcademicCalendarWidget({ canEdit = false }: { canEdit?: boolean 
                 <div className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: color }} />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium truncate" style={{ color: C.text }}>{ev.title}</p>
-                  <p className="text-[11px]" style={{ color: C.muted }}>{fmtDate(ev.startDate)}{ev.startDate !== ev.endDate ? ` – ${fmtDate(ev.endDate)}` : ''}</p>
+                  <p className="text-xs" style={{ color: C.muted }}>{fmtDate(ev.startDate)}{ev.startDate !== ev.endDate ? ` – ${fmtDate(ev.endDate)}` : ''}</p>
                 </div>
                 {canEdit && (
                   <div className="hidden group-hover:flex items-center gap-1 shrink-0">

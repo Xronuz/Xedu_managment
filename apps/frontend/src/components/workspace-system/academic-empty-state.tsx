@@ -77,7 +77,7 @@ export function AcademicEmptyState({
         <Icon className="h-4 w-4 text-xedu-slate-400 shrink-0" />
         <div>
           <p className="text-xs font-medium text-xedu-slate-600 dark:text-xedu-slate-400">{title ?? config.defaultTitle}</p>
-          <p className="text-[11px] text-xedu-slate-400 dark:text-xedu-slate-500">{description ?? config.defaultDescription}</p>
+          <p className="text-xs text-xedu-slate-400 dark:text-xedu-slate-500">{description ?? config.defaultDescription}</p>
         </div>
         {action && <div className="ml-auto shrink-0">{action}</div>}
       </div>

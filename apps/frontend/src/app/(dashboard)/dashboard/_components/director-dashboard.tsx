@@ -58,9 +58,11 @@ import {
   ActivityStream,
   BranchComparison,
   SmartInsights,
+  ExecutiveBriefing,
   type BranchDetail,
   type SituationBarData,
   type ExecutiveSummaryData,
+  type ExecutiveBriefingData,
 } from '@/components/director-workspace';
 
 export function DirectorDashboard() {
@@ -165,6 +167,21 @@ export function DirectorDashboard() {
     riskTrend: atRisk > 0 ? 'up' : 'stable',
   };
 
+  // ── Executive briefing data ─────────────────────────────────────────────────
+  const inactiveBranches = (branches as any[])?.filter((b: any) => !b.isActive) ?? [];
+  const briefingData: ExecutiveBriefingData = {
+    pendingLeaves: pendingLeaveList,
+    pendingDiscipline: pendingDisciplineList,
+    attendancePct: presentPct > 0 ? presentPct : null,
+    atRiskCount: atRisk,
+    overdueAmount: financeData?.overdueAmount ?? 0,
+    inactiveBranches,
+    teacherCount,
+    studentCount,
+    lowGpaCount: aiSummary?.riskDistribution?.low ?? 0,
+    upcomingExams: upcomingExamsCount,
+  };
+
   // ── Mutations ───────────────────────────────────────────────────────────────
   const reviewMutation = useMutation({
     mutationFn: ({ id, action }: { id: string; action: 'approve' | 'reject' }) =>
@@ -240,14 +257,18 @@ export function DirectorDashboard() {
       </div>
 
       {/* ── Main Canvas ─────────────────────────────────────────────────────── */}
-      <WorkspaceMain className="space-y-3">
-        {/* Branch Health Map with compare controls */}
+      <WorkspaceMain>
+        <div className="bg-xedu-bg-rail rounded-2xl p-4 md:p-5 space-y-6">
+          {/* HERO: Executive Briefing — decision guidance */}
+          <ExecutiveBriefing data={briefingData} />
+
+          {/* Primary: Branch Health Map with compare controls */}
         <div className="relative">
-          <div className="flex items-center justify-end gap-2 mb-1 px-1">
+          <div className="flex items-center justify-end gap-2 mb-2 px-1">
             {compareMode && compareSelected.length >= 2 && (
               <button
                 onClick={() => setCompareSelected([])}
-                className="flex items-center gap-1 text-[10px] font-semibold text-xedu-slate-500 hover:text-red-500 transition-colors"
+                className="flex items-center gap-1 text-xs font-semibold text-xedu-slate-500 hover:text-red-500 transition-colors"
               >
                 <X className="h-3 w-3" />
                 Tozalash ({compareSelected.length})
@@ -259,13 +280,13 @@ export function DirectorDashboard() {
                 if (compareMode) setCompareSelected([]);
               }}
               className={cn(
-                'flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold transition-colors',
+                'flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors',
                 compareMode
                   ? 'bg-xedu-primary text-white'
                   : 'text-xedu-slate-500 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800'
               )}
             >
-              <GitCompare className="h-3 w-3" />
+              <GitCompare className="h-3.5 w-3.5" />
               {compareMode ? 'Taqqoslashni yopish' : 'Filial taqqoslash'}
             </button>
           </div>
@@ -284,7 +305,7 @@ export function DirectorDashboard() {
           />
 
           {compareSelected.length >= 2 && (
-            <div className="mt-3">
+            <div className="mt-4">
               <BranchComparison
                 branches={(branches as any[]) ?? []}
                 selectedIds={compareSelected}
@@ -298,29 +319,34 @@ export function DirectorDashboard() {
           )}
         </div>
 
-        <FinancialPulse
-          financeData={financeData as any}
-          isLoading={!financeData && !attLoading}
-        />
+        {/* Secondary group */}
+        <div className="space-y-4">
+          <FinancialPulse
+            financeData={financeData as any}
+            isLoading={!financeData && !attLoading}
+          />
 
-        <AcademicSnapshot
-          attendanceSummary={attendanceSummary as any}
-          classCount={classList.length}
-          activeStudents={studentCount}
-          upcomingExams={upcomingExamsCount}
-          isLoading={attLoading}
-        />
+          <AcademicSnapshot
+            attendanceSummary={attendanceSummary as any}
+            classCount={classList.length}
+            activeStudents={studentCount}
+            upcomingExams={upcomingExamsCount}
+            isLoading={attLoading}
+          />
+        </div>
 
-        <StaffOperations
-          teacherCount={teacherCount}
-          staffCount={staffCount}
-          pendingLeaves={pendingLeaveList.length}
-          pendingDiscipline={pendingDisciplineList.length}
-          isLoading={!usersData}
-        />
+        {/* Tertiary group */}
+        <div className="space-y-3">
+          <StaffOperations
+            teacherCount={teacherCount}
+            staffCount={staffCount}
+            pendingLeaves={pendingLeaveList.length}
+            pendingDiscipline={pendingDisciplineList.length}
+            isLoading={!usersData}
+          />
 
-        {/* Supplementary blocks */}
-        <div className="grid gap-3 md:grid-cols-2">
+          {/* Supplementary blocks */}
+          <div className="grid gap-3 md:grid-cols-2">
           <WorkspaceSection
             title="Ta'til so'rovlari"
             action={
@@ -348,7 +374,7 @@ export function DirectorDashboard() {
                     </div>
                     <div className="flex gap-1.5 shrink-0 ml-3">
                       <button
-                        className="h-7 px-3 rounded-full text-xs font-semibold"
+                        className="h-9 px-4 rounded-full text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary focus-visible:ring-offset-1"
                         style={{ background: C.primaryLight, color: C.primary }}
                         onClick={() => reviewMutation.mutate({ id: req.id, action: 'approve' })}
                         disabled={reviewMutation.isPending}
@@ -356,7 +382,7 @@ export function DirectorDashboard() {
                         Tasdiqlash
                       </button>
                       <button
-                        className="h-7 px-3 rounded-full text-xs font-semibold"
+                        className="h-9 px-4 rounded-full text-xs font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xedu-ruby-500 focus-visible:ring-offset-1"
                         style={{ background: '#FEE2E2', color: '#DC2626' }}
                         onClick={() => reviewMutation.mutate({ id: req.id, action: 'reject' })}
                         disabled={reviewMutation.isPending}
@@ -441,80 +467,90 @@ export function DirectorDashboard() {
           </WorkspaceSection>
         )}
 
-        <div className="grid gap-3 md:grid-cols-2">
-          <AcademicCalendarWidget canEdit={true} />
-          <PCard>
-            <p className="font-bold text-[15px] mb-3" style={{ color: C.text }}>Tezkor havolalar</p>
-            <QuickActions items={[
-              { label: 'Davomat hisoboti', href: '/dashboard/attendance', icon: ClipboardCheck, iconColor: C.primary },
-              { label: 'Baholar', href: '/dashboard/grades', icon: BarChart2, iconColor: '#2563EB' },
-              { label: 'Moliya xulosasi', href: '/dashboard/finance', icon: TrendingUp, iconColor: '#D97706' },
-              { label: 'Dars jadvali', href: '/dashboard/schedule', icon: Activity, iconColor: '#7C3AED' },
-              { label: 'Xodimlar', href: '/dashboard/staff', icon: Users, iconColor: C.muted },
-              { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart2, iconColor: '#4338CA' },
-            ]} />
-          </PCard>
+          <div className="grid gap-3 md:grid-cols-2">
+            <AcademicCalendarWidget canEdit={true} />
+            <PCard>
+              <p className="font-bold text-base mb-3" style={{ color: C.text }}>So'nggi operatsiyalar</p>
+              <RecentOperations
+                pendingLeaves={pendingLeaveList.length}
+                pendingDiscipline={pendingDisciplineList.length}
+                atRisk={atRisk}
+                upcomingExams={upcomingExamsCount}
+              />
+            </PCard>
+          </div>
+        </div>
         </div>
       </WorkspaceMain>
 
       {/* ── Right Sidebar ───────────────────────────────────────────────────── */}
       <WorkspaceSidebar width="normal">
-        <IntelligenceFeed
-          aiSummary={aiSummary}
-          pendingLeaves={pendingLeaveList}
-          pendingDiscipline={pendingDisciplineList}
-          attendanceSummary={attendanceSummary as any}
-          branches={(branches as any[]) ?? []}
-          upcomingExams={upcomingExamsCount}
-          isLoading={!aiSummary && attLoading}
-        />
+        <div className="bg-xedu-bg-rail rounded-2xl p-3 md:p-4">
+          {/* 1. Operational Intelligence — primary, most urgent */}
+          <IntelligenceFeed
+            aiSummary={aiSummary}
+            pendingLeaves={pendingLeaveList}
+            pendingDiscipline={pendingDisciplineList}
+            attendanceSummary={attendanceSummary as any}
+            branches={(branches as any[]) ?? []}
+            upcomingExams={upcomingExamsCount}
+            isLoading={!aiSummary && attLoading}
+          />
 
-        <SmartInsights
-          data={{
-            branches: (branches as any[]) ?? [],
-            attendanceSummary,
-            pendingLeaves: pendingLeaveList,
-            pendingDiscipline: pendingDisciplineList,
-            aiSummary,
-            financeData: financeData as any,
-            teacherCount,
-            studentCount,
-          }}
-          maxInsights={4}
-        />
-
-        <ActivityStream
-          pendingLeaves={pendingLeaveList}
-          pendingDiscipline={pendingDisciplineList}
-          attendanceSummary={attendanceSummary as any}
-          branches={(branches as any[]) ?? []}
-          aiSummary={aiSummary}
-          financeData={financeData as any}
-          upcomingExams={upcomingExamsData as any[]}
-          maxItems={10}
-        />
-
-        <div className="grid grid-cols-3 gap-2">
-          <KPICard kpiData={kpiData} />
-          <AiRiskCard aiSummary={aiSummary} />
-          <EduCoinCard coinStats={coinStats} />
-        </div>
-
-        {/* AI Placeholders */}
-        <WorkspaceSection title="AI xususiyatlar" icon={<Sparkles className="h-4 w-4" />}>
-          <div className="space-y-2">
-            <AiPlaceholderCard
-              title="Teacher Pro"
-              description="AI imtihon yaratuvchi, uyga vazifa tekshiruvchi"
-              icon={<Zap className="h-4 w-4" />}
+          {/* 2. Analytical layer — insights + activity */}
+          <div className="mt-5 space-y-3">
+            <SmartInsights
+              data={{
+                branches: (branches as any[]) ?? [],
+                attendanceSummary,
+                pendingLeaves: pendingLeaveList,
+                pendingDiscipline: pendingDisciplineList,
+                aiSummary,
+                financeData: financeData as any,
+                teacherCount,
+                studentCount,
+              }}
+              maxInsights={4}
             />
-            <AiPlaceholderCard
-              title="AI Insights"
-              description="Bashoratli tahlil va avtomatik tavsiyalar"
-              icon={<BarChart3 className="h-4 w-4" />}
+            <ActivityStream
+              pendingLeaves={pendingLeaveList}
+              pendingDiscipline={pendingDisciplineList}
+              attendanceSummary={attendanceSummary as any}
+              branches={(branches as any[]) ?? []}
+              aiSummary={aiSummary}
+              financeData={financeData as any}
+              upcomingExams={upcomingExamsData as any[]}
+              maxItems={10}
             />
           </div>
-        </WorkspaceSection>
+
+          {/* 3. Quick metrics — compact numbers */}
+          <div className="mt-4">
+            <div className="grid grid-cols-3 gap-2">
+              <KPICard kpiData={kpiData} />
+              <AiRiskCard aiSummary={aiSummary} />
+              <EduCoinCard coinStats={coinStats} />
+            </div>
+          </div>
+
+          {/* 4. Passive tools — most separated */}
+          <div className="mt-5">
+            <WorkspaceSection title="AI xususiyatlar" icon={<Sparkles className="h-4 w-4" />} density="compact">
+              <div className="space-y-2">
+                <AiPlaceholderCard
+                  title="Teacher Pro"
+                  description="AI imtihon yaratuvchi, uyga vazifa tekshiruvchi"
+                  icon={<Zap className="h-4 w-4" />}
+                />
+                <AiPlaceholderCard
+                  title="AI Insights"
+                  description="Bashoratli tahlil va avtomatik tavsiyalar"
+                  icon={<BarChart3 className="h-4 w-4" />}
+                />
+              </div>
+            </WorkspaceSection>
+          </div>
+        </div>
       </WorkspaceSidebar>
 
       {/* ── Right Contextual Panel ──────────────────────────────────────────── */}
@@ -545,13 +581,13 @@ function KPICard({ kpiData }: { kpiData: any }) {
       className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
     >
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>KPI</p>
+        <p className="text-xs font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>KPI</p>
         <ArrowUpRight className="h-3 w-3 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors" />
       </div>
       <p className="text-xl font-black leading-none tracking-tight" style={{ color: C.text }}>
         {avg}%
       </p>
-      <p className="text-[11px] font-medium mt-0.5" style={{ color: C.muted }}>
+      <p className="text-xs font-medium mt-0.5" style={{ color: C.muted }}>
         {items.length} ta metrika
       </p>
     </Link>
@@ -568,7 +604,7 @@ function AiRiskCard({ aiSummary }: { aiSummary: any }) {
       className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
     >
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>AI Tahlil</p>
+        <p className="text-xs font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>AI Tahlil</p>
         <ArrowUpRight className="h-3 w-3 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors" />
       </div>
       <p
@@ -577,7 +613,7 @@ function AiRiskCard({ aiSummary }: { aiSummary: any }) {
       >
         {atRisk}
       </p>
-      <p className="text-[11px] font-medium mt-0.5" style={{ color: C.muted }}>
+      <p className="text-xs font-medium mt-0.5" style={{ color: C.muted }}>
         {total > 0 ? `xavf ostida / ${total}` : "O'quvchilar tahlili"}
       </p>
     </Link>
@@ -590,16 +626,79 @@ function EduCoinCard({ coinStats }: { coinStats: any }) {
   return (
     <Link
       href="/dashboard/coins"
-      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
+      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary focus-visible:ring-offset-1"
     >
       <div className="flex items-center justify-between mb-2">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>EduCoin</p>
+        <p className="text-xs font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>EduCoin</p>
         <ArrowUpRight className="h-3 w-3 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors" />
       </div>
       <p className="text-xl font-black leading-none tracking-tight" style={{ color: C.text }}>
         {count.toLocaleString()}
       </p>
-      <p className="text-[11px] font-medium mt-0.5" style={{ color: C.muted }}>Faol o'quvchilar</p>
+      <p className="text-xs font-medium mt-0.5" style={{ color: C.muted }}>Faol o'quvchilar</p>
     </Link>
+  );
+}
+
+// ── Recent Operations — executive snapshot (replaces duplicated Quick Links) ──
+
+function RecentOperations({
+  pendingLeaves,
+  pendingDiscipline,
+  atRisk,
+  upcomingExams,
+}: {
+  pendingLeaves: number;
+  pendingDiscipline: number;
+  atRisk: number;
+  upcomingExams: number;
+}) {
+  const ops = [
+    {
+      label: "Tasdiqlashni kutmoqda",
+      count: pendingLeaves,
+      href: '/dashboard/approvals',
+      tone: pendingLeaves > 0 ? 'urgent' as const : 'calm' as const,
+    },
+    {
+      label: 'Intizom holatlari',
+      count: pendingDiscipline,
+      href: '/dashboard/discipline',
+      tone: pendingDiscipline > 0 ? 'urgent' as const : 'calm' as const,
+    },
+    {
+      label: "Xavf ostidagi o'quvchilar",
+      count: atRisk,
+      href: '/dashboard/ai-analytics',
+      tone: atRisk > 0 ? 'attention' as const : 'calm' as const,
+    },
+    {
+      label: 'Yaqin imtihonlar',
+      count: upcomingExams,
+      href: '/dashboard/exams',
+      tone: upcomingExams > 0 ? 'attention' as const : 'calm' as const,
+    },
+  ];
+
+  return (
+    <div className="space-y-1">
+      {ops.map((op) => (
+        <Link
+          key={op.label}
+          href={op.href}
+          className="flex items-center justify-between rounded-lg px-3 py-2.5 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary focus-visible:ring-offset-1"
+        >
+          <span className="text-sm font-medium text-xedu-slate-700 dark:text-xedu-slate-300">{op.label}</span>
+          <span className={cn(
+            'text-sm font-bold tabular-nums',
+            op.tone === 'urgent' ? 'text-xedu-ruby-600' :
+            op.tone === 'attention' ? 'text-xedu-amber-600' :
+            'text-xedu-slate-400'
+          )}>
+            {op.count}
+          </span>
+        </Link>
+      ))}
+    </div>
   );
 }

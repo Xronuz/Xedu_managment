@@ -24,8 +24,8 @@ export function StaffOperations({
   if (isLoading) {
     return (
       <WorkspaceBlock title="Xodimlar" icon={Users} action={{ label: 'Batafsil', href: '/dashboard/staff' }}>
-        <div className="p-3 space-y-2">
-          <div className="flex gap-2">
+        <div className="p-4 space-y-3">
+          <div className="flex gap-4">
             <Skeleton className="h-14 flex-1 rounded-md" />
             <Skeleton className="h-14 flex-1 rounded-md" />
           </div>
@@ -40,21 +40,34 @@ export function StaffOperations({
 
   return (
     <WorkspaceBlock title="Xodimlar" icon={Users} action={{ label: 'Batafsil', href: '/dashboard/staff' }}>
-      <div className="px-3 py-2">
-        <div className="flex gap-1.5 mb-1.5">
-          <StaffPill icon={Users} label="O'qituvchilar" value={teacherCount} href="/dashboard/users" />
-          <StaffPill icon={ShieldCheck} label="Boshqa xodimlar" value={staffCount} href="/dashboard/users" />
+      <div className="px-4 py-4 space-y-3">
+        {/* Primary stats */}
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <div className="flex items-center gap-1 mb-1">
+              <Users className="h-3 w-3 text-xedu-slate-400" />
+              <span className="text-2xs font-semibold uppercase tracking-wider text-xedu-slate-400">O'qituvchilar</span>
+            </div>
+            <p className="text-lg font-black leading-none text-xedu-slate-900 dark:text-xedu-slate-100">{teacherCount}</p>
+          </div>
+          <div>
+            <div className="flex items-center gap-1 mb-1">
+              <ShieldCheck className="h-3 w-3 text-xedu-slate-400" />
+              <span className="text-2xs font-semibold uppercase tracking-wider text-xedu-slate-400">Boshqa xodimlar</span>
+            </div>
+            <p className="text-lg font-black leading-none text-xedu-slate-900 dark:text-xedu-slate-100">{staffCount}</p>
+          </div>
         </div>
 
         {/* Capacity summary */}
-        <div className="rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 px-2 py-1 flex items-center justify-between">
-          <span className="text-[11px] text-xedu-slate-500">Jami xodimlar</span>
+        <div className="flex items-center justify-between pt-3 border-t border-xedu-border">
+          <span className="text-xs text-xedu-slate-500">Jami xodimlar</span>
           <span className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 tabular-nums">{totalStaff}</span>
         </div>
 
         {/* Pending attention */}
         {hasPending && (
-          <div className="mt-1.5 space-y-1">
+          <div className="space-y-1.5">
             {pendingLeaves > 0 && (
               <AttentionRow
                 icon={Clock}
@@ -79,37 +92,6 @@ export function StaffOperations({
   );
 }
 
-function StaffPill({
-  icon: Icon,
-  label,
-  value,
-  href,
-}: {
-  icon: React.ElementType;
-  label: string;
-  value: number;
-  href?: string;
-}) {
-  const Wrapper = href ? Link : 'div';
-  const wrapperProps = href ? { href } : {};
-
-  return (
-    <Wrapper
-      {...(wrapperProps as any)}
-      className={cn(
-        'flex-1 rounded-md border border-xedu-slate-100 dark:border-xedu-slate-800 p-2 transition-colors',
-        href && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/40 cursor-pointer'
-      )}
-    >
-      <div className="flex items-center gap-1 mb-0.5">
-        <Icon className="h-3 w-3 text-xedu-slate-400" />
-        <span className="text-[9px] font-semibold uppercase tracking-wider text-xedu-slate-400">{label}</span>
-      </div>
-      <p className="text-sm font-black leading-none text-xedu-slate-900 dark:text-xedu-slate-100">{value}</p>
-    </Wrapper>
-  );
-}
-
 function AttentionRow({
   icon: Icon,
   label,
@@ -124,24 +106,18 @@ function AttentionRow({
   tone?: 'attention' | 'urgent';
 }) {
   const dotColor = tone === 'urgent' ? 'bg-xedu-ruby-500' : 'bg-xedu-amber-500';
-  const bgColor = tone === 'urgent'
-    ? 'hover:bg-xedu-ruby-50 dark:hover:bg-xedu-ruby-900/10'
-    : 'hover:bg-xedu-amber-50 dark:hover:bg-xedu-amber-900/10';
 
   return (
     <Link
       href={href}
-      className={cn(
-        'flex items-center justify-between rounded-md px-2.5 py-1.5 border border-xedu-slate-100 dark:border-xedu-slate-800 transition-colors',
-        bgColor
-      )}
+      className="flex items-center justify-between rounded-lg px-3 py-2 bg-xedu-slate-50/60 dark:bg-xedu-slate-800/30 hover:bg-xedu-slate-100 dark:hover:bg-xedu-slate-800/50 transition-colors"
     >
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-2">
         <div className={cn('h-1.5 w-1.5 rounded-full', dotColor)} />
-        <Icon className="h-3 w-3 text-xedu-slate-400" />
-        <span className="text-[11px] font-medium text-xedu-slate-700 dark:text-xedu-slate-300">{label}</span>
+        <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
+        <span className="text-xs font-medium text-xedu-slate-700 dark:text-xedu-slate-300">{label}</span>
       </div>
-      <span className="text-[11px] font-bold text-xedu-slate-900 dark:text-xedu-slate-100 tabular-nums">{count}</span>
+      <span className="text-xs font-bold text-xedu-slate-900 dark:text-xedu-slate-100 tabular-nums">{count}</span>
     </Link>
   );
 }

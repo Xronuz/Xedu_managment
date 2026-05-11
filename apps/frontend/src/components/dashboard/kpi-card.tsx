@@ -28,6 +28,7 @@ export interface KpiCardProps {
   href?: string;
   onClick?: () => void;
   className?: string;
+  density?: 'compact' | 'normal';
 }
 
 const ICON_BG_MAP: Record<NonNullable<KpiCardProps['iconColor']>, string> = {
@@ -63,15 +64,19 @@ export function KpiCard({
   href,
   onClick,
   className,
+  density = 'normal',
 }: KpiCardProps) {
   const Tag = href ? 'a' : onClick ? 'button' : 'div';
+
+  const isCompact = density === 'compact';
 
   return (
     <Tag
       {...(href ? { href } : {})}
       {...(onClick ? { onClick, type: 'button' } : {})}
       className={cn(
-        'group relative flex flex-col justify-between rounded-2xl border border-xedu-border bg-xedu-bg-panel p-5 transition-all duration-[var(--xedu-duration)] dark:bg-xedu-bg-panel',
+        'group relative flex flex-col justify-between rounded-2xl border border-xedu-border bg-xedu-bg-panel transition-all duration-[var(--xedu-duration)] dark:bg-xedu-bg-panel',
+        isCompact ? 'p-4' : 'p-6',
         (href || onClick) && 'cursor-pointer hover:border-xedu-slate-200 hover:shadow-sm dark:hover:border-xedu-slate-700',
         className,
       )}
@@ -81,27 +86,31 @@ export function KpiCard({
         {Icon && (
           <div
             className={cn(
-              'flex h-9 w-9 items-center justify-center rounded-lg',
+              'flex items-center justify-center rounded-lg',
+              isCompact ? 'h-8 w-8' : 'h-9 w-9',
               ICON_BG_MAP[iconColor],
             )}
           >
-            <Icon className="h-[18px] w-[18px]" strokeWidth={1.8} />
+            <Icon className={isCompact ? 'h-4 w-4' : 'h-[18px] w-[18px]'} strokeWidth={1.8} />
           </div>
         )}
         {delta && (
-          <div className={cn('flex items-center gap-1 text-2xs font-semibold', TREND_COLOR[trend])}>
-            {React.createElement(TREND_ICON[trend], { className: 'h-3 w-3' })}
+          <div className={cn('flex items-center gap-1 text-xs font-semibold', TREND_COLOR[trend])}>
+            {React.createElement(TREND_ICON[trend], { className: 'h-3.5 w-3.5' })}
             <span>{delta}</span>
           </div>
         )}
       </div>
 
       {/* Value */}
-      <div className="mt-3">
+      <div className={isCompact ? 'mt-2' : 'mt-3'}>
         {loading ? (
-          <div className="h-8 w-24 animate-pulse rounded-md bg-xedu-slate-100 dark:bg-xedu-slate-800" />
+          <div className={cn('animate-pulse rounded-md bg-xedu-slate-100 dark:bg-xedu-slate-800', isCompact ? 'h-6 w-20' : 'h-8 w-24')} />
         ) : (
-          <p className="text-2xl font-bold tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100">
+          <p className={cn(
+            'font-black tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100',
+            isCompact ? 'text-xl' : 'text-3xl'
+          )}>
             {value}
           </p>
         )}
@@ -109,7 +118,10 @@ export function KpiCard({
 
       {/* Label + description */}
       <div className="mt-1">
-        <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">
+        <p className={cn(
+          'font-medium text-xedu-slate-500 dark:text-xedu-slate-400',
+          isCompact ? 'text-xs' : 'text-sm'
+        )}>
           {label}
         </p>
         {description && (
@@ -134,7 +146,7 @@ export function KpiStrip({
   return (
     <div
       className={cn(
-        'grid gap-4',
+        'grid gap-3 md:gap-5',
         /* responsive: 1 col mobile, 2 sm, 3 md, 4 lg */
         'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4',
         className,

@@ -173,7 +173,7 @@ export function SmartInsights({ data, maxInsights = 4 }: SmartInsightsProps) {
     <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated overflow-hidden">
       <div className="flex items-center gap-2 px-3 py-2 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
         <Lightbulb className="h-3 w-3 text-xedu-slate-400" />
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-500">Tahliliy xulosalar</p>
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-xedu-slate-500">Tahliliy xulosalar</p>
       </div>
       <div className="divide-y divide-xedu-slate-100 dark:divide-xedu-slate-800">
         {insights.map((insight) => (
@@ -202,7 +202,7 @@ function InsightRow({ insight }: { insight: Insight }) {
   return (
     <div className={cn('flex items-start gap-2 px-3 py-2', bgColor)}>
       <Icon className={cn('h-3 w-3 shrink-0 mt-0.5', toneColor)} />
-      <p className="text-[12px] font-medium text-xedu-slate-700 dark:text-xedu-slate-300 leading-snug">
+      <p className="text-sm font-medium text-xedu-slate-700 dark:text-xedu-slate-300 leading-snug">
         {text}
       </p>
     </div>

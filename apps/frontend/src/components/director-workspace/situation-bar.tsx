@@ -32,72 +32,65 @@ export function SituationBar({ data, onAlertsClick, onApprovalsClick }: Situatio
   } = data;
 
   return (
-    <div className="flex items-center gap-1.5 md:gap-3 overflow-x-auto pb-1 scrollbar-hide">
-      {/* Branch context */}
-      <SituationItem
-        icon={Building2}
-        label={activeBranchName ?? 'Barcha filiallar'}
-        sub={totalBranches > 1 ? `${totalBranches} ta filial` : undefined}
-        href="/dashboard/branches"
-      />
+    <div className="flex items-center gap-6 md:gap-10 overflow-x-auto py-2 scrollbar-hide">
+      {/* ── Group 1: Branch context ── */}
+      <div className="flex items-center shrink-0">
+        <SituationItem
+          icon={Building2}
+          label={activeBranchName ?? 'Barcha filiallar'}
+          sub={totalBranches > 1 ? `${totalBranches} ta filial` : undefined}
+          href="/dashboard/branches"
+          prominence="high"
+        />
+      </div>
 
-      <Divider />
+      {/* ── Group 2: Operational signals ── */}
+      <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
+        <SituationItem
+          icon={AlertTriangle}
+          label="Diqqat"
+          value={alertCount}
+          tone={alertCount > 0 ? 'urgent' : 'calm'}
+          onClick={alertCount > 0 ? onAlertsClick : undefined}
+          clickable={alertCount > 0}
+        />
+        <SituationItem
+          icon={Clock}
+          label="Tasdiqlash"
+          value={pendingApprovals}
+          tone={pendingApprovals > 0 ? 'attention' : 'calm'}
+          onClick={pendingApprovals > 0 ? onApprovalsClick : undefined}
+          clickable={pendingApprovals > 0}
+        />
+        <SituationItem
+          icon={BarChart3}
+          label="Xavf"
+          value={riskSignals}
+          tone={riskSignals > 0 ? 'attention' : 'calm'}
+          href="/dashboard/ai-analytics"
+          clickable={riskSignals > 0}
+        />
+      </div>
 
-      {/* Alerts */}
-      <SituationItem
-        icon={AlertTriangle}
-        label="Diqqat"
-        value={alertCount}
-        tone={alertCount > 0 ? 'urgent' : 'calm'}
-        onClick={alertCount > 0 ? onAlertsClick : undefined}
-        clickable={alertCount > 0}
-      />
-
-      {/* Pending approvals */}
-      <SituationItem
-        icon={Clock}
-        label="Tasdiqlash"
-        value={pendingApprovals}
-        tone={pendingApprovals > 0 ? 'attention' : 'calm'}
-        onClick={pendingApprovals > 0 ? onApprovalsClick : undefined}
-        clickable={pendingApprovals > 0}
-      />
-
-      {/* Risk signals */}
-      <SituationItem
-        icon={BarChart3}
-        label="Xavf signallari"
-        value={riskSignals}
-        tone={riskSignals > 0 ? 'attention' : 'calm'}
-        href="/dashboard/ai-analytics"
-        clickable={riskSignals > 0}
-      />
-
-      <Divider />
-
-      {/* Academic context */}
-      <SituationItem
-        icon={Activity}
-        label="Davomat"
-        sub={attendancePct != null ? `${attendancePct}%` : "Ma'lumot yo'q"}
-        tone={attendancePct != null && attendancePct < 80 ? 'attention' : 'calm'}
-        href="/dashboard/attendance"
-      />
-
-      {/* System status */}
-      <SituationItem
-        icon={ShieldCheck}
-        label="Tizim"
-        sub={systemStatus === 'ok' ? 'Ishlayapti' : systemStatus === 'warning' ? 'Diqqat' : 'Xato'}
-        tone={systemStatus === 'ok' ? 'calm' : systemStatus === 'warning' ? 'attention' : 'urgent'}
-        href="/dashboard/system-health"
-      />
+      {/* ── Group 3: System context ── */}
+      <div className="flex items-center gap-1.5 md:gap-2 shrink-0 ml-auto">
+        <SituationItem
+          icon={Activity}
+          label="Davomat"
+          sub={attendancePct != null ? `${attendancePct}%` : "Ma'lumot yo'q"}
+          tone={attendancePct != null && attendancePct < 80 ? 'attention' : 'calm'}
+          href="/dashboard/attendance"
+        />
+        <SituationItem
+          icon={ShieldCheck}
+          label="Tizim"
+          sub={systemStatus === 'ok' ? 'Ishlayapti' : systemStatus === 'warning' ? 'Diqqat' : 'Xato'}
+          tone={systemStatus === 'ok' ? 'calm' : systemStatus === 'warning' ? 'attention' : 'urgent'}
+          href="/dashboard/system-health"
+        />
+      </div>
     </div>
   );
-}
-
-function Divider() {
-  return <div className="h-4 w-px bg-xedu-slate-200 dark:bg-xedu-slate-700 shrink-0 hidden sm:block" />;
 }
 
 interface SituationItemProps {
@@ -109,40 +102,53 @@ interface SituationItemProps {
   href?: string;
   onClick?: () => void;
   clickable?: boolean;
+  prominence?: 'normal' | 'high';
 }
 
-function SituationItem({ icon: Icon, label, value, sub, tone = 'calm', href, onClick, clickable }: SituationItemProps) {
+function SituationItem({ icon: Icon, label, value, sub, tone = 'calm', href, onClick, clickable, prominence = 'normal' }: SituationItemProps) {
   const dotColor =
     tone === 'urgent' ? 'bg-xedu-ruby-500' : tone === 'attention' ? 'bg-xedu-amber-500' : 'bg-xedu-primary';
 
   const Wrapper = href ? Link : onClick ? 'button' : 'div';
   const wrapperProps = href ? { href } : onClick ? { onClick } : {};
 
+  const isHighProminence = prominence === 'high';
+
   return (
     <Wrapper
       {...(wrapperProps as any)}
       className={cn(
-        'flex items-center gap-2 rounded-lg px-2.5 py-1.5 shrink-0 transition-colors',
+        'flex items-center gap-2 rounded-lg shrink-0 transition-colors',
+        isHighProminence ? 'px-4 py-2.5' : 'px-3 py-2',
         (clickable || href || onClick) && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50 cursor-pointer'
       )}
     >
       <div className="relative">
-        <Icon className="h-3.5 w-3.5 text-xedu-slate-500" />
+        <Icon className={cn('text-xedu-slate-500', isHighProminence ? 'h-4 w-4' : 'h-3.5 w-3.5')} />
         {(value !== undefined && value > 0) && (
           <div className={cn('absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full', dotColor)} />
         )}
       </div>
       <div className="flex items-baseline gap-1.5">
-        <span className="text-[11px] font-semibold text-xedu-slate-700 dark:text-xedu-slate-300 whitespace-nowrap">
+        <span className={cn(
+          'font-semibold whitespace-nowrap',
+          isHighProminence ? 'text-sm text-xedu-slate-800 dark:text-xedu-slate-200' : 'text-xs text-xedu-slate-600 dark:text-xedu-slate-400'
+        )}>
           {label}
         </span>
         {value !== undefined && value > 0 && (
-          <span className="text-[11px] font-bold text-xedu-slate-900 dark:text-xedu-slate-100 tabular-nums">
+          <span className={cn(
+            'font-bold tabular-nums',
+            isHighProminence ? 'text-base text-xedu-slate-900 dark:text-xedu-slate-100' : 'text-sm text-xedu-slate-900 dark:text-xedu-slate-100'
+          )}>
             {value}
           </span>
         )}
         {sub && (
-          <span className="text-[11px] font-medium text-xedu-slate-600 dark:text-xedu-slate-400 whitespace-nowrap">{sub}</span>
+          <span className={cn(
+            'whitespace-nowrap',
+            isHighProminence ? 'text-xs text-xedu-slate-400' : 'text-2xs text-xedu-slate-400'
+          )}>{sub}</span>
         )}
       </div>
     </Wrapper>

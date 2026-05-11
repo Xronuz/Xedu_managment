@@ -158,7 +158,7 @@ export function ActivityStream({
   if (items.length === 0) {
     return (
       <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-4">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-400 mb-3">Operatsion faollik</p>
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-xedu-slate-400 mb-3">Operatsion faollik</p>
         <div className="flex flex-col items-center py-6 gap-2">
           <CheckCircle2 className="h-5 w-5 text-xedu-slate-300" />
           <p className="text-sm text-xedu-slate-500">So'nggi faollik yo'q</p>
@@ -173,14 +173,14 @@ export function ActivityStream({
   return (
     <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-400">Operatsion faollik</p>
-        <span className="text-[10px] font-medium text-xedu-slate-400">{items.length} ta hodisa</span>
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-xedu-slate-400">Operatsion faollik</p>
+        <span className="text-xs font-medium text-xedu-slate-400">{items.length} ta hodisa</span>
       </div>
       <div className="divide-y divide-xedu-slate-100 dark:divide-xedu-slate-800 max-h-[360px] overflow-y-auto">
         {grouped.map((group) => (
           <div key={group.label}>
             <div className="px-3 py-1.5 bg-xedu-slate-50/50 dark:bg-xedu-slate-800/20">
-              <span className="text-[9px] font-bold uppercase tracking-wider text-xedu-slate-400">{group.label}</span>
+              <span className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400">{group.label}</span>
             </div>
             {group.items.map((item) => (
               <ActivityRow key={item.id} item={item} />
@@ -223,15 +223,15 @@ function ActivityRow({ item }: { item: ActivityItem }) {
     >
       <Icon className={cn('h-3 w-3 shrink-0 mt-0.5', toneColor)} />
       <div className="flex-1 min-w-0">
-        <p className="text-[12px] font-medium text-xedu-slate-800 dark:text-xedu-slate-200 leading-snug">
+        <p className="text-sm font-medium text-xedu-slate-800 dark:text-xedu-slate-200 leading-snug">
           {title}
         </p>
-        <p className="text-[11px] text-xedu-slate-500 truncate">{detail}</p>
+        <p className="text-xs text-xedu-slate-500 truncate">{detail}</p>
         {actor && (
-          <p className="text-[10px] text-xedu-slate-400 mt-0.5">{actor}</p>
+          <p className="text-2xs text-xedu-slate-400 mt-0.5">{actor}</p>
         )}
       </div>
-      <span className="text-[10px] text-xedu-slate-400 tabular-nums shrink-0 mt-0.5">
+      <span className="text-2xs text-xedu-slate-400 tabular-nums shrink-0 mt-0.5">
         {formatTimeAgo(item.timestamp)}
       </span>
     </Wrapper>

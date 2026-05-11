@@ -94,7 +94,7 @@ export function RightContextualPanel({
       <div
         className={cn(
           'fixed inset-y-0 right-0 z-50 bg-xedu-bg-rail dark:bg-xedu-bg-rail border-l border-xedu-border',
-          'w-full md:w-[460px] lg:w-[500px]',
+          'w-full md:w-[420px] lg:w-[420px]',
           'transform transition-transform duration-200 ease-out',
           open ? 'translate-x-0' : 'translate-x-full'
         )}
@@ -112,7 +112,7 @@ export function RightContextualPanel({
               <h3 className="text-sm font-bold truncate text-xedu-slate-900 dark:text-xedu-slate-100">
                 {branch.name}
               </h3>
-              <p className="text-[11px] text-xedu-slate-500 truncate">
+              <p className="text-xs text-xedu-slate-500 truncate">
                 {branch.code || 'Filial'} · {branch.isActive ? 'Faol' : 'Nofaol'}
               </p>
             </div>
@@ -133,7 +133,7 @@ export function RightContextualPanel({
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={cn(
-                'relative px-3 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-colors',
+                'relative px-3 py-2.5 text-xs font-bold uppercase tracking-wider transition-colors',
                 activeTab === tab.id
                   ? 'text-xedu-primary'
                   : 'text-xedu-slate-400 hover:text-xedu-slate-600 dark:hover:text-xedu-slate-300'
@@ -148,7 +148,7 @@ export function RightContextualPanel({
         </div>
 
         {/* Body */}
-        <div className="p-4 space-y-5 overflow-y-auto h-[calc(100vh-110px)]">
+        <div className="p-4 space-y-4 overflow-y-auto h-[calc(100vh-110px)]">
           {activeTab === 'overview' && (
             <OverviewTab
               branch={branch}
@@ -206,13 +206,13 @@ function OverviewTab({
           {branch.isActive ? 'Faol' : 'Nofaol'}
         </span>
         {branchAlerts > 0 && (
-          <span className="flex items-center gap-1 text-[11px] font-bold text-xedu-ruby-500 ml-auto">
+          <span className="flex items-center gap-1 text-xs font-bold text-xedu-ruby-500 ml-auto">
             <AlertTriangle className="h-3 w-3" />
             {branchAlerts} ta ogohlantirish
           </span>
         )}
         {branchPending > 0 && (
-          <span className="flex items-center gap-1 text-[11px] font-bold text-xedu-amber-500 ml-auto">
+          <span className="flex items-center gap-1 text-xs font-bold text-xedu-amber-500 ml-auto">
             <Clock className="h-3 w-3" />
             {branchPending} ta tasdiqlash
           </span>
@@ -242,7 +242,7 @@ function OverviewTab({
 
       {/* Quick actions */}
       <div className="space-y-1">
-        <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-xedu-slate-400 mb-1.5">Tezkor amallar</p>
+        <p className="text-xs font-bold uppercase tracking-[0.1em] text-xedu-slate-400 mb-1.5">Tezkor amallar</p>
         <QuickLinkRow href={`/dashboard/branches/${branch.id}`} label="Filial sahifasi" icon={Building2} />
         <QuickLinkRow href="/dashboard/finance" label="Moliya ko'rinishi" icon={TrendingUp} />
         <QuickLinkRow href="/dashboard/education" label="Akademik ma'lumotlar" icon={BookOpen} />
@@ -268,8 +268,8 @@ function AcademicsTab({ studentCount, attendancePct }: { studentCount: number; a
       {attendancePct != null && (
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-[11px] font-semibold text-xedu-slate-500">Davomat foizi</span>
-            <span className="text-[11px] font-bold text-xedu-slate-800">{attendancePct}%</span>
+            <span className="text-xs font-semibold text-xedu-slate-500">Davomat foizi</span>
+            <span className="text-xs font-bold text-xedu-slate-800">{attendancePct}%</span>
           </div>
           <div className="h-1.5 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 overflow-hidden">
             <div
@@ -294,7 +294,7 @@ function FinanceTab() {
       <div className="rounded-lg border border-xedu-slate-100 dark:border-xedu-slate-800 p-4 text-center">
         <p className="text-sm text-xedu-slate-500">Filial daromadi</p>
         <p className="text-lg font-black text-xedu-slate-900 dark:text-xedu-slate-100 mt-1">Ma'lumot mavjud emas</p>
-        <p className="text-[11px] text-xedu-slate-400 mt-1">Filial ma'lumotlari kiritilganda ko'rsatiladi</p>
+        <p className="text-xs text-xedu-slate-400 mt-1">Filial ma'lumotlari kiritilganda ko'rsatiladi</p>
       </div>
       <QuickLinkRow href="/dashboard/finance" label="Moliya bo'limi" icon={TrendingUp} />
       <QuickLinkRow href="/dashboard/payments" label="To'lovlar" icon={Activity} />
@@ -333,11 +333,11 @@ function StaffTab({ teachers, staff, pendingLeaves }: { teachers: any[]; staff: 
 function MetricPill({ label, value, icon: Icon }: { label: string; value: string | number; icon: React.ElementType }) {
   return (
     <div className="rounded-lg border border-xedu-slate-100 dark:border-xedu-slate-800 p-2.5 text-center">
-      <div className="h-6 w-6 rounded-md bg-xedu-slate-50 dark:bg-xedu-slate-800 flex items-center justify-center mx-auto mb-1.5">
-        <Icon className="h-3 w-3 text-xedu-slate-500" />
+      <div className="h-7 w-7 rounded-md bg-xedu-slate-50 dark:bg-xedu-slate-800 flex items-center justify-center mx-auto mb-1.5">
+        <Icon className="h-3.5 w-3.5 text-xedu-slate-500" />
       </div>
       <p className="text-base font-black leading-none text-xedu-slate-900 dark:text-xedu-slate-100">{value}</p>
-      <p className="text-[10px] font-medium text-xedu-slate-500 mt-1">{label}</p>
+      <p className="text-xs font-medium text-xedu-slate-500 mt-1">{label}</p>
     </div>
   );
 }

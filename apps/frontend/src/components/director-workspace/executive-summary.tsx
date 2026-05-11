@@ -139,9 +139,9 @@ function SummaryItem({
         )}
       </div>
       <div className="flex items-baseline gap-1">
-        <span className="text-[10px] font-semibold text-xedu-slate-500 whitespace-nowrap">{label}</span>
+        <span className="text-xs font-semibold text-xedu-slate-500 whitespace-nowrap">{label}</span>
         <span className={cn(
-          'text-[11px] font-bold tabular-nums whitespace-nowrap',
+          'text-sm font-bold tabular-nums whitespace-nowrap',
           quiet ? 'text-xedu-slate-400' : 'text-xedu-slate-800 dark:text-xedu-slate-200'
         )}>
           {value}

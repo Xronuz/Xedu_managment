@@ -49,16 +49,16 @@ export function BranchComparison({
       {/* Header */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-slate-50/50 dark:bg-xedu-slate-800/20">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-500">
+          <span className="text-xs font-bold uppercase tracking-[0.12em] text-xedu-slate-500">
             Filial taqqoslash
           </span>
-          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-xedu-slate-200 dark:bg-xedu-slate-700 text-xedu-slate-700 dark:text-xedu-slate-300">
+          <span className="text-xs font-bold px-1.5 py-0.5 rounded-full bg-xedu-slate-200 dark:bg-xedu-slate-700 text-xedu-slate-700 dark:text-xedu-slate-300">
             {selected.length}
           </span>
         </div>
         <button
           onClick={onClose}
-          className="flex items-center gap-1 text-[10px] font-semibold text-xedu-slate-500 hover:text-xedu-slate-800 transition-colors"
+          className="flex items-center gap-1 text-xs font-semibold text-xedu-slate-500 hover:text-xedu-slate-800 transition-colors"
         >
           <X className="h-3 w-3" />
           Yopish
@@ -70,9 +70,9 @@ export function BranchComparison({
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-xedu-slate-100 dark:border-xedu-slate-800">
-              <th className="px-3 py-2 text-[9px] font-bold uppercase tracking-wider text-xedu-slate-400 whitespace-nowrap">Ko'rsatkich</th>
+              <th className="px-3 py-2 text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 whitespace-nowrap">Ko'rsatkich</th>
               {rows.map(({ branch }) => (
-                <th key={branch.id} className="px-3 py-2 text-[11px] font-bold text-xedu-slate-700 dark:text-xedu-slate-300 whitespace-nowrap min-w-[80px]">
+                <th key={branch.id} className="px-3 py-2 text-xs font-bold text-xedu-slate-700 dark:text-xedu-slate-300 whitespace-nowrap min-w-[80px]">
                   <div className="flex items-center gap-1">
                     {branch.name}
                     <button
@@ -151,7 +151,7 @@ function CompareRow({
 
   return (
     <tr>
-      <td className="px-3 py-2 text-[11px] font-medium text-xedu-slate-500 whitespace-nowrap">
+      <td className="px-3 py-2 text-xs font-medium text-xedu-slate-500 whitespace-nowrap">
         <div className="flex items-center gap-1.5">
           <Icon className="h-3 w-3 text-xedu-slate-400" />
           {label}
@@ -166,7 +166,7 @@ function CompareRow({
           <td key={branch.id} className="px-3 py-2">
             <div className="flex items-center gap-2">
               <span className={cn(
-                'text-[13px] font-bold tabular-nums',
+                'text-sm font-bold tabular-nums',
                 shouldHighlight && tone === 'urgent' ? 'text-xedu-ruby-600' :
                 shouldHighlight && tone === 'attention' ? 'text-xedu-amber-600' :
                 isMax ? 'text-xedu-primary' : 'text-xedu-slate-800 dark:text-xedu-slate-200'
@@ -174,7 +174,7 @@ function CompareRow({
                 {value}
               </span>
               {getBar && (
-                <div className="flex-1 h-1 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 overflow-hidden max-w-[60px]">
+                <div className="flex-1 h-1.5 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 overflow-hidden max-w-[60px]">
                   <div
                     className={cn('h-full rounded-full', isMax ? 'bg-xedu-primary' : 'bg-xedu-slate-300')}
                     style={{ width: `${getBar(rows.find((r) => r.branch.id === branch.id)!)}%` }}

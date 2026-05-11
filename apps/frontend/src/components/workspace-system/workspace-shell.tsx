@@ -269,6 +269,7 @@ interface WorkspaceSectionProps {
   children: React.ReactNode;
   className?: string;
   padded?: boolean;
+  density?: 'compact' | 'normal' | 'spacious';
 }
 
 export function WorkspaceSection({
@@ -278,11 +279,27 @@ export function WorkspaceSection({
   children,
   className,
   padded = true,
+  density = 'normal',
 }: WorkspaceSectionProps) {
+  const densityClasses = {
+    compact: {
+      header: 'px-3 py-2',
+      body: 'px-3 py-2',
+    },
+    normal: {
+      header: 'px-4 py-2.5',
+      body: 'px-4 py-3',
+    },
+    spacious: {
+      header: 'px-5 py-3',
+      body: 'px-5 py-4',
+    },
+  }[density];
+
   return (
     <div className={cn('rounded-xl bg-xedu-bg-panel dark:bg-xedu-bg-panel border border-xedu-border shadow-sm overflow-hidden', className)}>
       {(title || action) && (
-        <div className="flex items-center justify-between px-4 py-2.5 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
+        <div className={cn('flex items-center justify-between border-b border-xedu-slate-100 dark:border-xedu-slate-800', densityClasses.header)}>
           <div className="flex items-center gap-2">
             {icon && <span className="text-xedu-slate-500">{icon}</span>}
             {title && <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">{title}</h3>}
@@ -290,7 +307,7 @@ export function WorkspaceSection({
           {action && <div className="flex items-center gap-1">{action}</div>}
         </div>
       )}
-      <div className={cn(padded && 'px-3 py-2')}>{children}</div>
+      <div className={cn(padded && densityClasses.body)}>{children}</div>
     </div>
   );
 }

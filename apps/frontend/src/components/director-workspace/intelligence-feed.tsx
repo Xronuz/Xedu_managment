@@ -234,11 +234,11 @@ function FeedSection({
 
   return (
     <div className="border border-xedu-slate-100 dark:border-xedu-slate-800 rounded-xl overflow-hidden bg-xedu-bg-elevated">
-      <div className="flex items-center gap-2 px-3 py-1.5 border-b border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-slate-50/30 dark:bg-xedu-slate-800">
+      <div className="flex items-center gap-2 px-3 py-2 border-b border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-slate-50/30 dark:bg-xedu-slate-800">
         <div className={cn('h-1.5 w-1.5 rounded-full', accentColor)} />
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-500">{title}</p>
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-xedu-slate-500">{title}</p>
       </div>
-      <div className="divide-y divide-xedu-slate-100 dark:divide-xedu-slate-800">{children}</div>
+      <div className="border-t border-xedu-slate-100 dark:border-xedu-slate-800">{children}</div>
     </div>
   );
 }
@@ -275,22 +275,22 @@ function StreamRow({ item }: { item: StreamItem }) {
     <Wrapper
       {...(wrapperProps as any)}
       className={cn(
-        'flex items-center gap-2 px-3 py-2 transition-colors',
+        'flex items-center gap-2 px-3 py-2.5 transition-colors',
         href && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/40 cursor-pointer',
         priorityBg
       )}
     >
       <Icon className={cn('h-3 w-3 shrink-0', priorityColor)} />
       <div className="flex-1 min-w-0">
-        <p className="text-[12px] font-semibold text-xedu-slate-800 dark:text-xedu-slate-200 truncate leading-snug">
+        <p className="text-sm font-semibold text-xedu-slate-800 dark:text-xedu-slate-200 truncate leading-snug">
           {title}
         </p>
-        <p className="text-[11px] text-xedu-slate-500 leading-snug">{meta}</p>
+        <p className="text-xs text-xedu-slate-500 leading-snug">{meta}</p>
       </div>
       {href && action && (
-        <div className="flex items-center gap-0.5 shrink-0 text-[11px] font-semibold text-xedu-primary">
+        <div className="flex items-center gap-1 shrink-0 text-xs font-semibold text-xedu-primary">
           {action}
-          <ArrowRight className="h-3 w-3" />
+          <ArrowRight className="h-3.5 w-3.5" />
         </div>
       )}
     </Wrapper>

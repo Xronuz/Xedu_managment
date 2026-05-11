@@ -78,7 +78,7 @@ export function AuditDetailPane({
           {cfg && (
             <div className="flex items-center gap-1.5 shrink-0">
               <div className={cn('h-2 w-2 rounded-full', cfg.dot)} />
-              <span className={cn('text-[11px] font-bold', cfg.text)}>{cfg.label}</span>
+              <span className={cn('text-xs font-bold', cfg.text)}>{cfg.label}</span>
             </div>
           )}
         </div>
@@ -90,7 +90,7 @@ export function AuditDetailPane({
               <div className="h-5 w-5 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center">
                 <User className="h-3 w-3 text-xedu-slate-500" />
               </div>
-              <span className="text-[11px] text-xedu-slate-600 dark:text-xedu-slate-400">
+              <span className="text-xs text-xedu-slate-600 dark:text-xedu-slate-400">
                 {requester.name}
                 {requester.role && ` · ${requester.role}`}
               </span>
@@ -99,19 +99,19 @@ export function AuditDetailPane({
           {branch && (
             <div className="flex items-center gap-1.5">
               <Building2 className="h-3 w-3 text-xedu-slate-400" />
-              <span className="text-[11px] text-xedu-slate-500">{branch}</span>
+              <span className="text-xs text-xedu-slate-500">{branch}</span>
             </div>
           )}
           {createdAt && (
             <div className="flex items-center gap-1.5">
               <Calendar className="h-3 w-3 text-xedu-slate-400" />
-              <span className="text-[11px] text-xedu-slate-500">{formatDate(createdAt)}</span>
+              <span className="text-xs text-xedu-slate-500">{formatDate(createdAt)}</span>
             </div>
           )}
           {source && (
             <div className="flex items-center gap-1.5">
               <FileText className="h-3 w-3 text-xedu-slate-400" />
-              <span className="text-[11px] text-xedu-slate-500">{source}</span>
+              <span className="text-xs text-xedu-slate-500">{source}</span>
             </div>
           )}
         </div>
@@ -119,7 +119,7 @@ export function AuditDetailPane({
 
       {/* Events timeline */}
       <div className="flex-1 overflow-y-auto px-5 py-4">
-        <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-400 mb-3">
+        <p className="text-xs font-bold uppercase tracking-[0.12em] text-xedu-slate-400 mb-3">
           Hodisalar tarixi
         </p>
         <div className="space-y-0 relative">
@@ -160,10 +160,10 @@ function TimelineRow({ event }: { event: AuditEvent }) {
     <div className="relative flex items-start gap-3 py-2">
       <div className={cn('h-[11px] w-[11px] rounded-full border-2 border-white dark:border-xedu-slate-900 shrink-0 mt-0.5 z-[1]', dotColor)} />
       <div className="flex-1 min-w-0">
-        <p className="text-[13px] font-medium text-xedu-slate-800 dark:text-xedu-slate-200">{label}</p>
-        <p className="text-[11px] text-xedu-slate-500 mt-0.5">{value}</p>
+        <p className="text-sm font-medium text-xedu-slate-800 dark:text-xedu-slate-200">{label}</p>
+        <p className="text-xs text-xedu-slate-500 mt-0.5">{value}</p>
         {timestamp && (
-          <p className="text-[10px] text-xedu-slate-400 mt-0.5 flex items-center gap-1">
+          <p className="text-2xs text-xedu-slate-400 mt-0.5 flex items-center gap-1">
             <Clock className="h-2.5 w-2.5" />
             {formatDate(timestamp)}
           </p>

@@ -113,7 +113,7 @@ export function EntityPanel({
         className={cn(
           'fixed inset-y-0 right-0 z-50 w-full sm:w-[440px]',
           'bg-xedu-bg-panel dark:bg-xedu-bg-panel',
-          'border-l border-xedu-border-strong',
+          'border-l border-xedu-border',
           'shadow-premium-xl',
           'flex flex-col',
           className

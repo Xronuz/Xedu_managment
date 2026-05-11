@@ -214,7 +214,7 @@ export function WorkspacePanel({ open, onClose, children, className, title }: Wo
       {/* Panel */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-xedu-bg-rail dark:bg-xedu-bg-rail shadow-xl border-l border-xedu-border-strong transform transition-transform duration-200 ease-out',
+          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-xedu-bg-rail dark:bg-xedu-bg-rail shadow-xl border-l border-xedu-border transform transition-transform duration-200 ease-out',
           open ? 'translate-x-0' : 'translate-x-full',
           'lg:absolute lg:inset-y-0 lg:right-0 lg:translate-x-0 lg:transition-none lg:shadow-none lg:border-l lg:w-[380px] lg:hidden',
           open && 'lg:block',

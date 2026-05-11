@@ -210,31 +210,41 @@ export function ExecutiveBriefing({ data }: ExecutiveBriefingProps) {
   const hasCritical = items.some((i) => i.severity === 'critical');
   const hasAttention = items.some((i) => i.severity === 'attention');
 
+  const accentColor =
+    hasCritical ? 'bg-xedu-ruby-400' :
+    hasAttention ? 'bg-xedu-amber-400' :
+    'bg-xedu-primary';
+
   return (
-    <div className="rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden">
+    <div className="relative rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden shadow-sm">
+      {/* Left severity accent */}
+      <div className={cn('absolute left-0 top-0 bottom-0 w-[3px]', accentColor)} />
+
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-xedu-border">
+      <div className="flex items-center justify-between pl-5 pr-4 py-3 border-b border-xedu-border bg-xedu-bg-subtle dark:bg-xedu-bg-subtle">
         <div className="flex items-center gap-2">
-          <Lightbulb className="h-4 w-4 text-xedu-slate-400" />
-          <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">
+          <div className="h-6 w-6 rounded-md bg-xedu-bg-panel dark:bg-xedu-slate-700/60 flex items-center justify-center shadow-xs">
+            <Lightbulb className="h-3.5 w-3.5 text-xedu-slate-500" />
+          </div>
+          <h3 className="text-sm font-bold tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100">
             Bugungi tavsiya
           </h3>
         </div>
         <div className="flex items-center gap-1.5">
           {hasCritical && (
-            <span className="flex items-center gap-1 text-2xs font-bold text-xedu-ruby-600">
+            <span className="flex items-center gap-1 text-2xs font-bold px-2 py-0.5 rounded-full bg-xedu-ruby-50/80 dark:bg-xedu-ruby-900/20 text-xedu-ruby-600 dark:text-xedu-ruby-400">
               <span className="h-1.5 w-1.5 rounded-full bg-xedu-ruby-500" />
               Jiddiy
             </span>
           )}
           {hasAttention && !hasCritical && (
-            <span className="flex items-center gap-1 text-2xs font-bold text-xedu-amber-600">
+            <span className="flex items-center gap-1 text-2xs font-bold px-2 py-0.5 rounded-full bg-xedu-amber-50/80 dark:bg-xedu-amber-900/20 text-xedu-amber-600 dark:text-xedu-amber-400">
               <span className="h-1.5 w-1.5 rounded-full bg-xedu-amber-500" />
               Diqqat
             </span>
           )}
           {!hasCritical && !hasAttention && (
-            <span className="flex items-center gap-1 text-2xs font-bold text-xedu-primary">
+            <span className="flex items-center gap-1 text-2xs font-bold px-2 py-0.5 rounded-full bg-xedu-primary-light/60 text-xedu-primary">
               <span className="h-1.5 w-1.5 rounded-full bg-xedu-primary" />
               Normal
             </span>
@@ -282,11 +292,15 @@ function BriefingRow({ item }: { item: BriefingItem }) {
     <Link
       href={href}
       className={cn(
-        'flex items-center gap-3 px-4 py-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30',
+        'group flex items-center gap-3 pl-5 pr-4 py-3 transition-all duration-150',
+        'hover:-translate-y-px hover:shadow-sm hover:z-10 relative',
+        'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30',
         severityStyles.bg
       )}
     >
-      <Icon className={cn('h-4 w-4 shrink-0', severityStyles.icon)} />
+      <div className={cn('h-7 w-7 rounded-lg flex items-center justify-center shrink-0', severityStyles.bg, 'border border-current/10')}>
+        <Icon className={cn('h-3.5 w-3.5', severityStyles.icon)} />
+      </div>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-xedu-slate-800 dark:text-xedu-slate-200 leading-snug">
           {message}
@@ -298,11 +312,14 @@ function BriefingRow({ item }: { item: BriefingItem }) {
         </span>
       )}
       <span className={cn(
-        'flex items-center gap-0.5 shrink-0 text-xs font-semibold',
-        severity === 'critical' ? 'text-xedu-ruby-600' :
-        severity === 'attention' ? 'text-xedu-amber-600' :
-        severity === 'suggestion' ? 'text-xedu-sky-600' :
-        'text-xedu-primary'
+        'flex items-center gap-0.5 shrink-0 text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors',
+        severity === 'critical'
+          ? 'bg-xedu-ruby-50/80 text-xedu-ruby-700 dark:bg-xedu-ruby-900/25 dark:text-xedu-ruby-400 group-hover:bg-xedu-ruby-100 dark:group-hover:bg-xedu-ruby-900/40'
+          : severity === 'attention'
+          ? 'bg-xedu-amber-50/80 text-xedu-amber-700 dark:bg-xedu-amber-900/25 dark:text-xedu-amber-400 group-hover:bg-xedu-amber-100 dark:group-hover:bg-xedu-amber-900/40'
+          : severity === 'suggestion'
+          ? 'bg-xedu-sky-50/80 text-xedu-sky-700 dark:bg-xedu-sky-900/25 dark:text-xedu-sky-400 group-hover:bg-xedu-sky-100 dark:group-hover:bg-xedu-sky-900/40'
+          : 'bg-xedu-primary-light/60 text-xedu-primary group-hover:bg-xedu-primary-light'
       )}>
         {actionLabel}
         <ArrowRight className="h-3 w-3" />

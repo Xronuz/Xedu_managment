@@ -278,45 +278,61 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'relative flex h-screen shrink-0 flex-col xedu-material-sidebar transition-[width] duration-[var(--xedu-duration)] ease-out',
+        'group/sidebar relative flex h-screen shrink-0 flex-col xedu-material-sidebar transition-[width] duration-[var(--xedu-duration)] ease-out',
         sidebarCollapsed ? 'w-[84px]' : 'w-[272px]',
       )}
     >
       {/* ── Logo Area ───────────────────────────────────────────────────── */}
       <div
         className={cn(
-          'flex h-16 shrink-0 items-center border-b border-xedu-slate-100 dark:border-xedu-slate-800',
+          'relative flex h-16 shrink-0 items-center border-b border-xedu-slate-100 dark:border-xedu-slate-800',
           sidebarCollapsed ? 'justify-center px-2' : 'px-4',
         )}
       >
         <Link
           href="/dashboard"
-          className={cn(
-            'flex items-center gap-2.5 transition-opacity duration-[var(--xedu-duration)]',
-            sidebarCollapsed ? 'justify-center' : '',
-          )}
-          onMouseEnter={() => setLogoHovered(true)}
-          onMouseLeave={() => setLogoHovered(false)}
+          className="flex items-center transition-opacity duration-[var(--xedu-duration)]"
         >
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-xedu-primary">
-            <GraduationCap className="h-5 w-5 text-white" strokeWidth={2} />
-          </div>
-          {!sidebarCollapsed && (
-            <span
-              className={cn(
-                'text-lg font-bold tracking-tight text-xedu-slate-900 transition-colors duration-[var(--xedu-duration)] dark:text-white',
+          {sidebarCollapsed ? (
+            <img
+              src="/Xedu-icon-trimmed.png"
+              alt="Xedu"
+              className="h-8 w-8 shrink-0 object-contain"
+            />
+          ) : (
+            <div className="flex items-center gap-2.5">
+              <img
+                src="/Xedu-icon-trimmed.png"
+                alt="Xedu"
+                className="h-8 w-8 object-contain shrink-0"
+              />
+              <span className={cn(
+                'text-lg font-bold tracking-tight text-xedu-slate-900 dark:text-white transition-colors duration-[var(--xedu-duration)]',
                 logoHovered && 'text-xedu-primary',
-              )}
-            >
-              Xedu
-            </span>
+              )}>
+                Xedu
+              </span>
+            </div>
           )}
         </Link>
-      </div>
 
-      {/* ── Branch Context ──────────────────────────────────────────────── */}
-      <div className="shrink-0 pt-3">
-        <BranchContext collapsed={sidebarCollapsed} />
+        {/* Collapse toggle — doim o'ng yuqori burchakda, logoga tegmaydi */}
+        <button
+          onClick={toggleSidebar}
+          title={sidebarCollapsed ? 'Kengaytirish' : 'Yig\'ish'}
+          className={cn(
+            'absolute right-2 top-1/2 -translate-y-1/2',
+            'flex h-6 w-6 items-center justify-center rounded-md',
+            'text-xedu-slate-400 transition-all duration-150',
+            'hover:bg-xedu-slate-100 hover:text-xedu-slate-700',
+            'dark:hover:bg-xedu-slate-800 dark:hover:text-xedu-slate-300',
+          )}
+        >
+          {sidebarCollapsed
+            ? <ChevronRight className="h-3.5 w-3.5" />
+            : <ChevronLeft  className="h-3.5 w-3.5" />
+          }
+        </button>
       </div>
 
       {/* ── Navigation Scroll Area ──────────────────────────────────────── */}
@@ -349,29 +365,6 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* ── Footer: Profile + Toggle ────────────────────────────────────── */}
-      <div className="shrink-0 border-t border-xedu-slate-100 dark:border-xedu-slate-800">
-        <ProfileFooter collapsed={sidebarCollapsed} />
-
-        {/* Collapse toggle */}
-        <button
-          onClick={toggleSidebar}
-          className={cn(
-            'flex w-full items-center gap-2 border-t border-xedu-slate-100 px-3 py-2.5 text-2xs font-medium text-xedu-slate-400 transition-colors hover:bg-xedu-slate-50 hover:text-xedu-slate-600 dark:border-xedu-slate-800',
-            sidebarCollapsed ? 'justify-center' : 'justify-between',
-          )}
-          title={sidebarCollapsed ? 'Kengaytirish' : 'Yig\'ish'}
-        >
-          {sidebarCollapsed ? (
-            <ChevronRight className="h-3.5 w-3.5" />
-          ) : (
-            <>
-              <span>Yig&apos;ish</span>
-              <ChevronLeft className="h-3.5 w-3.5" />
-            </>
-          )}
-        </button>
-      </div>
     </aside>
   );
 }

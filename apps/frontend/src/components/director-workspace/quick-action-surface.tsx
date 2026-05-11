@@ -23,7 +23,7 @@ export function QuickActionSurface({ onOpenCommandPalette, activeAction }: Quick
   return (
     <>
       {/* Desktop dock — centered bottom */}
-      <div className="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-30 items-center rounded-xl bg-xedu-bg-floating dark:bg-xedu-bg-floating border border-xedu-border shadow-premium-lg overflow-hidden">
+      <div className="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-30 items-center rounded-xl bg-xedu-bg-floating dark:bg-xedu-bg-floating border border-xedu-border shadow-floating overflow-hidden backdrop-blur-sm">
         {actions.map((action) => (
           <DockItem
             key={action.id}
@@ -43,7 +43,7 @@ export function QuickActionSurface({ onOpenCommandPalette, activeAction }: Quick
       </div>
 
       {/* Mobile compact bar */}
-      <div className="flex md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-30 items-center gap-0.5 rounded-full bg-xedu-bg-floating dark:bg-xedu-bg-floating border border-xedu-border shadow-premium-lg overflow-hidden px-1.5 py-1.5">
+      <div className="flex md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-30 items-center gap-0.5 rounded-full bg-xedu-bg-floating dark:bg-xedu-bg-floating border border-xedu-border shadow-floating overflow-hidden px-1.5 py-1.5 backdrop-blur-sm">
         {actions.slice(0, 5).map((action) => (
           <MobileDockItem key={action.id} action={action} />
         ))}
@@ -65,16 +65,16 @@ function DockItem({
     <Link
       href={href}
       className={cn(
-        'relative flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold transition-colors',
+        'relative flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold transition-all duration-150',
         isActive
-          ? 'text-xedu-primary bg-xedu-primary-light/40'
-          : 'text-xedu-slate-500 hover:text-xedu-slate-800 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800'
+          ? 'text-xedu-primary bg-xedu-primary-light/50 dark:bg-xedu-primary/15 shadow-sm'
+          : 'text-xedu-slate-500 hover:text-xedu-slate-800 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 hover:-translate-y-px'
       )}
     >
-      <Icon className={cn('h-4 w-4', isActive && 'text-xedu-primary')} />
+      <Icon className={cn('h-4 w-4', isActive ? 'text-xedu-primary' : 'text-xedu-slate-400')} />
       <span className="hidden lg:inline">{label}</span>
       {isActive && (
-        <div className="absolute bottom-1 left-3 right-3 h-0.5 rounded-full bg-xedu-primary" />
+        <div className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-xedu-primary" />
       )}
     </Link>
   );

@@ -1,6 +1,8 @@
 'use client';
 
-import { Building2, AlertTriangle, CheckCircle2, Clock, BarChart3, Activity, ShieldCheck } from 'lucide-react';
+import {
+  Building2, Clock, BarChart3, Activity, Users, TrendingUp,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -11,7 +13,8 @@ export interface SituationBarData {
   pendingApprovals?: number;
   riskSignals?: number;
   attendancePct?: number | null;
-  systemStatus?: 'ok' | 'warning' | 'error' | 'unknown';
+  staffTotal?: number;
+  revenueGrowth?: number | null;
 }
 
 interface SituationBarProps {
@@ -20,137 +23,158 @@ interface SituationBarProps {
   onApprovalsClick?: () => void;
 }
 
+type Tone = 'calm' | 'attention' | 'urgent';
+
 export function SituationBar({ data, onAlertsClick, onApprovalsClick }: SituationBarProps) {
   const {
     activeBranchName,
     totalBranches = 0,
-    alertCount = 0,
     pendingApprovals = 0,
     riskSignals = 0,
     attendancePct,
-    systemStatus = 'ok',
+    staffTotal = 0,
+    revenueGrowth = null,
   } = data;
 
+  const attLabel = attendancePct != null ? `${attendancePct}%` : '—';
+  const attTone: Tone = attendancePct != null && attendancePct < 80 ? 'attention' : 'calm';
+
+  const revLabel = revenueGrowth != null
+    ? `${revenueGrowth > 0 ? '+' : ''}${revenueGrowth.toFixed(1)}%`
+    : '—';
+  const revTone: Tone = revenueGrowth != null && revenueGrowth < 0 ? 'attention' : 'calm';
+
   return (
-    <div className="flex items-center gap-6 md:gap-10 overflow-x-auto py-2 scrollbar-hide">
-      {/* ── Group 1: Branch context ── */}
-      <div className="flex items-center shrink-0">
-        <SituationItem
-          icon={Building2}
-          label={activeBranchName ?? 'Barcha filiallar'}
-          sub={totalBranches > 1 ? `${totalBranches} ta filial` : undefined}
-          href="/dashboard/branches"
-          prominence="high"
-        />
-      </div>
+    <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto scrollbar-hide py-1 px-0.5">
 
-      {/* ── Group 2: Operational signals ── */}
-      <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
-        <SituationItem
-          icon={AlertTriangle}
-          label="Diqqat"
-          value={alertCount}
-          tone={alertCount > 0 ? 'urgent' : 'calm'}
-          onClick={alertCount > 0 ? onAlertsClick : undefined}
-          clickable={alertCount > 0}
-        />
-        <SituationItem
-          icon={Clock}
-          label="Tasdiqlash"
-          value={pendingApprovals}
-          tone={pendingApprovals > 0 ? 'attention' : 'calm'}
-          onClick={pendingApprovals > 0 ? onApprovalsClick : undefined}
-          clickable={pendingApprovals > 0}
-        />
-        <SituationItem
-          icon={BarChart3}
-          label="Xavf"
-          value={riskSignals}
-          tone={riskSignals > 0 ? 'attention' : 'calm'}
-          href="/dashboard/ai-analytics"
-          clickable={riskSignals > 0}
-        />
-      </div>
+      {/* 1. Filial kontekst */}
+      <Chip
+        icon={Building2}
+        label={activeBranchName ?? 'Barcha filiallar'}
+        metric={totalBranches > 1 ? `${totalBranches} ta` : undefined}
+        href="/dashboard/branches"
+        tone="calm"
+      />
 
-      {/* ── Group 3: System context ── */}
-      <div className="flex items-center gap-1.5 md:gap-2 shrink-0 ml-auto">
-        <SituationItem
-          icon={Activity}
-          label="Davomat"
-          sub={attendancePct != null ? `${attendancePct}%` : "Ma'lumot yo'q"}
-          tone={attendancePct != null && attendancePct < 80 ? 'attention' : 'calm'}
-          href="/dashboard/attendance"
-        />
-        <SituationItem
-          icon={ShieldCheck}
-          label="Tizim"
-          sub={systemStatus === 'ok' ? 'Ishlayapti' : systemStatus === 'warning' ? 'Diqqat' : 'Xato'}
-          tone={systemStatus === 'ok' ? 'calm' : systemStatus === 'warning' ? 'attention' : 'urgent'}
-          href="/dashboard/system-health"
-        />
-      </div>
+      <Sep />
+
+      {/* 2-4. Operatsion ko'rsatkichlar */}
+      <Chip
+        icon={Activity}
+        label="Davomat"
+        metric={attLabel}
+        href="/dashboard/attendance"
+        tone={attTone}
+      />
+      <Chip
+        icon={Users}
+        label="Xodimlar"
+        metric={staffTotal > 0 ? staffTotal : '—'}
+        href="/dashboard/users"
+        tone="calm"
+      />
+      <Chip
+        icon={TrendingUp}
+        label="Moliya"
+        metric={revLabel}
+        href="/dashboard/finance"
+        tone={revTone}
+      />
+
+      <Sep />
+
+      {/* 5-6. Harakatga chaqiruvchi signallar */}
+      <Chip
+        icon={Clock}
+        label="Tasdiqlash"
+        metric={pendingApprovals > 0 ? pendingApprovals : '—'}
+        onClick={pendingApprovals > 0 ? onApprovalsClick : undefined}
+        href={pendingApprovals === 0 ? '/dashboard/approvals' : undefined}
+        tone={pendingApprovals > 0 ? 'attention' : 'calm'}
+      />
+      <Chip
+        icon={BarChart3}
+        label="Xavf"
+        metric={riskSignals > 0 ? riskSignals : '—'}
+        href="/dashboard/ai-analytics"
+        tone={riskSignals > 0 ? 'attention' : 'calm'}
+      />
+
     </div>
   );
 }
 
-interface SituationItemProps {
+interface ChipProps {
   icon: React.ElementType;
   label: string;
-  value?: number;
-  sub?: string;
-  tone?: 'calm' | 'attention' | 'urgent';
+  metric?: string | number;
+  tone?: Tone;
   href?: string;
   onClick?: () => void;
-  clickable?: boolean;
-  prominence?: 'normal' | 'high';
+  prominent?: boolean;
 }
 
-function SituationItem({ icon: Icon, label, value, sub, tone = 'calm', href, onClick, clickable, prominence = 'normal' }: SituationItemProps) {
-  const dotColor =
-    tone === 'urgent' ? 'bg-xedu-ruby-500' : tone === 'attention' ? 'bg-xedu-amber-500' : 'bg-xedu-primary';
+function Chip({ icon: Icon, label, metric, tone = 'calm', href, onClick, prominent }: ChipProps) {
+  const isInteractive = !!(href || onClick);
+
+  const chipBg: Record<Tone, string> = {
+    urgent:    'bg-xedu-ruby-50/70 border-xedu-ruby-200/70 dark:bg-xedu-ruby-900/20 dark:border-xedu-ruby-800/40',
+    attention: 'bg-xedu-amber-50/60 border-xedu-amber-200/60 dark:bg-xedu-amber-900/15 dark:border-xedu-amber-800/30',
+    calm:      'bg-xedu-bg-panel border-xedu-border dark:bg-xedu-bg-panel dark:border-xedu-border',
+  };
+
+  const iconColor: Record<Tone, string> = {
+    urgent:    'text-xedu-ruby-500',
+    attention: 'text-xedu-amber-500',
+    calm:      'text-xedu-slate-400',
+  };
+
+  const metricColor: Record<Tone, string> = {
+    urgent:    'text-xedu-ruby-700 dark:text-xedu-ruby-400',
+    attention: 'text-xedu-amber-700 dark:text-xedu-amber-400',
+    calm:      'text-xedu-slate-800 dark:text-xedu-slate-200',
+  };
 
   const Wrapper = href ? Link : onClick ? 'button' : 'div';
   const wrapperProps = href ? { href } : onClick ? { onClick } : {};
-
-  const isHighProminence = prominence === 'high';
 
   return (
     <Wrapper
       {...(wrapperProps as any)}
       className={cn(
-        'flex items-center gap-2 rounded-lg shrink-0 transition-colors',
-        isHighProminence ? 'px-4 py-2.5' : 'px-3 py-2',
-        (clickable || href || onClick) && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50 cursor-pointer'
+        'flex items-center gap-2 rounded-xl shrink-0 border transition-all duration-150',
+        chipBg[tone],
+        prominent ? 'px-3.5 py-2.5 shadow-sm' : 'px-2.5 py-1.5',
+        isInteractive && 'hover:-translate-y-px hover:shadow-sm cursor-pointer'
       )}
     >
-      <div className="relative">
-        <Icon className={cn('text-xedu-slate-500', isHighProminence ? 'h-4 w-4' : 'h-3.5 w-3.5')} />
-        {(value !== undefined && value > 0) && (
-          <div className={cn('absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full', dotColor)} />
-        )}
+      <div className={cn(
+        'flex items-center justify-center rounded-lg shrink-0',
+        prominent ? 'h-7 w-7 bg-xedu-bg-subtle dark:bg-xedu-slate-800/60' : 'h-5 w-5'
+      )}>
+        <Icon className={cn(iconColor[tone], prominent ? 'h-3.5 w-3.5' : 'h-3 w-3')} />
       </div>
       <div className="flex items-baseline gap-1.5">
         <span className={cn(
-          'font-semibold whitespace-nowrap',
-          isHighProminence ? 'text-sm text-xedu-slate-800 dark:text-xedu-slate-200' : 'text-xs text-xedu-slate-600 dark:text-xedu-slate-400'
+          'font-semibold whitespace-nowrap text-xedu-slate-500 dark:text-xedu-slate-400',
+          prominent ? 'text-xs' : 'text-2xs'
         )}>
           {label}
         </span>
-        {value !== undefined && value > 0 && (
+        {metric !== undefined && (
           <span className={cn(
-            'font-bold tabular-nums',
-            isHighProminence ? 'text-base text-xedu-slate-900 dark:text-xedu-slate-100' : 'text-sm text-xedu-slate-900 dark:text-xedu-slate-100'
+            'font-bold tabular-nums whitespace-nowrap',
+            metricColor[tone],
+            prominent ? 'text-sm' : 'text-xs'
           )}>
-            {value}
+            {metric}
           </span>
-        )}
-        {sub && (
-          <span className={cn(
-            'whitespace-nowrap',
-            isHighProminence ? 'text-xs text-xedu-slate-400' : 'text-2xs text-xedu-slate-400'
-          )}>{sub}</span>
         )}
       </div>
     </Wrapper>
   );
+}
+
+function Sep() {
+  return <div className="h-4 w-px bg-xedu-border shrink-0 hidden sm:block" />;
 }

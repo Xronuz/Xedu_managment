@@ -54,14 +54,12 @@ import {
   IntelligenceFeed,
   RightContextualPanel,
   QuickActionSurface,
-  ExecutiveSummary,
   ActivityStream,
   BranchComparison,
   SmartInsights,
   ExecutiveBriefing,
   type BranchDetail,
   type SituationBarData,
-  type ExecutiveSummaryData,
   type ExecutiveBriefingData,
 } from '@/components/director-workspace';
 
@@ -148,24 +146,9 @@ export function DirectorDashboard() {
 
   const atRisk = (aiSummary?.riskDistribution?.critical ?? 0) + (aiSummary?.riskDistribution?.high ?? 0);
 
-  // ── Executive summary data ──────────────────────────────────────────────────
   const thisMonthRev = financeData?.thisMonthRevenue ?? 0;
   const lastMonthRev = financeData?.lastMonthRevenue ?? 0;
   const revenueGrowth = financeData?.revenueGrowth ?? (lastMonthRev > 0 ? ((thisMonthRev - lastMonthRev) / lastMonthRev) * 100 : 0);
-
-  const execSummaryData: ExecutiveSummaryData = {
-    branchCount: (branches as any[])?.length ?? 0,
-    branchTrend: 'stable',
-    attendancePct: presentPct > 0 ? presentPct : null,
-    attendanceTrend: presentPct > 0 ? (presentPct < 75 ? 'down' : presentPct > 90 ? 'up' : 'stable') : 'stable',
-    staffTotal: teacherCount + staffCount,
-    staffPressure: pendingLeaveList.length > teacherCount * 0.2 ? 'elevated' : 'normal',
-    revenueGrowth: revenueGrowth || null,
-    pendingTotal: pendingLeaveList.length + pendingDisciplineList.length,
-    pendingTrend: pendingLeaveList.length + pendingDisciplineList.length > 5 ? 'up' : 'stable',
-    atRiskCount: atRisk,
-    riskTrend: atRisk > 0 ? 'up' : 'stable',
-  };
 
   // ── Executive briefing data ─────────────────────────────────────────────────
   const inactiveBranches = (branches as any[])?.filter((b: any) => !b.isActive) ?? [];
@@ -225,7 +208,8 @@ export function DirectorDashboard() {
     pendingApprovals: pendingLeaveList.length,
     riskSignals: atRisk,
     attendancePct: presentPct > 0 ? presentPct : null,
-    systemStatus: 'ok',
+    staffTotal: teacherCount + staffCount,
+    revenueGrowth: revenueGrowth || null,
   };
 
   return (
@@ -246,19 +230,18 @@ export function DirectorDashboard() {
           }
         />
 
-        <div className="sticky top-0 z-20 -mx-2 px-2 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm space-y-1">
+        <div className="sticky top-0 z-20 -mx-2 px-2 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm">
           <SituationBar
             data={situationData}
             onAlertsClick={() => router.push('/dashboard/alerts')}
             onApprovalsClick={() => router.push('/dashboard/approvals')}
           />
-          <ExecutiveSummary data={execSummaryData} />
         </div>
       </div>
 
       {/* ── Main Canvas ─────────────────────────────────────────────────────── */}
       <WorkspaceMain>
-        <div className="bg-xedu-bg-rail rounded-2xl p-4 md:p-5 space-y-6">
+        <div className="bg-xedu-bg-rail rounded-2xl border border-xedu-border shadow-sm p-4 md:p-5 space-y-6">
           {/* HERO: Executive Briefing — decision guidance */}
           <ExecutiveBriefing data={briefingData} />
 
@@ -485,7 +468,7 @@ export function DirectorDashboard() {
 
       {/* ── Right Sidebar ───────────────────────────────────────────────────── */}
       <WorkspaceSidebar width="normal">
-        <div className="bg-xedu-bg-rail rounded-2xl p-3 md:p-4">
+        <div className="bg-xedu-bg-rail rounded-2xl border border-xedu-border shadow-sm p-3 md:p-4">
           {/* 1. Operational Intelligence — primary, most urgent */}
           <IntelligenceFeed
             aiSummary={aiSummary}

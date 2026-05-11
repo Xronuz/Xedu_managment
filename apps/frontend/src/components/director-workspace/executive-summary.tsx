@@ -129,8 +129,8 @@ function SummaryItem({
 
   return (
     <div className={cn(
-      'flex items-center gap-1.5 shrink-0 rounded-lg px-2 py-1 transition-colors',
-      !quiet && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30'
+      'flex items-center gap-1.5 shrink-0 rounded-lg px-2 py-1 transition-all duration-150 border border-transparent',
+      !quiet && 'hover:bg-xedu-bg-panel hover:border-xedu-border hover:shadow-xs dark:hover:bg-xedu-slate-800/40'
     )}>
       <div className="relative">
         <Icon className={cn('h-3 w-3', quiet ? 'text-xedu-slate-300' : 'text-xedu-slate-400')} />

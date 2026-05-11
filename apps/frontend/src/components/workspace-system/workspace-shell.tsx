@@ -299,10 +299,13 @@ export function WorkspaceSection({
   return (
     <div className={cn('rounded-xl bg-xedu-bg-panel dark:bg-xedu-bg-panel border border-xedu-border shadow-sm overflow-hidden', className)}>
       {(title || action) && (
-        <div className={cn('flex items-center justify-between border-b border-xedu-slate-100 dark:border-xedu-slate-800', densityClasses.header)}>
+        <div className={cn(
+          'flex items-center justify-between border-b border-xedu-border bg-xedu-bg-subtle dark:bg-xedu-bg-subtle',
+          densityClasses.header
+        )}>
           <div className="flex items-center gap-2">
-            {icon && <span className="text-xedu-slate-500">{icon}</span>}
-            {title && <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">{title}</h3>}
+            {icon && <span className="text-xedu-slate-400">{icon}</span>}
+            {title && <h3 className="text-sm font-bold tracking-tight text-xedu-slate-800 dark:text-xedu-slate-100">{title}</h3>}
           </div>
           {action && <div className="flex items-center gap-1">{action}</div>}
         </div>

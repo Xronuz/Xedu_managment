@@ -297,7 +297,7 @@ export default function FinanceDashboardPage() {
                   </div>
                 ) : (
                   <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-white/80 backdrop-blur-sm">
+                    <thead className="sticky top-0 xedu-frosted">
                       <tr>
                         {['#', "O'quvchi", 'Sinf', 'Qarzdorlik', "To'lovlar", 'Eng eski', ''].map((h) => (
                           <th key={h} className="py-2.5 px-4 text-left text-xs font-semibold uppercase tracking-wide text-xedu-slate-500 dark:text-xedu-slate-400 first:w-8 last:w-10">
@@ -406,7 +406,7 @@ export default function FinanceDashboardPage() {
                   </div>
                 ) : (
                   <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-white/80 backdrop-blur-sm">
+                    <thead className="sticky top-0 xedu-frosted">
                       <tr>
                         {['Nomi', 'Daraja', 'Chastota', 'Miqdor'].map((h) => (
                           <th key={h} className="py-2.5 px-4 text-left text-xs font-semibold uppercase tracking-wide text-xedu-slate-500 dark:text-xedu-slate-400">

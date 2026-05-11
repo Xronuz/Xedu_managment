@@ -9,7 +9,7 @@ export default function HomeworkLoading() {
       </div>
       <div className="space-y-3">
         {[...Array(5)].map((_, i) => (
-          <div key={i} className="rounded-xl border bg-white dark:bg-xedu-slate-900 p-4 space-y-3">
+          <div key={i} className="rounded-xl border bg-xedu-bg-elevated p-4 space-y-3">
             <div className="flex items-start justify-between">
               <div className="space-y-1">
                 <Skeleton className="h-5 w-52" />

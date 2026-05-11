@@ -32,7 +32,7 @@ export interface KpiCardProps {
 
 const ICON_BG_MAP: Record<NonNullable<KpiCardProps['iconColor']>, string> = {
   primary: 'bg-xedu-primary-light text-xedu-primary',
-  gold:    'bg-[#FDF6E3] text-xedu-gold',
+  gold:    'bg-xedu-gold-50 text-xedu-gold',
   ruby:    'bg-red-50 text-xedu-ruby',
   amber:   'bg-amber-50 text-xedu-amber',
   sky:     'bg-sky-50 text-xedu-sky',

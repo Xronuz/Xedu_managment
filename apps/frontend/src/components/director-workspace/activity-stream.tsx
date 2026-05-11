@@ -157,7 +157,7 @@ export function ActivityStream({
 
   if (items.length === 0) {
     return (
-      <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 p-4">
+      <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-4">
         <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-400 mb-3">Operatsion faollik</p>
         <div className="flex flex-col items-center py-6 gap-2">
           <CheckCircle2 className="h-5 w-5 text-xedu-slate-300" />
@@ -171,7 +171,7 @@ export function ActivityStream({
   const grouped = groupByTime(items);
 
   return (
-    <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 overflow-hidden">
+    <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated overflow-hidden">
       <div className="flex items-center justify-between px-3 py-2 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
         <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-400">Operatsion faollik</p>
         <span className="text-[10px] font-medium text-xedu-slate-400">{items.length} ta hodisa</span>

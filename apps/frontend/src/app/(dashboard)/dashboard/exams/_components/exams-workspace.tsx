@@ -201,7 +201,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
             ) : (
               <div className="space-y-2">
                 {(questions as ExamQuestion[]).map((q, i) => (
-                  <div key={q.id} className="rounded-lg border bg-white dark:bg-xedu-slate-900">
+                  <div key={q.id} className="rounded-lg border bg-xedu-bg-elevated">
                     <div className="flex items-start gap-3 p-3">
                       <span className="bg-primary/10 text-primary rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
                         {i + 1}
@@ -337,7 +337,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
                   const statusColor = s.status === 'submitted' || s.status === 'graded' ? 'text-xedu-emerald-600' : s.status === 'timed_out' ? 'text-xedu-ruby-500' : 'text-xedu-sky-500';
                   const statusLabel = { in_progress: 'Jarayonda', submitted: 'Topshirildi', timed_out: 'Vaqt tugadi', graded: 'Baholandi', not_started: 'Boshlanmagan' }[s.status as string] ?? s.status;
                   return (
-                    <div key={s.id} className="flex items-center justify-between rounded-lg border px-3 py-2.5 bg-white dark:bg-xedu-slate-900">
+                    <div key={s.id} className="flex items-center justify-between rounded-lg border px-3 py-2.5 bg-xedu-bg-elevated">
                       <div>
                         <p className="text-sm font-medium">{s.student?.firstName} {s.student?.lastName}</p>
                         <p className={`text-xs ${statusColor}`}>{statusLabel}</p>
@@ -842,7 +842,7 @@ export function ExamsWorkspace() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Imtihon nomi..."
-              className="w-full h-8 pl-8 pr-3 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-800 dark:text-xedu-slate-200 outline-none focus:ring-1 focus:ring-xedu-primary"
+              className="w-full h-8 pl-8 pr-3 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-800 dark:text-xedu-slate-200 outline-none focus:ring-1 focus:ring-xedu-primary"
             />
             {search && (
               <button onClick={() => { setSearch(''); }} className="absolute right-2 top-1/2 -translate-y-1/2">
@@ -896,7 +896,7 @@ export function ExamsWorkspace() {
             <select
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha sinflar</option>
               {classes.map((c: any) => (
@@ -907,7 +907,7 @@ export function ExamsWorkspace() {
             <select
               value={filterSubject}
               onChange={(e) => setFilterSubject(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha fanlar</option>
               {subjects.map((s: any) => (
@@ -918,7 +918,7 @@ export function ExamsWorkspace() {
             <select
               value={filterFrequency}
               onChange={(e) => setFilterFrequency(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha turlar</option>
               {Object.entries(FREQUENCY_LABELS).map(([k, v]) => (
@@ -929,7 +929,7 @@ export function ExamsWorkspace() {
             <select
               value={filterTimeRange}
               onChange={(e) => setFilterTimeRange(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha vaqt</option>
               <option value="upcoming">Kelgusi</option>
@@ -939,7 +939,7 @@ export function ExamsWorkspace() {
             <select
               value={filterPublished}
               onChange={(e) => setFilterPublished(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha holat</option>
               <option value="published">E&apos;lon qilingan</option>

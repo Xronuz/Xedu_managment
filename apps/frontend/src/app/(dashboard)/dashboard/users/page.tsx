@@ -374,7 +374,7 @@ export default function UsersPage() {
           </button>
 
           {filterOpen && (
-            <div className="absolute left-0 top-[calc(100%+6px)] z-50 w-[220px] rounded-[16px] bg-white dark:bg-slate-800 p-3 space-y-3 border border-black/[0.07] dark:border-white/[0.08] shadow-[0_12px_40px_rgba(0,0,0,0.10)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.40)]">
+            <div className="absolute left-0 top-[calc(100%+6px)] z-50 w-[220px] rounded-[16px] bg-xedu-bg-elevated dark:bg-xedu-slate-800 p-3 space-y-3 border border-xedu-border dark:border-xedu-border shadow-premium-lg">
               {/* Role filter */}
               <div className="space-y-1.5">
                 <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Rol</p>

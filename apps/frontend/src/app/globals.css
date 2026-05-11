@@ -41,9 +41,19 @@
     --xedu-slate-950: #020617;
 
     /* ── Surface ── */
-    --xedu-bg:          #F7F8F8;
+    --xedu-bg:          #F5F7F6;
+    --xedu-bg-canvas:   #F5F7F6;
+    --xedu-bg-panel:    #FFFFFF;
     --xedu-bg-elevated: #FFFFFF;
     --xedu-bg-subtle:   #F8FAF8;
+    --xedu-bg-floating: #FFFFFF;
+
+    /* ── Material highlights ── */
+    --xedu-highlight-top:        rgba(255,255,255,0.7);
+    --xedu-highlight-top-strong: rgba(255,255,255,0.9);
+
+    /* ── Overlay ── */
+    --xedu-overlay: rgba(0,0,0,0.20);
 
     /* ── Text ── */
     --xedu-text:           #111827;
@@ -148,6 +158,7 @@
     --xedu-violet: var(--xedu-violet-600);
 
     /* ── Shadows (elevation system) ── */
+    --xedu-shadow-inset:       inset 0 1px 3px rgba(0,0,0,0.06);
     --xedu-shadow-xs:          0 1px 2px rgba(0,0,0,0.04);
     --xedu-shadow-sm:          0 2px 6px rgba(0,0,0,0.06);
     --xedu-shadow-md:          0 4px 12px rgba(0,0,0,0.08);
@@ -167,7 +178,7 @@
     --xedu-easing: cubic-bezier(0.4, 0, 0.2, 1);
 
     /* ── shadcn/ui semantic tokens (aligned to brand) ── */
-    --background:         120 7% 97.6%;
+    --background:         140 6% 97.3%;
     --foreground:         222 47% 11%;
     --card:               0 0% 100%;
     --card-foreground:    222 47% 11%;
@@ -199,9 +210,19 @@
 
   .dark {
     /* ── Xedu dark overrides ── */
-    --xedu-bg:            #0F172A;
+    --xedu-bg:            #0B1320;
+    --xedu-bg-canvas:     #0B1320;
+    --xedu-bg-panel:      #141d2e;
     --xedu-bg-elevated:   #1E293B;
     --xedu-bg-subtle:     #1a2235;
+    --xedu-bg-floating:   #1E293B;
+
+    /* ── Material highlights (dark) ── */
+    --xedu-highlight-top:        rgba(255,255,255,0.04);
+    --xedu-highlight-top-strong: rgba(255,255,255,0.06);
+
+    /* ── Overlay (dark) ── */
+    --xedu-overlay: rgba(0,0,0,0.50);
     --xedu-text:          #F1F5F9;
     --xedu-text-secondary:#CBD5E1;
     --xedu-text-muted:    #94A3B8;
@@ -209,6 +230,7 @@
     --xedu-border-hover:  rgba(255,255,255,0.10);
     --xedu-border-strong: rgba(255,255,255,0.14);
 
+    --xedu-shadow-inset:       inset 0 1px 3px rgba(0,0,0,0.30);
     --xedu-shadow-xs:          0 1px 2px rgba(0,0,0,0.12);
     --xedu-shadow-sm:          0 2px 6px rgba(0,0,0,0.18);
     --xedu-shadow-md:          0 4px 12px rgba(0,0,0,0.24);
@@ -342,7 +364,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: var(--xedu-bg-canvas);
     font-feature-settings: 'rlig' 1, 'calt' 1, 'cv02' 1, 'cv03' 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -606,4 +629,131 @@
   .density-compact { --ws-pad: 0.5rem; --ws-gap: 0.5rem; }
   .density-normal  { --ws-pad: 0.75rem; --ws-gap: 0.75rem; }
   .density-spacious{ --ws-pad: 1rem; --ws-gap: 1rem; }
+
+  /* ════════════════════════════════════════════════════════════════════════════
+     Xedu Material Depth System — Phase 28.6
+     Centralized surface, elevation, and atmospheric utilities.
+     Do NOT add one-off shadows/colors to components — extend here instead.
+     ════════════════════════════════════════════════════════════════════════════ */
+
+  /* ── App canvas ── */
+  .xedu-app-canvas {
+    background: var(--xedu-bg-canvas);
+  }
+
+  /* ── Panel surface (standard card/panel) ── */
+  .xedu-surface-panel {
+    background: var(--xedu-bg-panel);
+    border: 1px solid var(--xedu-border);
+  }
+  .dark .xedu-surface-panel {
+    background: var(--xedu-bg-panel);
+    border-color: var(--xedu-border);
+  }
+
+  /* ── Elevated surface (cards with shadow + top highlight) ── */
+  .xedu-surface-elevated {
+    background: var(--xedu-bg-elevated);
+    border: 1px solid var(--xedu-border);
+    box-shadow: var(--xedu-shadow-sm);
+    position: relative;
+  }
+  .xedu-surface-elevated::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(180deg, var(--xedu-highlight-top) 0%, transparent 40%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .dark .xedu-surface-elevated {
+    background: var(--xedu-bg-elevated);
+    border-color: var(--xedu-border);
+    box-shadow: var(--xedu-shadow-xs);
+  }
+
+  /* ── Floating surface (command palette, action bars, modals) ── */
+  .xedu-surface-floating {
+    background: rgba(255,255,255,0.95);
+    border: 1px solid var(--xedu-border);
+    box-shadow: var(--xedu-shadow-floating);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .dark .xedu-surface-floating {
+    background: rgba(30,41,59,0.95);
+    border-color: var(--xedu-border);
+    box-shadow: var(--xedu-shadow-floating);
+  }
+
+  /* ── Frosted glass (sticky headers, overlays) ── */
+  .xedu-frosted {
+    background: rgba(255,255,255,0.80);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  .dark .xedu-frosted {
+    background: rgba(15,23,42,0.80);
+  }
+
+  /* ── Material header (top nav bar) ── */
+  .xedu-material-header {
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--xedu-border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .dark .xedu-material-header {
+    background: rgba(15,23,42,0.85);
+    border-color: var(--xedu-border);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.20);
+  }
+
+  /* ── Material sidebar ── */
+  .xedu-material-sidebar {
+    background: var(--xedu-bg-panel);
+    border-right: 1px solid var(--xedu-border);
+  }
+  .dark .xedu-material-sidebar {
+    background: var(--xedu-bg-panel);
+    border-color: var(--xedu-border);
+  }
+
+  /* ── Hover depth (card lift on hover) ── */
+  .xedu-hover-depth {
+    transition: transform 200ms var(--xedu-easing), box-shadow 200ms var(--xedu-easing);
+  }
+  .xedu-hover-depth:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--xedu-shadow-md);
+  }
+
+  /* ── Border tokens ── */
+  .xedu-border-subtle {
+    border: 1px solid var(--xedu-border);
+  }
+  .xedu-border-strong {
+    border: 1px solid var(--xedu-border-strong);
+  }
+
+  /* ── Dark variants for existing premium surfaces ── */
+  .dark .surface-premium {
+    background: linear-gradient(180deg, #1a2235 0%, #141d2e 100%);
+  }
+  .dark .surface-atmospheric {
+    background: linear-gradient(180deg, #161f2e 0%, #101829 100%);
+  }
+  .dark .surface-warm {
+    background: linear-gradient(180deg, #1a1f2e 0%, #141a25 100%);
+  }
+  .dark .surface-elevated {
+    background: var(--xedu-bg-elevated);
+    border-color: var(--xedu-border);
+    box-shadow: var(--xedu-shadow-xs);
+  }
 }

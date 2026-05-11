@@ -10,7 +10,7 @@ export default function GradesLoading() {
           <Skeleton className="h-9 w-32" />
         </div>
       </div>
-      <div className="rounded-xl border bg-white dark:bg-xedu-slate-900">
+      <div className="rounded-xl border bg-xedu-bg-elevated">
         <div className="p-4 border-b flex gap-3">
           <Skeleton className="h-9 w-40" />
           <Skeleton className="h-9 w-40" />

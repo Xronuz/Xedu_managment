@@ -118,7 +118,7 @@ export function StatCard({
     <Wrapper
       {...(wrapperProps as any)}
       className={cn(
-        'group relative block rounded-2xl border border-xedu-slate-100 bg-white p-6 transition-all duration-[var(--xedu-duration)] dark:border-xedu-slate-800 dark:bg-xedu-slate-900',
+        'group relative block rounded-2xl border border-xedu-slate-100 bg-xedu-bg-elevated p-6 transition-all duration-[var(--xedu-duration)] dark:border-xedu-slate-800',
         isClickable && 'cursor-pointer hover:border-xedu-slate-200 hover:shadow-sm dark:hover:border-xedu-slate-700',
       )}
       style={{}}
@@ -180,7 +180,7 @@ export function SectionHeader({ title, action }: { title: string; action?: React
 export function PCard({ className, style, children }: { className?: string; style?: React.CSSProperties; children: React.ReactNode }) {
   return (
     <div
-      className={cn('rounded-2xl border border-xedu-slate-100 bg-white p-6 dark:border-xedu-slate-800 dark:bg-xedu-slate-900', className)}
+      className={cn('rounded-2xl border border-xedu-slate-100 bg-xedu-bg-elevated p-6 dark:border-xedu-slate-800', className)}
       style={{ ...style }}
     >
       {children}

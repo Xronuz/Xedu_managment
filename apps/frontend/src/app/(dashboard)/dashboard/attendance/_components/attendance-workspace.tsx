@@ -402,7 +402,7 @@ export function AttendanceWorkspace() {
               value={selectedDate}
               max={today}
               onChange={(e) => { setSelectedDate(e.target.value); setAttendanceMap({}); }}
-              className="h-7 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700 outline-none focus:ring-1 focus:ring-xedu-primary"
+              className="h-7 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700 outline-none focus:ring-1 focus:ring-xedu-primary"
             />
           </div>
         </WorkspaceToolbar>
@@ -469,7 +469,7 @@ export function AttendanceWorkspace() {
                       key={s.id}
                       className={cn(
                         'flex items-center justify-between rounded-lg px-3 py-2 transition-all border',
-                        isSelected ? 'border-xedu-primary bg-xedu-primary-light/30' : 'border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900/50',
+                        isSelected ? 'border-xedu-primary bg-xedu-primary-light/30' : 'border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated/50',
                         current !== 'present' && !isSelected && cfg.bgSoft
                       )}
                     >

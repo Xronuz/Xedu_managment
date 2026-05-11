@@ -521,7 +521,7 @@ export function SubjectsWorkspace() {
               value={search}
               onChange={(e) => handleSearch(e.target.value)}
               placeholder="Fan, o'qituvchi, sinf..."
-              className="w-full h-8 pl-8 pr-3 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-800 dark:text-xedu-slate-200 outline-none focus:ring-1 focus:ring-xedu-primary"
+              className="w-full h-8 pl-8 pr-3 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-800 dark:text-xedu-slate-200 outline-none focus:ring-1 focus:ring-xedu-primary"
             />
             {search && (
               <button onClick={() => { setSearch(''); setDebouncedSearch(''); }} className="absolute right-2 top-1/2 -translate-y-1/2">
@@ -575,7 +575,7 @@ export function SubjectsWorkspace() {
             <select
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha sinflar</option>
               {classes.map((c: any) => (
@@ -586,7 +586,7 @@ export function SubjectsWorkspace() {
             <select
               value={filterTeacher}
               onChange={(e) => setFilterTeacher(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha o'qituvchilar</option>
               {teachers.map((t: any) => (

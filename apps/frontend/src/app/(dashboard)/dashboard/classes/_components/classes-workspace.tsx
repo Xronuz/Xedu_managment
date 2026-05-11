@@ -458,7 +458,7 @@ export function ClassesWorkspace() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Sinf nomi, rahbar, filial..."
-              className="w-full h-8 pl-8 pr-3 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-800 dark:text-xedu-slate-200 outline-none focus:ring-1 focus:ring-xedu-primary"
+              className="w-full h-8 pl-8 pr-3 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-800 dark:text-xedu-slate-200 outline-none focus:ring-1 focus:ring-xedu-primary"
             />
             {search && (
               <button onClick={() => { setSearch(''); }} className="absolute right-2 top-1/2 -translate-y-1/2">
@@ -512,7 +512,7 @@ export function ClassesWorkspace() {
             <select
               value={filterBranch}
               onChange={(e) => setFilterBranch(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha filiallar</option>
               {branches.map((b: any) => (
@@ -523,7 +523,7 @@ export function ClassesWorkspace() {
             <select
               value={filterTeacher}
               onChange={(e) => setFilterTeacher(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha rahbarlar</option>
               <option value="__none__">Rahbarisiz</option>
@@ -535,7 +535,7 @@ export function ClassesWorkspace() {
             <select
               value={filterGrade}
               onChange={(e) => setFilterGrade(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha darajalar</option>
               {GRADES.map((g) => (

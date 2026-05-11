@@ -35,7 +35,7 @@ export function SplitView({
       {/* Detail pane */}
       <div
         className={cn(
-          'flex-1 flex flex-col h-full overflow-hidden bg-white dark:bg-xedu-slate-900',
+          'flex-1 flex flex-col h-full overflow-hidden bg-xedu-bg-elevated',
           !showDetail && 'hidden lg:flex'
         )}
       >
@@ -78,7 +78,7 @@ export function SplitViewListHeader({
   return (
     <div
       className={cn(
-        'flex items-center justify-between px-4 py-2.5 border-b border-xedu-slate-100 dark:border-xedu-slate-800 bg-white/80 dark:bg-xedu-slate-900/80 backdrop-blur-sm sticky top-0 z-10',
+        'flex items-center justify-between px-4 py-2.5 border-b border-xedu-slate-100 dark:border-xedu-slate-800 xedu-frosted sticky top-0 z-10',
         className
       )}
     >
@@ -115,7 +115,7 @@ export function SplitViewDetailHeader({
   return (
     <div
       className={cn(
-        'flex items-center justify-between px-5 py-3 border-b border-xedu-slate-100 dark:border-xedu-slate-800 bg-white/80 dark:bg-xedu-slate-900/80 backdrop-blur-sm sticky top-0 z-10',
+        'flex items-center justify-between px-5 py-3 border-b border-xedu-slate-100 dark:border-xedu-slate-800 xedu-frosted sticky top-0 z-10',
         className
       )}
     >

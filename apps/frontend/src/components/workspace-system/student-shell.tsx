@@ -97,7 +97,7 @@ export function StudentDayBlock({ dateLabel, children, className, isToday }: Stu
         'rounded-xl border overflow-hidden',
         isToday
           ? 'border-xedu-primary/20 bg-xedu-primary/[0.02] dark:bg-xedu-primary/5'
-          : 'border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900',
+          : 'border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated',
         className
       )}
     >

@@ -39,7 +39,7 @@ export function BranchAdminWelcome() {
           <button
             key={a.href}
             onClick={() => router.push(a.href)}
-            className="flex items-center gap-3 rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 p-4 text-left transition-all hover:border-xedu-slate-200 hover:shadow-sm dark:hover:border-xedu-slate-700"
+            className="flex items-center gap-3 rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-4 text-left transition-all hover:border-xedu-slate-200 hover:shadow-sm dark:hover:border-xedu-slate-700"
           >
             <div className="h-9 w-9 rounded-xl bg-xedu-slate-50 dark:bg-xedu-slate-800/60 flex items-center justify-center shrink-0">
               <a.icon className="h-[18px] w-[18px] text-xedu-amber" />

@@ -12,13 +12,13 @@ export default function AttendanceLoading() {
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="rounded-xl border bg-white dark:bg-xedu-slate-900 p-4 space-y-2">
+          <div key={i} className="rounded-xl border bg-xedu-bg-elevated p-4 space-y-2">
             <Skeleton className="h-4 w-20" />
             <Skeleton className="h-8 w-12" />
           </div>
         ))}
       </div>
-      <div className="rounded-xl border bg-white dark:bg-xedu-slate-900">
+      <div className="rounded-xl border bg-xedu-bg-elevated">
         <div className="p-4 border-b">
           <Skeleton className="h-5 w-32" />
         </div>

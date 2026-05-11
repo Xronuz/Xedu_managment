@@ -278,7 +278,7 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'relative flex h-screen shrink-0 flex-col border-r border-xedu-slate-100 bg-white transition-[width] duration-[var(--xedu-duration)] ease-out dark:border-xedu-slate-800 dark:bg-xedu-slate-900',
+        'relative flex h-screen shrink-0 flex-col xedu-material-sidebar transition-[width] duration-[var(--xedu-duration)] ease-out',
         sidebarCollapsed ? 'w-[84px]' : 'w-[272px]',
       )}
     >

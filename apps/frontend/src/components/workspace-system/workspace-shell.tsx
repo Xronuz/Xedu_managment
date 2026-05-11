@@ -206,14 +206,15 @@ export function WorkspacePanel({ open, onClose, children, className, title }: Wo
       {/* Backdrop */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40 lg:hidden"
+          className="fixed inset-0 z-40 lg:hidden"
+          style={{ background: 'var(--xedu-overlay)' }}
           onClick={onClose}
         />
       )}
       {/* Panel */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-white dark:bg-xedu-slate-900 shadow-xl border-l border-xedu-slate-100 dark:border-xedu-slate-800 transform transition-transform duration-200 ease-out',
+          'fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] xedu-surface-panel shadow-xl border-l transform transition-transform duration-200 ease-out',
           open ? 'translate-x-0' : 'translate-x-full',
           'lg:absolute lg:inset-y-0 lg:right-0 lg:translate-x-0 lg:transition-none lg:shadow-none lg:border-l lg:w-[380px] lg:hidden',
           open && 'lg:block',
@@ -279,7 +280,7 @@ export function WorkspaceSection({
   padded = true,
 }: WorkspaceSectionProps) {
   return (
-    <div className={cn('rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 overflow-hidden', className)}>
+    <div className={cn('rounded-xl xedu-surface-panel overflow-hidden', className)}>
       {(title || action) && (
         <div className="flex items-center justify-between px-4 py-2.5 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
           <div className="flex items-center gap-2">

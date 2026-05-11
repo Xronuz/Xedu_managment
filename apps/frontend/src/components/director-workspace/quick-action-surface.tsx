@@ -24,7 +24,7 @@ export function QuickActionSurface({ onOpenCommandPalette, activeAction }: Quick
   return (
     <>
       {/* Desktop dock — centered bottom */}
-      <div className="hidden md:flex fixed bottom-5 left-1/2 -translate-x-1/2 z-30 items-center rounded-xl border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white/95 dark:bg-xedu-slate-900 backdrop-blur-sm shadow-premium-sm overflow-hidden">
+      <div className="hidden md:flex fixed bottom-5 left-1/2 -translate-x-1/2 z-30 items-center rounded-xl xedu-surface-floating overflow-hidden">
         {actions.map((action) => (
           <DockItem
             key={action.id}
@@ -44,7 +44,7 @@ export function QuickActionSurface({ onOpenCommandPalette, activeAction }: Quick
       </div>
 
       {/* Mobile compact bar */}
-      <div className="flex md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-30 items-center gap-0.5 rounded-full border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white/95 dark:bg-xedu-slate-900/95 backdrop-blur-sm shadow-premium-sm overflow-hidden px-1 py-1">
+      <div className="flex md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-30 items-center gap-0.5 rounded-full xedu-surface-floating overflow-hidden px-1 py-1">
         {actions.slice(0, 4).map((action) => (
           <MobileDockItem key={action.id} action={action} />
         ))}

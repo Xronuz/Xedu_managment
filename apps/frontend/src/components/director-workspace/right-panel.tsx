@@ -82,7 +82,8 @@ export function RightContextualPanel({
       {/* Backdrop */}
       <div
         className={cn(
-          'fixed inset-0 bg-black/20 z-40 transition-opacity duration-200',
+          'fixed inset-0 z-40 transition-opacity duration-200',
+          'bg-[var(--xedu-overlay)]',
           open ? 'opacity-100' : 'opacity-0 pointer-events-none'
         )}
         onClick={onClose}
@@ -92,7 +93,7 @@ export function RightContextualPanel({
       {/* Panel */}
       <div
         className={cn(
-          'fixed inset-y-0 right-0 z-50 bg-white dark:bg-xedu-slate-900 border-l border-xedu-slate-100 dark:border-xedu-slate-800',
+          'fixed inset-y-0 right-0 z-50 xedu-surface-panel border-l',
           'w-full md:w-[460px] lg:w-[500px]',
           'transform transition-transform duration-200 ease-out',
           open ? 'translate-x-0' : 'translate-x-full'

@@ -342,7 +342,7 @@ function JoinRequestsPanel({ clubId }: { clubId: string }) {
   return (
     <div className="space-y-2">
       {pending.map((req) => (
-        <div key={req.id} className="flex items-center gap-3 p-3 rounded-lg border bg-white dark:bg-xedu-slate-900">
+        <div key={req.id} className="flex items-center gap-3 p-3 rounded-lg border bg-xedu-bg-elevated">
           <Avatar className="h-9 w-9 shrink-0">
             <AvatarImage src={req.student?.avatarUrl} />
             <AvatarFallback>{req.student?.firstName?.[0]}{req.student?.lastName?.[0]}</AvatarFallback>
@@ -822,7 +822,7 @@ export default function ClubsPage() {
                 <EmptyState icon={Clock} title="Kutilayotgan arizalar yo'q" description="" />
               ) : (
                 (myRequests as any[]).filter((r: any) => r.status === 'PENDING').map((req: any) => (
-                  <div key={req.id} className="flex items-center gap-3 p-4 rounded-lg border bg-white dark:bg-xedu-slate-900">
+                  <div key={req.id} className="flex items-center gap-3 p-4 rounded-lg border bg-xedu-bg-elevated">
                     <div className="h-10 w-10 rounded-xl bg-amber-100 dark:bg-amber-900/20 flex items-center justify-center shrink-0">
                       <Clock className="h-5 w-5 text-amber-600" />
                     </div>

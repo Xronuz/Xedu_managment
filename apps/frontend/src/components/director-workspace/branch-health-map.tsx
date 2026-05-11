@@ -280,7 +280,7 @@ interface WorkspaceBlockProps {
 
 export function WorkspaceBlock({ title, icon: Icon, action, children }: WorkspaceBlockProps) {
   return (
-    <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 overflow-hidden">
+    <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated overflow-hidden">
       <div className="flex items-center justify-between px-4 py-2.5 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
         <div className="flex items-center gap-2">
           <Icon className="h-4 w-4 text-xedu-slate-500" />

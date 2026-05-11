@@ -233,7 +233,7 @@ function FeedSection({
     tone === 'urgent' ? 'bg-xedu-ruby-500' : tone === 'risk' ? 'bg-xedu-amber-500' : 'bg-xedu-slate-300';
 
   return (
-    <div className="border border-xedu-slate-100 dark:border-xedu-slate-800 rounded-xl overflow-hidden bg-white dark:bg-xedu-slate-900">
+    <div className="border border-xedu-slate-100 dark:border-xedu-slate-800 rounded-xl overflow-hidden bg-xedu-bg-elevated">
       <div className="flex items-center gap-2 px-3 py-1.5 border-b border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-slate-50/30 dark:bg-xedu-slate-800">
         <div className={cn('h-1.5 w-1.5 rounded-full', accentColor)} />
         <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-500">{title}</p>

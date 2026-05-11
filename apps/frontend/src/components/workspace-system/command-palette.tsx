@@ -126,13 +126,13 @@ export function CommandPalette({
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[15vh]" onClick={onClose}>
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/30 dark:bg-black/50 backdrop-blur-sm" />
+      <div className="absolute inset-0 backdrop-blur-sm" style={{ background: 'var(--xedu-overlay)' }} />
 
       {/* Modal */}
       <div
         className={cn(
           'relative w-full max-w-xl mx-4 rounded-xl border border-xedu-slate-200 dark:border-xedu-slate-700',
-          'bg-white dark:bg-xedu-slate-900 shadow-2xl overflow-hidden',
+          'bg-xedu-bg-elevated shadow-2xl overflow-hidden',
           className
         )}
         onClick={(e) => e.stopPropagation()}

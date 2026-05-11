@@ -87,7 +87,7 @@ function getPreset(preset: 'this_month' | 'last_month' | 'this_quarter' | 'this_
 function CustomTooltip({ active, payload, label, formatter }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-xl border bg-white/95 dark:bg-xedu-slate-950/95 backdrop-blur-sm p-3 shadow-md text-xs space-y-1 min-w-[140px]">
+    <div className="rounded-xl xedu-surface-floating p-3 text-xs space-y-1 min-w-[140px]">
       <p className="font-semibold text-foreground mb-1.5 border-b pb-1">{label}</p>
       {payload.map((entry: any, i: number) => (
         <p key={i} className="flex justify-between gap-4" style={{ color: entry.color }}>

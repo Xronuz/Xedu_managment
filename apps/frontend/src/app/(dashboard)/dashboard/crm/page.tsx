@@ -67,7 +67,7 @@ function LeadCard({
 
   return (
     <div
-      className={`rounded-xl border bg-white dark:bg-xedu-slate-900 p-3 shadow-sm hover:shadow-sm transition-shadow cursor-pointer group ${
+      className={`rounded-xl border bg-xedu-bg-elevated p-3 shadow-sm hover:shadow-sm transition-shadow cursor-pointer group ${
         isConverted ? 'opacity-70' : ''
       }`}
       onClick={() => onOpenDetail(lead)}

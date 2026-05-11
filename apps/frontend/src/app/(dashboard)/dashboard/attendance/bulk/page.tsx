@@ -211,7 +211,7 @@ export default function BulkAttendancePage() {
 
       {/* Sticky footer */}
       {studentList.length > 0 && classId && (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 rounded-2xl border bg-white/95 dark:bg-xedu-slate-950/95 backdrop-blur px-5 py-3 shadow-md">
+        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 rounded-2xl xedu-surface-floating px-5 py-3">
           <div className="flex gap-3 text-sm">
             <span className="text-green-600 font-semibold"> {counts[AttendanceStatus.PRESENT] ?? 0}</span>
             <span className="text-red-600 font-semibold">❌ {counts[AttendanceStatus.ABSENT] ?? 0}</span>

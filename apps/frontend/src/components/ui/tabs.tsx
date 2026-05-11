@@ -19,7 +19,7 @@ const TabsList = React.forwardRef<
     className={cn(
       'inline-flex h-11 items-center justify-center gap-1 p-1',
       'rounded-2xl bg-black/[0.04] dark:bg-white/[0.06]',
-      'shadow-[inset_0_1px_3px_rgba(0,0,0,0.06)] dark:shadow-[inset_0_1px_3px_rgba(0,0,0,0.30)]',
+      'shadow-[var(--xedu-shadow-inset)]',
       'text-xedu-slate-500 dark:text-xedu-slate-400',
       className,
     )}
@@ -49,7 +49,7 @@ const TabsTrigger = React.forwardRef<
       // Active
       'data-[state=active]:bg-white dark:data-[state=active]:bg-xedu-slate-700',
       'data-[state=active]:text-xedu-slate-800 dark:data-[state=active]:text-xedu-slate-100',
-      'data-[state=active]:shadow-[0_1px_4px_rgba(0,0,0,0.10)] dark:data-[state=active]:shadow-[0_1px_4px_rgba(0,0,0,0.40)]',
+      'data-[state=active]:shadow-premium-sm',
       'data-[state=active]:font-semibold',
       className,
     )}

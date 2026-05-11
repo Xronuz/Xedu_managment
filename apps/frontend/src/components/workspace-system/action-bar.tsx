@@ -92,7 +92,7 @@ export function SecondaryAction({
         'rounded-lg px-3 py-2.5 min-h-[44px]',
         'text-xs font-bold text-xedu-slate-700 dark:text-xedu-slate-300',
         'border border-xedu-slate-200 dark:border-xedu-slate-700',
-        'bg-white dark:bg-xedu-slate-900',
+        'xedu-surface-panel',
         'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800',
         'transition-colors',
         'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -172,7 +172,7 @@ export function DestructiveAction({
         'rounded-lg px-3 py-2.5 min-h-[44px]',
         'text-xs font-bold text-red-600',
         'border border-red-200 dark:border-red-900/30',
-        'bg-white dark:bg-xedu-slate-900',
+        'xedu-surface-panel',
         'hover:bg-red-50 dark:hover:bg-red-900/20',
         'transition-colors',
         'disabled:opacity-50 disabled:cursor-not-allowed',
@@ -292,7 +292,7 @@ export function ContextualActions({ children, className }: ContextualActionsProp
     <div
       className={cn(
         'flex items-center gap-1 rounded-lg border border-xedu-slate-100 dark:border-xedu-slate-800',
-        'bg-white dark:bg-xedu-slate-900 px-1 py-0.5 shadow-sm',
+        'bg-xedu-bg-elevated px-1 py-0.5 shadow-sm',
         className
       )}
     >

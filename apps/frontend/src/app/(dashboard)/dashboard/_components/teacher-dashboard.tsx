@@ -103,7 +103,7 @@ export function TeacherDashboard() {
       <div className="grid gap-4 grid-cols-2 sm:grid-cols-4">
         <Link
           href="/dashboard/attendance"
-          className="group flex items-center gap-3 rounded-2xl border border-xedu-slate-100 bg-white p-4 transition-all duration-[var(--xedu-duration)] hover:border-xedu-slate-200 hover:shadow-sm dark:border-xedu-slate-800 dark:bg-xedu-slate-900"
+          className="group flex items-center gap-3 rounded-2xl border border-xedu-slate-100 bg-xedu-bg-elevated p-4 transition-all duration-[var(--xedu-duration)] hover:border-xedu-slate-200 hover:shadow-sm dark:border-xedu-slate-800"
         >
           <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'var(--xedu-primary-light)' }}>
             <ClipboardCheck className="h-5 w-5" style={{ color: C.primary }} />
@@ -116,7 +116,7 @@ export function TeacherDashboard() {
         </Link>
         <Link
           href="/dashboard/grades"
-          className="group flex items-center gap-3 rounded-2xl border border-xedu-slate-100 bg-white p-4 transition-all duration-[var(--xedu-duration)] hover:border-xedu-slate-200 hover:shadow-sm dark:border-xedu-slate-800 dark:bg-xedu-slate-900"
+          className="group flex items-center gap-3 rounded-2xl border border-xedu-slate-100 bg-xedu-bg-elevated p-4 transition-all duration-[var(--xedu-duration)] hover:border-xedu-slate-200 hover:shadow-sm dark:border-xedu-slate-800"
         >
           <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: ICON_CFG.blue.bg }}>
             <BookOpen className="h-5 w-5" style={{ color: ICON_CFG.blue.icon }} />
@@ -129,7 +129,7 @@ export function TeacherDashboard() {
         </Link>
         <Link
           href="/dashboard/homework"
-          className="group flex items-center gap-3 rounded-2xl border border-xedu-slate-100 bg-white p-4 transition-all duration-[var(--xedu-duration)] hover:border-xedu-slate-200 hover:shadow-sm dark:border-xedu-slate-800 dark:bg-xedu-slate-900"
+          className="group flex items-center gap-3 rounded-2xl border border-xedu-slate-100 bg-xedu-bg-elevated p-4 transition-all duration-[var(--xedu-duration)] hover:border-xedu-slate-200 hover:shadow-sm dark:border-xedu-slate-800"
         >
           <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: ICON_CFG.violet.bg }}>
             <BookMarked className="h-5 w-5" style={{ color: ICON_CFG.violet.icon }} />
@@ -142,7 +142,7 @@ export function TeacherDashboard() {
         </Link>
         <Link
           href="/dashboard/exams"
-          className="group flex items-center gap-3 rounded-2xl border border-xedu-slate-100 bg-white p-4 transition-all duration-[var(--xedu-duration)] hover:border-xedu-slate-200 hover:shadow-sm dark:border-xedu-slate-800 dark:bg-xedu-slate-900"
+          className="group flex items-center gap-3 rounded-2xl border border-xedu-slate-100 bg-xedu-bg-elevated p-4 transition-all duration-[var(--xedu-duration)] hover:border-xedu-slate-200 hover:shadow-sm dark:border-xedu-slate-800"
         >
           <div className="h-10 w-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: '#FEF3C7' }}>
             <GraduationCap className="h-5 w-5 text-amber-600" />

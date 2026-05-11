@@ -448,7 +448,7 @@ export default function LinkParentPage() {
 
 function ParentCard({ parent, onLink }: { parent: User; onLink: () => void }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg border hover:shadow-sm transition-shadow bg-white dark:bg-xedu-slate-900">
+    <div className="flex items-center gap-3 p-3 rounded-lg border hover:shadow-sm transition-shadow bg-xedu-bg-elevated">
       <Avatar className="h-9 w-9 shrink-0">
         <AvatarFallback className="text-xs font-medium bg-pink-100 text-pink-700 dark:bg-pink-900/30 dark:text-pink-300">
           {getInitials(parent.firstName, parent.lastName)}
@@ -478,7 +478,7 @@ function ParentCard({ parent, onLink }: { parent: User; onLink: () => void }) {
 
 function StudentCard({ student }: { student: User }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-lg border bg-white dark:bg-xedu-slate-900">
+    <div className="flex items-center gap-3 p-3 rounded-lg border bg-xedu-bg-elevated">
       <Avatar className="h-9 w-9 shrink-0">
         <AvatarFallback className="text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
           {getInitials(student.firstName, student.lastName)}

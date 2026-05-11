@@ -396,7 +396,7 @@ function ListView({
                 'relative inline-flex items-center gap-1 rounded-full px-4 py-1.5 text-sm font-medium transition-colors',
                 active
                   ? 'bg-primary text-primary-foreground'
-                  : 'bg-white text-xedu-slate-600 hover:bg-xedu-slate-50 dark:bg-xedu-slate-900 dark:text-xedu-slate-300 dark:hover:bg-xedu-slate-800 shadow-[0_1px_3px_rgba(0,0,0,0.04)]'
+                  : 'bg-xedu-bg-elevated text-xedu-slate-600 hover:bg-xedu-slate-50 dark:bg-xedu-slate-900 dark:text-xedu-slate-300 dark:hover:bg-xedu-slate-800 shadow-sm'
               )}
             >
               {label}
@@ -999,7 +999,7 @@ export function ScheduleWorkspace() {
             <select
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha sinflar</option>
               {classes.map((c: any) => (
@@ -1010,7 +1010,7 @@ export function ScheduleWorkspace() {
             <select
               value={filterTeacher}
               onChange={(e) => setFilterTeacher(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha o'qituvchilar</option>
               {teachers.map((t: any) => (

@@ -542,7 +542,7 @@ function KPICard({ kpiData }: { kpiData: any }) {
   return (
     <Link
       href="/dashboard/kpi"
-      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
+      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
     >
       <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>KPI</p>
@@ -565,7 +565,7 @@ function AiRiskCard({ aiSummary }: { aiSummary: any }) {
   return (
     <Link
       href="/dashboard/ai-analytics"
-      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
+      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
     >
       <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>AI Tahlil</p>
@@ -590,7 +590,7 @@ function EduCoinCard({ coinStats }: { coinStats: any }) {
   return (
     <Link
       href="/dashboard/coins"
-      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
+      className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
     >
       <div className="flex items-center justify-between mb-2">
         <p className="text-[10px] font-bold uppercase tracking-[0.12em]" style={{ color: C.muted }}>EduCoin</p>

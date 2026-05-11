@@ -288,7 +288,7 @@ export default function LibraryPage() {
                   <ChevronsUpDown className="h-4 w-4 text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0 opacity-50" />
                 </div>
                 {studentSearch && (
-                  <div className="absolute z-50 mt-1 w-full rounded-md border bg-white dark:bg-xedu-slate-900 shadow-md max-h-48 overflow-y-auto">
+                  <div className="absolute z-50 mt-1 w-full rounded-md border bg-xedu-bg-elevated shadow-md max-h-48 overflow-y-auto">
                     {students
                       .filter((s: any) =>
                         `${s.firstName} ${s.lastName}`.toLowerCase().includes(studentSearch.toLowerCase())

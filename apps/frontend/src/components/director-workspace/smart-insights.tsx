@@ -170,7 +170,7 @@ export function SmartInsights({ data, maxInsights = 4 }: SmartInsightsProps) {
   if (insights.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900 overflow-hidden">
+    <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated overflow-hidden">
       <div className="flex items-center gap-2 px-3 py-2 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
         <Lightbulb className="h-3 w-3 text-xedu-slate-400" />
         <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-xedu-slate-500">Tahliliy xulosalar</p>

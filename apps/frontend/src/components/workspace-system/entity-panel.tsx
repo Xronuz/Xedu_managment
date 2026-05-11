@@ -106,13 +106,13 @@ export function EntityPanel({
   return (
     <>
       {/* Mobile backdrop */}
-      <div className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40 lg:hidden" onClick={onClose} />
+      <div className="fixed inset-0 z-40 lg:hidden" style={{ background: 'var(--xedu-overlay)' }} onClick={onClose} />
 
       {/* Panel */}
       <div
         className={cn(
           'fixed inset-y-0 right-0 z-50 w-full sm:w-[440px]',
-          'bg-white dark:bg-xedu-slate-900',
+          'bg-xedu-bg-elevated',
           'border-l border-xedu-slate-100 dark:border-xedu-slate-800',
           'shadow-2xl',
           'flex flex-col',

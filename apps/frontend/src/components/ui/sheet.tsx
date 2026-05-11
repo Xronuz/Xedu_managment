@@ -101,7 +101,7 @@ export function Sheet({
           {/* Panel */}
           <div
             className={cn(
-              'fixed z-50 flex flex-col bg-white dark:bg-xedu-slate-900 shadow-md overflow-y-auto',
+              'fixed z-50 flex flex-col bg-xedu-bg-elevated shadow-md overflow-y-auto',
               sideClasses[side],
             )}
           >
@@ -186,7 +186,7 @@ export function SheetContent({ side = 'right', className, children, hideClose = 
       {/* Panel */}
       <div
         className={cn(
-          'fixed z-50 flex flex-col bg-white dark:bg-xedu-slate-900 shadow-md',
+          'fixed z-50 flex flex-col bg-xedu-bg-elevated shadow-md',
           sideClasses[side],
           className,
         )}

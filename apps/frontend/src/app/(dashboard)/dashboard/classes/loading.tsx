@@ -9,7 +9,7 @@ export default function ClassesLoading() {
       </div>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="rounded-xl border bg-white dark:bg-xedu-slate-900 p-5 space-y-4">
+          <div key={i} className="rounded-xl border bg-xedu-bg-elevated p-5 space-y-4">
             <div className="flex justify-between">
               <Skeleton className="h-6 w-24" />
               <Skeleton className="h-5 w-16 rounded-full" />

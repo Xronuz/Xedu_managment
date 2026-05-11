@@ -285,7 +285,7 @@ export function StudentsWorkspace() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Ism, familiya, email, telefon..."
-              className="w-full h-8 pl-8 pr-3 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-800 dark:text-xedu-slate-200 outline-none focus:ring-1 focus:ring-xedu-primary"
+              className="w-full h-8 pl-8 pr-3 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-800 dark:text-xedu-slate-200 outline-none focus:ring-1 focus:ring-xedu-primary"
             />
             {search && (
               <button onClick={() => { setSearch(''); }} className="absolute right-2 top-1/2 -translate-y-1/2">
@@ -341,7 +341,7 @@ export function StudentsWorkspace() {
             <select
               value={filterClass}
               onChange={(e) => setFilterClass(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha sinflar</option>
               {classList.map((c: any) => (
@@ -352,7 +352,7 @@ export function StudentsWorkspace() {
             <select
               value={filterBranch}
               onChange={(e) => setFilterBranch(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha filiallar</option>
               {branches.map((b: any) => (
@@ -363,7 +363,7 @@ export function StudentsWorkspace() {
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-white dark:bg-xedu-slate-900 text-xs text-xedu-slate-700"
+              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha holatlar</option>
               <option value="active">Faol</option>

@@ -328,7 +328,7 @@ function ScheduleTab({ studentId }: { studentId: string }) {
             {lessons.map((lesson) => (
               <div
                 key={lesson.id}
-                className="flex items-center gap-3 p-3 rounded-lg border bg-white dark:bg-xedu-slate-900 hover:bg-accent/50 transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg border bg-xedu-bg-elevated hover:bg-accent/50 transition-colors"
               >
                 <Avatar className="h-10 w-10 shrink-0">
                   <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
@@ -495,7 +495,7 @@ function HomeworkTab({ studentId }: { studentId: string }) {
     return (
       <div
         className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
-          overdue ? 'border-xedu-ruby/20 bg-xedu-ruby/5' : 'bg-white dark:bg-xedu-slate-900 hover:bg-accent/50'
+          overdue ? 'border-xedu-ruby/20 bg-xedu-ruby/5' : 'bg-xedu-bg-elevated hover:bg-accent/50'
         }`}
       >
         <div

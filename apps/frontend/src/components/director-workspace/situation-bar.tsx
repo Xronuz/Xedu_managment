@@ -127,13 +127,13 @@ function SituationItem({ icon: Icon, label, value, sub, tone = 'calm', href, onC
       )}
     >
       <div className="relative">
-        <Icon className="h-3.5 w-3.5 text-xedu-slate-400" />
+        <Icon className="h-3.5 w-3.5 text-xedu-slate-500" />
         {(value !== undefined && value > 0) && (
           <div className={cn('absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full', dotColor)} />
         )}
       </div>
       <div className="flex items-baseline gap-1.5">
-        <span className="text-[11px] font-semibold text-xedu-slate-600 dark:text-xedu-slate-400 whitespace-nowrap">
+        <span className="text-[11px] font-semibold text-xedu-slate-700 dark:text-xedu-slate-300 whitespace-nowrap">
           {label}
         </span>
         {value !== undefined && value > 0 && (
@@ -142,7 +142,7 @@ function SituationItem({ icon: Icon, label, value, sub, tone = 'calm', href, onC
           </span>
         )}
         {sub && (
-          <span className="text-[11px] font-medium text-xedu-slate-500 whitespace-nowrap">{sub}</span>
+          <span className="text-[11px] font-medium text-xedu-slate-600 dark:text-xedu-slate-400 whitespace-nowrap">{sub}</span>
         )}
       </div>
     </Wrapper>

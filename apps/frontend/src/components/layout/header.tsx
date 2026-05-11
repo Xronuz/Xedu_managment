@@ -63,7 +63,7 @@ export function Header() {
           className={cn(
             'hidden md:flex items-center gap-2.5 rounded-full h-[42px] px-4 w-[260px] lg:w-[360px] transition-colors cursor-pointer',
             'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
-            'border border-black/[0.06] dark:border-white/[0.06]',
+            'border border-xedu-border dark:border-xedu-border',
             'hover:bg-xedu-slate-200/60 dark:hover:bg-xedu-slate-700/60',
           )}
         >
@@ -89,7 +89,7 @@ export function Header() {
             'relative flex h-[42px] w-[42px] items-center justify-center rounded-full transition-colors',
             'text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-slate-700 dark:hover:text-xedu-slate-200',
             'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
-            'border border-black/[0.06] dark:border-white/[0.06]',
+            'border border-xedu-border dark:border-xedu-border',
           )}
         >
           <Sun  className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -105,7 +105,7 @@ export function Header() {
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary/40',
               'transition-all duration-200 hover:shadow-sm',
               'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
-              'border border-black/[0.06] dark:border-white/[0.06]',
+              'border border-xedu-border dark:border-xedu-border',
             )}>
               <Avatar className={cn('h-8 w-8 ring-2 ring-offset-1 ring-offset-xedu-bg-elevated dark:ring-offset-xedu-slate-900 shrink-0', ringColor)}>
                 <AvatarImage src={user?.avatarUrl ?? undefined} />

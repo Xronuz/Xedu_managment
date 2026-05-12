@@ -116,15 +116,28 @@ http://platform.cybertron.uz {
 }
 
 # =============================
-# WORKLOAD - workload.cybertron.uz (PM2 port 3002)
+# WORKLOAD - workload.cybertron.uz
+# /api/* -> backend (3002), rest -> frontend (3003)
 # =============================
 http://workload.cybertron.uz {
 
     encode zstd gzip
 
-    reverse_proxy host.docker.internal:3002 {
-        header_up X-Real-IP {http.request.remote.host}
-        header_up Host      {http.request.host}
+    # API calls -> backend
+    @api path /api/*
+    handle @api {
+        reverse_proxy host.docker.internal:3002 {
+            header_up X-Real-IP {http.request.remote.host}
+            header_up Host      {http.request.host}
+        }
+    }
+
+    # Everything else -> frontend (vite preview)
+    handle {
+        reverse_proxy host.docker.internal:3003 {
+            header_up X-Real-IP {http.request.remote.host}
+            header_up Host      {http.request.host}
+        }
     }
 
     log {

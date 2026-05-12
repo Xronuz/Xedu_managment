@@ -294,6 +294,14 @@ networks:
     # DB, Redis, Backend — tashqaridan yopiq
     name: eduplatform-internal
     internal: true
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+          gateway: 172.18.0.1
   external:
-    # Frontend + Nginx — tashqariga ochiq
+    # Frontend + Caddy — tashqariga ochiq
     name: eduplatform-external
+    ipam:
+      config:
+        - subnet: 172.19.0.0/16
+          gateway: 172.19.0.1

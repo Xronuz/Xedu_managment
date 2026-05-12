@@ -246,6 +246,8 @@ services:
       dockerfile: caddy/Dockerfile
     container_name: eduplatform-caddy
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "80:80"     # HTTP (asosiy port)
       # 443: DNS + Cloudflare tayyor bo'lgach qo'shing:

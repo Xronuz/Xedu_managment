@@ -122,7 +122,7 @@ http://workload.cybertron.uz {
 
     encode zstd gzip
 
-    reverse_proxy 172.17.0.1:3002 {
+    reverse_proxy host.docker.internal:3002 {
         header_up X-Real-IP {http.request.remote.host}
         header_up Host      {http.request.host}
     }

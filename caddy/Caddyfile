@@ -1,5 +1,5 @@
 # EduPlatform - Caddyfile
-# Cloudflare proxy -> HTTP origin (auto_https off)
+# HTTP only (Cloudflare handles SSL)
 # platform.cybertron.uz  -> Next.js frontend + NestJS backend
 # workload.cybertron.uz  -> PM2 workload (port 3002)
 
@@ -11,9 +11,9 @@
 }
 
 # =============================
-# PLATFORM - platform.cybertron.uz
+# PLATFORM - platform.cybertron.uz (HTTP)
 # =============================
-platform.cybertron.uz {
+http://platform.cybertron.uz {
 
     header {
         X-Frame-Options             "SAMEORIGIN"
@@ -118,7 +118,7 @@ platform.cybertron.uz {
 # =============================
 # WORKLOAD - workload.cybertron.uz (PM2 port 3002)
 # =============================
-workload.cybertron.uz {
+http://workload.cybertron.uz {
 
     encode zstd gzip
 

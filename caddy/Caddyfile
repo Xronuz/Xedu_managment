@@ -117,7 +117,7 @@ http://platform.cybertron.uz {
 
 # =============================
 # WORKLOAD - workload.cybertron.uz
-# /api/* -> backend (3002), rest -> frontend (3003 vite preview)
+# /api/* -> backend (172.18.0.1:3002), rest -> vite preview (172.18.0.1:3003)
 # =============================
 http://workload.cybertron.uz {
 
@@ -126,7 +126,7 @@ http://workload.cybertron.uz {
     # API calls -> workload Express backend
     @api path /api/*
     handle @api {
-        reverse_proxy host.docker.internal:3002 {
+        reverse_proxy 172.18.0.1:3002 {
             header_up X-Real-IP {http.request.remote.host}
             header_up Host      {http.request.host}
         }
@@ -135,7 +135,7 @@ http://workload.cybertron.uz {
     # Everything else -> workload Vite preview frontend
     # Host header set to localhost to bypass Vite host check
     handle {
-        reverse_proxy host.docker.internal:3003 {
+        reverse_proxy 172.18.0.1:3003 {
             header_up X-Real-IP {http.request.remote.host}
             header_up Host      localhost
         }

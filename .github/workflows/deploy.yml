@@ -1,4 +1,4 @@
-name: Deploy to Server
+name: Deploy — Xedu_managment
 
 on:
   push:
@@ -7,87 +7,113 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
 
-      # 1. Eng yangi kodni yuklab olish
+      # ── 1. Eng yangi kodni yuklab olish ─────────────────────────────────────
       - name: Pull latest code
         run: |
           set -e
           cd /opt/eduplatform
           git fetch origin main
           git reset --hard origin/main
+          echo "HEAD: $(git log --oneline -1)"
 
-      # 2. Containerlarni to'xtatish — MA'LUMOTLAR (volumes) O'CHIRILMAYDI
-      #    caddy_data volumeni ASLO o'chirmang — TLS sertifikatlar shu yerda!
+      # ── 2. Pre-build: disk tekshiruv va kesh tozalash ───────────────────────
+      - name: Pre-build diagnostics & cleanup
+        run: |
+          echo "=== DISK BEFORE ==="
+          df -h /
+          echo "=== DOCKER DISK ==="
+          docker system df
+          echo "=== CLEANING BUILD CACHE ==="
+          docker image prune -f || true
+          docker builder prune --keep-storage=5gb -f || true
+          echo "=== DISK AFTER ==="
+          df -h / | tail -1
+          echo "=== COMPOSE CONFIG VALIDATE ==="
+          cd /opt/eduplatform
+          docker compose -f docker-compose.selfhost.yml config --quiet \
+            && echo "Config OK" \
+            || { echo "Config ERROR — aborting"; exit 1; }
+
+      # ── 3. Containerlarni to'xtatish (volumelar saqlanadi) ─────────────────
+      # OGOHLANTIRISH: hech qachon -v flagini qo'shmang — DB o'chib ketadi!
       - name: Stop containers (preserve volumes)
         run: |
           cd /opt/eduplatform
           docker compose -f docker-compose.selfhost.yml down --remove-orphans 2>/dev/null || true
-          echo "Containers stopped. Volumes (DB, Redis, Caddy TLS certs) preserved."
+          echo "Containers stopped. DB/Redis/Caddy volumes preserved."
 
-      # 3. Imagelarni qayta build qilish va barcha servicelarni ishga tushirish
+      # ── 4. Imagelarni build qilib ishga tushirish ───────────────────────────
       - name: Build images and start all services
         run: |
           set -e
           cd /opt/eduplatform
           docker compose -f docker-compose.selfhost.yml up -d --build
+          echo "All services started"
 
-      # 4. Caddy port 80 dan javob berishini kutish (real external check)
-      #    Port 80 → 443 redirect (HTTP 301) yoki to'g'ridan API 200 — ikkalasi ham muvaffaqiyat
-      - name: Wait for caddy on port 80
+      # ── 5. Sog'liqni tekshirish — Caddy port 80 ─────────────────────────────
+      - name: Wait for healthy (up to 5 min)
         run: |
           cd /opt/eduplatform
-          echo "Waiting for caddy on port 80 (up to 5 min)..."
+          echo "Waiting for API health..."
           for i in $(seq 1 60); do
-            STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:80/api/health 2>/dev/null || echo "000")
-            if [ "$STATUS" = "200" ] || [ "$STATUS" = "301" ] || [ "$STATUS" = "302" ] || [ "$STATUS" = "307" ]; then
-              echo "Caddy healthy — HTTP $STATUS after $((i * 5))s"
-              break
+            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+              http://localhost:80/api/health 2>/dev/null || echo "000")
+            if echo "$STATUS" | grep -qE "^(200|301|302|307)$"; then
+              echo "Healthy — HTTP $STATUS after $((i * 5))s"
+              exit 0
             fi
             if [ "$i" -eq 60 ]; then
-              echo "ERROR: Caddy did not become healthy in 5 minutes (last HTTP status: $STATUS)"
-              echo ""
-              echo "=== PORT STATE ==="
-              ss -tlnp | grep -E ':80|:443' || echo "(nothing listening on :80/:443)"
-              echo ""
-              echo "=== CADDY LOGS ==="
-              docker compose -f docker-compose.selfhost.yml logs --tail=50 caddy 2>/dev/null || true
-              echo ""
-              echo "=== FRONTEND LOGS ==="
-              docker compose -f docker-compose.selfhost.yml logs --tail=30 frontend 2>/dev/null || true
-              echo ""
-              echo "=== BACKEND LOGS ==="
-              docker compose -f docker-compose.selfhost.yml logs --tail=30 backend 2>/dev/null || true
+              echo "ERROR: not healthy after 5 min (last: HTTP $STATUS)"
               exit 1
             fi
-            echo "  ${i}/60 — HTTP ${STATUS} — $((i * 5))s elapsed..."
+            printf "  [%02d/60] HTTP %s — %ds\n" "$i" "$STATUS" "$((i * 5))"
             sleep 5
           done
 
-      # 5. Har doim ko'rsatiladigan holat
-      - name: Status and logs
+      # ── 6. workload.cybertron.uz — PM2 tekshiruvi ──────────────────────────
+      - name: Check workload PM2
+        run: |
+          WPORT=${WORKLOAD_PORT:-3002}
+          STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+            http://localhost:${WPORT}/ 2>/dev/null || echo "000")
+          if [ "$STATUS" != "000" ]; then
+            echo "workload PM2 port ${WPORT}: HTTP $STATUS — OK"
+          else
+            echo "WARN: workload PM2 port ${WPORT} not responding"
+            pm2 list 2>/dev/null || true
+          fi
+
+      # ── 7. Holat va loglar (har doim ko'rsatiladi) ─────────────────────────
+      - name: Status & logs
         if: always()
         run: |
           cd /opt/eduplatform
-          echo "=== PORT 80/443 STATE ==="
-          ss -tlnp | grep -E ':80|:443' || echo "(nothing listening on :80/:443)"
+          echo "=== GIT ==="
+          git log --oneline -3
+          echo ""
+          echo "=== PORTS ==="
+          ss -tlnp | grep -E ':80|:443|:3002' | awk '{print $4, $6}' || true
           echo ""
           echo "=== CONTAINERS ==="
-          docker compose -f docker-compose.selfhost.yml ps
+          docker compose -f docker-compose.selfhost.yml ps \
+            --format "table {{.Name}}\t{{.Status}}\t{{.Ports}}"
           echo ""
           echo "=== MIGRATE LOGS ==="
-          docker compose -f docker-compose.selfhost.yml logs --tail=80 migrate 2>/dev/null || true
+          docker compose -f docker-compose.selfhost.yml logs --tail=60 migrate 2>/dev/null || true
           echo ""
-          echo "=== BACKEND LOGS (last 50) ==="
-          docker compose -f docker-compose.selfhost.yml logs --tail=50 backend 2>/dev/null || true
+          echo "=== BACKEND (last 40) ==="
+          docker compose -f docker-compose.selfhost.yml logs --tail=40 backend 2>/dev/null || true
           echo ""
-          echo "=== CADDY LOGS (last 30) ==="
-          docker compose -f docker-compose.selfhost.yml logs --tail=30 caddy 2>/dev/null || true
+          echo "=== CADDY (last 20) ==="
+          docker compose -f docker-compose.selfhost.yml logs --tail=20 caddy 2>/dev/null || true
           echo ""
-          echo "=== FRONTEND LOGS (last 20) ==="
-          docker compose -f docker-compose.selfhost.yml logs --tail=20 frontend 2>/dev/null || true
+          echo "=== FRONTEND (last 10) ==="
+          docker compose -f docker-compose.selfhost.yml logs --tail=10 frontend 2>/dev/null || true
           echo ""
-          echo "=== DISK USAGE ==="
-          docker system df 2>/dev/null || true
+          echo "=== DISK ==="
+          df -h / | tail -1
+          docker system df

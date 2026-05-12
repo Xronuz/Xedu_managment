@@ -1,8 +1,10 @@
-# EduPlatform - Caddyfile (HTTPS)
+# EduPlatform - Caddyfile
+# Cloudflare proxy -> HTTP origin (auto_https off)
 # platform.cybertron.uz  -> Next.js frontend + NestJS backend
 # workload.cybertron.uz  -> PM2 workload (port 3002)
 
 {
+    auto_https off
     servers {
         protocols h1 h2
     }
@@ -18,7 +20,6 @@ platform.cybertron.uz {
         X-Content-Type-Options      "nosniff"
         X-XSS-Protection            "1; mode=block"
         Referrer-Policy             "strict-origin-when-cross-origin"
-        Strict-Transport-Security   "max-age=31536000; includeSubDomains"
         -Server
     }
 

@@ -249,8 +249,8 @@ services:
     ports:
       - "80:80"     # HTTP (asosiy port)
       # 443: DNS + Cloudflare tayyor bo'lgach qo'shing:
-      # - "443:443"
-      # - "443:443/udp"  # HTTP/3 (QUIC)
+      - "443:443"
+      - "443:443/udp"  # HTTP/3 (QUIC)
     volumes:
       - ./caddy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data       # Caddy ma'lumotlar (kelajakda TLS sertifikatlar)

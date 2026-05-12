@@ -1,5 +1,6 @@
 'use client';
 
+import React, { memo } from 'react';
 import { X, Users, GraduationCap, ClipboardCheck, AlertTriangle, Wallet } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { BranchDetail } from './right-panel';
@@ -19,7 +20,7 @@ interface BranchComparisonProps {
   onRemove: (id: string) => void;
 }
 
-export function BranchComparison({
+export const BranchComparison = memo(function BranchComparison({
   branches,
   selectedIds,
   allUsers,
@@ -128,7 +129,7 @@ export function BranchComparison({
       </div>
     </div>
   );
-}
+});
 
 function CompareRow({
   label,

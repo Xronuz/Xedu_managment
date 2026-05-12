@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, memo } from 'react';
 import {
   Building2, ChevronRight, Users, GraduationCap, MapPin,
   Eye, FileText, AlertTriangle, Clock, BarChart3,
@@ -24,7 +24,7 @@ interface BranchHealthMapProps {
   onToggleCompare?: (id: string) => void;
 }
 
-export function BranchHealthMap({
+export const BranchHealthMap = memo(function BranchHealthMap({
   branches,
   allUsers,
   pendingLeaves = [],
@@ -37,6 +37,59 @@ export function BranchHealthMap({
   onToggleCompare,
 }: BranchHealthMapProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  // ── Precompute branch metrics in O(n) instead of O(n²) ──────────────
+  const branchMetrics = useMemo(() => {
+    const metrics = new Map<string, {
+      students: number;
+      teachers: number;
+      staff: number;
+      alerts: number;
+      pending: number;
+    }>();
+
+    // Index users by branch
+    const usersByBranch = new Map<string, any[]>();
+    for (const u of allUsers) {
+      if (!u.branchId) continue;
+      const list = usersByBranch.get(u.branchId);
+      if (list) list.push(u);
+      else usersByBranch.set(u.branchId, [u]);
+    }
+
+    // Index discipline by branch
+    const disciplineByBranch = new Map<string, number>();
+    for (const d of pendingDiscipline) {
+      const bid = d.student?.branchId;
+      if (bid) disciplineByBranch.set(bid, (disciplineByBranch.get(bid) || 0) + 1);
+    }
+
+    // Index leaves by branch
+    const leavesByBranch = new Map<string, number>();
+    for (const l of pendingLeaves) {
+      const bid = l.requester?.branchId;
+      if (bid) leavesByBranch.set(bid, (leavesByBranch.get(bid) || 0) + 1);
+    }
+
+    for (const branch of branches) {
+      const branchUsers = usersByBranch.get(branch.id) || [];
+      let students = 0, teachers = 0, staff = 0;
+      for (const u of branchUsers) {
+        if (u.role === 'student') students++;
+        else if (u.role === 'teacher' || u.role === 'class_teacher') teachers++;
+        else if (u.role !== 'parent') staff++;
+      }
+      metrics.set(branch.id, {
+        students,
+        teachers,
+        staff,
+        alerts: disciplineByBranch.get(branch.id) || 0,
+        pending: leavesByBranch.get(branch.id) || 0,
+      });
+    }
+
+    return metrics;
+  }, [branches, allUsers, pendingDiscipline, pendingLeaves]);
 
   if (isLoading) {
     return (
@@ -69,13 +122,9 @@ export function BranchHealthMap({
     >
       <div className="divide-y divide-xedu-slate-100 dark:divide-xedu-slate-800">
         {branches.map((branch) => {
-          const branchUsers = allUsers.filter((u: any) => u.branchId === branch.id);
-          const students = branchUsers.filter((u: any) => u.role === 'student').length;
-          const teachers = branchUsers.filter((u: any) => ['teacher', 'class_teacher'].includes(u.role)).length;
-          const staff = branchUsers.filter((u: any) => !['student', 'teacher', 'class_teacher', 'parent'].includes(u.role)).length;
+          const m = branchMetrics.get(branch.id)!;
+          const { students, teachers, staff, alerts: branchAlerts, pending: branchPending } = m;
 
-          const branchAlerts = pendingDiscipline.filter((d: any) => d.student?.branchId === branch.id).length;
-          const branchPending = pendingLeaves.filter((l: any) => l.requester?.branchId === branch.id).length;
           const hasAttention = branchAlerts > 0 || branchPending > 0;
           const isSelected = selectedBranchId === branch.id;
           const isHovered = hoveredId === branch.id;
@@ -85,28 +134,23 @@ export function BranchHealthMap({
           const pressureScore = (branchAlerts * 2 + branchPending) / Math.max(students + teachers, 1);
           const pressureLevel = pressureScore > 0.1 ? 'critical' : pressureScore > 0.03 ? 'elevated' : 'normal';
 
+          const branchWithCounts: BranchDetail = {
+            ...branch,
+            studentCount: students,
+            teacherCount: teachers,
+            staffCount: staff,
+          };
+
           return (
             <div
               key={branch.id}
               onMouseEnter={() => setHoveredId(branch.id)}
               onMouseLeave={() => setHoveredId(null)}
-              onClick={() =>
-                onSelectBranch({
-                  ...branch,
-                  studentCount: students,
-                  teacherCount: teachers,
-                  staffCount: staff,
-                })
-              }
+              onClick={() => onSelectBranch(branchWithCounts)}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  onSelectBranch({
-                    ...branch,
-                    studentCount: students,
-                    teacherCount: teachers,
-                    staffCount: staff,
-                  });
+                  onSelectBranch(branchWithCounts);
                 }
               }}
               role="button"
@@ -170,13 +214,13 @@ export function BranchHealthMap({
                   <span className="text-sm font-bold tabular-nums text-xedu-slate-900 dark:text-xedu-slate-100">
                     {students.toLocaleString()}
                   </span>
-                  <span className="text-2xs text-xedu-slate-400 ml-1">o'quvchi</span>
+                  <span className="text-2xs text-xedu-slate-400 ml-1">o&apos;quvchi</span>
                 </div>
                 <div className="text-right">
                   <span className="text-xs font-semibold tabular-nums text-xedu-slate-500">
                     {teachers}
                   </span>
-                  <span className="text-2xs text-xedu-slate-400 ml-1">o'qituvchi</span>
+                  <span className="text-2xs text-xedu-slate-400 ml-1">o&apos;qituvchi</span>
                 </div>
                 {branchAlerts > 0 && (
                   <span className="flex items-center gap-0.5 text-2xs font-bold text-xedu-ruby-500 shrink-0">
@@ -202,14 +246,7 @@ export function BranchHealthMap({
                 <ActionBtn
                   icon={Eye}
                   label="Ko'rish"
-                  onClick={() =>
-                    onSelectBranch({
-                      ...branch,
-                      studentCount: students,
-                      teacherCount: teachers,
-                      staffCount: staff,
-                    })
-                  }
+                  onClick={() => onSelectBranch(branchWithCounts)}
                 />
                 <ActionBtn
                   icon={FileText}
@@ -238,7 +275,7 @@ export function BranchHealthMap({
       </div>
     </WorkspaceBlock>
   );
-}
+});
 
 function OpIndicator({
   icon: Icon,
@@ -262,7 +299,7 @@ function OpIndicator({
   );
 }
 
-function ActionBtn({
+const ActionBtn = memo(function ActionBtn({
   icon: Icon,
   label,
   onClick,
@@ -285,7 +322,7 @@ function ActionBtn({
       <span>{label}</span>
     </Wrapper>
   );
-}
+});
 
 interface WorkspaceBlockProps {
   title: string;
@@ -294,7 +331,7 @@ interface WorkspaceBlockProps {
   children: React.ReactNode;
 }
 
-export function WorkspaceBlock({ title, icon: Icon, action, children }: WorkspaceBlockProps) {
+export const WorkspaceBlock = memo(function WorkspaceBlock({ title, icon: Icon, action, children }: WorkspaceBlockProps) {
   return (
     <div className="rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-xedu-border bg-xedu-slate-50/50 dark:bg-xedu-slate-900/20">
@@ -314,4 +351,4 @@ export function WorkspaceBlock({ title, icon: Icon, action, children }: Workspac
       {children}
     </div>
   );
-}
+});

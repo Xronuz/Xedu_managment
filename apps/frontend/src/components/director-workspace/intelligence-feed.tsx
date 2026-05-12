@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo, memo } from 'react';
 import {
   BarChart3, Calendar, AlertTriangle, Activity, CheckCircle2,
   Info, ArrowRight, Clock, ShieldAlert, TrendingDown, Zap,
@@ -27,7 +28,7 @@ interface IntelligenceFeedProps {
   isLoading: boolean;
 }
 
-export function IntelligenceFeed({
+export const IntelligenceFeed = memo(function IntelligenceFeed({
   aiSummary,
   pendingLeaves = [],
   pendingDiscipline = [],
@@ -36,6 +37,102 @@ export function IntelligenceFeed({
   upcomingExams = 0,
   isLoading,
 }: IntelligenceFeedProps) {
+  // ── Build operational sections — memoized ──────────────────────────────────
+  const { attentionItems, riskItems, eventItems, weekItems } = useMemo(() => {
+    const critical = aiSummary?.riskDistribution?.critical ?? 0;
+    const high = aiSummary?.riskDistribution?.high ?? 0;
+    const atRisk = critical + high;
+    const totalPending = pendingLeaves.length + pendingDiscipline.length;
+    const presentPct = attendanceSummary?.presentPct ?? 0;
+
+    const attentionItems: StreamItem[] = [];
+    if (totalPending > 0) {
+      attentionItems.push({
+        id: 'pending-leaves',
+        priority: 'high',
+        title: `${pendingLeaves.length} ta ta'til so'rovi kutilmoqda`,
+        meta: "Tasdiqlash talab etiladi",
+        href: '/dashboard/leave-requests',
+        action: "Ko'rish",
+      });
+    }
+    if (pendingDiscipline.length > 0) {
+      attentionItems.push({
+        id: 'pending-discipline',
+        priority: 'high',
+        title: `${pendingDiscipline.length} ta intizom holati hal etilmagan`,
+        meta: 'Tezkor yechim talab etiladi',
+        href: '/dashboard/discipline',
+        action: "Ko'rish",
+      });
+    }
+    if (presentPct > 0 && presentPct < 75) {
+      attentionItems.push({
+        id: 'low-attendance',
+        priority: 'medium',
+        title: `Davomat pasaydi: ${presentPct}%`,
+        meta: `${attendanceSummary?.totalStudents ?? 0} ta o'quvchidan`,
+        href: '/dashboard/attendance',
+        action: 'Tahlil',
+      });
+    }
+
+    const riskItems: StreamItem[] = [];
+    if (atRisk > 0) {
+      riskItems.push({
+        id: 'at-risk',
+        priority: critical > 0 ? 'critical' : 'high',
+        title: `${atRisk} ta o'quvchi xavf ostida`,
+        meta: critical > 0 ? `${critical} ta kritik holat` : `${high} ta yuqori xavf`,
+        href: '/dashboard/ai-analytics',
+        action: 'Tahlil',
+      });
+    }
+    if (aiSummary?.averages?.gpa != null && aiSummary.averages.gpa < 60) {
+      riskItems.push({
+        id: 'low-gpa',
+        priority: 'medium',
+        title: `O'rtacha GPA pas: ${aiSummary.averages.gpa.toFixed(1)}`,
+        meta: "Akademik qo'llab-quvvatlash zarur",
+        href: '/dashboard/ai-analytics',
+        action: 'Tahlil',
+      });
+    }
+
+    const eventItems: StreamItem[] = [];
+    if (upcomingExams > 0) {
+      eventItems.push({
+        id: 'upcoming-exams',
+        priority: 'low',
+        title: `${upcomingExams} ta imtihon yaqinlashmoqda`,
+        meta: 'Keyingi 7 kun ichida',
+        href: '/dashboard/exams',
+        action: 'Jadval',
+      });
+    }
+    if ((branches as any[]).length > 1) {
+      eventItems.push({
+        id: 'branches-active',
+        priority: 'low',
+        title: `${branches.length} ta filial faol`,
+        meta: 'Umumiy monitoring davom etmoqda',
+        href: '/dashboard/branches',
+      });
+    }
+
+    const dayLabel = new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' });
+    const weekItems: StreamItem[] = [
+      {
+        id: 'today',
+        priority: 'low',
+        title: 'Bugun',
+        meta: dayLabel,
+      },
+    ];
+
+    return { attentionItems, riskItems, eventItems, weekItems };
+  }, [aiSummary, pendingLeaves, pendingDiscipline, attendanceSummary, branches, upcomingExams]);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -48,104 +145,6 @@ export function IntelligenceFeed({
       </div>
     );
   }
-
-  // ── Build operational sections ─────────────────────────────────────────────
-  const critical = aiSummary?.riskDistribution?.critical ?? 0;
-  const high = aiSummary?.riskDistribution?.high ?? 0;
-  const atRisk = critical + high;
-
-  const totalPending = pendingLeaves.length + pendingDiscipline.length;
-  const presentPct = attendanceSummary?.presentPct ?? 0;
-
-  // Section: Attention Required
-  const attentionItems: StreamItem[] = [];
-  if (totalPending > 0) {
-    attentionItems.push({
-      id: 'pending-leaves',
-      priority: 'high',
-      title: `${pendingLeaves.length} ta ta'til so'rovi kutilmoqda`,
-      meta: "Tasdiqlash talab etiladi",
-      href: '/dashboard/leave-requests',
-      action: "Ko'rish",
-    });
-  }
-  if (pendingDiscipline.length > 0) {
-    attentionItems.push({
-      id: 'pending-discipline',
-      priority: 'high',
-      title: `${pendingDiscipline.length} ta intizom holati hal etilmagan`,
-      meta: 'Tezkor yechim talab etiladi',
-      href: '/dashboard/discipline',
-      action: "Ko'rish",
-    });
-  }
-  if (presentPct > 0 && presentPct < 75) {
-    attentionItems.push({
-      id: 'low-attendance',
-      priority: 'medium',
-      title: `Davomat pasaydi: ${presentPct}%`,
-      meta: `${attendanceSummary?.totalStudents ?? 0} ta o'quvchidan`,
-      href: '/dashboard/attendance',
-      action: 'Tahlil',
-    });
-  }
-
-  // Section: AI / Risk Signals
-  const riskItems: StreamItem[] = [];
-  if (atRisk > 0) {
-    riskItems.push({
-      id: 'at-risk',
-      priority: critical > 0 ? 'critical' : 'high',
-      title: `${atRisk} ta o'quvchi xavf ostida`,
-      meta: critical > 0 ? `${critical} ta kritik holat` : `${high} ta yuqori xavf`,
-      href: '/dashboard/ai-analytics',
-      action: 'Tahlil',
-    });
-  }
-  if (aiSummary?.averages?.gpa != null && aiSummary.averages.gpa < 60) {
-    riskItems.push({
-      id: 'low-gpa',
-      priority: 'medium',
-      title: `O'rtacha GPA pas: ${aiSummary.averages.gpa.toFixed(1)}`,
-      meta: "Akademik qo'llab-quvvatlash zarur",
-      href: '/dashboard/ai-analytics',
-      action: 'Tahlil',
-    });
-  }
-
-  // Section: Operational Events
-  const eventItems: StreamItem[] = [];
-  if (upcomingExams > 0) {
-    eventItems.push({
-      id: 'upcoming-exams',
-      priority: 'low',
-      title: `${upcomingExams} ta imtihon yaqinlashmoqda`,
-      meta: 'Keyingi 7 kun ichida',
-      href: '/dashboard/exams',
-      action: 'Jadval',
-    });
-  }
-  if ((branches as any[]).length > 1) {
-    eventItems.push({
-      id: 'branches-active',
-      priority: 'low',
-      title: `${branches.length} ta filial faol`,
-      meta: 'Umumiy monitoring davom etmoqda',
-      href: '/dashboard/branches',
-    });
-  }
-
-  // Section: This Week
-  const today = new Date();
-  const dayLabel = today.toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' });
-  const weekItems: StreamItem[] = [
-    {
-      id: 'today',
-      priority: 'low',
-      title: 'Bugun',
-      meta: dayLabel,
-    },
-  ];
 
   return (
     <div className="space-y-3">
@@ -194,7 +193,7 @@ export function IntelligenceFeed({
       )}
     </div>
   );
-}
+});
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -211,10 +210,12 @@ interface StreamItem {
 
 function FeedHeader({ title, icon: Icon }: { title: string; icon: React.ElementType }) {
   return (
-    <div className="flex items-center justify-between px-1">
-      <div className="flex items-center gap-1.5">
-        <Icon className="h-3.5 w-3.5 text-xedu-slate-500" />
-        <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">{title}</h3>
+    <div className="flex items-center justify-between px-1 py-1">
+      <div className="flex items-center gap-2">
+        <div className="h-7 w-7 rounded-lg bg-xedu-primary-light/60 dark:bg-xedu-primary/20 flex items-center justify-center border border-xedu-primary/15 dark:border-xedu-primary/25 shadow-sm">
+          <Icon className="h-4 w-4 text-xedu-primary" strokeWidth={2.2} />
+        </div>
+        <h3 className="text-authority-sm text-xedu-slate-900 dark:text-xedu-slate-100">{title}</h3>
       </div>
     </div>
   );
@@ -233,12 +234,12 @@ function FeedSection({
     tone === 'urgent' ? 'bg-xedu-ruby-500' : tone === 'risk' ? 'bg-xedu-amber-500' : 'bg-xedu-slate-300';
 
   return (
-    <div className="border border-xedu-slate-100 dark:border-xedu-slate-800 rounded-xl overflow-hidden bg-xedu-bg-elevated">
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-slate-50/30 dark:bg-xedu-slate-800">
+    <div className="rounded-xl overflow-hidden bg-xedu-bg-elevated border border-xedu-border shadow-sm">
+      <div className={cn('flex items-center gap-2 px-3 py-2 xedu-section-header-intel')}>
         <div className={cn('h-1.5 w-1.5 rounded-full', accentColor)} />
-        <p className="text-xs font-bold uppercase tracking-[0.12em] text-xedu-slate-500">{title}</p>
+        <p className="text-2xs font-bold uppercase tracking-[0.12em] text-xedu-slate-500">{title}</p>
       </div>
-      <div className="border-t border-xedu-slate-100 dark:border-xedu-slate-800">{children}</div>
+      <div className="divide-y divide-xedu-border">{children}</div>
     </div>
   );
 }
@@ -275,12 +276,12 @@ function StreamRow({ item }: { item: StreamItem }) {
     <Wrapper
       {...(wrapperProps as any)}
       className={cn(
-        'flex items-center gap-2 px-3 py-2.5 transition-colors',
-        href && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/40 cursor-pointer',
+        'flex items-center gap-2.5 px-3 py-2.5 transition-all duration-150',
+        href && 'hover:bg-xedu-slate-50/60 dark:hover:bg-xedu-slate-800/30 cursor-pointer',
         priorityBg
       )}
     >
-      <Icon className={cn('h-3 w-3 shrink-0', priorityColor)} />
+      <Icon className={cn('h-3.5 w-3.5 shrink-0', priorityColor)} />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-xedu-slate-800 dark:text-xedu-slate-200 truncate leading-snug">
           {title}
@@ -288,9 +289,9 @@ function StreamRow({ item }: { item: StreamItem }) {
         <p className="text-xs text-xedu-slate-500 leading-snug">{meta}</p>
       </div>
       {href && action && (
-        <div className="flex items-center gap-1 shrink-0 text-xs font-semibold text-xedu-primary">
+        <div className="flex items-center gap-1 shrink-0 text-2xs font-bold text-xedu-primary bg-xedu-primary-light/30 dark:bg-xedu-primary/10 px-2 py-0.5 rounded-md">
           {action}
-          <ArrowRight className="h-3.5 w-3.5" />
+          <ArrowRight className="h-3 w-3" />
         </div>
       )}
     </Wrapper>

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatCurrency } from '@/lib/utils';
@@ -17,7 +18,7 @@ interface FinancialPulseProps {
   isLoading: boolean;
 }
 
-export function FinancialPulse({ financeData, isLoading }: FinancialPulseProps) {
+export const FinancialPulse = memo(function FinancialPulse({ financeData, isLoading }: FinancialPulseProps) {
   if (isLoading) {
     return (
       <WorkspaceBlock title="Moliya" icon={TrendingUp} action={{ label: 'Batafsil', href: '/dashboard/finance' }}>
@@ -82,7 +83,7 @@ export function FinancialPulse({ financeData, isLoading }: FinancialPulseProps) 
       </div>
     </WorkspaceBlock>
   );
-}
+});
 
 function FinStat({ label, value, tone = 'calm' }: { label: string; value: string; tone?: 'calm' | 'attention' | 'urgent' }) {
   const valueColor =

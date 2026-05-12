@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import {
   Clock, FileText, ShieldAlert, CheckCircle2, TrendingDown,
-  Calendar, AlertTriangle, Brain, Wallet, UserMinus,
+  Calendar, AlertTriangle, Brain, Wallet, UserMinus, Activity,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils';
@@ -38,7 +38,7 @@ interface ActivityStreamProps {
   maxItems?: number;
 }
 
-export function ActivityStream({
+export const ActivityStream = memo(function ActivityStream({
   pendingLeaves = [],
   pendingDiscipline = [],
   attendanceSummary,
@@ -149,11 +149,15 @@ export function ActivityStream({
       }
     });
 
-    // Sort by timestamp desc
+    // Sort by timestamp desc (copy first to avoid mutating source)
     return activities
+      .slice()
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, maxItems);
   }, [pendingLeaves, pendingDiscipline, attendanceSummary, branches, aiSummary, financeData, upcomingExams, maxItems]);
+
+  // Group by relative time
+  const grouped = useMemo(() => groupByTime(items), [items]);
 
   if (items.length === 0) {
     return (
@@ -167,19 +171,21 @@ export function ActivityStream({
     );
   }
 
-  // Group by relative time
-  const grouped = groupByTime(items);
-
   return (
-    <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated overflow-hidden">
-      <div className="flex items-center justify-between px-3 py-2 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
-        <p className="text-xs font-bold uppercase tracking-[0.12em] text-xedu-slate-400">Operatsion faollik</p>
-        <span className="text-xs font-medium text-xedu-slate-400">{items.length} ta hodisa</span>
+    <div className="rounded-xl border border-xedu-border bg-xedu-bg-elevated overflow-hidden shadow-sm">
+      <div className={cn('flex items-center justify-between px-3 py-2 xedu-section-header-intel')}>
+        <div className="flex items-center gap-2">
+          <div className="h-6 w-6 rounded-md bg-xedu-primary-light/50 dark:bg-xedu-primary/15 flex items-center justify-center border border-xedu-primary/10 dark:border-xedu-primary/20">
+            <Activity className="h-3.5 w-3.5 text-xedu-primary" strokeWidth={2.2} />
+          </div>
+          <p className="text-2xs font-bold uppercase tracking-[0.12em] text-xedu-slate-500">Operatsion faollik</p>
+        </div>
+        <span className="text-2xs font-medium text-xedu-slate-400">{items.length} ta hodisa</span>
       </div>
-      <div className="divide-y divide-xedu-slate-100 dark:divide-xedu-slate-800 max-h-[360px] overflow-y-auto">
+      <div className="divide-y divide-xedu-border max-h-[360px] overflow-y-auto">
         {grouped.map((group) => (
           <div key={group.label}>
-            <div className="px-3 py-1.5 bg-xedu-slate-50/50 dark:bg-xedu-slate-800/20">
+            <div className="px-3 py-1.5 bg-xedu-bg-subtle/60 dark:bg-xedu-slate-800/20">
               <span className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400">{group.label}</span>
             </div>
             {group.items.map((item) => (
@@ -190,9 +196,9 @@ export function ActivityStream({
       </div>
     </div>
   );
-}
+});
 
-function ActivityRow({ item }: { item: ActivityItem }) {
+const ActivityRow = memo(function ActivityRow({ item }: { item: ActivityItem }) {
   const { icon: Icon, tone, title, detail, actor, href } = item;
 
   const toneColor = {
@@ -216,12 +222,12 @@ function ActivityRow({ item }: { item: ActivityItem }) {
     <Wrapper
       {...(wrapperProps as any)}
       className={cn(
-        'flex items-start gap-2 px-3 py-2 transition-colors',
-        href && 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30 cursor-pointer',
+        'flex items-start gap-2.5 px-3 py-2.5 transition-all duration-150',
+        href && 'hover:bg-xedu-slate-50/60 dark:hover:bg-xedu-slate-800/25 cursor-pointer',
         bgColor
       )}
     >
-      <Icon className={cn('h-3 w-3 shrink-0 mt-0.5', toneColor)} />
+      <Icon className={cn('h-3.5 w-3.5 shrink-0 mt-0.5', toneColor)} />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-medium text-xedu-slate-800 dark:text-xedu-slate-200 leading-snug">
           {title}
@@ -231,12 +237,12 @@ function ActivityRow({ item }: { item: ActivityItem }) {
           <p className="text-2xs text-xedu-slate-400 mt-0.5">{actor}</p>
         )}
       </div>
-      <span className="text-2xs text-xedu-slate-400 tabular-nums shrink-0 mt-0.5">
+      <span className="text-2xs text-xedu-slate-400 tabular-nums shrink-0 mt-0.5 font-medium">
         {formatTimeAgo(item.timestamp)}
       </span>
     </Wrapper>
   );
-}
+});
 
 // ── Time grouping ────────────────────────────────────────────────────────────
 

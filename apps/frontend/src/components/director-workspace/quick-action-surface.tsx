@@ -1,5 +1,6 @@
 'use client';
 
+import React, { memo } from 'react';
 import {
   Megaphone, FileText, CheckSquare, TrendingUp, Building2, Command,
 } from 'lucide-react';
@@ -11,7 +12,7 @@ interface QuickActionSurfaceProps {
   activeAction?: string;
 }
 
-export function QuickActionSurface({ onOpenCommandPalette, activeAction }: QuickActionSurfaceProps) {
+export const QuickActionSurface = memo(function QuickActionSurface({ onOpenCommandPalette, activeAction }: QuickActionSurfaceProps) {
   const actions = [
     { id: 'announcement', label: "E'lon", icon: Megaphone, href: '/dashboard/announcements', badge: 0 },
     { id: 'report', label: 'Hisobot', icon: FileText, href: '/dashboard/reports', badge: 0 },
@@ -22,8 +23,8 @@ export function QuickActionSurface({ onOpenCommandPalette, activeAction }: Quick
 
   return (
     <>
-      {/* Desktop dock — centered bottom */}
-      <div className="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-30 items-center rounded-xl bg-xedu-bg-floating dark:bg-xedu-bg-floating border border-xedu-border shadow-floating overflow-hidden backdrop-blur-sm">
+      {/* Desktop dock — centered bottom with executive material richness */}
+      <div className="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-30 items-center rounded-2xl xedu-floating-executive backdrop-blur-md overflow-hidden px-1 py-1">
         {actions.map((action) => (
           <DockItem
             key={action.id}
@@ -31,10 +32,14 @@ export function QuickActionSurface({ onOpenCommandPalette, activeAction }: Quick
             isActive={activeAction === action.id}
           />
         ))}
-        <div className="h-5 w-px bg-xedu-slate-200 dark:bg-xedu-slate-700 mx-1" />
+        <div className="h-5 w-px bg-xedu-border mx-1.5" />
         <button
           onClick={onOpenCommandPalette}
-          className="flex items-center gap-1.5 rounded-lg px-3 py-2.5 text-xs font-semibold text-xedu-slate-400 hover:text-xedu-slate-700 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
+          className={cn(
+            'flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-xs font-semibold transition-all duration-150',
+            'text-xedu-slate-400 hover:text-xedu-slate-700 dark:hover:text-xedu-slate-200',
+            'hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-800/60'
+          )}
           title="Command palette (Cmd+K)"
         >
           <Command className="h-4 w-4" />
@@ -43,14 +48,14 @@ export function QuickActionSurface({ onOpenCommandPalette, activeAction }: Quick
       </div>
 
       {/* Mobile compact bar */}
-      <div className="flex md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-30 items-center gap-0.5 rounded-full bg-xedu-bg-floating dark:bg-xedu-bg-floating border border-xedu-border shadow-floating overflow-hidden px-1.5 py-1.5 backdrop-blur-sm">
+      <div className="flex md:hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-30 items-center gap-0.5 rounded-full xedu-floating-executive overflow-hidden px-1.5 py-1.5">
         {actions.slice(0, 5).map((action) => (
           <MobileDockItem key={action.id} action={action} />
         ))}
       </div>
     </>
   );
-}
+});
 
 function DockItem({
   action,
@@ -65,16 +70,16 @@ function DockItem({
     <Link
       href={href}
       className={cn(
-        'relative flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold transition-all duration-150',
+        'relative flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold rounded-xl transition-all duration-150',
         isActive
-          ? 'text-xedu-primary bg-xedu-primary-light/50 dark:bg-xedu-primary/15 shadow-sm'
-          : 'text-xedu-slate-500 hover:text-xedu-slate-800 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 hover:-translate-y-px'
+          ? 'text-xedu-primary bg-xedu-primary-light/60 dark:bg-xedu-primary/20 shadow-sm border border-xedu-primary/20'
+          : 'text-xedu-slate-500 hover:text-xedu-slate-800 dark:hover:text-xedu-slate-200 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-800/60'
       )}
     >
       <Icon className={cn('h-4 w-4', isActive ? 'text-xedu-primary' : 'text-xedu-slate-400')} />
       <span className="hidden lg:inline">{label}</span>
       {isActive && (
-        <div className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-xedu-primary" />
+        <div className="absolute bottom-1 left-3 right-3 h-0.5 rounded-full bg-xedu-primary/60" />
       )}
     </Link>
   );
@@ -90,7 +95,7 @@ function MobileDockItem({
   return (
     <Link
       href={href}
-      className="h-9 w-9 rounded-full flex items-center justify-center text-xedu-slate-500 hover:text-xedu-primary hover:bg-xedu-slate-50 transition-colors"
+      className="h-10 w-10 rounded-full flex items-center justify-center text-xedu-slate-500 hover:text-xedu-primary hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-800/60 transition-colors"
       aria-label={label}
     >
       <Icon className="h-4 w-4" />

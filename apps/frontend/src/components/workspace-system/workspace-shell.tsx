@@ -137,7 +137,7 @@ export function WorkspaceToolbar({ children, className, sticky = false, scrollab
       className={cn(
         'flex items-center gap-2',
         scrollable ? 'overflow-x-auto scrollbar-hide flex-nowrap' : 'overflow-x-auto scrollbar-hide flex-nowrap md:flex-wrap md:overflow-visible',
-        sticky && 'sticky top-0 z-10 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm -mx-2 px-2',
+        sticky && 'sticky top-0 z-10 py-2 xedu-sticky-executive -mx-2 px-2',
         className
       )}
     >
@@ -300,12 +300,12 @@ export function WorkspaceSection({
     <div className={cn('rounded-xl bg-xedu-bg-panel dark:bg-xedu-bg-panel border border-xedu-border shadow-sm overflow-hidden', className)}>
       {(title || action) && (
         <div className={cn(
-          'flex items-center justify-between border-b border-xedu-border bg-xedu-bg-subtle dark:bg-xedu-bg-subtle',
+          'flex items-center justify-between border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail dark:from-xedu-bg-subtle dark:to-xedu-bg-rail',
           densityClasses.header
         )}>
           <div className="flex items-center gap-2">
             {icon && <span className="text-xedu-slate-400">{icon}</span>}
-            {title && <h3 className="text-sm font-bold tracking-tight text-xedu-slate-800 dark:text-xedu-slate-100">{title}</h3>}
+            {title && <h3 className="text-sm font-bold tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100">{title}</h3>}
           </div>
           {action && <div className="flex items-center gap-1">{action}</div>}
         </div>

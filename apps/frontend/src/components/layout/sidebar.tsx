@@ -64,15 +64,12 @@ function NavLink({
         'group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-[colors,background-color] duration-[var(--xedu-duration)]',
         collapsed ? 'justify-center px-2' : 'px-3',
         isActive
-          ? 'bg-xedu-primary-light text-xedu-primary'
+          ? 'bg-xedu-primary-light/70 text-xedu-primary xedu-emerald-rail'
           : 'text-xedu-slate-600 hover:bg-xedu-slate-50 hover:text-xedu-slate-900',
       )}
       title={collapsed ? item.label : undefined}
     >
-      {/* Active left indicator — 2px solid primary, only when expanded */}
-      {isActive && !collapsed && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[2px] rounded-r-full bg-xedu-primary" />
-      )}
+      {/* Active left indicator handled by xedu-emerald-rail utility */}
 
       <Icon
         className={cn(
@@ -80,7 +77,7 @@ function NavLink({
           isActive ? 'text-xedu-primary' : 'text-xedu-slate-400 group-hover:text-xedu-slate-600',
           collapsed ? 'h-5 w-5' : 'h-[18px] w-[18px]',
         )}
-        strokeWidth={1.8}
+        strokeWidth={isActive ? 2.2 : 1.8}
       />
 
       {!collapsed && (

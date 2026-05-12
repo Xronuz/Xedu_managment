@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { Lightbulb, TrendingDown, TrendingUp, AlertTriangle, Users, Wallet, BookOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -32,7 +32,7 @@ interface Insight {
   text: string;
 }
 
-export function SmartInsights({ data, maxInsights = 4 }: SmartInsightsProps) {
+export const SmartInsights = memo(function SmartInsights({ data, maxInsights = 4 }: SmartInsightsProps) {
   const insights = useMemo(() => {
     const items: Insight[] = [];
     const {
@@ -170,21 +170,23 @@ export function SmartInsights({ data, maxInsights = 4 }: SmartInsightsProps) {
   if (insights.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-2 border-b border-xedu-slate-100 dark:border-xedu-slate-800">
-        <Lightbulb className="h-3 w-3 text-xedu-slate-400" />
-        <p className="text-xs font-bold uppercase tracking-[0.12em] text-xedu-slate-500">Tahliliy xulosalar</p>
+    <div className="rounded-xl border border-xedu-border bg-xedu-bg-elevated overflow-hidden shadow-sm">
+      <div className={cn('flex items-center gap-2 px-3 py-2 xedu-section-header-intel')}>
+        <div className="h-6 w-6 rounded-md bg-xedu-primary-light/50 dark:bg-xedu-primary/15 flex items-center justify-center border border-xedu-primary/10 dark:border-xedu-primary/20">
+          <Lightbulb className="h-3.5 w-3.5 text-xedu-primary" strokeWidth={2.2} />
+        </div>
+        <p className="text-2xs font-bold uppercase tracking-[0.12em] text-xedu-slate-500">Tahliliy xulosalar</p>
       </div>
-      <div className="divide-y divide-xedu-slate-100 dark:divide-xedu-slate-800">
+      <div className="divide-y divide-xedu-border">
         {insights.map((insight) => (
           <InsightRow key={insight.id} insight={insight} />
         ))}
       </div>
     </div>
   );
-}
+});
 
-function InsightRow({ insight }: { insight: Insight }) {
+const InsightRow = memo(function InsightRow({ insight }: { insight: Insight }) {
   const { icon: Icon, tone, text } = insight;
 
   const toneColor = {
@@ -200,11 +202,11 @@ function InsightRow({ insight }: { insight: Insight }) {
   }[tone];
 
   return (
-    <div className={cn('flex items-start gap-2 px-3 py-2', bgColor)}>
-      <Icon className={cn('h-3 w-3 shrink-0 mt-0.5', toneColor)} />
-      <p className="text-sm font-medium text-xedu-slate-700 dark:text-xedu-slate-300 leading-snug">
+    <div className={cn('flex items-start gap-2.5 px-3 py-2.5 transition-colors hover:bg-xedu-slate-50/40 dark:hover:bg-xedu-slate-800/20', bgColor)}>
+      <Icon className={cn('h-3.5 w-3.5 shrink-0 mt-0.5', toneColor)} />
+      <p className="text-sm font-medium text-xedu-slate-800 dark:text-xedu-slate-200 leading-snug">
         {text}
       </p>
     </div>
   );
-}
+});

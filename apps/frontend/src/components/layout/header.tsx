@@ -51,7 +51,7 @@ export function Header() {
     <header
       className={cn(
         'flex h-[60px] shrink-0 items-center justify-between gap-4 px-5',
-        'xedu-material-header',
+        'xedu-material-header edge-emerald',
       )}
     >
       {/* Left: mobile nav + search */}
@@ -61,10 +61,11 @@ export function Header() {
           onClick={() => document.dispatchEvent(new CustomEvent('open-command-palette'))}
           aria-label="Qidiruv panelini ochish"
           className={cn(
-            'hidden md:flex items-center gap-2.5 rounded-full h-[42px] px-4 w-[260px] lg:w-[360px] transition-colors cursor-pointer',
+            'hidden md:flex items-center gap-2.5 rounded-xl h-[42px] px-4 w-[260px] lg:w-[360px] transition-all duration-150',
             'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
             'border border-xedu-border dark:border-xedu-border',
-            'hover:bg-xedu-slate-200/60 dark:hover:bg-xedu-slate-700/60',
+            'hover:bg-xedu-bg-elevated hover:border-xedu-primary/20 hover:shadow-sm',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary/20'
           )}
         >
           <Search className="h-4 w-4 shrink-0 text-xedu-slate-400 dark:text-xedu-slate-500" />
@@ -86,10 +87,11 @@ export function Header() {
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           aria-label="Mavzuni o'zgartirish"
           className={cn(
-            'relative flex h-[42px] w-[42px] items-center justify-center rounded-full transition-colors',
+            'relative flex h-[42px] w-[42px] items-center justify-center rounded-xl transition-all duration-150',
             'text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-slate-700 dark:hover:text-xedu-slate-200',
             'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
             'border border-xedu-border dark:border-xedu-border',
+            'hover:bg-xedu-bg-elevated hover:border-xedu-primary/15 hover:shadow-xs'
           )}
         >
           <Sun  className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -101,11 +103,12 @@ export function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className={cn(
-              'flex items-center gap-2.5 rounded-full pl-2 pr-4 ml-0.5 h-[52px]',
-              'focus:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary/40',
+              'flex items-center gap-2.5 rounded-xl pl-2 pr-4 ml-0.5 h-[52px]',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary/30',
               'transition-all duration-200 hover:shadow-sm',
               'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
               'border border-xedu-border dark:border-xedu-border',
+              'hover:bg-xedu-bg-elevated hover:border-xedu-primary/15',
             )}>
               <Avatar className={cn('h-8 w-8 ring-2 ring-offset-1 ring-offset-xedu-bg-elevated dark:ring-offset-xedu-slate-900 shrink-0', ringColor)}>
                 <AvatarImage src={user?.avatarUrl ?? undefined} />
@@ -121,7 +124,7 @@ export function Header() {
             </button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56 xedu-surface-floating">
             <DropdownMenuLabel className="pb-1">
               <p className="text-sm font-semibold">{user?.firstName} {user?.lastName}</p>
               <p className="text-xs font-normal text-xedu-slate-400 mt-0.5">{user ? getRoleLabel(user.role) : ''}</p>

@@ -1,5 +1,6 @@
 'use client';
 
+import React, { memo } from 'react';
 import { Users, Clock, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { WorkspaceBlock } from './branch-health-map';
@@ -14,7 +15,7 @@ interface StaffOperationsProps {
   isLoading: boolean;
 }
 
-export function StaffOperations({
+export const StaffOperations = memo(function StaffOperations({
   teacherCount = 0,
   staffCount = 0,
   pendingLeaves = 0,
@@ -90,7 +91,7 @@ export function StaffOperations({
       </div>
     </WorkspaceBlock>
   );
-}
+});
 
 function AttentionRow({
   icon: Icon,

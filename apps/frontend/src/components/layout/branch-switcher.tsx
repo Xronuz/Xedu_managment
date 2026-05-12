@@ -114,15 +114,15 @@ export function BranchSwitcher() {
           type="button"
           disabled={isSwitching || isLoading}
           className={cn(
-            // Header pill — matches search/theme/bell/avatar system
+            // Header pill — executive emerald material accent
             'hidden md:flex items-center gap-2 h-10 px-4 max-w-[220px]',
-            'rounded-full bg-xedu-bg-elevated shadow-pill',
+            'rounded-xl xedu-emerald-material',
             'text-sm font-medium text-xedu-slate-700 dark:text-xedu-slate-200',
-            'hover:shadow-sm transition-all duration-150',
+            'xedu-tactile-hover',
             'disabled:opacity-60 disabled:cursor-not-allowed',
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/30',
+            'focus:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary/30',
             authBranchId
-              ? 'text-blue-700 dark:text-blue-300'
+              ? 'text-xedu-slate-700 dark:text-xedu-slate-200'
               : isDirector
                 ? 'text-xedu-primary dark:text-xedu-primary'
                 : '',

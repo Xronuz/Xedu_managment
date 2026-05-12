@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import {
   Lightbulb, ArrowRight, AlertTriangle, Clock,
   Users, TrendingDown, Wallet, Building2, BookOpen,
@@ -11,7 +11,7 @@ import Link from 'next/link';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    EXECUTIVE BRIEFING — "Bugungi tavsiya"
-   Decision-guidance surface. NOT a dashboard widget. NOT marketing.
+   Decision-guidance surface. The emotional + operational anchor of the page.
 
    Philosophy:
    - Answers: "What needs my attention right now?"
@@ -19,6 +19,7 @@ import Link from 'next/link';
    - ONE primary action per item.
    - Calm, editorial, operational.
    - Severity is signal, not noise.
+   - Emerald material depth for executive confidence.
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 export type BriefingSeverity = 'critical' | 'attention' | 'suggestion' | 'calm';
@@ -50,7 +51,7 @@ interface ExecutiveBriefingProps {
   data: ExecutiveBriefingData;
 }
 
-export function ExecutiveBriefing({ data }: ExecutiveBriefingProps) {
+export const ExecutiveBriefing = memo(function ExecutiveBriefing({ data }: ExecutiveBriefingProps) {
   const items = useMemo(() => {
     const briefs: BriefingItem[] = [];
 
@@ -211,40 +212,40 @@ export function ExecutiveBriefing({ data }: ExecutiveBriefingProps) {
   const hasAttention = items.some((i) => i.severity === 'attention');
 
   const accentColor =
-    hasCritical ? 'bg-xedu-ruby-400' :
-    hasAttention ? 'bg-xedu-amber-400' :
+    hasCritical ? 'bg-xedu-ruby-500' :
+    hasAttention ? 'bg-xedu-amber-500' :
     'bg-xedu-primary';
 
   return (
-    <div className="relative rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden shadow-sm">
+    <div className="xedu-zumrad-core rounded-xl overflow-hidden">
       {/* Left severity accent */}
       <div className={cn('absolute left-0 top-0 bottom-0 w-[3px]', accentColor)} />
 
-      {/* Header */}
-      <div className="flex items-center justify-between pl-5 pr-4 py-3 border-b border-xedu-border bg-xedu-bg-subtle dark:bg-xedu-bg-subtle">
-        <div className="flex items-center gap-2">
-          <div className="h-6 w-6 rounded-md bg-xedu-bg-panel dark:bg-xedu-slate-700/60 flex items-center justify-center shadow-xs">
-            <Lightbulb className="h-3.5 w-3.5 text-xedu-slate-500" />
+      {/* Header — executive intelligence surface */}
+      <div className="flex items-center justify-between pl-5 pr-4 py-3 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail dark:from-xedu-bg-subtle dark:to-xedu-bg-rail">
+        <div className="flex items-center gap-2.5">
+          <div className="h-7 w-7 rounded-lg bg-xedu-primary-light/60 dark:bg-xedu-primary/15 flex items-center justify-center border border-xedu-primary/10 dark:border-xedu-primary/20">
+            <Lightbulb className="h-3.5 w-3.5 text-xedu-primary" />
           </div>
-          <h3 className="text-sm font-bold tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100">
+          <h3 className="text-authority-sm text-xedu-slate-900 dark:text-xedu-slate-100">
             Bugungi tavsiya
           </h3>
         </div>
         <div className="flex items-center gap-1.5">
           {hasCritical && (
-            <span className="flex items-center gap-1 text-2xs font-bold px-2 py-0.5 rounded-full bg-xedu-ruby-50/80 dark:bg-xedu-ruby-900/20 text-xedu-ruby-600 dark:text-xedu-ruby-400">
-              <span className="h-1.5 w-1.5 rounded-full bg-xedu-ruby-500" />
+            <span className="flex items-center gap-1.5 text-2xs font-bold px-2.5 py-1 rounded-full bg-xedu-ruby-50/80 dark:bg-xedu-ruby-900/20 text-xedu-ruby-600 dark:text-xedu-ruby-400 border border-xedu-ruby-200/50 dark:border-xedu-ruby-800/30">
+              <span className="h-1.5 w-1.5 rounded-full bg-xedu-ruby-500 animate-pulse" />
               Jiddiy
             </span>
           )}
           {hasAttention && !hasCritical && (
-            <span className="flex items-center gap-1 text-2xs font-bold px-2 py-0.5 rounded-full bg-xedu-amber-50/80 dark:bg-xedu-amber-900/20 text-xedu-amber-600 dark:text-xedu-amber-400">
+            <span className="flex items-center gap-1.5 text-2xs font-bold px-2.5 py-1 rounded-full bg-xedu-amber-50/80 dark:bg-xedu-amber-900/20 text-xedu-amber-600 dark:text-xedu-amber-400 border border-xedu-amber-200/50 dark:border-xedu-amber-800/30">
               <span className="h-1.5 w-1.5 rounded-full bg-xedu-amber-500" />
               Diqqat
             </span>
           )}
           {!hasCritical && !hasAttention && (
-            <span className="flex items-center gap-1 text-2xs font-bold px-2 py-0.5 rounded-full bg-xedu-primary-light/60 text-xedu-primary">
+            <span className="flex items-center gap-1.5 text-2xs font-bold px-2.5 py-1 rounded-full bg-xedu-primary-light/50 text-xedu-primary border border-xedu-primary/10">
               <span className="h-1.5 w-1.5 rounded-full bg-xedu-primary" />
               Normal
             </span>
@@ -260,31 +261,39 @@ export function ExecutiveBriefing({ data }: ExecutiveBriefingProps) {
       </div>
     </div>
   );
-}
+});
 
-function BriefingRow({ item }: { item: BriefingItem }) {
+const BriefingRow = memo(function BriefingRow({ item }: { item: BriefingItem }) {
   const { icon: Icon, severity, message, actionLabel, href, metric } = item;
 
   const severityStyles = {
     critical: {
       icon: 'text-xedu-ruby-500',
-      bg: 'bg-xedu-ruby-50/60 dark:bg-xedu-ruby-900/15',
+      bg: 'bg-xedu-ruby-50/50 dark:bg-xedu-ruby-900/10',
       metric: 'text-xedu-ruby-600 dark:text-xedu-ruby-400',
+      actionBg: 'bg-xedu-ruby-50/80 text-xedu-ruby-700 dark:bg-xedu-ruby-900/25 dark:text-xedu-ruby-400 group-hover:bg-xedu-ruby-100 dark:group-hover:bg-xedu-ruby-900/40',
+      border: 'border-xedu-ruby-200/30 dark:border-xedu-ruby-800/20',
     },
     attention: {
       icon: 'text-xedu-amber-500',
-      bg: 'bg-xedu-amber-50/40 dark:bg-xedu-amber-900/10',
+      bg: 'bg-xedu-amber-50/30 dark:bg-xedu-amber-900/08',
       metric: 'text-xedu-amber-600 dark:text-xedu-amber-400',
+      actionBg: 'bg-xedu-amber-50/80 text-xedu-amber-700 dark:bg-xedu-amber-900/25 dark:text-xedu-amber-400 group-hover:bg-xedu-amber-100 dark:group-hover:bg-xedu-amber-900/40',
+      border: 'border-xedu-amber-200/30 dark:border-xedu-amber-800/20',
     },
     suggestion: {
       icon: 'text-xedu-sky-500',
-      bg: 'bg-xedu-sky-50/30 dark:bg-xedu-sky-900/10',
+      bg: 'bg-xedu-sky-50/20 dark:bg-xedu-sky-900/08',
       metric: 'text-xedu-sky-600 dark:text-xedu-sky-400',
+      actionBg: 'bg-xedu-sky-50/80 text-xedu-sky-700 dark:bg-xedu-sky-900/25 dark:text-xedu-sky-400 group-hover:bg-xedu-sky-100 dark:group-hover:bg-xedu-sky-900/40',
+      border: 'border-xedu-sky-200/30 dark:border-xedu-sky-800/20',
     },
     calm: {
       icon: 'text-xedu-primary',
-      bg: 'bg-xedu-primary-light/20 dark:bg-xedu-primary/10',
+      bg: 'bg-xedu-primary-light/15 dark:bg-xedu-primary/08',
       metric: 'text-xedu-primary',
+      actionBg: 'bg-xedu-primary-light/50 text-xedu-primary group-hover:bg-xedu-primary-light',
+      border: 'border-xedu-primary/10 dark:border-xedu-primary/15',
     },
   }[severity];
 
@@ -292,17 +301,20 @@ function BriefingRow({ item }: { item: BriefingItem }) {
     <Link
       href={href}
       className={cn(
-        'group flex items-center gap-3 pl-5 pr-4 py-3 transition-all duration-150',
-        'hover:-translate-y-px hover:shadow-sm hover:z-10 relative',
-        'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30',
+        'group flex items-center gap-3 pl-5 pr-4 py-3.5 transition-all duration-150',
+        'hover:bg-xedu-slate-50/60 dark:hover:bg-xedu-slate-800/20',
         severityStyles.bg
       )}
     >
-      <div className={cn('h-7 w-7 rounded-lg flex items-center justify-center shrink-0', severityStyles.bg, 'border border-current/10')}>
-        <Icon className={cn('h-3.5 w-3.5', severityStyles.icon)} />
+      <div className={cn(
+        'h-8 w-8 rounded-lg flex items-center justify-center shrink-0 border',
+        severityStyles.bg,
+        severityStyles.border
+      )}>
+        <Icon className={cn('h-4 w-4', severityStyles.icon)} />
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-xedu-slate-800 dark:text-xedu-slate-200 leading-snug">
+        <p className="text-sm font-semibold text-xedu-slate-800 dark:text-xedu-slate-200 leading-snug">
           {message}
         </p>
       </div>
@@ -312,18 +324,13 @@ function BriefingRow({ item }: { item: BriefingItem }) {
         </span>
       )}
       <span className={cn(
-        'flex items-center gap-0.5 shrink-0 text-xs font-semibold px-2.5 py-1 rounded-lg transition-colors',
-        severity === 'critical'
-          ? 'bg-xedu-ruby-50/80 text-xedu-ruby-700 dark:bg-xedu-ruby-900/25 dark:text-xedu-ruby-400 group-hover:bg-xedu-ruby-100 dark:group-hover:bg-xedu-ruby-900/40'
-          : severity === 'attention'
-          ? 'bg-xedu-amber-50/80 text-xedu-amber-700 dark:bg-xedu-amber-900/25 dark:text-xedu-amber-400 group-hover:bg-xedu-amber-100 dark:group-hover:bg-xedu-amber-900/40'
-          : severity === 'suggestion'
-          ? 'bg-xedu-sky-50/80 text-xedu-sky-700 dark:bg-xedu-sky-900/25 dark:text-xedu-sky-400 group-hover:bg-xedu-sky-100 dark:group-hover:bg-xedu-sky-900/40'
-          : 'bg-xedu-primary-light/60 text-xedu-primary group-hover:bg-xedu-primary-light'
+        'flex items-center gap-0.5 shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors border',
+        severityStyles.actionBg,
+        severityStyles.border
       )}>
         {actionLabel}
         <ArrowRight className="h-3 w-3" />
       </span>
     </Link>
   );
-}
+});

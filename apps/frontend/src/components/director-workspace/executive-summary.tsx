@@ -1,5 +1,6 @@
 'use client';
 
+import React, { memo } from 'react';
 import { cn } from '@/lib/utils';
 import {
   ArrowUpRight, ArrowDownRight, Minus, Building2, Users,
@@ -9,6 +10,7 @@ import {
 /* ═══════════════════════════════════════════════════════════════════════════════
    EXECUTIVE SUMMARY STRIP
    Compact institutional pulse. Bloomberg-terminal density, not SaaS KPIs.
+   Authority typography: stronger metrics, quieter metadata.
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 export interface ExecutiveSummaryData {
@@ -29,7 +31,7 @@ interface ExecutiveSummaryProps {
   data: ExecutiveSummaryData;
 }
 
-export function ExecutiveSummary({ data }: ExecutiveSummaryProps) {
+export const ExecutiveSummary = memo(function ExecutiveSummary({ data }: ExecutiveSummaryProps) {
   const {
     branchCount,
     branchTrend = 'stable',
@@ -45,7 +47,7 @@ export function ExecutiveSummary({ data }: ExecutiveSummaryProps) {
   } = data;
 
   return (
-    <div className="flex items-center gap-1 md:gap-3 overflow-x-auto scrollbar-hide px-1 py-1.5">
+    <div className="flex items-center gap-1 md:gap-3 overflow-x-auto scrollbar-hide px-1 py-2">
       <SummaryItem
         icon={Building2}
         label="Filiallar"
@@ -93,7 +95,7 @@ export function ExecutiveSummary({ data }: ExecutiveSummaryProps) {
       />
     </div>
   );
-}
+});
 
 function SummaryItem({
   icon: Icon,
@@ -120,38 +122,39 @@ function SummaryItem({
   const trendColor =
     effectiveTrend === 'up' ? 'text-xedu-primary' :
     effectiveTrend === 'down' ? 'text-xedu-ruby-500' :
-    'text-xedu-slate-300';
+    'text-xedu-slate-300 dark:text-xedu-slate-600';
 
   const pressureColor =
     pressure === 'critical' ? 'bg-xedu-ruby-500' :
     pressure === 'elevated' ? 'bg-xedu-amber-500' :
-    'bg-xedu-slate-300';
+    'bg-xedu-slate-300 dark:bg-xedu-slate-600';
 
   return (
     <div className={cn(
-      'flex items-center gap-1.5 shrink-0 rounded-lg px-2 py-1 transition-all duration-150 border border-transparent',
+      'flex items-center gap-2 shrink-0 rounded-xl px-3 py-2 transition-all duration-150 border',
+      'bg-xedu-bg-panel/60 border-transparent',
       !quiet && 'hover:bg-xedu-bg-panel hover:border-xedu-border hover:shadow-xs dark:hover:bg-xedu-slate-800/40'
     )}>
       <div className="relative">
-        <Icon className={cn('h-3 w-3', quiet ? 'text-xedu-slate-300' : 'text-xedu-slate-400')} />
+        <Icon className={cn('h-3.5 w-3.5', quiet ? 'text-xedu-slate-300 dark:text-xedu-slate-600' : 'text-xedu-slate-400')} />
         {pressure && pressure !== 'normal' && (
-          <div className={cn('absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full', pressureColor)} />
+          <div className={cn('absolute -top-0.5 -right-0.5 h-1.5 w-1.5 rounded-full ring-2 ring-xedu-bg-panel dark:ring-xedu-bg-canvas', pressureColor)} />
         )}
       </div>
-      <div className="flex items-baseline gap-1">
-        <span className="text-xs font-semibold text-xedu-slate-500 whitespace-nowrap">{label}</span>
+      <div className="flex items-baseline gap-1.5">
+        <span className="text-2xs font-semibold uppercase tracking-wider text-xedu-slate-400 whitespace-nowrap">{label}</span>
         <span className={cn(
-          'text-sm font-bold tabular-nums whitespace-nowrap',
-          quiet ? 'text-xedu-slate-400' : 'text-xedu-slate-800 dark:text-xedu-slate-200'
+          'text-sm font-bold tabular-nums whitespace-nowrap tracking-tight',
+          quiet ? 'text-xedu-slate-400 dark:text-xedu-slate-500' : 'text-xedu-slate-900 dark:text-xedu-slate-100'
         )}>
           {value}
         </span>
-        <TrendIcon className={cn('h-2.5 w-2.5', trendColor)} />
+        <TrendIcon className={cn('h-3 w-3', trendColor)} />
       </div>
     </div>
   );
 }
 
 function Divider() {
-  return <div className="h-3 w-px bg-xedu-slate-200 dark:bg-xedu-slate-700 shrink-0 hidden sm:block" />;
+  return <div className="h-4 w-px bg-xedu-border shrink-0 hidden sm:block" />;
 }

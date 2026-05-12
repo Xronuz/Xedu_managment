@@ -418,6 +418,20 @@ async function main() {
       });
     }
   }
+  // Today's attendance — ensures the dashboard shows real operational state
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  for (const student of allStudents) {
+    const cs = classStudentData.find((c) => c.studentId === student.id);
+    attendanceData.push({
+      schoolId: school.id,
+      branchId: student.branchId!,
+      classId: cs!.classId,
+      studentId: student.id,
+      date: today,
+      status: sample(attendanceStatuses),
+    });
+  }
   // Chunk to avoid hitting parameter limits (Postgres ~32k params)
   const chunkSize = 1000;
   for (let i = 0; i < attendanceData.length; i += chunkSize) {
@@ -501,7 +515,7 @@ async function main() {
   const paymentStatuses: PaymentStatus[] = ['pending', 'paid', 'paid', 'paid', 'overdue', 'failed'];
   const paymentProviders: PaymentProvider[] = ['cash', 'payme', 'click'];
   const paymentData: any[] = [];
-  for (let i = 0; i < 120; i++) {
+  for (let i = 0; i < 180; i++) {
     const student = sample(allStudents);
     const fee = sample(feeStructures);
     const status = sample(paymentStatuses);
@@ -529,41 +543,46 @@ async function main() {
   const disciplineSeverities: DisciplineSeverity[] = ['low', 'medium', 'high'];
   const disciplineActions: DisciplineAction[] = ['warning', 'detention', 'parent_call', 'parent_meeting', 'suspension', 'other'];
   const disciplineData: any[] = [];
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 16; i++) {
     const student = sample(allStudents);
     const reporter = sample(teachers);
+    const isUnresolved = i < 6;
+    const isHighSeverity = i < 3;
     disciplineData.push({
       schoolId: school.id,
       branchId: student.branchId!,
       studentId: student.id,
       reportedById: reporter.id,
       type: sample(disciplineTypes),
-      severity: sample(disciplineSeverities),
+      severity: isHighSeverity ? 'high' : sample(['low', 'medium']),
       action: sample(disciplineActions),
-      description: 'Namoyish uchun intizomiy voqea',
-      date: randomDate(60, 0),
-      resolved: Math.random() > 0.5,
+      description: isHighSeverity
+        ? 'Jiddiy intizomiy buzilish: sinf jarayoniga xalaqit berdi'
+        : 'Yengil intizomiy voqea',
+      date: randomDate(30, 0),
+      resolved: !isUnresolved,
     });
   }
   await prisma.disciplineIncident.createMany({ data: disciplineData });
   console.log(`  ✓ Discipline incidents: ${disciplineData.length}`);
 
   // ─── 15. Leave Requests + Approvals ────────────────────────────────────
-  const leaveStatuses: LeaveStatus[] = ['pending', 'approved', 'approved', 'rejected', 'cancelled'];
+  const leaveStatuses: LeaveStatus[] = ['pending', 'pending', 'pending', 'approved', 'approved', 'rejected', 'cancelled', 'approved'];
   for (let i = 0; i < 8; i++) {
     const requester = sample([...teachers, vicePrincipal]);
     const start = randomDate(30, 30);
     const end = new Date(start);
     end.setDate(end.getDate() + randInt(1, 5));
+    const status = leaveStatuses[i];
     const lr = await prisma.leaveRequest.create({
       data: {
         schoolId: school.id,
         branchId: requester.branchId!,
         requesterId: requester.id,
-        reason: 'Shaxsiy sabablar',
+        reason: i % 2 === 0 ? 'Shaxsiy sabablar' : "Sog'lig'i yomonlashdi",
         startDate: start,
         endDate: end,
-        status: sample(leaveStatuses),
+        status,
         createdById: director.id,
       },
     });
@@ -686,9 +705,9 @@ async function main() {
   console.log(`  ✓ Library loans: ${loanData.length}`);
 
   // ─── 19. Exams + Questions + Options + Sessions + Answers ──────────────
-  const examClasses = sampleSize(classes, 3);
+  const pastExamClasses = sampleSize(classes, 3);
   for (let eIdx = 0; eIdx < 3; eIdx++) {
-    const cls = examClasses[eIdx];
+    const cls = pastExamClasses[eIdx];
     const clsSubjects = subjectRecords.filter((s) => s.classId === cls.id);
     const subject = sample(clsSubjects);
 
@@ -769,17 +788,107 @@ async function main() {
       }
     }
   }
-  console.log('  ✓ Exams: 3 with questions, sessions & answers');
+  console.log('  ✓ Exams: 3 past with questions, sessions & answers');
 
-  // ─── 20. KPI Metrics (bonus) ───────────────────────────────────────────
-  await prisma.kpiMetric.createMany({
-    data: [
-      { schoolId: school.id, name: 'Oquvchilar soni', category: 'STUDENT', targetValue: 200, unit: 'count', period: 'MONTHLY' },
-      { schoolId: school.id, name: 'Davomat', category: 'STUDENT', targetValue: 95, unit: '%', period: 'MONTHLY' },
-      { schoolId: school.id, name: 'Ortacha ball', category: 'ACADEMIC', targetValue: 80, unit: 'score', period: 'MONTHLY' },
-    ],
-  });
-  console.log('  ✓ KPI metrics: 3');
+  // ─── 19b. Upcoming Exams (for dashboard) ───────────────────────────────
+  const upcomingExamClasses = sampleSize(classes, 3);
+  for (let eIdx = 0; eIdx < 3; eIdx++) {
+    const cls = upcomingExamClasses[eIdx];
+    const clsSubjects = subjectRecords.filter((s) => s.classId === cls.id);
+    const subject = sample(clsSubjects);
+    const scheduledAt = new Date(Date.now() + randInt(1, 7) * 24 * 60 * 60 * 1000);
+    await prisma.exam.create({
+      data: {
+        schoolId: school.id,
+        branchId: cls.branchId,
+        classId: cls.id,
+        subjectId: subject.id,
+        title: `${subject.name} - Yaqinlashayotgan imtihon`,
+        frequency: 'quarterly' as ExamFrequency,
+        maxScore: 100,
+        scheduledAt,
+        duration: 45,
+        isPublished: true,
+      },
+    });
+  }
+  console.log('  ✓ Upcoming exams: 3');
+
+  // ─── 19c. Homework + Submissions (for AI analytics) ────────────────────
+  for (const cls of classes) {
+    const clsSubjects = subjectRecords.filter((s) => s.classId === cls.id);
+    for (let h = 0; h < 2; h++) {
+      const subject = sample(clsSubjects);
+      const homework = await prisma.homework.create({
+        data: {
+          schoolId: school.id,
+          branchId: cls.branchId,
+          classId: cls.id,
+          subjectId: subject.id,
+          title: `Uy vazifasi ${h + 1}: ${subject.name}`,
+          description: 'Mavzuni takrorlang va mashqlarni bajaring',
+          dueDate: randomDate(14, 7),
+        },
+      });
+      const clsStudentIds = classStudentData
+        .filter((cs) => cs.classId === cls.id)
+        .map((cs) => cs.studentId);
+      for (const studentId of clsStudentIds) {
+        if (Math.random() > 0.25) {
+          await prisma.homeworkSubmission.create({
+            data: {
+              homeworkId: homework.id,
+              studentId,
+              content: 'Bajarildi',
+              submittedAt: randomDate(7, 0),
+            },
+          });
+        }
+      }
+    }
+  }
+  const homeworkCount = await prisma.homework.count({ where: { schoolId: school.id } });
+  const submissionCount = await prisma.homeworkSubmission.count({ where: { homework: { schoolId: school.id } } });
+  console.log(`  ✓ Homework: ${homeworkCount} with ${submissionCount} submissions`);
+
+  // ─── 20. KPI Metrics + Records ─────────────────────────────────────────
+  const kpiMetrics = await prisma.$transaction([
+    prisma.kpiMetric.create({
+      data: { schoolId: school.id, name: "O'quvchilar soni", category: 'STUDENT', targetValue: 200, unit: 'count', period: 'MONTHLY' },
+    }),
+    prisma.kpiMetric.create({
+      data: { schoolId: school.id, name: 'Davomat', category: 'STUDENT', targetValue: 95, unit: '%', period: 'MONTHLY' },
+    }),
+    prisma.kpiMetric.create({
+      data: { schoolId: school.id, name: "O'rtacha ball", category: 'ACADEMIC', targetValue: 80, unit: 'score', period: 'MONTHLY' },
+    }),
+    prisma.kpiMetric.create({
+      data: { schoolId: school.id, name: "Moliya yig'imi", category: 'FINANCE', targetValue: 50000000, unit: 'UZS', period: 'MONTHLY' },
+    }),
+  ]);
+  for (const metric of kpiMetrics) {
+    for (let m = 0; m < 3; m++) {
+      const actualValue = metric.category === 'FINANCE'
+        ? randInt(35000000, 52000000)
+        : metric.category === 'STUDENT' && metric.unit === 'count'
+          ? allStudents.length
+          : randInt(70, 95);
+      const periodStart = new Date(Date.now() - m * 30 * 24 * 60 * 60 * 1000);
+      const periodEnd = new Date(periodStart);
+      periodEnd.setDate(periodEnd.getDate() + 29);
+      await prisma.kpiRecord.create({
+        data: {
+          metricId: metric.id,
+          actualValue,
+          periodStart,
+          periodEnd,
+          notes: m === 0 ? 'Joriy davr' : `${m} oy avvalgi davr`,
+          createdById: director.id,
+        },
+      });
+    }
+  }
+  console.log(`  ✓ KPI metrics: ${kpiMetrics.length} with records`);
 
   // ─── Credentials Summary ───────────────────────────────────────────────
   console.log('\n✅ Demo seed complete!\n');

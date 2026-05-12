@@ -1,5 +1,6 @@
 'use client';
 
+import React, { memo } from 'react';
 import {
   Building2, Clock, BarChart3, Activity, Users, TrendingUp,
 } from 'lucide-react';
@@ -25,7 +26,7 @@ interface SituationBarProps {
 
 type Tone = 'calm' | 'attention' | 'urgent';
 
-export function SituationBar({ data, onAlertsClick, onApprovalsClick }: SituationBarProps) {
+export const SituationBar = memo(function SituationBar({ data, onAlertsClick, onApprovalsClick }: SituationBarProps) {
   const {
     activeBranchName,
     totalBranches = 0,
@@ -45,7 +46,7 @@ export function SituationBar({ data, onAlertsClick, onApprovalsClick }: Situatio
   const revTone: Tone = revenueGrowth != null && revenueGrowth < 0 ? 'attention' : 'calm';
 
   return (
-    <div className="flex items-center gap-1.5 md:gap-2 overflow-x-auto scrollbar-hide py-1 px-0.5">
+    <div className="flex items-center gap-2 md:gap-3 overflow-x-auto scrollbar-hide py-1.5 px-0.5">
 
       {/* 1. Filial kontekst */}
       <Chip
@@ -102,7 +103,7 @@ export function SituationBar({ data, onAlertsClick, onApprovalsClick }: Situatio
 
     </div>
   );
-}
+});
 
 interface ChipProps {
   icon: React.ElementType;
@@ -111,28 +112,33 @@ interface ChipProps {
   tone?: Tone;
   href?: string;
   onClick?: () => void;
-  prominent?: boolean;
 }
 
-function Chip({ icon: Icon, label, metric, tone = 'calm', href, onClick, prominent }: ChipProps) {
+function Chip({ icon: Icon, label, metric, tone = 'calm', href, onClick }: ChipProps) {
   const isInteractive = !!(href || onClick);
 
-  const chipBg: Record<Tone, string> = {
-    urgent:    'bg-xedu-ruby-50/70 border-xedu-ruby-200/70 dark:bg-xedu-ruby-900/20 dark:border-xedu-ruby-800/40',
-    attention: 'bg-xedu-amber-50/60 border-xedu-amber-200/60 dark:bg-xedu-amber-900/15 dark:border-xedu-amber-800/30',
-    calm:      'bg-xedu-bg-panel border-xedu-border dark:bg-xedu-bg-panel dark:border-xedu-border',
+  const chipMaterial: Record<Tone, string> = {
+    urgent:    'xedu-material-chip-urgent',
+    attention: 'xedu-material-chip-attention',
+    calm:      'xedu-material-chip',
   };
 
-  const iconColor: Record<Tone, string> = {
-    urgent:    'text-xedu-ruby-500',
-    attention: 'text-xedu-amber-500',
-    calm:      'text-xedu-slate-400',
+  const iconContainer: Record<Tone, string> = {
+    urgent:    'bg-xedu-ruby-100/60 text-xedu-ruby-600 dark:bg-xedu-ruby-900/30 dark:text-xedu-ruby-400',
+    attention: 'bg-xedu-amber-100/60 text-xedu-amber-600 dark:bg-xedu-amber-900/30 dark:text-xedu-amber-400',
+    calm:      'bg-xedu-primary-light/60 text-xedu-primary dark:bg-xedu-primary/15 dark:text-xedu-emerald-400',
   };
 
   const metricColor: Record<Tone, string> = {
     urgent:    'text-xedu-ruby-700 dark:text-xedu-ruby-400',
     attention: 'text-xedu-amber-700 dark:text-xedu-amber-400',
-    calm:      'text-xedu-slate-800 dark:text-xedu-slate-200',
+    calm:      'text-xedu-slate-900 dark:text-xedu-slate-100',
+  };
+
+  const labelColor: Record<Tone, string> = {
+    urgent:    'text-xedu-ruby-600/80 dark:text-xedu-ruby-400/80',
+    attention: 'text-xedu-amber-600/80 dark:text-xedu-amber-400/80',
+    calm:      'text-xedu-slate-500 dark:text-xedu-slate-400',
   };
 
   const Wrapper = href ? Link : onClick ? 'button' : 'div';
@@ -142,30 +148,31 @@ function Chip({ icon: Icon, label, metric, tone = 'calm', href, onClick, promine
     <Wrapper
       {...(wrapperProps as any)}
       className={cn(
-        'flex items-center gap-2 rounded-xl shrink-0 border transition-all duration-150',
-        chipBg[tone],
-        prominent ? 'px-3.5 py-2.5 shadow-sm' : 'px-2.5 py-1.5',
-        isInteractive && 'hover:-translate-y-px hover:shadow-sm cursor-pointer'
+        'flex items-center gap-2.5 rounded-xl shrink-0 cursor-default',
+        'px-3 py-2',
+        chipMaterial[tone],
+        isInteractive && 'cursor-pointer xedu-tactile-hover'
       )}
     >
       <div className={cn(
         'flex items-center justify-center rounded-lg shrink-0',
-        prominent ? 'h-7 w-7 bg-xedu-bg-subtle dark:bg-xedu-slate-800/60' : 'h-5 w-5'
+        'h-6 w-6',
+        iconContainer[tone]
       )}>
-        <Icon className={cn(iconColor[tone], prominent ? 'h-3.5 w-3.5' : 'h-3 w-3')} />
+        <Icon className="h-3.5 w-3.5" strokeWidth={2} />
       </div>
       <div className="flex items-baseline gap-1.5">
         <span className={cn(
-          'font-semibold whitespace-nowrap text-xedu-slate-500 dark:text-xedu-slate-400',
-          prominent ? 'text-xs' : 'text-2xs'
+          'font-semibold whitespace-nowrap',
+          'text-2xs uppercase tracking-wider',
+          labelColor[tone]
         )}>
           {label}
         </span>
         {metric !== undefined && (
           <span className={cn(
-            'font-bold tabular-nums whitespace-nowrap',
-            metricColor[tone],
-            prominent ? 'text-sm' : 'text-xs'
+            'font-bold tabular-nums whitespace-nowrap text-sm',
+            metricColor[tone]
           )}>
             {metric}
           </span>
@@ -176,5 +183,5 @@ function Chip({ icon: Icon, label, metric, tone = 'calm', href, onClick, promine
 }
 
 function Sep() {
-  return <div className="h-4 w-px bg-xedu-border shrink-0 hidden sm:block" />;
+  return <div className="h-5 w-px bg-xedu-border shrink-0 hidden sm:block" />;
 }

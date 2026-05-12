@@ -1,5 +1,6 @@
 'use client';
 
+import React, { memo } from 'react';
 import { BookOpen, ClipboardCheck, GraduationCap, Calendar } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -21,7 +22,7 @@ interface AcademicSnapshotProps {
   isLoading: boolean;
 }
 
-export function AcademicSnapshot({
+export const AcademicSnapshot = memo(function AcademicSnapshot({
   attendanceSummary,
   classCount = 0,
   activeStudents = 0,
@@ -106,7 +107,7 @@ export function AcademicSnapshot({
       </div>
     </WorkspaceBlock>
   );
-}
+});
 
 function AcadStat({
   icon: Icon,

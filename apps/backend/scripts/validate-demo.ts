@@ -47,8 +47,9 @@ async function main() {
     { name: 'Announcements',   min: 1,  fn: () => prisma.announcement.count({ where: { schoolId } }) },
     { name: 'Library books',   min: 20, fn: () => prisma.libraryBook.count({ where: { schoolId } }) },
     { name: 'Library loans',   min: 10, fn: () => prisma.libraryLoan.count({ where: { schoolId } }) },
-    { name: 'Exams',           min: 1,  fn: () => prisma.exam.count({ where: { schoolId } }) },
-    { name: 'KPI metrics',     min: 1,  fn: () => prisma.kpiMetric.count({ where: { schoolId } }) },
+    { name: 'Exams',           min: 3,  fn: () => prisma.exam.count({ where: { schoolId } }) },
+    { name: 'KPI metrics',     min: 3,  fn: () => prisma.kpiMetric.count({ where: { schoolId } }) },
+    { name: 'KPI records',     min: 3,  fn: () => prisma.kpiRecord.count({ where: { metric: { schoolId } } }) },
   ];
 
   console.log(`\n🏫 Validating demo school: ${school.name} (${school.slug})\n`);

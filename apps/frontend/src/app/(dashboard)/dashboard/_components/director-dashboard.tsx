@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
@@ -31,6 +31,12 @@ import { leaveRequestsApi } from '@/lib/api/leave-requests';
 import { disciplineApi } from '@/lib/api/discipline';
 import { financeApi } from '@/lib/api/finance';
 import { notificationsApi } from '@/lib/api/notifications';
+
+const REALTIME_PULSE_EVENTS = [
+  'leave-request:created', 'leave-request:updated', 'discipline:created',
+  'discipline:resolved', 'payment:received', 'class:created',
+  'class:updated', 'class:removed', 'notification:broadcast',
+];
 
 import {
   C, ICON_CFG, PCard, QuickActions, AcademicCalendarWidget,
@@ -84,26 +90,38 @@ export function DirectorDashboard() {
   const { data: attendanceSummary, isLoading: attLoading } = useQuery({
     queryKey: ['attendance', 'today-summary', 'school-wide'],
     queryFn: attendanceApi.getTodaySummary,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   const { data: classesData } = useQuery({
     queryKey: ['classes', 'school-wide'],
     queryFn: classesApi.getAll,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   const { data: usersData } = useQuery({
     queryKey: ['users', 'all', 'school-wide'],
     queryFn: () => usersApi.getAll({ limit: 200 }),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   const { data: pendingLeaves } = useQuery({
     queryKey: ['leave-requests', 'pending', 'school-wide'],
     queryFn: () => leaveRequestsApi.getAll({ status: 'pending' }),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   const { data: financeData } = useQuery({
     queryKey: ['finance', 'dashboard', 'school-wide'],
     queryFn: financeApi.getDashboard,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   const { data: pendingDiscipline } = useQuery({
     queryKey: ['discipline', 'unresolved', 'school-wide'],
     queryFn: () => disciplineApi.getAll().catch(() => ({ data: [] })),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
   const { data: coinStats } = useQuery({
     queryKey: ['coins', 'admin', 'stats'],
@@ -128,6 +146,8 @@ export function DirectorDashboard() {
   const { data: upcomingExamsData } = useQuery({
     queryKey: ['exams', 'upcoming', 'school-wide'],
     queryFn: () => examsApi.getUpcoming(7).catch(() => []),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 
   // ── Derived data ────────────────────────────────────────────────────────────
@@ -151,8 +171,11 @@ export function DirectorDashboard() {
   const revenueGrowth = financeData?.revenueGrowth ?? (lastMonthRev > 0 ? ((thisMonthRev - lastMonthRev) / lastMonthRev) * 100 : 0);
 
   // ── Executive briefing data ─────────────────────────────────────────────────
-  const inactiveBranches = (branches as any[])?.filter((b: any) => !b.isActive) ?? [];
-  const briefingData: ExecutiveBriefingData = {
+  const inactiveBranches = useMemo(() =>
+    (branches as any[])?.filter((b: any) => !b.isActive) ?? [],
+  [branches]);
+
+  const briefingData = useMemo<ExecutiveBriefingData>(() => ({
     pendingLeaves: pendingLeaveList,
     pendingDiscipline: pendingDisciplineList,
     attendancePct: presentPct > 0 ? presentPct : null,
@@ -163,7 +186,7 @@ export function DirectorDashboard() {
     studentCount,
     lowGpaCount: aiSummary?.riskDistribution?.low ?? 0,
     upcomingExams: upcomingExamsCount,
-  };
+  }), [pendingLeaveList, pendingDisciplineList, presentPct, atRisk, financeData?.overdueAmount, inactiveBranches, teacherCount, studentCount, aiSummary?.riskDistribution?.low, upcomingExamsCount]);
 
   // ── Mutations ───────────────────────────────────────────────────────────────
   const reviewMutation = useMutation({
@@ -192,16 +215,46 @@ export function DirectorDashboard() {
     document.dispatchEvent(new CustomEvent('open-command-palette'));
   };
 
-  const handleToggleCompare = (id: string) => {
+  const handleToggleCompare = useCallback((id: string) => {
     setCompareSelected((prev) => {
       const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
       return next;
     });
-  };
+  }, []);
 
-  const dayLabel = new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' });
+  const handleAlertsClick = useCallback(() => {
+    router.push('/dashboard/alerts');
+  }, [router]);
 
-  const situationData: SituationBarData = {
+  const handleApprovalsClick = useCallback(() => {
+    router.push('/dashboard/approvals');
+  }, [router]);
+
+  const handleCompareClose = useCallback(() => {
+    setCompareMode(false);
+    setCompareSelected([]);
+  }, []);
+
+  const handleCompareRemove = useCallback((id: string) => {
+    setCompareSelected((prev) => prev.filter((x) => x !== id));
+  }, []);
+
+  const smartInsightsData = useMemo(() => ({
+    branches: (branches as any[]) ?? [],
+    attendanceSummary,
+    pendingLeaves: pendingLeaveList,
+    pendingDiscipline: pendingDisciplineList,
+    aiSummary,
+    financeData: financeData as any,
+    teacherCount,
+    studentCount,
+  }), [branches, attendanceSummary, pendingLeaveList, pendingDisciplineList, aiSummary, financeData, teacherCount, studentCount]);
+
+  const dayLabel = useMemo(() =>
+    new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' }),
+  []);
+
+  const situationData = useMemo<SituationBarData>(() => ({
     activeBranchName: activeBranchId ? undefined : 'Barcha filiallar',
     totalBranches: (branches as any[])?.length ?? 0,
     alertCount: pendingDisciplineList.length,
@@ -210,7 +263,7 @@ export function DirectorDashboard() {
     attendancePct: presentPct > 0 ? presentPct : null,
     staffTotal: teacherCount + staffCount,
     revenueGrowth: revenueGrowth || null,
-  };
+  }), [activeBranchId, branches, pendingDisciplineList.length, pendingLeaveList.length, atRisk, presentPct, teacherCount, staffCount, revenueGrowth]);
 
   return (
     <WorkspaceShell layout="two-column" density="compact">
@@ -224,24 +277,24 @@ export function DirectorDashboard() {
           icon={<LayoutDashboard className="h-5 w-5 text-xedu-slate-500" />}
           actions={
             <RealtimePulse
-              events={['leave-request:created', 'leave-request:updated', 'discipline:created', 'discipline:resolved', 'payment:received', 'class:created', 'class:updated', 'class:removed', 'notification:broadcast']}
+              events={REALTIME_PULSE_EVENTS}
               label="Ma'lumot yangilandi"
             />
           }
         />
 
-        <div className="sticky top-0 z-20 -mx-2 px-2 py-2 bg-xedu-bg/90 dark:bg-xedu-slate-950/90 backdrop-blur-sm">
+        <div className="sticky top-0 z-20 -mx-2 px-2 py-2 xedu-sticky-executive">
           <SituationBar
             data={situationData}
-            onAlertsClick={() => router.push('/dashboard/alerts')}
-            onApprovalsClick={() => router.push('/dashboard/approvals')}
+            onAlertsClick={handleAlertsClick}
+            onApprovalsClick={handleApprovalsClick}
           />
         </div>
       </div>
 
       {/* ── Main Canvas ─────────────────────────────────────────────────────── */}
       <WorkspaceMain>
-        <div className="bg-xedu-bg-rail rounded-2xl border border-xedu-border shadow-sm p-4 md:p-5 space-y-6">
+        <div className="xedu-emerald-mineral rounded-2xl p-4 md:p-5 space-y-6">
           {/* HERO: Executive Briefing — decision guidance */}
           <ExecutiveBriefing data={briefingData} />
 
@@ -295,8 +348,8 @@ export function DirectorDashboard() {
                 allUsers={allUsers}
                 pendingLeaves={pendingLeaveList}
                 pendingDiscipline={pendingDisciplineList}
-                onClose={() => { setCompareMode(false); setCompareSelected([]); }}
-                onRemove={(id) => setCompareSelected((prev) => prev.filter((x) => x !== id))}
+                onClose={handleCompareClose}
+                onRemove={handleCompareRemove}
               />
             </div>
           )}
@@ -468,7 +521,7 @@ export function DirectorDashboard() {
 
       {/* ── Right Sidebar ───────────────────────────────────────────────────── */}
       <WorkspaceSidebar width="normal">
-        <div className="bg-xedu-bg-rail rounded-2xl border border-xedu-border shadow-sm p-3 md:p-4">
+        <div className="xedu-intelligence-surface rounded-2xl p-3 md:p-4">
           {/* 1. Operational Intelligence — primary, most urgent */}
           <IntelligenceFeed
             aiSummary={aiSummary}
@@ -483,16 +536,7 @@ export function DirectorDashboard() {
           {/* 2. Analytical layer — insights + activity */}
           <div className="mt-5 space-y-3">
             <SmartInsights
-              data={{
-                branches: (branches as any[]) ?? [],
-                attendanceSummary,
-                pendingLeaves: pendingLeaveList,
-                pendingDiscipline: pendingDisciplineList,
-                aiSummary,
-                financeData: financeData as any,
-                teacherCount,
-                studentCount,
-              }}
+              data={smartInsightsData}
               maxInsights={4}
             />
             <ActivityStream
@@ -552,7 +596,7 @@ export function DirectorDashboard() {
 
 // ── Compact side cards ─────────────────────────────────────────────────────────
 
-function KPICard({ kpiData }: { kpiData: any }) {
+const KPICard = memo(function KPICard({ kpiData }: { kpiData: any }) {
   const items: any[] = (kpiData as any)?.items ?? [];
   const avg = items.length
     ? Math.round(items.reduce((s: number, i: any) => s + (i.progress ?? 0), 0) / items.length)
@@ -575,9 +619,9 @@ function KPICard({ kpiData }: { kpiData: any }) {
       </p>
     </Link>
   );
-}
+});
 
-function AiRiskCard({ aiSummary }: { aiSummary: any }) {
+const AiRiskCard = memo(function AiRiskCard({ aiSummary }: { aiSummary: any }) {
   const atRisk = (aiSummary?.riskDistribution?.critical ?? 0) + (aiSummary?.riskDistribution?.high ?? 0);
   const total = aiSummary?.totalStudents ?? 0;
 
@@ -601,9 +645,9 @@ function AiRiskCard({ aiSummary }: { aiSummary: any }) {
       </p>
     </Link>
   );
-}
+});
 
-function EduCoinCard({ coinStats }: { coinStats: any }) {
+const EduCoinCard = memo(function EduCoinCard({ coinStats }: { coinStats: any }) {
   const count = (coinStats as any)?.data?.length ?? 0;
 
   return (
@@ -621,11 +665,11 @@ function EduCoinCard({ coinStats }: { coinStats: any }) {
       <p className="text-xs font-medium mt-0.5" style={{ color: C.muted }}>Faol o'quvchilar</p>
     </Link>
   );
-}
+});
 
 // ── Recent Operations — executive snapshot (replaces duplicated Quick Links) ──
 
-function RecentOperations({
+const RecentOperations = memo(function RecentOperations({
   pendingLeaves,
   pendingDiscipline,
   atRisk,
@@ -684,4 +728,4 @@ function RecentOperations({
       ))}
     </div>
   );
-}
+});

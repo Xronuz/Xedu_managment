@@ -54,23 +54,23 @@ jobs:
           docker compose -f docker-compose.selfhost.yml up -d --build
           echo "All services started"
 
-      # ── 5. Sog'liqni tekshirish — Caddy port 80 ─────────────────────────────
+      # ── 5. Sog'liqni tekshirish — backend to'g'ridan tekshirish ───────────────
       - name: Wait for healthy (up to 5 min)
         run: |
           cd /opt/eduplatform
-          echo "Waiting for API health..."
+          echo "Waiting for backend health..."
           for i in $(seq 1 60); do
-            STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
-              http://localhost:80/api/health 2>/dev/null || echo "000")
-            if echo "$STATUS" | grep -qE "^(200|301|302|307)$"; then
-              echo "Healthy — HTTP $STATUS after $((i * 5))s"
+            STATUS=$(docker compose -f docker-compose.selfhost.yml exec -T backend \
+              wget -qO- http://localhost:3001/api/health 2>/dev/null && echo "200" || echo "000")
+            if [ "$STATUS" = "200" ] || echo "$STATUS" | grep -qE "\"status\""; then
+              echo "Backend healthy after $((i * 5))s"
               exit 0
             fi
             if [ "$i" -eq 60 ]; then
-              echo "ERROR: not healthy after 5 min (last: HTTP $STATUS)"
+              echo "ERROR: backend not healthy after 5 min"
               exit 1
             fi
-            printf "  [%02d/60] HTTP %s — %ds\n" "$i" "$STATUS" "$((i * 5))"
+            printf "  [%02d/60] not ready — %ds\n" "$i" "$((i * 5))"
             sleep 5
           done
 

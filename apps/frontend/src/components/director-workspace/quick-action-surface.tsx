@@ -2,7 +2,7 @@
 
 import React, { memo } from 'react';
 import {
-  Megaphone, FileText, CheckSquare, TrendingUp, Building2, Command,
+  Megaphone, CheckSquare, Command,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -13,18 +13,16 @@ interface QuickActionSurfaceProps {
 }
 
 export const QuickActionSurface = memo(function QuickActionSurface({ onOpenCommandPalette, activeAction }: QuickActionSurfaceProps) {
+  // Faqat sidebar da YO'Q bo'lgan amallar
+  // Tasdiqlash — sidebar da "Tasdiqlash inbox" sifatida mavjud, olib tashlandi
   const actions = [
     { id: 'announcement', label: "E'lon", icon: Megaphone, href: '/dashboard/announcements', badge: 0 },
-    { id: 'report', label: 'Hisobot', icon: FileText, href: '/dashboard/reports', badge: 0 },
-    { id: 'approvals', label: 'Tasdiqlash', icon: CheckSquare, href: '/dashboard/leave-requests', badge: 0 },
-    { id: 'finance', label: 'Moliya', icon: TrendingUp, href: '/dashboard/finance', badge: 0 },
-    { id: 'branches', label: 'Filiallar', icon: Building2, href: '/dashboard/branches', badge: 0 },
   ];
 
   return (
     <>
       {/* Desktop dock — centered bottom with executive material richness */}
-      <div className="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-30 items-center rounded-2xl xedu-floating-executive backdrop-blur-md overflow-hidden px-1 py-1">
+      <div className="hidden md:flex fixed bottom-6 left-1/2 -translate-x-1/2 z-30 items-center rounded-2xl xedu-floating-executive overflow-hidden px-1 py-1">
         {actions.map((action) => (
           <DockItem
             key={action.id}

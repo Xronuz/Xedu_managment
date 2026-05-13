@@ -33,12 +33,12 @@ export const BranchComparison = memo(function BranchComparison({
   if (selected.length < 2) return null;
 
   const rows = selected.map((branch) => {
-    const branchUsers = allUsers.filter((u: any) => u.branchId === branch.id);
+    const branchUsers = allUsers.filter((u: any) => (u.branchId ?? u.branch?.id) === branch.id);
     const students = branchUsers.filter((u: any) => u.role === 'student').length;
     const teachers = branchUsers.filter((u: any) => ['teacher', 'class_teacher'].includes(u.role)).length;
     const staff = branchUsers.filter((u: any) => !['student', 'teacher', 'class_teacher', 'parent'].includes(u.role)).length;
-    const alerts = pendingDiscipline.filter((d: any) => d.student?.branchId === branch.id).length;
-    const pending = pendingLeaves.filter((l: any) => l.requester?.branchId === branch.id).length;
+    const alerts = pendingDiscipline.filter((d: any) => (d.student?.branchId ?? d.student?.branch?.id) === branch.id).length;
+    const pending = pendingLeaves.filter((l: any) => (l.requester?.branchId ?? l.requester?.branch?.id) === branch.id).length;
     return { branch, students, teachers, staff, alerts, pending };
   });
 

@@ -78,8 +78,14 @@ export class UsersService {
   ) {
     const skip = (page - 1) * limit;
 
-    // super_admin can see all users; others get branchFilter
-    const baseFilter = currentUser.isSuperAdmin ? {} : buildTenantWhere(currentUser);
+    // director va vice_principal maktab bo'yicha ko'radi (branchId filter yo'q)
+    const isSchoolWide = currentUser.isSuperAdmin
+      || currentUser.role === UserRole.DIRECTOR
+      || currentUser.role === UserRole.VICE_PRINCIPAL;
+
+    const baseFilter = isSchoolWide
+      ? { schoolId: currentUser.schoolId! }
+      : buildTenantWhere(currentUser);
     const where: any = { ...baseFilter };
 
     // Rol-darajasiga ko'ra ko'rinish: actor o'zidan yuqori rolni ko'rmaydi

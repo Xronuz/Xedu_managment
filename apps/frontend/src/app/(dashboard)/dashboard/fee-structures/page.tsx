@@ -26,6 +26,7 @@ import { Controller } from 'react-hook-form';
 import { feeStructuresApi, FeeStructure } from '@/lib/api/fee-structures';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth.store';
+import { FinanceSectionNav } from '@/components/finance/finance-section-nav';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const FREQUENCY_OPTIONS = [
@@ -285,6 +286,7 @@ export default function FeeStructuresPage() {
 
   return (
     <div className="space-y-6">
+      <FinanceSectionNav />
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>

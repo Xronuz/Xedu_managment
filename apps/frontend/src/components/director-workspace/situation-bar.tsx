@@ -2,7 +2,7 @@
 
 import React, { memo } from 'react';
 import {
-  Building2, Clock, BarChart3, Activity, Users, TrendingUp,
+  Building2, Clock, BarChart3, Activity, Users, TrendingUp, Megaphone,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
@@ -99,6 +99,16 @@ export const SituationBar = memo(function SituationBar({ data, onAlertsClick, on
         metric={riskSignals > 0 ? riskSignals : '—'}
         href="/dashboard/ai-analytics"
         tone={riskSignals > 0 ? 'attention' : 'calm'}
+      />
+
+      <Sep />
+
+      {/* E'lon — sidebar da yo'q, tez kirish uchun */}
+      <Chip
+        icon={Megaphone}
+        label="E'lon"
+        href="/dashboard/announcements"
+        tone="calm"
       />
 
     </div>

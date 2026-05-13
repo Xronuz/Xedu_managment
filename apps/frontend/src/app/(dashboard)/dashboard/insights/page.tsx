@@ -15,6 +15,7 @@ import { Progress } from '@/components/ui/progress';
 import { Input } from '@/components/ui/input';
 import { aiAnalyticsApi } from '@/lib/api/ai-analytics';
 import { cn } from '@/lib/utils';
+import { AnalyticsSectionNav } from '@/components/analytics/analytics-section-nav';
 
 const RISK_COLORS = {
   LOW:      { bg: 'bg-xedu-primary-light', text: 'text-xedu-primary', bar: 'bg-xedu-primary', label: 'Past' },
@@ -149,6 +150,7 @@ export default function AiAnalyticsPage() {
 
   return (
     <div className="space-y-6">
+      <AnalyticsSectionNav />
       <div>
         <div className="flex items-center gap-2">
           <Brain className="h-6 w-6 text-indigo-500" />

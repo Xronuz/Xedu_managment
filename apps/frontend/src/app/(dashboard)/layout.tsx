@@ -128,6 +128,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Header />
             <main
               className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg-canvas dark:bg-xedu-bg-canvas rounded-tl-2xl p-6"
+              style={{ isolation: 'isolate' }}
               onClick={() => { if (!sidebarCollapsed) setSidebarCollapsed(true); }}
             >
               <BreadcrumbNav />

@@ -15,6 +15,7 @@ import { Progress } from '@/components/ui/progress';
 import { useAuthStore } from '@/store/auth.store';
 import { kpiApi } from '@/lib/api/kpi';
 import { cn } from '@/lib/utils';
+import { AnalyticsSectionNav } from '@/components/analytics/analytics-section-nav';
 
 const CATEGORY_LABELS: Record<string, { label: string; color: string }> = {
   STRATEGY:   { label: 'Strategiya', color: 'bg-blue-100 text-blue-700' },
@@ -117,6 +118,7 @@ export default function KpiDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <AnalyticsSectionNav />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>

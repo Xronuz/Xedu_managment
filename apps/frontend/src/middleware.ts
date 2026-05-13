@@ -50,6 +50,10 @@ export function middleware(request: NextRequest) {
 
   // ── 1. Public auth pages ──────────────────────────────────────────────
   if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p + '/'))) {
+    // /auth/clear must always run regardless of auth state — it's a cookie-clearing handler
+    if (pathname === '/auth/clear' || pathname.startsWith('/auth/clear/')) {
+      return NextResponse.next();
+    }
     // First-login enforcement: even on public pages, force first-login users
     if (isAuthenticated && payload?.isFirstLogin === true && pathname !== '/first-login') {
       return NextResponse.redirect(new URL('/first-login', request.url));

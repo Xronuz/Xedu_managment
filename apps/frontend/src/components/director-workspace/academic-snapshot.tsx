@@ -45,7 +45,10 @@ export const AcademicSnapshot = memo(function AcademicSnapshot({
   }
 
   const pct = attendanceSummary?.presentPct ?? 0;
-  const totalStudents = attendanceSummary?.totalStudents ?? activeStudents ?? 0;
+  // activeStudents (allUsers dan hisoblangan) to'liq school-wide raqam.
+  // attendanceSummary.totalStudents branch-scoped bo'lishi mumkin — faqat davomat formulasida ishlatiladi.
+  const totalStudents = activeStudents > 0 ? activeStudents : (attendanceSummary?.totalStudents ?? 0);
+  const attendanceBase = attendanceSummary?.totalStudents ?? totalStudents;
   const hasAttendance = attendanceSummary != null && (attendanceSummary.marked ?? 0) > 0;
 
   return (
@@ -57,7 +60,7 @@ export const AcademicSnapshot = memo(function AcademicSnapshot({
             icon={ClipboardCheck}
             label="Davomat"
             value={hasAttendance ? `${pct}%` : '—'}
-            sub={hasAttendance ? `${attendanceSummary?.marked ?? 0} / ${totalStudents}` : "Ma'lumot yo'q"}
+            sub={hasAttendance ? `${attendanceSummary?.marked ?? 0} / ${attendanceBase}` : "Ma'lumot yo'q"}
             tone={pct < 70 ? 'urgent' : pct < 85 ? 'attention' : 'calm'}
             href="/dashboard/attendance"
           />

@@ -20,6 +20,7 @@ import { TreasuryPanel } from '@/components/finance/treasury-panel';
 import { ShiftManager } from '@/components/finance/shift-manager';
 import { cn } from '@/lib/utils';
 import { DS } from '@/components/ui/page-ui';
+import { FinanceSectionNav } from '@/components/finance/finance-section-nav';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmt(amount: number) {
@@ -230,6 +231,9 @@ export default function FinanceDashboardPage() {
 
   return (
     <div className="flex flex-col gap-3" style={{ height: 'calc(100vh - 10.5rem)' }}>
+
+      {/* ── Section nav: Moliya / To'lovlar / Ish haqi / Tariflar ─────────── */}
+      <FinanceSectionNav />
 
       {/* ── Row 1: Header + Tab bar ───────────────────────────────────────── */}
       <div className="flex shrink-0 flex-wrap items-center justify-between gap-3">

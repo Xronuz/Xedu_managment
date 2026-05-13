@@ -53,62 +53,49 @@ export const DIRECTOR_NAV: NavGroup[] = [
     ],
   },
   {
+    // Sinflar, Dars jadvali, Fanlar — Ta'lim markazi tablarida mavjud
     title: "Ta'lim",
     items: [
       { label: "Ta'lim markazi", href: '/dashboard/education', icon: BookOpen, roles: ROUTE_PERMISSIONS['/dashboard/education'] },
-      { label: 'Dars jadvali', href: '/dashboard/schedule', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/schedule'] },
-      { label: 'Sinflar', href: '/dashboard/classes', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/classes'] },
-      { label: 'Fanlar', href: '/dashboard/subjects', icon: BookMarked, roles: ROUTE_PERMISSIONS['/dashboard/subjects'] },
       { label: 'Baholar', href: '/dashboard/grades', icon: GraduationCap, roles: ROUTE_PERMISSIONS['/dashboard/grades'] },
       { label: 'Imtihonlar', href: '/dashboard/exams', icon: ClipboardList, roles: ROUTE_PERMISSIONS['/dashboard/exams'] },
       { label: 'Davomat', href: '/dashboard/attendance', icon: CalendarCheck, roles: ROUTE_PERMISSIONS['/dashboard/attendance'] },
     ],
   },
   {
+    // Ta'til so'rovlar — Tasdiqlash inbox (Ta'til tab) orqali boshqariladi
     title: 'Operatsiyalar',
     items: [
       { label: 'Intizom', href: '/dashboard/discipline', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
-      { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
     ],
   },
   {
+    // To'lovlar, Ish haqi, Tariflar — Moliya sahifasi tablarida mavjud
     title: 'Moliya',
     items: [
       { label: 'Moliya', href: '/dashboard/finance', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/finance'] },
-      { label: "To'lovlar", href: '/dashboard/payments', icon: CreditCard, roles: ROUTE_PERMISSIONS['/dashboard/payments'] },
-      { label: 'Ish haqi', href: '/dashboard/payroll', icon: Award, roles: ROUTE_PERMISSIONS['/dashboard/payroll'] },
-      { label: 'Tariflar', href: '/dashboard/fee-structures', icon: Wallet, roles: ROUTE_PERMISSIONS['/dashboard/fee-structures'] },
     ],
   },
   {
+    // Foydalanuvchilar — Cmd+K orqali yetarli
     title: 'Jamoa',
     items: [
       { label: "O'quvchilar", href: '/dashboard/students', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/students'] },
       { label: 'Xodimlar', href: '/dashboard/staff', icon: Briefcase, roles: ROUTE_PERMISSIONS['/dashboard/staff'] },
-      { label: 'Foydalanuvchilar', href: '/dashboard/users', icon: UserCog, roles: ROUTE_PERMISSIONS['/dashboard/users'] },
     ],
   },
   {
+    // Kommunikatsiya — Bildirishnomalar bilan birlashtirildi; CRM, Uchrashuvlar, Marketing — Cmd+K
     title: 'Aloqa',
     items: [
-      { label: 'Kommunikatsiya', href: '/dashboard/comms', icon: MessageSquare, roles: ROUTE_PERMISSIONS['/dashboard/comms'] },
       { label: 'Bildirishnomalar', href: '/dashboard/notifications', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/notifications'] },
     ],
   },
   {
+    // KPI, Insights — Hisobotlar sahifasi tablarida mavjud
     title: 'Analitika',
     items: [
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
-      { label: 'KPI Dashboard', href: '/dashboard/kpi', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/kpi'] },
-      { label: 'Insights', href: '/dashboard/insights', icon: Brain, roles: ROUTE_PERMISSIONS['/dashboard/insights'] },
-      { label: 'Marketing', href: '/dashboard/marketing', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/marketing'] },
-    ],
-  },
-  {
-    title: 'Boshqaruv',
-    items: [
-      { label: 'CRM', href: '/dashboard/crm', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/crm'] },
-      { label: 'Uchrashuvlar', href: '/dashboard/meetings', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/meetings'] },
     ],
   },
   {

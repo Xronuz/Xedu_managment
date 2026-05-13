@@ -28,6 +28,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/ui/use-toast';
 import { formatCurrency, formatDate, getInitials, getRoleLabel } from '@/lib/utils';
 import { TariffCalculatorDialog } from '@/components/payroll/tariff-calculator-dialog';
+import { FinanceSectionNav } from '@/components/finance/finance-section-nav';
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 
@@ -413,6 +414,7 @@ export default function PayrollPage() {
 
   return (
     <div className="space-y-6">
+      <FinanceSectionNav />
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Banknote className="h-6 w-6 text-primary" /> Maosh tizimi

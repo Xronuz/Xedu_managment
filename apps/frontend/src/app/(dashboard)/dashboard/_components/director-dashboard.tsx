@@ -1,20 +1,17 @@
 'use client';
 
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback, memo, useTransition, startTransition } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ClipboardCheck, Users, TrendingUp, TrendingDown,
-  CheckCircle2, ShieldAlert, Bell, BarChart2, Activity, Coins,
-  ArrowUpRight, GitCompare, X, LayoutDashboard, Sparkles, BarChart3, Zap,
+  CheckCircle2, ShieldAlert, BarChart2, Activity, Coins,
+  ArrowUpRight, LayoutDashboard, Sparkles, BarChart3, Zap,
 } from 'lucide-react';
 import { AiPlaceholderCard } from '@/components/ai/ai-placeholder-card';
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/components/ui/use-toast';
 import { formatCurrency, cn } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'next/navigation';
@@ -30,18 +27,9 @@ import { branchesApi } from '@/lib/api/branches';
 import { leaveRequestsApi } from '@/lib/api/leave-requests';
 import { disciplineApi } from '@/lib/api/discipline';
 import { financeApi } from '@/lib/api/finance';
-import { notificationsApi } from '@/lib/api/notifications';
-
-const REALTIME_PULSE_EVENTS = [
-  'leave-request:created', 'leave-request:updated', 'discipline:created',
-  'discipline:resolved', 'payment:received', 'class:created',
-  'class:updated', 'class:removed', 'notification:broadcast',
-];
-
 import {
   C, ICON_CFG, PCard, QuickActions, AcademicCalendarWidget,
 } from './shared-widgets';
-
 import {
   WorkspaceShell,
   WorkspaceHeader,
@@ -50,7 +38,6 @@ import {
   WorkspaceSection,
   RealtimePulse,
 } from '@/components/workspace-system';
-
 import {
   SituationBar,
   BranchHealthMap,
@@ -59,9 +46,7 @@ import {
   StaffOperations,
   IntelligenceFeed,
   RightContextualPanel,
-  QuickActionSurface,
   ActivityStream,
-  BranchComparison,
   SmartInsights,
   ExecutiveBriefing,
   type BranchDetail,
@@ -69,23 +54,22 @@ import {
   type ExecutiveBriefingData,
 } from '@/components/director-workspace';
 
+const REALTIME_PULSE_EVENTS = [
+  'leave-request:created', 'leave-request:updated', 'discipline:created',
+  'discipline:resolved', 'payment:received', 'class:created',
+  'class:updated', 'class:removed', 'notification:broadcast',
+];
+
 export function DirectorDashboard() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { toast } = useToast();
   const { activeBranchId } = useAuthStore();
-
-  const [annTitle, setAnnTitle] = useState('');
-  const [annBody, setAnnBody] = useState('');
-  const [annTarget, setAnnTarget] = useState('all_staff');
+  const [, startNonUrgent] = useTransition();
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [selectedBranch, setSelectedBranch] = useState<BranchDetail | null>(null);
 
   // ── Comparison mode ────────────────────────────────────────────────────────
-  const [compareMode, setCompareMode] = useState(false);
-  const [compareSelected, setCompareSelected] = useState<string[]>([]);
-
   // ── Data queries ────────────────────────────────────────────────────────────
   const { data: attendanceSummary, isLoading: attLoading } = useQuery({
     queryKey: ['attendance', 'today-summary', 'school-wide'],
@@ -101,7 +85,7 @@ export function DirectorDashboard() {
   });
   const { data: usersData } = useQuery({
     queryKey: ['users', 'all', 'school-wide'],
-    queryFn: () => usersApi.getAll({ limit: 200 }),
+    queryFn: () => usersApi.getAll({ limit: 1000 }),
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
@@ -150,18 +134,33 @@ export function DirectorDashboard() {
     gcTime: 10 * 60 * 1000,
   });
 
-  // ── Derived data ────────────────────────────────────────────────────────────
-  const classList: any[] = Array.isArray(classesData) ? classesData : (classesData as any)?.data ?? [];
-  const allUsers: any[] = (usersData as any)?.data ?? [];
-  const teacherCount = allUsers.filter((u: any) => ['teacher', 'class_teacher'].includes(u.role)).length;
-  const studentCount = allUsers.filter((u: any) => u.role === 'student').length;
-  const staffCount = allUsers.filter((u: any) =>
-    !['student', 'teacher', 'class_teacher', 'parent'].includes(u.role)
-  ).length;
-  const pendingLeaveList: any[] = (pendingLeaves as any)?.data ?? pendingLeaves ?? [];
-  const pendingDisciplineList: any[] = (pendingDiscipline as any)?.data ?? [];
+  // ── Derived data — all memoised so child memo() comparisons are stable ──────
+  const classList: any[] = useMemo(
+    () => Array.isArray(classesData) ? classesData : (classesData as any)?.data ?? [],
+    [classesData],
+  );
+  const allUsers: any[] = useMemo(() => (usersData as any)?.data ?? [], [usersData]);
+  const teacherCount = useMemo(
+    () => allUsers.filter((u: any) => ['teacher', 'class_teacher'].includes(u.role)).length,
+    [allUsers],
+  );
+  const studentCount = useMemo(
+    () => allUsers.filter((u: any) => u.role === 'student').length,
+    [allUsers],
+  );
+  const staffCount = useMemo(
+    () => allUsers.filter((u: any) => !['student', 'teacher', 'class_teacher', 'parent'].includes(u.role)).length,
+    [allUsers],
+  );
+  const pendingLeaveList: any[] = useMemo(
+    () => (pendingLeaves as any)?.data ?? pendingLeaves ?? [],
+    [pendingLeaves],
+  );
+  const pendingDisciplineList: any[] = useMemo(
+    () => (pendingDiscipline as any)?.data ?? [],
+    [pendingDiscipline],
+  );
   const presentPct = (attendanceSummary as any)?.presentPct ?? 0;
-  const totalStudents = (attendanceSummary as any)?.totalStudents ?? 0;
   const upcomingExamsCount = Array.isArray(upcomingExamsData) ? upcomingExamsData.length : 0;
 
   const atRisk = (aiSummary?.riskDistribution?.critical ?? 0) + (aiSummary?.riskDistribution?.high ?? 0);
@@ -195,32 +194,15 @@ export function DirectorDashboard() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['leave-requests'] }),
   });
 
-  const broadcastMutation = useMutation({
-    mutationFn: notificationsApi.broadcast,
-    onSuccess: () => { setAnnTitle(''); setAnnBody(''); },
-  });
-
-  const handleBroadcast = () => {
-    if (!annTitle.trim() || !annBody.trim()) return;
-    broadcastMutation.mutate({ targetGroup: annTarget, title: annTitle, body: annBody });
-  };
-
   // ── Handlers ─────────────────────────────────────────────────────────────────
-  const handleSelectBranch = (branch: BranchDetail) => {
-    setSelectedBranch(branch);
-    setPanelOpen(true);
-  };
-
-  const handleOpenCommandPalette = () => {
-    document.dispatchEvent(new CustomEvent('open-command-palette'));
-  };
-
-  const handleToggleCompare = useCallback((id: string) => {
-    setCompareSelected((prev) => {
-      const next = prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id];
-      return next;
+  const handleSelectBranch = useCallback((branch: BranchDetail) => {
+    startNonUrgent(() => {
+      setSelectedBranch(branch);
+      setPanelOpen(true);
     });
-  }, []);
+  }, [startNonUrgent]);
+
+
 
   const handleAlertsClick = useCallback(() => {
     router.push('/dashboard/alerts');
@@ -229,15 +211,6 @@ export function DirectorDashboard() {
   const handleApprovalsClick = useCallback(() => {
     router.push('/dashboard/approvals');
   }, [router]);
-
-  const handleCompareClose = useCallback(() => {
-    setCompareMode(false);
-    setCompareSelected([]);
-  }, []);
-
-  const handleCompareRemove = useCallback((id: string) => {
-    setCompareSelected((prev) => prev.filter((x) => x !== id));
-  }, []);
 
   const smartInsightsData = useMemo(() => ({
     branches: (branches as any[]) ?? [],
@@ -269,8 +242,6 @@ export function DirectorDashboard() {
     <WorkspaceShell layout="two-column" density="compact">
       {/* ── Header + Sticky Situation Zone ─────────────────────────────────── */}
       <div className="w-full lg:col-span-2 space-y-1">
-        <QuickActionSurface onOpenCommandPalette={handleOpenCommandPalette} />
-
         <WorkspaceHeader
           title="Direktor paneli"
           subtitle={`Maktab umumiy holati · ${dayLabel}`}
@@ -298,35 +269,7 @@ export function DirectorDashboard() {
           {/* HERO: Executive Briefing — decision guidance */}
           <ExecutiveBriefing data={briefingData} />
 
-          {/* Primary: Branch Health Map with compare controls */}
-        <div className="relative">
-          <div className="flex items-center justify-end gap-2 mb-2 px-1">
-            {compareMode && compareSelected.length >= 2 && (
-              <button
-                onClick={() => setCompareSelected([])}
-                className="flex items-center gap-1 text-xs font-semibold text-xedu-slate-500 hover:text-red-500 transition-colors"
-              >
-                <X className="h-3 w-3" />
-                Tozalash ({compareSelected.length})
-              </button>
-            )}
-            <button
-              onClick={() => {
-                setCompareMode((v) => !v);
-                if (compareMode) setCompareSelected([]);
-              }}
-              className={cn(
-                'flex items-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors',
-                compareMode
-                  ? 'bg-xedu-primary text-white'
-                  : 'text-xedu-slate-500 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800'
-              )}
-            >
-              <GitCompare className="h-3.5 w-3.5" />
-              {compareMode ? 'Taqqoslashni yopish' : 'Filial taqqoslash'}
-            </button>
-          </div>
-
+          {/* Primary: Branch Health Map — inline comparison */}
           <BranchHealthMap
             branches={(branches as any[]) ?? []}
             allUsers={allUsers}
@@ -334,26 +277,8 @@ export function DirectorDashboard() {
             pendingDiscipline={pendingDisciplineList}
             isLoading={branchesLoading}
             selectedBranchId={selectedBranch?.id}
-            compareMode={compareMode}
-            compareSelected={compareSelected}
             onSelectBranch={handleSelectBranch}
-            onToggleCompare={handleToggleCompare}
           />
-
-          {compareSelected.length >= 2 && (
-            <div className="mt-4">
-              <BranchComparison
-                branches={(branches as any[]) ?? []}
-                selectedIds={compareSelected}
-                allUsers={allUsers}
-                pendingLeaves={pendingLeaveList}
-                pendingDiscipline={pendingDisciplineList}
-                onClose={handleCompareClose}
-                onRemove={handleCompareRemove}
-              />
-            </div>
-          )}
-        </div>
 
         {/* Secondary group */}
         <div className="space-y-4">
@@ -433,75 +358,45 @@ export function DirectorDashboard() {
           </WorkspaceSection>
 
           <WorkspaceSection
-            title="E'lon yuborish"
-            icon={<Bell className="h-4 w-4" />}
+            title="Hal qilinmagan intizom holatlari"
+            icon={<ShieldAlert className="h-4 w-4 text-red-500" />}
+            action={
+              pendingDisciplineList.length > 0 ? (
+                <Badge variant="destructive">{pendingDisciplineList.length} ta</Badge>
+              ) : undefined
+            }
           >
-            <div className="space-y-2.5">
-              <Select value={annTarget} onValueChange={setAnnTarget}>
-                <SelectTrigger className="h-9 text-sm rounded-[14px]"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all_staff">Barcha xodimlar</SelectItem>
-                  <SelectItem value="all_teachers">Barcha o'qituvchilar</SelectItem>
-                  <SelectItem value="class_teachers">Sinf rahbarlari</SelectItem>
-                  <SelectItem value="all_parents">Barcha ota-onalar</SelectItem>
-                  <SelectItem value="all_students">Barcha o'quvchilar</SelectItem>
-                  <SelectItem value="vice_principal">O'rinbosarlar</SelectItem>
-                  <SelectItem value="accountant">Moliya bo'limi</SelectItem>
-                  <SelectItem value="librarian">Kutubxonachi</SelectItem>
-                </SelectContent>
-              </Select>
-              <input
-                className="w-full rounded-[14px] border px-4 py-2 text-sm outline-none transition-colors focus:ring-2"
-                style={{ borderColor: C.border }}
-                placeholder="E'lon sarlavhasi..."
-                value={annTitle}
-                onChange={e => setAnnTitle(e.target.value)}
-              />
-              <Textarea
-                placeholder="E'lon matni..."
-                value={annBody}
-                onChange={e => setAnnBody(e.target.value)}
-                className="resize-none text-sm rounded-[14px]"
-                rows={2}
-              />
-              <Button
-                className="w-full h-9"
-                onClick={handleBroadcast}
-                disabled={!annTitle.trim() || !annBody.trim() || broadcastMutation.isPending}
-              >
-                {broadcastMutation.isPending ? 'Yuborilmoqda...' : broadcastMutation.isSuccess ? 'Yuborildi' : "E'lon yuborish"}
-              </Button>
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {pendingDisciplineList.length === 0 ? (
+                <div className="flex flex-col items-center py-7 gap-2">
+                  <CheckCircle2 className="h-6 w-6 text-xedu-primary" />
+                  <p className="text-sm font-medium" style={{ color: C.muted }}>Intizom holatlari yo'q</p>
+                </div>
+              ) : (
+                <>
+                  {pendingDisciplineList.slice(0, 5).map((d: any) => (
+                    <div key={d.id} className="flex items-center gap-3 rounded-[14px] border p-3" style={{ borderColor: C.border }}>
+                      <div className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium truncate" style={{ color: C.text }}>
+                          {d.student?.firstName} {d.student?.lastName}
+                        </p>
+                        <p className="text-xs truncate" style={{ color: C.muted }}>{d.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    onClick={() => router.push('/dashboard/discipline')}
+                    className="w-full text-xs font-semibold py-2 rounded-[14px] transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30"
+                    style={{ color: C.primary }}
+                  >
+                    Barchasini ko'rish →
+                  </button>
+                </>
+              )}
             </div>
           </WorkspaceSection>
         </div>
-
-        {pendingDisciplineList.length > 0 && (
-          <WorkspaceSection
-            title="Hal qilinmagan intizom holatlari"
-            icon={<ShieldAlert className="h-4 w-4 text-red-500" />}
-          >
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {pendingDisciplineList.slice(0, 5).map((d: any) => (
-                <div key={d.id} className="flex items-center gap-3 rounded-[14px] border p-3" style={{ borderColor: C.border }}>
-                  <div className="h-2 w-2 rounded-full bg-red-500 shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium truncate" style={{ color: C.text }}>
-                      {d.student?.firstName} {d.student?.lastName}
-                    </p>
-                    <p className="text-xs truncate" style={{ color: C.muted }}>{d.description}</p>
-                  </div>
-                </div>
-              ))}
-              <button
-                onClick={() => router.push('/dashboard/discipline')}
-                className="w-full text-xs font-semibold py-2 rounded-[14px] transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30"
-                style={{ color: C.primary }}
-              >
-                Barchasini ko'rish →
-              </button>
-            </div>
-          </WorkspaceSection>
-        )}
 
           <div className="grid gap-3 md:grid-cols-2">
             <AcademicCalendarWidget canEdit={true} />

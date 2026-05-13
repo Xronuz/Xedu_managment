@@ -63,9 +63,9 @@ export function RightContextualPanel({
 
   if (!branch) return null;
 
-  const branchAlerts = pendingDiscipline.filter((d: any) => d.student?.branchId === branch.id).length;
-  const branchPending = pendingLeaves.filter((l: any) => l.requester?.branchId === branch.id).length;
-  const branchUsers = allUsers.filter((u: any) => u.branchId === branch.id);
+  const branchAlerts = pendingDiscipline.filter((d: any) => (d.student?.branchId ?? d.student?.branch?.id) === branch.id).length;
+  const branchPending = pendingLeaves.filter((l: any) => (l.requester?.branchId ?? l.requester?.branch?.id) === branch.id).length;
+  const branchUsers = allUsers.filter((u: any) => (u.branchId ?? u.branch?.id) === branch.id);
   const branchStudents = branchUsers.filter((u: any) => u.role === 'student');
   const branchTeachers = branchUsers.filter((u: any) => ['teacher', 'class_teacher'].includes(u.role));
   const branchStaff = branchUsers.filter((u: any) => !['student', 'teacher', 'class_teacher', 'parent'].includes(u.role));

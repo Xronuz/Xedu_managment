@@ -3,6 +3,7 @@
 import { Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PaymentsWorkspace } from './_components/payments-workspace';
+import { FinanceSectionNav } from '@/components/finance/finance-section-nav';
 
 function PaymentsFallback() {
   return (
@@ -18,8 +19,11 @@ function PaymentsFallback() {
 
 export default function PaymentsPage() {
   return (
-    <Suspense fallback={<PaymentsFallback />}>
-      <PaymentsWorkspace />
-    </Suspense>
+    <div>
+      <FinanceSectionNav />
+      <Suspense fallback={<PaymentsFallback />}>
+        <PaymentsWorkspace />
+      </Suspense>
+    </div>
   );
 }

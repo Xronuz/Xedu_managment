@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
 import { marketingApi } from '@/lib/api/marketing';
 import { cn } from '@/lib/utils';
+import { AnalyticsSectionNav } from '@/components/analytics/analytics-section-nav';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart as RePieChart, Pie, Cell, Legend,
@@ -41,6 +42,7 @@ export default function MarketingDashboardPage() {
 
   return (
     <div className="space-y-6">
+      <AnalyticsSectionNav />
       <div>
         <div className="flex items-center gap-2">
           <Megaphone className="h-6 w-6 text-pink-500" />

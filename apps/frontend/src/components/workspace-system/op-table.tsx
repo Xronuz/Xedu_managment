@@ -149,7 +149,7 @@ export function OpTable<T>({
     <div className={cn('rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 overflow-hidden bg-xedu-bg-elevated', className)}>
       <div className={cn('overflow-x-auto', maxHeight && 'overflow-y-auto')} style={maxHeight ? { maxHeight } : undefined}>
         <table className="w-full text-left">
-          <thead className="sticky top-0 z-10 bg-xedu-slate-50/80 dark:bg-xedu-slate-800/80 backdrop-blur-sm">
+          <thead className="sticky top-0 z-10 bg-xedu-slate-50 dark:bg-xedu-slate-800">
             <tr className="border-b border-xedu-slate-100 dark:border-xedu-slate-800">
               {selectable && (
                 <th className={cn('w-10', densityPadding)}>

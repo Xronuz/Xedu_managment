@@ -37,6 +37,7 @@ import {
 import {
   PrimaryAction, SecondaryAction, IconAction, ActionBar,
 } from '@/components/workspace-system/action-bar';
+import { AnalyticsSectionNav } from '@/components/analytics/analytics-section-nav';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    REPORTS & INTELLIGENCE WORKSPACE
@@ -1150,6 +1151,11 @@ export function ReportsWorkspace() {
 
   return (
     <WorkspaceShell layout="two-column" density="compact">
+      {/* Section nav: Hisobotlar / KPI / Insights / Marketing */}
+      <div className="w-full">
+        <AnalyticsSectionNav />
+      </div>
+
       {/* Header */}
       <div className="w-full">
         <WorkspaceHeader

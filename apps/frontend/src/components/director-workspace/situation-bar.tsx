@@ -71,7 +71,7 @@ export const SituationBar = memo(function SituationBar({ data, onAlertsClick, on
         icon={Users}
         label="Xodimlar"
         metric={staffTotal > 0 ? staffTotal : '—'}
-        href="/dashboard/users"
+        href="/dashboard/staff"
         tone="calm"
       />
       <Chip

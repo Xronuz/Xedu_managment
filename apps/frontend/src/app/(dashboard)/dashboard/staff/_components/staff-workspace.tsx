@@ -314,15 +314,23 @@ export function StaffWorkspace() {
           subtitle={`${totalCount} ta xodim · Maktab kadrlari`}
           icon={<Briefcase className="h-5 w-5 text-xedu-slate-500" />}
           actions={
-            canManage && (
-              <ActionBar
-                primary={
-                  <PrimaryAction onClick={() => { window.location.href = '/dashboard/users'; }}>
-                    + Xodim qo&apos;shish
-                  </PrimaryAction>
-                }
-              />
-            )
+            <div className="flex items-center gap-2">
+              <Link
+                href="/dashboard/users"
+                className="text-xs font-semibold text-xedu-slate-500 hover:text-xedu-primary transition-colors"
+              >
+                To&apos;liq boshqaruv →
+              </Link>
+              {canManage && (
+                <ActionBar
+                  primary={
+                    <PrimaryAction onClick={() => { window.location.href = '/dashboard/users'; }}>
+                      + Xodim qo&apos;shish
+                    </PrimaryAction>
+                  }
+                />
+              )}
+            </div>
           }
         />
       </div>

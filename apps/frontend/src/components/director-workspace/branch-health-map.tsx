@@ -188,16 +188,17 @@ const MetricCell = memo(function MetricCell({ value, max }: { value: number; max
 
 interface WorkspaceBlockProps {
   title: string;
+  icon?: React.ElementType;
   action?: { label: string; href: string };
   children: React.ReactNode;
 }
 
-export const WorkspaceBlock = memo(function WorkspaceBlock({ title, action, children }: WorkspaceBlockProps) {
+export const WorkspaceBlock = memo(function WorkspaceBlock({ title, icon: Icon, action, children }: WorkspaceBlockProps) {
   return (
     <div className="rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden">
       <div className="flex items-center justify-between px-4 py-3 border-b border-xedu-border bg-xedu-slate-50/50 dark:bg-xedu-slate-900/20">
         <div className="flex items-center gap-2">
-          <Building2 className="h-4 w-4 text-xedu-slate-500" />
+          {Icon ? <Icon className="h-4 w-4 text-xedu-slate-500" /> : <Building2 className="h-4 w-4 text-xedu-slate-500" />}
           <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">{title}</h3>
         </div>
         {action && (

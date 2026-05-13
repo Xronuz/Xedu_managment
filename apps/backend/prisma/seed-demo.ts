@@ -586,17 +586,18 @@ async function main() {
         createdById: director.id,
       },
     });
-    if (lr.status === 'approved' || lr.status === 'rejected') {
-      await prisma.leaveApproval.create({
-        data: {
-          leaveRequestId: lr.id,
-          approverId: director.id,
-          status: lr.status,
-          comment: "Ko'rib chiqildi",
-          decidedAt: new Date(),
-        },
-      });
-    }
+    // Barcha holatlarda approval record yaratilishi kerak:
+    // pending → status=pending, decidedAt=null (director hali qaror bermagan)
+    // approved/rejected → status=approved/rejected, decidedAt=qaror vaqti
+    await prisma.leaveApproval.create({
+      data: {
+        leaveRequestId: lr.id,
+        approverId: director.id,
+        status: lr.status === 'pending' ? 'pending' : lr.status,
+        comment: lr.status !== 'pending' ? "Ko'rib chiqildi" : null,
+        decidedAt: lr.status !== 'pending' ? new Date() : null,
+      },
+    });
   }
   console.log('  ✓ Leave requests: 8');
 

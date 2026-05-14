@@ -118,7 +118,7 @@ export const ExecutiveBriefing = memo(function ExecutiveBriefing({ data }: Execu
         icon: Users,
         message: `${atRiskCount} ta o'quvchi xavf ostida`,
         actionLabel: 'Monitoring',
-        href: '/dashboard/ai-analytics',
+        href: '/dashboard/insights',
         metric: atRiskCount,
       });
     }
@@ -173,7 +173,7 @@ export const ExecutiveBriefing = memo(function ExecutiveBriefing({ data }: Execu
         icon: BookOpen,
         message: `${lowGpaCount} ta o'quvchining akademik ko'rsatkichi past`,
         actionLabel: 'Batafsil',
-        href: '/dashboard/ai-analytics',
+        href: '/dashboard/insights',
         metric: lowGpaCount,
       });
     }

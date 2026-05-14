@@ -84,7 +84,7 @@ export const IntelligenceFeed = memo(function IntelligenceFeed({
         priority: critical > 0 ? 'critical' : 'high',
         title: `${atRisk} ta o'quvchi xavf ostida`,
         meta: critical > 0 ? `${critical} ta kritik holat` : `${high} ta yuqori xavf`,
-        href: '/dashboard/ai-analytics',
+        href: '/dashboard/insights',
         action: 'Tahlil',
       });
     }
@@ -94,7 +94,7 @@ export const IntelligenceFeed = memo(function IntelligenceFeed({
         priority: 'medium',
         title: `O'rtacha GPA pas: ${aiSummary.averages.gpa.toFixed(1)}`,
         meta: "Akademik qo'llab-quvvatlash zarur",
-        href: '/dashboard/ai-analytics',
+        href: '/dashboard/insights',
         action: 'Tahlil',
       });
     }

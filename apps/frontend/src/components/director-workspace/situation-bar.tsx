@@ -97,7 +97,7 @@ export const SituationBar = memo(function SituationBar({ data, onAlertsClick, on
         icon={BarChart3}
         label="Xavf"
         metric={riskSignals > 0 ? riskSignals : '—'}
-        href="/dashboard/ai-analytics"
+        href="/dashboard/insights"
         tone={riskSignals > 0 ? 'attention' : 'calm'}
       />
 

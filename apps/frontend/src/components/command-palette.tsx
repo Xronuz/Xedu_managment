@@ -86,7 +86,7 @@ const NAV_ITEMS = [
   { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
   { label: 'Audit Log', href: '/dashboard/audit-log', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/audit-log'] },
   { label: 'KPI Dashboard', href: '/dashboard/kpi', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/kpi'] },
-  { label: 'AI Analytics', href: '/dashboard/ai-analytics', icon: Brain, roles: ROUTE_PERMISSIONS['/dashboard/ai-analytics'] },
+  { label: 'AI Analytics', href: '/dashboard/insights', icon: Brain, roles: ROUTE_PERMISSIONS['/dashboard/insights'] },
   { label: 'Marketing', href: '/dashboard/marketing', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/marketing'] },
 ];
 

@@ -117,7 +117,7 @@ export const ActivityStream = memo(function ActivityStream({
         tone: 'urgent',
         title: 'AI xavf signali yangilandi',
         detail: `${criticalRisk} ta o'quvchi kritik xavf ostida`,
-        href: '/dashboard/ai-analytics',
+        href: '/dashboard/insights',
       });
     }
 

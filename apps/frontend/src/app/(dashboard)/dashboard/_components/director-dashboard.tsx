@@ -522,7 +522,7 @@ const AiRiskCard = memo(function AiRiskCard({ aiSummary }: { aiSummary: any }) {
 
   return (
     <Link
-      href="/dashboard/ai-analytics"
+      href="/dashboard/insights"
       className="group block rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-3 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/50"
     >
       <div className="flex items-center justify-between mb-2">
@@ -591,7 +591,7 @@ const RecentOperations = memo(function RecentOperations({
     {
       label: "Xavf ostidagi o'quvchilar",
       count: atRisk,
-      href: '/dashboard/ai-analytics',
+      href: '/dashboard/insights',
       tone: atRisk > 0 ? 'attention' as const : 'calm' as const,
     },
     {

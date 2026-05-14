@@ -66,9 +66,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // ── 1.5. /dashboard/classes → /dashboard/education (duplicate route) ───
+  // ── 1.5. Legacy route redirects ─────────────────────────────────────────
   if (pathname === '/dashboard/classes') {
     return NextResponse.redirect(new URL('/dashboard/education', request.url));
+  }
+  // /dashboard/ai-analytics was renamed to /dashboard/insights
+  if (pathname === '/dashboard/ai-analytics' || pathname.startsWith('/dashboard/ai-analytics/')) {
+    return NextResponse.redirect(new URL('/dashboard/insights', request.url));
   }
 
   // ── 2. Dashboard routes require authentication ────────────────────────

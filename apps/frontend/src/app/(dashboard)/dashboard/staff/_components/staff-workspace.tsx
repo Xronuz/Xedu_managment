@@ -97,8 +97,9 @@ export function StaffWorkspace() {
       search: debouncedSearch || undefined,
       role: filterRole || undefined,
       branchId: filterBranch || undefined,
-      limit: 100,
+      limit: 500,
     }),
+    staleTime: 2 * 60_000,
   });
 
   const { data: branchesData } = useQuery({
@@ -148,7 +149,8 @@ export function StaffWorkspace() {
       });
   }, [staffList, filterStatus, classList, subjectList]);
 
-  const totalCount = (staffData as any)?.meta?.total ?? staffList.length;
+  // meta.total = barcha userlar (student+parent ham), staff.length = filterlangan haqiqiy xodimlar
+  const totalCount = staff.length;
 
   // ── Selection state ────────────────────────────────────────────────────────
   const [selectedIds, setSelectedIds] = useState<string[]>([]);

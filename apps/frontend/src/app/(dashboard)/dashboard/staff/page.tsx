@@ -2,14 +2,11 @@
 
 import { Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Plus, UserPlus } from 'lucide-react';
 import { SectionTabs } from '@/components/layout/section-tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Button } from '@/components/ui/button';
 import { usePageActions } from '@/lib/header-actions-context';
 import { useAuthStore } from '@/store/auth.store';
 
-import UsersPage         from '../users/page';
 import BranchesPage      from '../branches/page';
 import CrmPage           from '../crm/page';
 import LeaveRequestsPage from '../leave-requests/page';
@@ -26,28 +23,6 @@ const TABS = [
   { id: 'meetings',   label: 'Uchrashuvlar',      roles: ['director', 'vice_principal', 'class_teacher'] },
 ];
 
-const TAB_ACTIONS: Record<string, React.ReactNode> = {
-  users: (
-    <Button size="sm" onClick={() => document.dispatchEvent(new CustomEvent('users:open-add'))}>
-      <UserPlus className="h-4 w-4" /> Foydalanuvchi qo&apos;shish
-    </Button>
-  ),
-  branches: (
-    <Button size="sm" onClick={() => document.dispatchEvent(new CustomEvent('branches:open-add'))}>
-      <Plus className="h-4 w-4" /> Filial qo&apos;shish
-    </Button>
-  ),
-  crm: (
-    <Button size="sm" onClick={() => document.dispatchEvent(new CustomEvent('crm:open-add'))}>
-      <Plus className="h-4 w-4" /> Lead qo&apos;shish
-    </Button>
-  ),
-  meetings: (
-    <Button size="sm" onClick={() => document.dispatchEvent(new CustomEvent('meetings:open-add'))}>
-      <Plus className="h-4 w-4" /> Uchrashuv qo&apos;shish
-    </Button>
-  ),
-};
 
 function TabFallback() {
   return (
@@ -80,7 +55,7 @@ function StaffContent() {
   const tab = searchParams.get('tab') ?? firstVisibleTab;
 
   useEffect(() => {
-    setActions(TAB_ACTIONS[tab] ?? null);
+    setActions(null);
     return () => setActions(null);
   }, [tab, setActions]);
 

@@ -1095,12 +1095,12 @@
 
   /* ── Sticky executive header wrapper ── */
   .xedu-sticky-executive {
-    background: rgb(232,236,235);
+    background: var(--xedu-bg-panel);
     border-bottom: 1px solid rgba(15,123,83,0.12);
     will-change: transform;
   }
   .dark .xedu-sticky-executive {
-    background: rgb(8,15,26);
+    background: var(--xedu-bg-panel);
     border-bottom-color: rgba(15,123,83,0.18);
   }
 

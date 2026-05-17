@@ -162,6 +162,23 @@ const config: Config = {
           900: 'var(--xedu-gold-900)',
           950: 'var(--xedu-gold-950)',
         },
+        'xedu-bg': {
+          DEFAULT:  'var(--xedu-bg)',
+          canvas:   'var(--xedu-bg-canvas)',
+          rail:     'var(--xedu-bg-rail)',
+          panel:    'var(--xedu-bg-panel)',
+          elevated: 'var(--xedu-bg-elevated)',
+          subtle:   'var(--xedu-bg-subtle)',
+          floating: 'var(--xedu-bg-floating)',
+        },
+        'xedu-border': {
+          DEFAULT: 'var(--xedu-border)',
+          strong:  'var(--xedu-border-strong)',
+          hover:   'var(--xedu-border-hover)',
+        },
+        'xedu-text': {
+          DEFAULT: 'var(--xedu-text)',
+        },
       },
 
       /* ── Border radius (4px step system) ── */

@@ -88,8 +88,8 @@ export function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/first-login', request.url));
     }
 
-    // Branch guard: every authenticated non-super_admin must have a branchId
-    if (role !== 'super_admin' && !branchId && pathname !== '/dashboard/onboarding') {
+    // Branch guard: every authenticated non-super_admin/director must have a branchId
+    if (!['super_admin', 'director'].includes(role) && !branchId && pathname !== '/dashboard/onboarding') {
       return NextResponse.redirect(new URL('/dashboard/onboarding', request.url));
     }
 

@@ -72,10 +72,11 @@ export const authApi = {
 
   /**
    * Birinchi kirishda parolni o'zgartirish.
-   * Backend isFirstLogin=false qiladi va yangi parolni saqlaydi.
+   * Backend isFirstLogin=false qiladi, yangi parolni saqlaydi va
+   * yangi JWT tokenlar qaytaradi (cookie + auth store yangilanishi kerak).
    */
-  firstLogin: async (payload: { currentPassword: string; newPassword: string }): Promise<{ message: string }> => {
-    const { data } = await apiClient.post<{ message: string }>('/auth/first-login', payload);
+  firstLogin: async (payload: { currentPassword: string; newPassword: string }): Promise<{ message: string; tokens: TokenPair }> => {
+    const { data } = await apiClient.post<{ message: string; tokens: TokenPair }>('/auth/first-login', payload);
     return data;
   },
 };

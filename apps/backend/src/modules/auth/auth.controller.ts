@@ -155,12 +155,21 @@ export class AuthController {
   @ApiOperation({ summary: 'Birinchi kirishda parolni o\'zgartirish' })
   @ApiResponse({ status: 200, description: 'Parol muvaffaqiyatli yangilandi' })
   @ApiResponse({ status: 401, description: 'Joriy parol noto\'g\'ri' })
-  async firstLogin(@Body() dto: FirstLoginDto, @CurrentUser() user: JwtPayload) {
-    return this.authService.firstLoginPasswordChange(
+  async firstLogin(@Body() dto: FirstLoginDto, @CurrentUser() user: JwtPayload, @Res({ passthrough: true }) res: Response) {
+    const result = await this.authService.firstLoginPasswordChange(
       user.sub,
       dto.currentPassword,
       dto.newPassword,
     );
+    res.cookie('access_token', result.tokens.accessToken, {
+      ...this.cookieOptions,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    res.cookie('refresh_token', result.tokens.refreshToken, {
+      ...this.cookieOptions,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return result;
   }
 
   /**

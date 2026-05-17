@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { authApi } from '@/lib/api/auth';
+import { useAuthStore } from '@/store/auth.store';
 import { AuthShell } from '../_components/auth-shell';
 import { cn } from '@/lib/utils';
 
@@ -59,6 +60,7 @@ function PasswordStrength({ password }: { password: string }) {
 
 export default function FirstLoginPage() {
   const router = useRouter();
+  const { user, setAuth } = useAuthStore();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -85,7 +87,12 @@ export default function FirstLoginPage() {
     if (!validate()) return;
     setSubmitting(true);
     try {
-      await authApi.firstLogin({ currentPassword, newPassword: password });
+      const result = await authApi.firstLogin({ currentPassword, newPassword: password });
+      // Auth store'dagi tokenlarni yangilash — keyingi API chaqiruvlari
+      // Authorization header'da yangi token bilan ketadi
+      if (user) {
+        setAuth(user, result.tokens);
+      }
       setDone(true);
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? "Parolni o'zgartirishda xatolik yuz berdi";

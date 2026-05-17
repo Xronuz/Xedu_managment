@@ -389,16 +389,25 @@ export class AuthService {
 
   /**
    * Birinchi kirishda parolni o'zgartirish.
-   * Joriy parolni tekshiradi, yangi parolni saqlaydi va isFirstLogin=false qiladi.
+   * Joriy parolni tekshiradi, yangi parolni saqlaydi, isFirstLogin=false qiladi
+   * va yangi JWT tokenlar qaytaradi (cookie yangilanishi uchun).
    */
   async firstLoginPasswordChange(
     userId: string,
     currentPassword: string,
     newPassword: string,
-  ): Promise<{ message: string }> {
+  ): Promise<{ message: string; tokens: TokenPair }> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { passwordHash: true, isFirstLogin: true },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        schoolId: true,
+        branchId: true,
+        passwordHash: true,
+        isFirstLogin: true,
+      },
     });
     if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
 
@@ -415,8 +424,10 @@ export class AuthService {
       data: { passwordHash, isFirstLogin: false },
     });
 
+    // Yangi tokenlar isFirstLogin=false bilan generatsiya qilinadi
+    const tokens = await this.generateTokens({ ...user, isFirstLogin: false });
     this.logger.log(`Foydalanuvchi birinchi parolni o'zgartirdi: ${userId}`);
-    return { message: 'Parol muvaffaqiyatli yangilandi' };
+    return { message: 'Parol muvaffaqiyatli yangilandi', tokens };
   }
 
   private async generateTokens(user: {

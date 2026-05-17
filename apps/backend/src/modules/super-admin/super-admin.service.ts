@@ -1,7 +1,9 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { IsString, IsOptional, IsEmail, IsBoolean, Matches, MaxLength, MinLength } from 'class-validator';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { ModuleName } from '@eduplatform/types';
+import { AuthService } from '@/modules/auth/auth.service';
+import { AuditService } from '@/common/audit/audit.service';
+import { ModuleName, JwtPayload } from '@eduplatform/types';
 
 export class CreateSchoolDto {
   @IsString()
@@ -52,13 +54,21 @@ const CORE_MODULES: ModuleName[] = [
 
 @Injectable()
 export class SuperAdminService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly authService: AuthService,
+    private readonly auditService: AuditService,
+  ) {}
 
   async getSchools(page = 1, limit = 20, search?: string) {
     const skip = (page - 1) * limit;
-    const where: any = search
-      ? { OR: [{ name: { contains: search, mode: 'insensitive' } }, { slug: { contains: search, mode: 'insensitive' } }] }
-      : {};
+    const where: any = { deletedAt: null };
+    if (search) {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { slug: { contains: search, mode: 'insensitive' } },
+      ];
+    }
 
     const [schools, total] = await this.prisma.$transaction([
       this.prisma.school.findMany({
@@ -81,7 +91,7 @@ export class SuperAdminService {
       where: { id },
       include: { modules: true, subscription: true },
     });
-    if (!school) throw new NotFoundException('Maktab topilmadi');
+    if (!school || school.deletedAt) throw new NotFoundException('Maktab topilmadi');
     return school;
   }
 
@@ -162,6 +172,53 @@ export class SuperAdminService {
     return school;
   }
 
+  async deleteSchool(id: string, currentUser: JwtPayload) {
+    const school = await this.prisma.school.findUnique({
+      where: { id },
+      select: { id: true, name: true, deletedAt: true },
+    });
+
+    if (!school) throw new NotFoundException('Maktab topilmadi');
+    if (school.deletedAt) {
+      throw new ConflictException('Maktab allaqachon o‘chirilgan');
+    }
+
+    // Soft delete school and deactivate all users
+    await this.prisma.$transaction([
+      this.prisma.school.update({
+        where: { id },
+        data: { deletedAt: new Date(), deletedById: currentUser.sub, isActive: false },
+      }),
+      this.prisma.user.updateMany({
+        where: { schoolId: id },
+        data: { isActive: false },
+      }),
+    ]);
+
+    // Revoke all sessions for school users
+    const users = await this.prisma.user.findMany({
+      where: { schoolId: id },
+      select: { id: true },
+    });
+    for (const user of users) {
+      await this.authService.logoutAll(user.id, '');
+    }
+
+    // Audit log
+    await this.auditService.log({
+      userId: currentUser.sub,
+      action: 'school_deleted',
+      entity: 'School',
+      entityId: id,
+      newData: { name: school.name, deletedById: currentUser.sub },
+    });
+
+    return {
+      message: "Maktab muvaffaqiyatli o‘chirildi. Barcha foydalanuvchilar bloklandi.",
+      schoolId: id,
+    };
+  }
+
   async toggleModule(schoolId: string, dto: ToggleModuleDto) {
     await this.getSchool(schoolId);
     return this.prisma.schoolModule.upsert({
@@ -182,7 +239,7 @@ export class SuperAdminService {
 
   async getPlatformStats() {
     const [schoolCount, userCount, activeSubscriptions] = await this.prisma.$transaction([
-      this.prisma.school.count({ where: { isActive: true } }),
+      this.prisma.school.count({ where: { isActive: true, deletedAt: null } }),
       this.prisma.user.count({ where: { isActive: true } }),
       this.prisma.subscription.count({ where: { status: 'active' } }),
     ]);

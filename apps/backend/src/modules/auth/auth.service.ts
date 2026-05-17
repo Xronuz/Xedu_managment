@@ -76,6 +76,18 @@ export class AuthService {
       throw new UnauthorizedException('Email yoki parol noto‘g‘ri');
     }
 
+    // Check if user's school has been deleted
+    if (user.schoolId) {
+      const school = await this.prisma.school.findUnique({
+        where: { id: user.schoolId },
+        select: { deletedAt: true },
+      });
+      if (school?.deletedAt) {
+        await this.incrementLoginAttempts(attemptsKey).catch(() => null);
+        throw new UnauthorizedException('Email yoki parol noto‘g‘ri');
+      }
+    }
+
     const passwordValid = await bcrypt.compare(password, user.passwordHash);
     if (!passwordValid) {
       await this.incrementLoginAttempts(attemptsKey).catch(() => null);
@@ -138,6 +150,17 @@ export class AuthService {
     });
 
     if (!user) throw new UnauthorizedException('Foydalanuvchi topilmadi');
+
+    // Check if user's school has been deleted
+    if (user.schoolId) {
+      const school = await this.prisma.school.findUnique({
+        where: { id: user.schoolId },
+        select: { deletedAt: true },
+      });
+      if (school?.deletedAt) {
+        throw new UnauthorizedException('Foydalanuvchi topilmadi');
+      }
+    }
 
     return this.generateTokens(user);
   }

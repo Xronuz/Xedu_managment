@@ -45,4 +45,9 @@ export const superAdminApi = {
     });
     return data;
   },
+
+  deleteSchool: async (id: string) => {
+    const { data } = await apiClient.delete(`/super-admin/schools/${id}`);
+    return data as { message: string; schoolId: string };
+  },
 };

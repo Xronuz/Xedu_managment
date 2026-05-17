@@ -226,6 +226,7 @@ enum AuditAction {
   assign_branch
   unassign_branch
   password_reset
+  school_deleted
 }
 
 // ─── Phase 23: New enums for previously String fields ──────────────────────
@@ -319,6 +320,8 @@ model School {
   timezone           String           @default("Asia/Tashkent") // IANA timezone — UTC saqlash uchun
   onboardingStep     Int              @default(0) // 0=not started, 1-5=steps, 6=completed
   onboardingCompleted Boolean         @default(false)
+  deletedAt          DateTime?
+  deletedById        String?
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
 

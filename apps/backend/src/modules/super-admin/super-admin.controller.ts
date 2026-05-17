@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Put, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, Query, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { SuperAdminService, CreateSchoolDto, ToggleModuleDto } from './super-admin.service';
 import { Roles } from '@/common/decorators/roles.decorator';
+import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { UserRole } from '@eduplatform/types';
 
 @ApiTags('super-admin')
@@ -46,6 +47,13 @@ export class SuperAdminController {
   @ApiOperation({ summary: 'Maktabni yangilash' })
   updateSchool(@Param('id') id: string, @Body() dto: Partial<CreateSchoolDto>) {
     return this.superAdminService.updateSchool(id, dto);
+  }
+
+  @Delete('schools/:id')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Maktabni o'chirish (soft delete)" })
+  deleteSchool(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.superAdminService.deleteSchool(id, user);
   }
 
   @Get('schools/:id/modules')

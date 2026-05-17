@@ -5,8 +5,10 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Building2, Plus, Search, MoreVertical, Settings,
   Users, CheckCircle2, XCircle, Globe, Layers, AlertTriangle,
+  Trash2,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,8 +21,13 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle,
+  DialogDescription, DialogFooter,
+} from '@/components/ui/dialog';
 import { superAdminApi } from '@/lib/api/super-admin';
 import { formatDate } from '@/lib/utils';
+import { useToast } from '@/components/ui/use-toast';
 
 const TIER_LABELS: Record<string, { label: string; color: string }> = {
   basic: { label: 'Basic', color: 'bg-gray-500' },
@@ -30,11 +37,15 @@ const TIER_LABELS: Record<string, { label: string; color: string }> = {
 };
 
 export default function SchoolsPage() {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
-
-  const queryClient = useQueryClient();
+  const [confirmDelete, setConfirmDelete] = useState<any>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['schools', page, search],
@@ -45,6 +56,23 @@ export default function SchoolsPage() {
     mutationFn: ({ id, payload }: { id: string; payload: object }) =>
       superAdminApi.updateSchool(id, payload),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['schools'] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => superAdminApi.deleteSchool(id),
+    onSuccess: () => {
+      toast({ title: 'Maktab o\'chirildi', description: 'Maktab muvaffaqiyatli o\'chirildi.' });
+      setConfirmDelete(null);
+      setDeleteConfirmText('');
+      queryClient.invalidateQueries({ queryKey: ['schools'] });
+    },
+    onError: (err: any) => {
+      toast({
+        title: 'Xatolik',
+        description: err?.response?.data?.message || 'Maktabni o\'chirishda xatolik yuz berdi',
+        variant: 'destructive',
+      });
+    },
   });
 
   const schools = data?.data ?? [];
@@ -59,6 +87,8 @@ export default function SchoolsPage() {
   const toggleStatus = (school: any) => {
     updateMutation.mutate({ id: school.id, payload: { isActive: !school.isActive } });
   };
+
+  const canSubmitDelete = deleteConfirmText === "O'CHIRISH";
 
   return (
     <div className="space-y-6">
@@ -221,6 +251,14 @@ export default function SchoolsPage() {
                             </>
                           )}
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => setConfirmDelete(school)}
+                          className="text-xedu-ruby"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          O'chirish
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -255,6 +293,43 @@ export default function SchoolsPage() {
           </Button>
         </div>
       )}
+
+      {/* Delete confirmation modal */}
+      <Dialog open={!!confirmDelete} onOpenChange={(v) => { if (!v) { setConfirmDelete(null); setDeleteConfirmText(''); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xedu-ruby">
+              <AlertTriangle className="h-5 w-5" />
+              Maktabni o'chirishni tasdiqlang
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              Bu maktab tizimdan o'chiriladi va uning foydalanuvchilari tizimga kira olmaydi. Bu amalni ehtiyotkorlik bilan bajaring.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <div className="rounded-md bg-xedu-ruby/10 border border-xedu-ruby/20 p-3 text-sm text-xedu-ruby">
+              <strong>{confirmDelete?.name}</strong> maktabini o'chirish uchun quyidagi maydonga <code className="font-mono bg-white/50 px-1 rounded">O'CHIRISH</code> so'zini yozing.
+            </div>
+            <Input
+              placeholder="O'CHIRISH"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+            />
+          </div>
+          <DialogFooter className="gap-2 pt-2">
+            <Button variant="secondary" onClick={() => { setConfirmDelete(null); setDeleteConfirmText(''); }}>
+              Bekor qilish
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={!canSubmitDelete || deleteMutation.isPending}
+              onClick={() => deleteMutation.mutate(confirmDelete?.id)}
+            >
+              {deleteMutation.isPending ? "O'chirilmoqda..." : "O'chirish"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

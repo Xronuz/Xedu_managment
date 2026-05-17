@@ -9,7 +9,7 @@ import {
   BookOpen, CreditCard, Bell, Calendar, GraduationCap,
   Utensils, Library, Bus, Package, UserPlus, Loader2,
   BarChart2, FileText, ClipboardCheck, DollarSign,
-  TrendingUp, MessageSquare, BookCopy,
+  TrendingUp, MessageSquare, BookCopy, Trash2, AlertTriangle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -76,6 +76,8 @@ export default function SchoolDetailPage() {
   const [editForm, setEditForm] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<'info' | 'modules'>('info');
   const [showAdminDialog, setShowAdminDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [adminForm, setAdminForm] = useState({
     firstName: '',
     lastName: '',
@@ -109,6 +111,24 @@ export default function SchoolDetailPage() {
       superAdminApi.toggleModule(id, moduleName, isEnabled),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['school-modules', id] });
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => superAdminApi.deleteSchool(id),
+    onSuccess: () => {
+      toast({ title: "Maktab o'chirildi", description: "Maktab muvaffaqiyatli o'chirildi." });
+      setShowDeleteDialog(false);
+      setDeleteConfirmText('');
+      queryClient.invalidateQueries({ queryKey: ['schools'] });
+      router.push('/dashboard/schools');
+    },
+    onError: (err: any) => {
+      toast({
+        title: 'Xatolik',
+        description: err?.response?.data?.message || "Maktabni o'chirishda xatolik yuz berdi",
+        variant: 'destructive',
+      });
     },
   });
 
@@ -221,6 +241,15 @@ export default function SchoolDetailPage() {
             ) : (
               <><CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />Faollashtirish</>
             )}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xedu-ruby border-xedu-ruby/30 hover:bg-xedu-ruby/10"
+            onClick={() => setShowDeleteDialog(true)}
+          >
+            <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+            O'chirish
           </Button>
         </div>
       </div>
@@ -436,6 +465,43 @@ export default function SchoolDetailPage() {
           )}
         </div>
       )}
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={showDeleteDialog} onOpenChange={(v) => { if (!v) { setShowDeleteDialog(false); setDeleteConfirmText(''); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xedu-ruby">
+              <AlertTriangle className="h-5 w-5" />
+              Maktabni o'chirishni tasdiqlang
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              Bu maktab tizimdan o'chiriladi va uning foydalanuvchilari tizimga kira olmaydi. Bu amalni ehtiyotkorlik bilan bajaring.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-2">
+            <div className="rounded-md bg-xedu-ruby/10 border border-xedu-ruby/20 p-3 text-sm text-xedu-ruby">
+              <strong>{school.name}</strong> maktabini o'chirish uchun quyidagi maydonga <code className="font-mono bg-white/50 px-1 rounded">O'CHIRISH</code> so'zini yozing.
+            </div>
+            <Input
+              placeholder="O'CHIRISH"
+              value={deleteConfirmText}
+              onChange={(e) => setDeleteConfirmText(e.target.value)}
+            />
+          </div>
+          <DialogFooter className="gap-2 pt-2">
+            <Button variant="secondary" onClick={() => { setShowDeleteDialog(false); setDeleteConfirmText(''); }}>
+              Bekor qilish
+            </Button>
+            <Button
+              variant="destructive"
+              disabled={deleteConfirmText !== "O'CHIRISH" || deleteMutation.isPending}
+              onClick={() => deleteMutation.mutate()}
+            >
+              {deleteMutation.isPending ? "O'chirilmoqda..." : "O'chirish"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Admin qo'shish dialogi */}
       <Dialog open={showAdminDialog} onOpenChange={setShowAdminDialog}>

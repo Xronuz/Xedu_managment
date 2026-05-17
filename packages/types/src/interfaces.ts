@@ -12,6 +12,13 @@ import {
   Language,
 } from './enums';
 
+// ─── Grade Constants (single source of truth) ──────────────────────────────
+
+export const GRADE_LEVELS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] as const;
+export type GradeLevel = typeof GRADE_LEVELS[number];
+export const MIN_GRADE = 1;
+export const MAX_GRADE = 11;
+
 // ─── Pagination ────────────────────────────────────────────────────────────
 
 export interface PaginationMeta {

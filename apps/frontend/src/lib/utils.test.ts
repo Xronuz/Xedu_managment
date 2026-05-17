@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { getRoleLabel, getCompactRoleLabel, getAttendanceLabel, getGradeTypeLabel, formatCurrency } from './utils';
+import { GRADE_LEVELS, MAX_GRADE, MIN_GRADE } from '@eduplatform/types';
 
 describe('getRoleLabel', () => {
   it('maps director to Maktab direktori', () => {
@@ -164,5 +165,24 @@ describe('formatCurrency', () => {
     const result = formatCurrency(150000);
     expect(result).toContain('so‘m');
     expect(result).not.toContain('\\');
+  });
+});
+
+
+describe('GRADE_LEVELS constant', () => {
+  it('contains exactly grades 1 through 11', () => {
+    expect(GRADE_LEVELS).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+  });
+
+  it('does not contain 12', () => {
+    expect(GRADE_LEVELS).not.toContain(12);
+  });
+
+  it('has MAX_GRADE equal to 11', () => {
+    expect(MAX_GRADE).toBe(11);
+  });
+
+  it('has MIN_GRADE equal to 1', () => {
+    expect(MIN_GRADE).toBe(1);
   });
 });

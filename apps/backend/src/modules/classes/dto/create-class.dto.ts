@@ -1,5 +1,6 @@
 import { IsString, IsNotEmpty, IsInt, Min, Max, IsOptional, IsUUID } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { MAX_GRADE } from '@eduplatform/types';
 
 export class CreateClassDto {
   @ApiProperty({ example: '5-A' })
@@ -7,10 +8,10 @@ export class CreateClassDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 5, minimum: 1, maximum: 12 })
+  @ApiProperty({ example: 5, minimum: 1, maximum: MAX_GRADE })
   @IsInt()
   @Min(1)
-  @Max(12)
+  @Max(MAX_GRADE)
   gradeLevel: number;
 
   @ApiProperty({ example: '2024-2025' })

@@ -28,6 +28,7 @@ import { usersApi } from '@/lib/api/users';
 import { branchesApi } from '@/lib/api/branches';
 import { subjectsApi } from '@/lib/api/subjects';
 import { scheduleApi } from '@/lib/api/schedule';
+import { GRADE_LEVELS, MAX_GRADE } from '@eduplatform/types';
 import { useConfirm } from '@/store/confirm.store';
 import { gradesApi } from '@/lib/api/grades';
 
@@ -70,7 +71,7 @@ interface ClassRow {
   isActive?: boolean;
 }
 
-const GRADES = Array.from({ length: 12 }, (_, i) => i + 1);
+// GRADE_LEVELS imported from @eduplatform/types (single source of truth)
 const currentYear = new Date().getFullYear();
 const ACADEMIC_YEARS = [`${currentYear}-${currentYear + 1}`, `${currentYear - 1}-${currentYear}`];
 
@@ -538,7 +539,7 @@ export function ClassesWorkspace() {
               className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
             >
               <option value="">Barcha darajalar</option>
-              {GRADES.map((g) => (
+              {GRADE_LEVELS.map((g) => (
                 <option key={g} value={String(g)}>{g}-sinf</option>
               ))}
             </select>
@@ -735,7 +736,7 @@ export function ClassesWorkspace() {
                 <Label>Sinf darajasi <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.gradeLevel} onValueChange={sel('gradeLevel')}>
                   <SelectTrigger><SelectValue placeholder="1-12..." /></SelectTrigger>
-                  <SelectContent>{GRADES.map((g) => <SelectItem key={g} value={String(g)}>{g}-sinf</SelectItem>)}</SelectContent>
+                  <SelectContent>{GRADE_LEVELS.map((g) => <SelectItem key={g} value={String(g)}>{g}-sinf</SelectItem>)}</SelectContent>
                 </Select>
                 {errors.gradeLevel && <p className="text-xs text-xedu-ruby">{errors.gradeLevel}</p>}
               </div>

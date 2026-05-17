@@ -22,6 +22,7 @@ import { usersApi } from '@/lib/api/users';
 import { scheduleApi } from '@/lib/api/schedule';
 import { systemConfigApi } from '@/lib/api/system-config';
 import type { DayOfWeek } from '@eduplatform/types';
+import { MAX_GRADE } from '@eduplatform/types';
 
 // ── Step constants ─────────────────────────────────────────────────────────────
 const STEPS = [
@@ -167,7 +168,7 @@ function Step2Classes({ onDone }: { onDone: (classIds: string[]) => void }) {
         <Input
           placeholder="Daraja"
           type="number"
-          min={1} max={12}
+          min={1} max={MAX_GRADE}
           value={gradeLevel}
           onChange={e => setGradeLevel(e.target.value)}
           className="w-24"

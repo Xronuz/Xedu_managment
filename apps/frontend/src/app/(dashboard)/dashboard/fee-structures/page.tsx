@@ -45,7 +45,7 @@ const ACADEMIC_YEARS = [
   `${currentYear + 1}/${currentYear + 2}`,
 ];
 
-const GRADE_LEVELS = [1,2,3,4,5,6,7,8,9,10,11];
+import { GRADE_LEVELS } from '@eduplatform/types';
 
 function formatAmount(amount: number, currency: string) {
   if (currency === 'UZS') return `${amount.toLocaleString('uz-UZ')} so'm`;

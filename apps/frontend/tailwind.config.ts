@@ -85,6 +85,7 @@ const config: Config = {
           950: 'var(--xedu-slate-950)',
         },
         'xedu-ruby': {
+          DEFAULT: 'var(--xedu-ruby)',
           50:  'var(--xedu-ruby-50)',
           100: 'var(--xedu-ruby-100)',
           200: 'var(--xedu-ruby-200)',
@@ -98,6 +99,7 @@ const config: Config = {
           950: 'var(--xedu-ruby-950)',
         },
         'xedu-amber': {
+          DEFAULT: 'var(--xedu-amber)',
           50:  'var(--xedu-amber-50)',
           100: 'var(--xedu-amber-100)',
           200: 'var(--xedu-amber-200)',
@@ -111,6 +113,7 @@ const config: Config = {
           950: 'var(--xedu-amber-950)',
         },
         'xedu-emerald': {
+          DEFAULT: 'var(--xedu-emerald)',
           50:  'var(--xedu-emerald-50)',
           100: 'var(--xedu-emerald-100)',
           200: 'var(--xedu-emerald-200)',

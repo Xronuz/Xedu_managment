@@ -134,7 +134,7 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId, isActive: true },
-      select: { id: true, email: true, role: true, schoolId: true, branchId: true },
+      select: { id: true, email: true, role: true, schoolId: true, branchId: true, isFirstLogin: true },
     });
 
     if (!user) throw new UnauthorizedException('Foydalanuvchi topilmadi');
@@ -315,7 +315,7 @@ export class AuthService {
       }
       const user = await this.prisma.user.findUnique({
         where: { id: currentUser.sub, isActive: true },
-        select: { id: true, email: true, role: true, schoolId: true, branchId: true },
+        select: { id: true, email: true, role: true, schoolId: true, branchId: true, isFirstLogin: true },
       });
       if (!user) throw new UnauthorizedException('Foydalanuvchi topilmadi');
       return this.generateTokens({ ...user, branchId: null });
@@ -354,7 +354,7 @@ export class AuthService {
 
     const user = await this.prisma.user.findUnique({
       where: { id: currentUser.sub, isActive: true },
-      select: { id: true, email: true, role: true, schoolId: true, branchId: true },
+      select: { id: true, email: true, role: true, schoolId: true, branchId: true, isFirstLogin: true },
     });
 
     if (!user) throw new UnauthorizedException('Foydalanuvchi topilmadi');

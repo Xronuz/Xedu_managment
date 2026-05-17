@@ -1,11 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { UnauthorizedException, BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from './auth.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
+import { NotificationQueueService } from '@/modules/notifications/notification-queue.service';
 import { UserRole } from '@eduplatform/types';
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
@@ -17,14 +18,19 @@ const mockUser = {
   lastName: 'Valiyev',
   role: UserRole.DIRECTOR,
   schoolId: 'school-uuid-1',
+  branchId: 'branch-uuid-1',
   passwordHash: '',   // filled in beforeAll
   isActive: true,
+  isFirstLogin: true,
 };
 
 const mockPrisma = {
   user: {
     findUnique: jest.fn(),
     update: jest.fn(),
+  },
+  userBranchAssignment: {
+    findMany: jest.fn(() => Promise.resolve([])),
   },
 };
 
@@ -47,10 +53,15 @@ const mockJwt = {
 };
 
 const mockConfig = {
-  get: jest.fn((key: string) => {
+  get: jest.fn((key: string, defaultValue?: string) => {
     if (key === 'JWT_SECRET') return 'test-secret';
-    return undefined;
+    if (key === 'ALLOWED_ORIGINS') return 'http://localhost:3000';
+    return defaultValue;
   }),
+};
+
+const mockNotificationQueue = {
+  queueEmail: jest.fn(() => Promise.resolve()),
 };
 
 // ── Test Suite ─────────────────────────────────────────────────────────────
@@ -74,6 +85,7 @@ describe('AuthService', () => {
         { provide: RedisService,   useValue: mockRedis },
         { provide: JwtService,     useValue: mockJwt },
         { provide: ConfigService,  useValue: mockConfig },
+        { provide: NotificationQueueService, useValue: mockNotificationQueue },
       ],
     }).compile();
 
@@ -228,6 +240,114 @@ describe('AuthService', () => {
       await expect(
         service.resetPassword({ token: 'invalid-token', password: 'any' }),
       ).rejects.toThrow(BadRequestException);
+    });
+  });
+
+  // ── firstLoginPasswordChange ───────────────────────────────────────────────
+
+  describe('firstLoginPasswordChange()', () => {
+    it('returns tokens and updates password + isFirstLogin on success', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(mockUser);
+      mockPrisma.user.update.mockResolvedValueOnce({ ...mockUser, isFirstLogin: false });
+
+      const result = await service.firstLoginPasswordChange(
+        mockUser.id,
+        'Password123!',
+        'NewSecurePass123!',
+      );
+
+      expect(result.message).toContain('muvaffaqiyatli');
+      expect(result.tokens).toBeDefined();
+      expect(result.tokens.accessToken).toBe('mock-access-token');
+      expect(mockPrisma.user.update).toHaveBeenCalledWith({
+        where: { id: mockUser.id },
+        data: expect.objectContaining({
+          passwordHash: expect.any(String),
+          isFirstLogin: false,
+        }),
+      });
+    });
+
+    it('throws NotFoundException when user not found', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.firstLoginPasswordChange(mockUser.id, 'any', 'any'),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('throws ForbiddenException when isFirstLogin is false', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({ ...mockUser, isFirstLogin: false });
+
+      await expect(
+        service.firstLoginPasswordChange(mockUser.id, 'Password123!', 'NewPass123!'),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('throws UnauthorizedException on wrong current password', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(mockUser);
+
+      await expect(
+        service.firstLoginPasswordChange(mockUser.id, 'WrongPass!', 'NewPass123!'),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('new password works and old password fails after change', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(mockUser);
+      mockPrisma.user.update.mockResolvedValueOnce({ ...mockUser, isFirstLogin: false });
+
+      // First login password change
+      const result = await service.firstLoginPasswordChange(
+        mockUser.id,
+        'Password123!',
+        'NewSecurePass123!',
+      );
+      expect(result.tokens).toBeDefined();
+
+      // Simulate DB update reflected in subsequent login
+      const updatedUser = { ...mockUser, passwordHash: await bcrypt.hash('NewSecurePass123!', 10), isFirstLogin: false };
+      mockPrisma.user.findUnique.mockResolvedValueOnce(updatedUser);
+
+      // New password login succeeds
+      const loginResult = await service.login({ email: mockUser.email, password: 'NewSecurePass123!' });
+      expect((loginResult.user as any).isFirstLogin).toBe(false);
+
+      // Old password login fails
+      mockPrisma.user.findUnique.mockResolvedValueOnce(updatedUser);
+      await expect(
+        service.login({ email: mockUser.email, password: 'Password123!' }),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  // ── refresh (isFirstLogin preservation) ────────────────────────────────────
+
+  describe('refresh()', () => {
+    it('returns new token pair on valid refresh token', async () => {
+      const fakeRefresh = 'valid-refresh-token';
+      redisStore[`refresh:${fakeRefresh}`] = mockUser.id;
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        id: mockUser.id, email: mockUser.email,
+        role: mockUser.role, schoolId: mockUser.schoolId,
+        branchId: mockUser.branchId, isFirstLogin: true,
+      });
+
+      const tokens = await service.refresh({ refreshToken: fakeRefresh });
+
+      expect(tokens.accessToken).toBe('mock-access-token');
+      // Old token deleted (rotation)
+      expect(redisStore[`refresh:${fakeRefresh}`]).toBeUndefined();
+      // generateTokens called with isFirstLogin preserved
+      expect(mockJwt.sign).toHaveBeenCalledWith(
+        expect.objectContaining({ isFirstLogin: true }),
+        expect.any(Object),
+      );
+    });
+
+    it('throws UnauthorizedException on unknown/expired refresh token', async () => {
+      await expect(
+        service.refresh({ refreshToken: 'expired-token' }),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 });

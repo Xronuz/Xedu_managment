@@ -11,6 +11,7 @@ export interface AuthUser {
   role: string;
   schoolId: string | null;
   branchId: string | null;
+  isFirstLogin?: boolean;
   avatarUrl?: string | null;
   assignedBranchIds?: string[];
 }

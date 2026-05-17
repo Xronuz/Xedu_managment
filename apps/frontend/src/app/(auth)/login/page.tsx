@@ -100,8 +100,13 @@ export default function LoginPage() {
       const result = await authApi.login(data);
       setAuth(result.user, result.tokens);
       setIsRedirecting(true);
-      const home = ROLE_HOME[result.user.role as UserRole] ?? '/dashboard';
-      router.replace(home);
+      // Birinchi kirish majburiyatini tekshirish
+      if (result.user.isFirstLogin) {
+        router.replace('/first-login');
+      } else {
+        const home = ROLE_HOME[result.user.role as UserRole] ?? '/dashboard';
+        router.replace(home);
+      }
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? "Tizimga kirishda xato yuz berdi";
       setLoginError(typeof msg === 'string' ? msg : "Email yoki parol noto'g'ri");

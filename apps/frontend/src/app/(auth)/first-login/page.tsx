@@ -88,10 +88,11 @@ export default function FirstLoginPage() {
     setSubmitting(true);
     try {
       const result = await authApi.firstLogin({ currentPassword, newPassword: password });
-      // Auth store'dagi tokenlarni yangilash — keyingi API chaqiruvlari
+      // Auth store'dagi tokenlarni va user holatini yangilash
+      // isFirstLogin=false qilish kerak — keyingi API chaqiruvlari
       // Authorization header'da yangi token bilan ketadi
       if (user) {
-        setAuth(user, result.tokens);
+        setAuth({ ...user, isFirstLogin: false }, result.tokens);
       }
       setDone(true);
     } catch (err: any) {

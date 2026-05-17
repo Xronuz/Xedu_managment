@@ -528,15 +528,20 @@ export class UsersService {
     // Defense-in-depth: self-service only — verify the user exists and matches
     const user = await this.prisma.user.findFirst({
       where: { id: userId },
-      select: { passwordHash: true, schoolId: true },
+      select: { passwordHash: true, schoolId: true, isFirstLogin: true },
     });
     if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+
+    // Birinchi kirish parolini o'zgartirish faqat /auth/first-login orqali
+    if (user.isFirstLogin) {
+      throw new ForbiddenException('Birinchi kirishda parolni o\'zgartirish uchun /auth/first-login endpointidan foydalaning');
+    }
 
     const valid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
     if (!valid) throw new UnauthorizedException('Joriy parol noto\'g\'ri');
 
     const passwordHash = await bcrypt.hash(dto.newPassword, 12);
-    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash, isFirstLogin: false } });
+    await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
     return { message: 'Parol muvaffaqiyatli yangilandi' };
   }
 

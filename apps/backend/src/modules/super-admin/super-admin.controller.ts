@@ -56,6 +56,12 @@ export class SuperAdminController {
     return this.superAdminService.deleteSchool(id, user);
   }
 
+  @Get('schools/:id/users')
+  @ApiOperation({ summary: 'Maktab foydalanuvchilari' })
+  getSchoolUsers(@Param('id') id: string, @Query('role') role?: string) {
+    return this.superAdminService.getSchoolUsers(id, role);
+  }
+
   @Get('schools/:id/modules')
   @ApiOperation({ summary: 'Maktab modullari' })
   getModules(@Param('id') id: string) {

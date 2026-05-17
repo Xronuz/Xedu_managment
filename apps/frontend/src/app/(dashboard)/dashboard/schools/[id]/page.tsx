@@ -10,6 +10,7 @@ import {
   Utensils, Library, Bus, Package, UserPlus, Loader2,
   BarChart2, FileText, ClipboardCheck, DollarSign,
   TrendingUp, MessageSquare, BookCopy, Trash2, AlertTriangle,
+  KeyRound, Copy, Check,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -78,6 +79,9 @@ export default function SchoolDetailPage() {
   const [showAdminDialog, setShowAdminDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [confirmReset, setConfirmReset] = useState<any>(null);
+  const [resetResult, setResetResult] = useState<{ temporaryPassword: string; message: string } | null>(null);
+  const [copied, setCopied] = useState(false);
   const [adminForm, setAdminForm] = useState({
     firstName: '',
     lastName: '',
@@ -95,6 +99,12 @@ export default function SchoolDetailPage() {
   const { data: modules, isLoading: modulesLoading } = useQuery({
     queryKey: ['school-modules', id],
     queryFn: () => superAdminApi.getModules(id),
+  });
+
+  const { data: schoolUsers, isLoading: usersLoading } = useQuery({
+    queryKey: ['school-users', id],
+    queryFn: () => superAdminApi.getSchoolUsers(id),
+    enabled: !!id,
   });
 
   const updateMutation = useMutation({
@@ -127,6 +137,22 @@ export default function SchoolDetailPage() {
       toast({
         title: 'Xatolik',
         description: err?.response?.data?.message || "Maktabni o'chirishda xatolik yuz berdi",
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (userId: string) => usersApi.resetPassword(userId),
+    onSuccess: (data) => {
+      setConfirmReset(null);
+      setResetResult(data);
+      setCopied(false);
+    },
+    onError: (err: any) => {
+      toast({
+        title: 'Xatolik',
+        description: err?.response?.data?.message || 'Parolni tiklashda xatolik yuz berdi',
         variant: 'destructive',
       });
     },
@@ -405,6 +431,68 @@ export default function SchoolDetailPage() {
         </Card>
       )}
 
+      {/* Directors section */}
+      {activeTab === 'info' && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Direktorlar</CardTitle>
+              <CardDescription>Maktab direktorlari va ularning parolini boshqarish</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {usersLoading ? (
+              <div className="space-y-3">
+                {[...Array(2)].map((_, i) => <Skeleton key={i} className="h-16 rounded-xl" />)}
+              </div>
+            ) : !schoolUsers || schoolUsers.filter((u: any) => u.role === 'director').length === 0 ? (
+              <div className="text-center py-8 text-xedu-slate-500 dark:text-xedu-slate-400">
+                <Users className="mx-auto mb-2 h-8 w-8 opacity-40" />
+                <p>Hali direktor qo'shilmagan</p>
+                <Button size="sm" className="mt-3" onClick={() => setShowAdminDialog(true)}>
+                  <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+                  Direktor qo'shish
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {schoolUsers.filter((u: any) => u.role === 'director').map((director: any) => (
+                  <div
+                    key={director.id}
+                    className="flex items-center justify-between rounded-lg border p-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="rounded-full bg-primary/10 p-2">
+                        <Users className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">
+                          {director.firstName} {director.lastName}
+                        </p>
+                        <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
+                          {director.email} {director.phone && `· ${director.phone}`}
+                        </p>
+                      </div>
+                      <Badge variant={director.isActive ? 'success' : 'destructive'} className="text-[10px]">
+                        {director.isActive ? 'Aktiv' : 'Bloklangan'}
+                      </Badge>
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setConfirmReset(director)}
+                    >
+                      <KeyRound className="mr-1.5 h-3.5 w-3.5" />
+                      Parolni tiklash
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Tab: Modules */}
       {activeTab === 'modules' && (
         <div className="space-y-4">
@@ -465,6 +553,76 @@ export default function SchoolDetailPage() {
           )}
         </div>
       )}
+
+      {/* Password reset confirmation */}
+      <Dialog open={!!confirmReset} onOpenChange={(v) => { if (!v) setConfirmReset(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-primary" />
+              Parolni tiklashni tasdiqlang
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              <span className="font-semibold text-foreground">
+                {confirmReset?.firstName} {confirmReset?.lastName}
+              </span>{' '}
+              uchun yangi vaqtinchalik parol yaratiladi. U keyingi kirishda parolni yangilashi kerak.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="secondary" onClick={() => setConfirmReset(null)}>Bekor qilish</Button>
+            <Button
+              variant="default"
+              disabled={resetPasswordMutation.isPending}
+              onClick={() => resetPasswordMutation.mutate(confirmReset?.id)}
+            >
+              <KeyRound className="mr-1.5 h-3.5 w-3.5" />
+              Parolni tiklash
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password reset success — temporary password display */}
+      <Dialog open={!!resetResult} onOpenChange={(v) => { if (!v) { setResetResult(null); setCopied(false); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-xedu-emerald" />
+              Parol tiklandi
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              Vaqtinchalik parol faqat bir marta ko'rsatiladi. Foydalanuvchiga yuboring.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            <div className="flex items-center gap-2">
+              <Input
+                readOnly
+                value={resetResult?.temporaryPassword ?? ''}
+                className="font-mono text-sm"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  navigator.clipboard.writeText(resetResult?.temporaryPassword ?? '');
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+              >
+                {copied ? <Check className="h-4 w-4 text-xedu-emerald" /> : <Copy className="h-4 w-4" />}
+              </Button>
+            </div>
+            <p className="text-xs text-xedu-ruby">
+              Diqqat: Bu parolni hech qayerda saqlamang. Foydalanuvchi keyingi kirishda yangi parol o'rnatishi kerak.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setResetResult(null)}>Tushundim</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Delete confirmation dialog */}
       <Dialog open={showDeleteDialog} onOpenChange={(v) => { if (!v) { setShowDeleteDialog(false); setDeleteConfirmText(''); } }}>

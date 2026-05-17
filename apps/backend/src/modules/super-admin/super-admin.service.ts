@@ -233,6 +233,26 @@ export class SuperAdminService {
     });
   }
 
+  async getSchoolUsers(schoolId: string, role?: string) {
+    await this.getSchool(schoolId);
+    const where: any = { schoolId };
+    if (role) where.role = role;
+    return this.prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        email: true,
+        phone: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
   async getModules(schoolId: string) {
     return this.prisma.schoolModule.findMany({ where: { schoolId } });
   }

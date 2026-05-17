@@ -50,4 +50,18 @@ export const superAdminApi = {
     const { data } = await apiClient.delete(`/super-admin/schools/${id}`);
     return data as { message: string; schoolId: string };
   },
+
+  getSchoolUsers: async (schoolId: string, role?: string) => {
+    const { data } = await apiClient.get(`/super-admin/schools/${schoolId}/users`, { params: { role } });
+    return data as Array<{
+      id: string;
+      firstName: string;
+      lastName: string;
+      email: string;
+      phone: string | null;
+      role: string;
+      isActive: boolean;
+      createdAt: string;
+    }>;
+  },
 };

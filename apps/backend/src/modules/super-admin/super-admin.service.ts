@@ -106,6 +106,15 @@ export class SuperAdminService {
       },
     });
 
+    // Sync school profile to SystemConfig so onboarding computed sees them
+    const configEntries = [
+      { schoolId: school.id, key: 'school_name', value: dto.name },
+      ...(dto.address ? [{ schoolId: school.id, key: 'school_address', value: dto.address }] : []),
+      ...(dto.phone ? [{ schoolId: school.id, key: 'school_phone', value: dto.phone }] : []),
+      { schoolId: school.id, key: 'academic_year', value: '2025-2026' },
+    ];
+    await this.prisma.systemConfig.createMany({ data: configEntries });
+
     // Auto-create default "Asosiy filial" branch
     const mainBranch = await this.prisma.branch.create({
       data: {
@@ -130,7 +139,27 @@ export class SuperAdminService {
 
   async updateSchool(id: string, dto: Partial<CreateSchoolDto>) {
     await this.getSchool(id);
-    return this.prisma.school.update({ where: { id }, data: dto as any });
+
+    const school = await this.prisma.school.update({ where: { id }, data: dto as any });
+
+    // Sync updated school profile fields to SystemConfig
+    const configUpdates: Record<string, string> = {};
+    if (dto.name !== undefined) configUpdates.school_name = dto.name;
+    if (dto.phone !== undefined) configUpdates.school_phone = dto.phone;
+    if (dto.address !== undefined) configUpdates.school_address = dto.address;
+
+    const ops = Object.entries(configUpdates).map(([key, value]) =>
+      this.prisma.systemConfig.upsert({
+        where: { schoolId_key: { schoolId: id, key } },
+        create: { schoolId: id, key, value },
+        update: { value },
+      }),
+    );
+    if (ops.length > 0) {
+      await this.prisma.$transaction(ops);
+    }
+
+    return school;
   }
 
   async toggleModule(schoolId: string, dto: ToggleModuleDto) {

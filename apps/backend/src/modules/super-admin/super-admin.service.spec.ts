@@ -20,6 +20,11 @@ const mockPrisma = {
   schoolModule: {
     createMany: jest.fn(),
   },
+  systemConfig: {
+    createMany: jest.fn(),
+    upsert: jest.fn(),
+  },
+  $transaction: jest.fn((ops: any[]) => Promise.all(ops)),
 };
 
 const mockAudit = {
@@ -77,6 +82,14 @@ describe('SuperAdminService', () => {
 
       const result = await service.createSchool(dto as any);
 
+      expect(mockPrisma.systemConfig.createMany).toHaveBeenCalledWith({
+        data: expect.arrayContaining([
+          expect.objectContaining({ schoolId: 'school-1', key: 'school_name', value: 'Test Maktab' }),
+          expect.objectContaining({ schoolId: 'school-1', key: 'school_address', value: 'Toshkent' }),
+          expect.objectContaining({ schoolId: 'school-1', key: 'school_phone', value: '+998901234567' }),
+          expect.objectContaining({ schoolId: 'school-1', key: 'academic_year', value: '2025-2026' }),
+        ]),
+      });
       expect(mockPrisma.branch.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
           schoolId: 'school-1',
@@ -120,6 +133,54 @@ describe('SuperAdminService', () => {
       const branchCall = mockPrisma.branch.create.mock.calls[0][0];
       expect(branchCall.data.name).not.toBe('Main Campus');
       expect(branchCall.data.name).toBe('Asosiy filial');
+    });
+  });
+
+  // ── updateSchool syncs to SystemConfig ─────────────────────────────────────
+
+  describe('updateSchool()', () => {
+    it('syncs updated fields to SystemConfig', async () => {
+      const dto = {
+        name: 'Updated Maktab',
+        phone: '+998999999999',
+      };
+
+      mockPrisma.school.findUnique.mockResolvedValueOnce({ id: 'school-1', name: 'Old' });
+      mockPrisma.school.update.mockResolvedValueOnce({ id: 'school-1', ...dto });
+      mockPrisma.systemConfig.upsert.mockResolvedValue({});
+
+      await service.updateSchool('school-1', dto);
+
+      expect(mockPrisma.school.update).toHaveBeenCalledWith({
+        where: { id: 'school-1' },
+        data: dto,
+      });
+      expect(mockPrisma.systemConfig.upsert).toHaveBeenCalledTimes(2);
+      expect(mockPrisma.systemConfig.upsert).toHaveBeenCalledWith({
+        where: { schoolId_key: { schoolId: 'school-1', key: 'school_name' } },
+        create: { schoolId: 'school-1', key: 'school_name', value: 'Updated Maktab' },
+        update: { value: 'Updated Maktab' },
+      });
+      expect(mockPrisma.systemConfig.upsert).toHaveBeenCalledWith({
+        where: { schoolId_key: { schoolId: 'school-1', key: 'school_phone' } },
+        create: { schoolId: 'school-1', key: 'school_phone', value: '+998999999999' },
+        update: { value: '+998999999999' },
+      });
+    });
+
+    it('does not touch SystemConfig when only slug is updated', async () => {
+      const dto = { slug: 'new-slug' };
+
+      mockPrisma.school.findUnique.mockResolvedValueOnce({ id: 'school-1', name: 'Old' });
+      mockPrisma.school.update.mockResolvedValueOnce({ id: 'school-1', slug: 'new-slug' });
+
+      await service.updateSchool('school-1', dto);
+
+      expect(mockPrisma.school.update).toHaveBeenCalledWith({
+        where: { id: 'school-1' },
+        data: dto,
+      });
+      expect(mockPrisma.systemConfig.upsert).not.toHaveBeenCalled();
     });
   });
 });

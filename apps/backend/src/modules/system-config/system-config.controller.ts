@@ -63,6 +63,20 @@ export class SystemConfigController {
     @Body() dto: UpdateConfigDto,
   ) {
     await this.service.setBulk(user.schoolId!, dto as any);
+
+    // Sync school profile fields to School model so onboarding computed sees them
+    const schoolData: Record<string, string> = {};
+    if (dto.school_name !== undefined) schoolData.name = dto.school_name;
+    if (dto.school_phone !== undefined) schoolData.phone = dto.school_phone;
+    if (dto.school_address !== undefined) schoolData.address = dto.school_address;
+
+    if (Object.keys(schoolData).length > 0) {
+      await this.prisma.school.update({
+        where: { id: user.schoolId! },
+        data: schoolData,
+      });
+    }
+
     return this.service.getAll(user.schoolId!);
   }
 

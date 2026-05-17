@@ -93,4 +93,67 @@ export class SystemConfigController {
     });
     return { success: true };
   }
+
+  /** GET /system-config/onboarding-computed — real DB data asosida onboarding holati */
+  @Get('onboarding-computed')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT, UserRole.LIBRARIAN, UserRole.STUDENT, UserRole.PARENT)
+  async getOnboardingComputed(@CurrentUser() user: JwtPayload) {
+    const schoolId = user.schoolId!;
+
+    // 1. School profile
+    const school = await this.prisma.school.findUnique({
+      where: { id: schoolId },
+      select: { name: true, phone: true, address: true },
+    });
+    const schoolProfileMissing: string[] = [];
+    if (!school?.name) schoolProfileMissing.push('name');
+    if (!school?.phone) schoolProfileMissing.push('phone');
+    if (!school?.address) schoolProfileMissing.push('address');
+
+    // Academic year from system config (key-value store)
+    const sysConfig = await this.prisma.systemConfig.findUnique({
+      where: { schoolId_key: { schoolId, key: 'academic_year' } },
+      select: { value: true },
+    });
+    if (!sysConfig?.value) schoolProfileMissing.push('academic_year');
+
+    // 2. Branches
+    const branches = await this.prisma.branch.findMany({
+      where: { schoolId },
+      select: { id: true, name: true },
+    });
+    const branchesMissing: string[] = [];
+    if (branches.length === 0) branchesMissing.push('branches');
+
+    // 3. Staff (at least Director)
+    const staffCount = await this.prisma.user.count({
+      where: { schoolId, isActive: true },
+    });
+    const staffMissing: string[] = [];
+    if (staffCount === 0) staffMissing.push('staff');
+
+    // 4. Education (classes, subjects, teachers)
+    const classCount = await this.prisma.class.count({ where: { schoolId } });
+    const subjectCount = await this.prisma.subject.count({ where: { schoolId } });
+    const teacherCount = await this.prisma.user.count({
+      where: { schoolId, role: { in: ['teacher', 'class_teacher'] } },
+    });
+    const educationMissing: string[] = [];
+    if (classCount === 0) educationMissing.push('classes');
+    if (subjectCount === 0) educationMissing.push('subjects');
+    if (teacherCount === 0) educationMissing.push('teachers');
+
+    const schoolProfileCompleted = schoolProfileMissing.length === 0;
+    const branchesCompleted = branchesMissing.length === 0;
+    const staffCompleted = staffMissing.length === 0;
+    const educationCompleted = educationMissing.length === 0;
+
+    return {
+      schoolProfile: { completed: schoolProfileCompleted, missing: schoolProfileMissing },
+      branches: { completed: branchesCompleted, missing: branchesMissing },
+      staff: { completed: staffCompleted, missing: staffMissing },
+      education: { completed: educationCompleted, missing: educationMissing },
+      overallCompleted: schoolProfileCompleted && branchesCompleted && staffCompleted && educationCompleted,
+    };
+  }
 }

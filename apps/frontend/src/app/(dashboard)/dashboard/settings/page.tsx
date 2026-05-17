@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Settings, Bell, Shield, Palette, Globe, User, Save, Loader2, Eye, EyeOff, Check,
 } from 'lucide-react';
@@ -71,6 +71,7 @@ const ROLE_BADGE_COLORS: Record<string, string> = {
 export default function SettingsPage() {
   const { user, updateUser } = useAuthStore();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabKey>('profil');
 
   const isAdmin = user?.role === UserRole.DIRECTOR || user?.role === UserRole.SUPER_ADMIN;
@@ -149,6 +150,8 @@ export default function SettingsPage() {
       setSysSaved(true);
       setTimeout(() => setSysSaved(false), 2500);
       toast({ title: 'Tizim sozlamalari saqlandi', description: 'Maktab konfiguratsiyasi yangilandi.' });
+      // Invalidate onboarding status so dashboard reflects changes immediately
+      queryClient.invalidateQueries({ queryKey: ['onboarding-computed'] });
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message;

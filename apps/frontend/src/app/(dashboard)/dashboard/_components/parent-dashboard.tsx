@@ -51,7 +51,7 @@ import { notificationsApi } from '@/lib/api/notifications';
 
 import {
   C, ICON_CFG, LEGACY_COLOR_MAP, StatCard, PCard, SectionHeader, QuickActions,
-  OnboardingChecklist, TodayScheduleWidget, AttendanceSummaryWidget,
+  TodayScheduleWidget, AttendanceSummaryWidget,
   UpcomingExamsWidget, ClassTeacherMyClassSection, TeacherKPISection,
   VicePrincipalSection, AdminChartsSection, AcademicCalendarWidget,
   SuperAdminServiceStatus, MONTH_LABELS, PIE_COLORS, FREQ_UZ

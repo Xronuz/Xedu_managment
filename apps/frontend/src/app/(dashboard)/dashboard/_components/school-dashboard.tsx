@@ -43,6 +43,7 @@ import { coinsApi } from '@/lib/api/coins';
 import { kpiApi } from '@/lib/api/kpi';
 import { aiAnalyticsApi } from '@/lib/api/ai-analytics';
 import { branchesApi } from '@/lib/api/branches';
+import { OnboardingChecklist } from '@/components/dashboard/onboarding-checklist';
 import { academicCalendarApi, type AcademicEventType, type CreateAcademicEventPayload } from '@/lib/api/academic-calendar';
 import { leaveRequestsApi } from '@/lib/api/leave-requests';
 import { disciplineApi } from '@/lib/api/discipline';
@@ -51,7 +52,7 @@ import { notificationsApi } from '@/lib/api/notifications';
 
 import {
   C, ICON_CFG, LEGACY_COLOR_MAP, StatCard, PCard, SectionHeader, QuickActions,
-  OnboardingChecklist, TodayScheduleWidget, AttendanceSummaryWidget,
+  TodayScheduleWidget, AttendanceSummaryWidget,
   UpcomingExamsWidget, ClassTeacherMyClassSection, TeacherKPISection,
   VicePrincipalSection, AdminChartsSection, AcademicCalendarWidget,
   SuperAdminServiceStatus, MONTH_LABELS, PIE_COLORS, FREQ_UZ
@@ -106,7 +107,7 @@ export function SchoolDashboard() {
 
       {/* ── Onboarding ── */}
       {user?.role === 'director' && (
-        <OnboardingChecklist classList={classList} usersData={usersData} subjectsCount={subjectsCount} />
+        <OnboardingChecklist />
       )}
 
       {/* ── Vice principal ── */}

@@ -15,6 +15,14 @@ export interface OnboardingStatus {
   onboardingCompleted: boolean;
 }
 
+export interface OnboardingComputedStatus {
+  schoolProfile: { completed: boolean; missing: string[] };
+  branches: { completed: boolean; missing: string[] };
+  staff: { completed: boolean; missing: string[] };
+  education: { completed: boolean; missing: string[] };
+  overallCompleted: boolean;
+}
+
 export const systemConfigApi = {
   getAll: (): Promise<SystemConfigMap> =>
     apiClient.get('/system-config').then(r => r.data),
@@ -27,4 +35,7 @@ export const systemConfigApi = {
 
   updateOnboardingStatus: (payload: Partial<OnboardingStatus>): Promise<{ success: boolean }> =>
     apiClient.patch('/system-config/onboarding', payload).then(r => r.data),
+
+  getOnboardingComputed: (): Promise<OnboardingComputedStatus> =>
+    apiClient.get('/system-config/onboarding-computed').then(r => r.data),
 };

@@ -2,6 +2,7 @@
 
 import { useAuthStore } from '@/store/auth.store';
 import { DirectorWelcome } from './director-welcome';
+import { VicePrincipalWelcome } from './vice-principal-welcome';
 import { BranchAdminWelcome } from './branch-admin-welcome';
 import { TeacherWelcome } from './teacher-welcome';
 import { ParentWelcome } from './parent-welcome';
@@ -22,6 +23,8 @@ export function RoleWelcome() {
     case 'director':
     case 'super_admin':
       return <DirectorWelcome />;
+    case 'vice_principal':
+      return <VicePrincipalWelcome />;
     case 'branch_admin':
       return <BranchAdminWelcome />;
     case 'teacher':

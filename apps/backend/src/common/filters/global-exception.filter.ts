@@ -44,17 +44,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       switch (exception.code) {
         case 'P2002':
           status = HttpStatus.CONFLICT;
-          message = 'Bu ma\'lumot allaqachon mavjud';
+          message = 'Bu ma‘lumot allaqachon mavjud';
           error = 'Conflict';
           break;
         case 'P2025':
           status = HttpStatus.NOT_FOUND;
-          message = 'Ma\'lumot topilmadi';
+          message = 'Ma‘lumot topilmadi';
           error = 'Not Found';
           break;
         default:
           status = HttpStatus.BAD_REQUEST;
-          message = 'Ma\'lumotlar bazasi xatosi';
+          message = 'Ma‘lumotlar bazasi xatosi';
           error = 'Database Error';
       }
     } else if (exception instanceof PrismaClientUnknownRequestError) {
@@ -62,17 +62,17 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       const msg = (exception as any).message ?? '';
       if (msg.includes('22021') || msg.includes('invalid byte sequence') || msg.includes('0x00')) {
         status  = HttpStatus.BAD_REQUEST;
-        message = 'So\'rov noto\'g\'ri belgilar (null-bayt yoki noto\'g\'ri kodlash) ni o\'z ichiga oladi';
+        message = 'So‘rov noto‘g‘ri belgilar (null-bayt yoki noto‘g‘ri kodlash) ni o‘z ichiga oladi';
         error   = 'Bad Request';
       } else {
         status  = HttpStatus.BAD_REQUEST;
-        message = 'Ma\'lumotlar bazasi xatosi';
+        message = 'Ma‘lumotlar bazasi xatosi';
         error   = 'Database Error';
         this.logger.error(msg, (exception as any).stack);
       }
     } else if (exception instanceof PrismaClientValidationError) {
       status  = HttpStatus.BAD_REQUEST;
-      message = 'Ma\'lumotlar bazasi validatsiya xatosi';
+      message = 'Ma‘lumotlar bazasi validatsiya xatosi';
       error   = 'Bad Request';
       this.logger.warn((exception as any).message?.slice(0, 200));
     } else if (exception instanceof Error) {

@@ -82,7 +82,7 @@ export class EngagementController {
   @Roles(UserRole.STUDENT, ...TEACHER_ROLES)
   @RequireEngagement('engagement_recovery_enabled')
   @UseGuards(RequireEngagementGuard)
-  @ApiOperation({ summary: 'Tiklanish yo\'li' })
+  @ApiOperation({ summary: 'Tiklanish yo‘li' })
   async getRecoveryPath(
     @CurrentUser() user: JwtPayload,
     @Query('studentId') studentId?: string,
@@ -95,7 +95,7 @@ export class EngagementController {
   @Roles(...TEACHER_ROLES)
   @RequireEngagement('engagement_recovery_enabled')
   @UseGuards(RequireEngagementGuard)
-  @ApiOperation({ summary: 'Tiklanish mukofotini qo\'llash' })
+  @ApiOperation({ summary: 'Tiklanish mukofotini qo‘llash' })
   async applyRecovery(
     @CurrentUser() user: JwtPayload,
     @Param('studentId') studentId: string,
@@ -148,7 +148,7 @@ export class EngagementController {
 
   @Get('analytics/exam-correlation')
   @Roles(...ADMIN_ROLES)
-  @ApiOperation({ summary: 'Imtihon va engagement o\'rtasidagi bog\'liqlik' })
+  @ApiOperation({ summary: 'Imtihon va engagement o‘rtasidagi bog‘liqlik' })
   async getExamCorrelation(
     @CurrentUser() user: JwtPayload,
     @Query('days', new DefaultValuePipe(90), ParseIntPipe) days: number,

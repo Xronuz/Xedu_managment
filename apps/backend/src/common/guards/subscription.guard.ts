@@ -30,7 +30,7 @@ export class SubscriptionGuard implements CanActivate {
 
     if (!school?.isActive) {
       throw new ForbiddenException(
-        'Maktab obunasi faol emas. Iltimos, administrator bilan bog\'laning.',
+        'Maktab obunasi faol emas. Iltimos, administrator bilan bog‘laning.',
       );
     }
 
@@ -53,7 +53,7 @@ export class SubscriptionGuard implements CanActivate {
 
     if (subscription.status === 'expired' || subscription.status === 'cancelled' || subscription.status === 'inactive') {
       throw new ForbiddenException(
-        'Obuna muddati tugadi yoki bekor qilindi. Iltimos, to\'lovni amalga oshiring.',
+        'Obuna muddati tugadi yoki bekor qilindi. Iltimos, to‘lovni amalga oshiring.',
       );
     }
 

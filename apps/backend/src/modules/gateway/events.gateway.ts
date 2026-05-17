@@ -153,10 +153,10 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     const user = client.data.user as JwtPayload | undefined;
     if (!user || user.schoolId !== data.schoolId) {
-      return { event: 'error', message: 'Ruxsat yo\'q' };
+      return { event: 'error', message: 'Ruxsat yo‘q' };
     }
     if (!this.checkRateLimit(client.id)) {
-      return { event: 'error', message: 'Juda ko\'p urinish' };
+      return { event: 'error', message: 'Juda ko‘p urinish' };
     }
     await client.join(`school:${data.schoolId}`);
     return { event: 'joined', room: `school:${data.schoolId}` };
@@ -173,10 +173,10 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
       ...(user?.assignedBranchIds ?? []),
     ].filter(Boolean);
     if (!user || !allowedBranches.includes(data.branchId)) {
-      return { event: 'error', message: 'Ruxsat yo\'q' };
+      return { event: 'error', message: 'Ruxsat yo‘q' };
     }
     if (!this.checkRateLimit(client.id)) {
-      return { event: 'error', message: 'Juda ko\'p urinish' };
+      return { event: 'error', message: 'Juda ko‘p urinish' };
     }
     await client.join(`branch:${data.branchId}`);
     return { event: 'joined', room: `branch:${data.branchId}` };

@@ -391,7 +391,7 @@ export default function MessagesPage() {
                 </div>
               ) : filteredConvs.length === 0 ? (
                 <div className="p-6 text-center text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
-                  {search ? 'Topilmadi' : 'Hali xabarlar yo\'q'}
+                  {search ? 'Topilmadi' : 'Hali xabarlar yo‘q'}
                 </div>
               ) : filteredConvs.map((conv: any) => {
                 const u = conv.user ?? conv;

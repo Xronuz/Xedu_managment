@@ -56,8 +56,8 @@ function getContextBanner(reason: string | null): ContextBanner | null {
       return {
         variant: 'error',
         icon: <AlertTriangle className="h-4 w-4 shrink-0" />,
-        title: 'Ruxsat yo\'q',
-        message: 'Bu sahifani ko\'rish uchun sizda yetarli huquq yo\'q.',
+        title: 'Ruxsat yo‘q',
+        message: 'Bu sahifani ko‘rish uchun sizda yetarli huquq yo‘q.',
       };
     default:
       return null;

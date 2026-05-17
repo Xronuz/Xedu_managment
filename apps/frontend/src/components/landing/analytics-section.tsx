@@ -5,25 +5,25 @@ import { SectionHeader } from './section-header';
 const insights = [
   {
     title: 'Davomat analitikasi',
-    description: 'Kunlik, haftalik va oylik davomat dinamikasi. O\'quvchilar, guruhlar va filiallar kesimida tahlil.',
+    description: 'Kunlik, haftalik va oylik davomat dinamikasi. O‘quvchilar, guruhlar va filiallar kesimida tahlil.',
     metric: '94.2%',
-    label: 'O\'rtacha davomat',
+    label: 'O‘rtacha davomat',
   },
   {
     title: 'Moliyaviy oversight',
-    description: 'To\'lov holati, qarzdorlik, byudjet bajarilishi va filial daromadi real vaqtda.',
+    description: 'To‘lov holati, qarzdorlik, byudjet bajarilishi va filial daromadi real vaqtda.',
     metric: '97%',
-    label: 'To\'lov yig\'ilishi',
+    label: 'To‘lov yig‘ilishi',
   },
   {
-    title: 'O\'quv natijalari',
-    description: 'Fanlar kesimida o\'rtacha baholar, o\'quvchilar rivojlanishi va o\'qituvchi samaradorligi.',
+    title: 'O‘quv natijalari',
+    description: 'Fanlar kesimida o‘rtacha baholar, o‘quvchilar rivojlanishi va o‘qituvchi samaradorligi.',
     metric: '4.2/5',
-    label: 'O\'rtacha baho',
+    label: 'O‘rtacha baho',
   },
   {
     title: 'Xodimlar KPI',
-    description: 'O\'qituvchilar yuklamasi, dars o\'tish sifati va administrativ samaradorlik ko\'rsatkichlari.',
+    description: 'O‘qituvchilar yuklamasi, dars o‘tish sifati va administrativ samaradorlik ko‘rsatkichlari.',
     metric: '86%',
     label: 'KPI bajarilishi',
   },

@@ -165,7 +165,7 @@ export default function DisplayPage() {
       setData(json);
       setError(null);
     } catch (e: any) {
-      setError(e.message ?? 'Ma\'lumot yuklanmadi');
+      setError(e.message ?? 'Ma‘lumot yuklanmadi');
     } finally {
       setLoading(false);
     }

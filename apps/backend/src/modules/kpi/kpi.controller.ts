@@ -21,7 +21,7 @@ export class KpiController {
 
   @Get('metrics')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.SUPER_ADMIN)
-  @ApiOperation({ summary: 'KPI metrikalar ro\'yxati' })
+  @ApiOperation({ summary: 'KPI metrikalar ro‘yxati' })
   @ApiQuery({ name: 'category', required: false, enum: KpiCategory })
   findMetrics(
     @CurrentUser() user: JwtPayload,
@@ -57,7 +57,7 @@ export class KpiController {
 
   @Delete('metrics/:id')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.SUPER_ADMIN)
-  @ApiOperation({ summary: 'KPI metrika o\'chirish' })
+  @ApiOperation({ summary: 'KPI metrika o‘chirish' })
   deleteMetric(@Param('id', ParseUUIDPipe) id: string, @CurrentUser() user: JwtPayload) {
     return this.kpiService.deleteMetric(id, user);
   }
@@ -71,7 +71,7 @@ export class KpiController {
 
   @Get('dashboard')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.SUPER_ADMIN)
-  @ApiOperation({ summary: 'KPI dashboard (so\'nggi qiymatlar)' })
+  @ApiOperation({ summary: 'KPI dashboard (so‘nggi qiymatlar)' })
   getDashboard(@CurrentUser() user: JwtPayload) {
     return this.kpiService.getDashboard(user);
   }

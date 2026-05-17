@@ -65,7 +65,7 @@ export class FeeStructuresService {
     const fee = await this.prisma.feeStructure.findFirst({
       where: { id, schoolId: currentUser.schoolId! },
     });
-    if (!fee) throw new NotFoundException('To\'lov tartibi topilmadi');
+    if (!fee) throw new NotFoundException('To‘lov tartibi topilmadi');
     return fee;
   }
 
@@ -99,7 +99,7 @@ export class FeeStructuresService {
     const fee = await this.prisma.feeStructure.findFirst({
       where: { id, schoolId: currentUser.schoolId! },
     });
-    if (!fee) throw new NotFoundException('To\'lov tartibi topilmadi');
+    if (!fee) throw new NotFoundException('To‘lov tartibi topilmadi');
 
     const updated = await this.prisma.feeStructure.update({
       where: { id },
@@ -121,7 +121,7 @@ export class FeeStructuresService {
     const fee = await this.prisma.feeStructure.findFirst({
       where: { id, schoolId: currentUser.schoolId! },
     });
-    if (!fee) throw new NotFoundException('To\'lov tartibi topilmadi');
+    if (!fee) throw new NotFoundException('To‘lov tartibi topilmadi');
     await this.prisma.feeStructure.delete({ where: { id } });
     this.auditService?.log({
       userId: currentUser.sub ?? undefined,
@@ -131,7 +131,7 @@ export class FeeStructuresService {
       entityId: id,
       oldData: { name: fee.name, amount: fee.amount, academicYear: fee.academicYear },
     });
-    return { message: 'To\'lov tartibi o\'chirildi' };
+    return { message: 'To‘lov tartibi o‘chirildi' };
   }
 
   /**
@@ -142,7 +142,7 @@ export class FeeStructuresService {
     const fee = await this.prisma.feeStructure.findFirst({
       where: { id, schoolId: currentUser.schoolId! },
     });
-    if (!fee) throw new NotFoundException('To\'lov tartibi topilmadi');
+    if (!fee) throw new NotFoundException('To‘lov tartibi topilmadi');
 
     // Targetted grade level yoki barcha sinflar
     const where: any = { schoolId: currentUser.schoolId! };

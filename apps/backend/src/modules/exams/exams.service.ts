@@ -161,7 +161,7 @@ export class ExamsService {
       oldData: { title: exam.title, classId: exam.classId, subjectId: exam.subjectId },
     });
 
-    return { message: 'Imtihon o\'chirildi' };
+    return { message: 'Imtihon o‘chirildi' };
   }
 
   async publish(id: string, currentUser: JwtPayload) {

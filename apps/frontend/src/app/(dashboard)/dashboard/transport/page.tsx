@@ -103,7 +103,7 @@ export default function TransportPage() {
   const createMutation = useMutation({
     mutationFn: transportApi.createRoute,
     onSuccess: () => {
-      toast({ title: 'Marshrut qo\'shildi' });
+      toast({ title: 'Marshrut qo‘shildi' });
       queryClient.invalidateQueries({ queryKey: ['transport'] });
       setRouteOpen(false);
     },
@@ -131,7 +131,7 @@ export default function TransportPage() {
   const deleteMutation = useMutation({
     mutationFn: transportApi.deleteRoute,
     onSuccess: () => {
-      toast({ title: 'Marshrut o\'chirildi' });
+      toast({ title: 'Marshrut o‘chirildi' });
       queryClient.invalidateQueries({ queryKey: ['transport'] });
       if (detailRouteId) setDetailRouteId(null);
     },
@@ -145,7 +145,7 @@ export default function TransportPage() {
     mutationFn: ({ routeId, studentId, stopName }: { routeId: string; studentId: string; stopName?: string }) =>
       transportApi.assignStudent(routeId, { studentId, stopName }),
     onSuccess: () => {
-      toast({ title: 'O\'quvchi biriktirildi' });
+      toast({ title: 'O‘quvchi biriktirildi' });
       queryClient.invalidateQueries({ queryKey: ['transport'] });
       setAssignOpen(false);
       setAssignStudentId('');
@@ -161,7 +161,7 @@ export default function TransportPage() {
     mutationFn: ({ routeId, studentId }: { routeId: string; studentId: string }) =>
       transportApi.removeStudent(routeId, studentId),
     onSuccess: () => {
-      toast({ title: 'O\'quvchi olib tashlandi' });
+      toast({ title: 'O‘quvchi olib tashlandi' });
       queryClient.invalidateQueries({ queryKey: ['transport'] });
     },
   });
@@ -198,7 +198,7 @@ export default function TransportPage() {
   const validateRoute = () => {
     const e: Record<string, string> = {};
     if (!routeForm.name.trim()) e.name = 'Marshrut nomi kiriting';
-    if (!routeForm.departureTime) e.departureTime = 'Jo\'nash vaqtini kiriting';
+    if (!routeForm.departureTime) e.departureTime = 'Jo‘nash vaqtini kiriting';
     if (!routeForm.arrivalTime) e.arrivalTime = 'Yetib kelish vaqtini kiriting';
     setRouteErrors(e);
     return Object.keys(e).length === 0;
@@ -358,7 +358,7 @@ export default function TransportPage() {
           {[
             { label: 'Jami marshrutlar', value: stats.totalRoutes, icon: Bus, color: 'text-teal-500', bg: 'bg-teal-500/10' },
             { label: 'Faol marshrutlar', value: stats.activeRoutes, icon: ToggleRight, color: 'text-green-500', bg: 'bg-green-500/10' },
-            { label: 'Biriktirilgan o\'quvchilar', value: stats.totalAssigned, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+            { label: 'Biriktirilgan o‘quvchilar', value: stats.totalAssigned, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
           ].map(({ label, value, icon: Icon, color, bg }) => (
             <Card key={label}>
               <CardContent className="p-4 flex items-center gap-4">
@@ -666,7 +666,7 @@ export default function TransportPage() {
             <Button variant="outline" onClick={() => setRouteOpen(false)}>Bekor</Button>
             <Button onClick={handleSaveRoute} disabled={isMutating}>
               {isMutating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {editRoute ? 'Saqlash' : 'Qo\'shish'}
+              {editRoute ? 'Saqlash' : 'Qo‘shish'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -709,7 +709,7 @@ export default function TransportPage() {
             <Button
               onClick={() => {
                 if (!assignStudentId) {
-                  toast({ variant: 'destructive', title: 'O\'quvchi tanlang' });
+                  toast({ variant: 'destructive', title: 'O‘quvchi tanlang' });
                   return;
                 }
                 assignMutation.mutate({

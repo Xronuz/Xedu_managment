@@ -19,31 +19,31 @@ const TIERS = [
     price: 'Bepul',
     description: 'Kichik maktablar uchun',
     color: 'border-gray-300',
-    features: ['50 ta foydalanuvchi', 'Asosiy modullar', 'Email qo\'llab-quvvatlash'],
+    features: ['50 ta foydalanuvchi', 'Asosiy modullar', 'Email qo‘llab-quvvatlash'],
   },
   {
     value: 'standard',
     label: 'Standard',
-    price: '299,000 so\'m/oy',
-    description: 'O\'rta maktablar uchun',
+    price: '299,000 so‘m/oy',
+    description: 'O‘rta maktablar uchun',
     color: 'border-blue-400',
-    features: ['200 ta foydalanuvchi', 'To\'lov moduli', 'SMS xabarnomalar', 'Hisobotlar'],
+    features: ['200 ta foydalanuvchi', 'To‘lov moduli', 'SMS xabarnomalar', 'Hisobotlar'],
   },
   {
     value: 'premium',
     label: 'Premium',
-    price: '599,000 so\'m/oy',
+    price: '599,000 so‘m/oy',
     description: 'Katta maktablar uchun',
     color: 'border-violet-500',
-    features: ['Cheksiz foydalanuvchi', 'Barcha modullar', 'API kirish', 'Maxsus qo\'llab-quvvatlash'],
+    features: ['Cheksiz foydalanuvchi', 'Barcha modullar', 'API kirish', 'Maxsus qo‘llab-quvvatlash'],
   },
   {
     value: 'enterprise',
     label: 'Enterprise',
     price: 'Kelishuv asosida',
-    description: 'Maktablar tarmog\'i uchun',
+    description: 'Maktablar tarmog‘i uchun',
     color: 'border-amber-400',
-    features: ['Ko\'p filial', 'White-label', 'SLA kafolati', 'Maxsus integratsiya'],
+    features: ['Ko‘p filial', 'White-label', 'SLA kafolati', 'Maxsus integratsiya'],
   },
 ];
 
@@ -96,8 +96,8 @@ export default function NewSchoolPage() {
     const e: Record<string, string> = {};
     if (!form.name.trim()) e.name = 'Maktab nomi majburiy';
     if (!form.slug.trim()) e.slug = 'Slug majburiy';
-    if (!/^[a-z0-9-]+$/.test(form.slug)) e.slug = 'Slug faqat kichik harf, raqam va defis bo\'lishi kerak';
-    if (form.email && !/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email noto\'g\'ri';
+    if (!/^[a-z0-9-]+$/.test(form.slug)) e.slug = 'Slug faqat kichik harf, raqam va defis bo‘lishi kerak';
+    if (form.email && !/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email noto‘g‘ri';
     return e;
   };
 

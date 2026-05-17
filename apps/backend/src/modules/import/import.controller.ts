@@ -146,7 +146,7 @@ export class ImportController {
   @Post('rollback')
   @Roles(...MANAGERS)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'So\'nggi importni bekor qilish (vaqt oralig\'i bo\'yicha)' })
+  @ApiOperation({ summary: 'So‘nggi importni bekor qilish (vaqt oralig‘i bo‘yicha)' })
   async rollback(
     @Query('type') type: 'students' | 'users' | 'schedule' | 'grades' | 'attendance',
     @Query('since') since: string,

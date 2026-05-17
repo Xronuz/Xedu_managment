@@ -2,7 +2,7 @@ import { IsUUID, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class OpenShiftDto {
-  @ApiProperty({ description: 'G\'azna IDsi' })
+  @ApiProperty({ description: 'G‘azna IDsi' })
   @IsUUID()
   treasuryId: string;
 

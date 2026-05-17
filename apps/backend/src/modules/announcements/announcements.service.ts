@@ -159,7 +159,7 @@ export class AnnouncementsService {
         _count: { select: { receipts: true } },
       },
     });
-    if (!announcement) throw new NotFoundException('E\'lon topilmadi');
+    if (!announcement) throw new NotFoundException('E‘lon topilmadi');
 
     // Get current user's receipt if exists
     const receipt = await this.prisma.announcementReceipt.findUnique({
@@ -184,7 +184,7 @@ export class AnnouncementsService {
       });
     }
 
-    return { message: 'O\'qildi deb belgilandi' };
+    return { message: 'O‘qildi deb belgilandi' };
   }
 
   async acknowledge(id: string, currentUser: JwtPayload) {
@@ -192,9 +192,9 @@ export class AnnouncementsService {
       where: { id, schoolId: currentUser.schoolId! },
       select: { requireAck: true },
     });
-    if (!announcement) throw new NotFoundException('E\'lon topilmadi');
+    if (!announcement) throw new NotFoundException('E‘lon topilmadi');
     if (!announcement.requireAck) {
-      throw new BadRequestException('Bu e\'lon tasdiqlashni talab qilmaydi');
+      throw new BadRequestException('Bu e‘lon tasdiqlashni talab qilmaydi');
     }
 
     await this.prisma.announcementReceipt.upsert({
@@ -210,9 +210,9 @@ export class AnnouncementsService {
     const announcement = await this.prisma.announcement.findFirst({
       where: { id, schoolId: currentUser.schoolId! },
     });
-    if (!announcement) throw new NotFoundException('E\'lon topilmadi');
+    if (!announcement) throw new NotFoundException('E‘lon topilmadi');
     if (announcement.status === 'active') {
-      throw new ForbiddenException('Faol e\'lonni tahrirlash mumkin emas');
+      throw new ForbiddenException('Faol e‘lonni tahrirlash mumkin emas');
     }
 
     const data: Prisma.AnnouncementUpdateInput = {};
@@ -239,14 +239,14 @@ export class AnnouncementsService {
     const announcement = await this.prisma.announcement.findFirst({
       where: { id, schoolId: currentUser.schoolId! },
     });
-    if (!announcement) throw new NotFoundException('E\'lon topilmadi');
+    if (!announcement) throw new NotFoundException('E‘lon topilmadi');
 
     await this.prisma.announcement.update({
       where: { id },
       data: { status: 'cancelled' },
     });
 
-    return { message: 'E\'lon bekor qilindi' };
+    return { message: 'E‘lon bekor qilindi' };
   }
 
   async cleanupExpired() {

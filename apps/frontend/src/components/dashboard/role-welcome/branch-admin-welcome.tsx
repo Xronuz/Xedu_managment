@@ -14,9 +14,9 @@ export function BranchAdminWelcome() {
     { label: 'Xodimlar', desc: 'Filiallar xodimlari', icon: Users, href: '/dashboard/users' },
     { label: 'Dars jadvali', desc: 'Haftalik darslar', icon: Calendar, href: '/dashboard/schedule' },
     { label: 'Davomat', desc: 'Kunlik davomat nazorati', icon: ClipboardCheck, href: '/dashboard/attendance' },
-    { label: 'To\'lovlar', desc: 'Moliyaviy operatsiyalar', icon: CreditCard, href: '/dashboard/payments' },
+    { label: 'To‘lovlar', desc: 'Moliyaviy operatsiyalar', icon: CreditCard, href: '/dashboard/payments' },
     { label: 'Sinflar', desc: 'Sinf boshqaruvi', icon: Building2, href: '/dashboard/classes' },
-    { label: 'Hisobotlar', desc: 'Filiyal ko\'rsatkichlari', icon: BarChart3, href: '/dashboard/reports' },
+    { label: 'Hisobotlar', desc: 'Filiyal ko‘rsatkichlari', icon: BarChart3, href: '/dashboard/reports' },
   ];
 
   return (

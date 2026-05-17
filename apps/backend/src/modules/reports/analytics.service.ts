@@ -808,7 +808,7 @@ export class AnalyticsService {
       const totalPaid    = payments.filter(p => p.status === 'paid').reduce((s, p) => s + p.amount, 0);
       const totalPending = payments.filter(p => p.status === 'pending').reduce((s, p) => s + p.amount, 0);
       ws.addRow([]);
-      const sumRow = ws.addRow({ no: '', student: 'JAMI TO\'LANGAN', amount: totalPaid, status: "To'langan" });
+      const sumRow = ws.addRow({ no: '', student: 'JAMI TO‘LANGAN', amount: totalPaid, status: "To'langan" });
       sumRow.font = { bold: true };
       sumRow.getCell('amount').numFmt = '#,##0';
       const sumRow2 = ws.addRow({ no: '', student: 'JAMI KUTILMOQDA', amount: totalPending, status: 'Kutilmoqda' });

@@ -31,7 +31,7 @@ function checkPasswordStrength(password: string): StrengthResult {
     { label: "Kamida 1 ta maxsus belgi", pass: /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\/;'`~]/.test(password) },
   ];
   const passed = checks.filter((c) => c.pass).length;
-  const labels = ['Juda zaif', 'Zaif', 'O\'rtacha', 'Yaxshi', 'Kuchli'];
+  const labels = ['Juda zaif', 'Zaif', 'O‘rtacha', 'Yaxshi', 'Kuchli'];
   return {
     score: passed,
     label: labels[passed],

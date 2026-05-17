@@ -54,8 +54,8 @@ function groupNotifications(list: any[]) {
 
 const PREF_LABELS: Record<string, { label: string; description: string }> = {
   sms_attendance: { label: 'SMS: Davomat', description: "Farzand darsga kelmasa SMS ko'rish" },
-  sms_payment:    { label: 'SMS: To\'lov eslatmasi', description: "To'lov muddati kelganda SMS" },
-  email_grades:   { label: 'Email: Yangi baholar', description: 'Yangi baho qo\'yilganda email' },
+  sms_payment:    { label: 'SMS: To‘lov eslatmasi', description: "To'lov muddati kelganda SMS" },
+  email_grades:   { label: 'Email: Yangi baholar', description: 'Yangi baho qo‘yilganda email' },
   email_homework: { label: 'Email: Uy vazifalari', description: 'Yangi vazifa berilganda email' },
   push_all:       { label: 'Push bildirishnomalar', description: 'Barcha turdagi push notifications' },
 };
@@ -83,7 +83,7 @@ function PreferencesPanel() {
       toast({ title: ' Sozlamalar saqlandi' });
       queryClient.invalidateQueries({ queryKey: ['notification-preferences'] });
     },
-    onError: () => toast({ variant: 'destructive', title: 'Xato', description: 'Saqlab bo\'lmadi' }),
+    onError: () => toast({ variant: 'destructive', title: 'Xato', description: 'Saqlab bo‘lmadi' }),
   });
 
   const toggle = (key: string) => {
@@ -162,7 +162,7 @@ export default function NotificationsPage() {
     mutationFn: notificationsApi.deleteAll,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
-      toast({ title: 'Barcha bildirishnomalar o\'chirildi' });
+      toast({ title: 'Barcha bildirishnomalar o‘chirildi' });
     },
   });
 

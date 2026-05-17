@@ -30,14 +30,14 @@ export class SubjectsController {
     UserRole.CLASS_TEACHER,
     UserRole.STUDENT,
   )
-  @ApiOperation({ summary: 'Fanlar ro\'yxati' })
+  @ApiOperation({ summary: 'Fanlar ro‘yxati' })
   findAll(@CurrentUser() user: JwtPayload, @Query('classId') classId?: string) {
     return this.subjectsService.findAll(user, classId);
   }
 
   @Post()
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
-  @ApiOperation({ summary: 'Fan qo\'shish' })
+  @ApiOperation({ summary: 'Fan qo‘shish' })
   create(@Body() dto: CreateSubjectDto, @CurrentUser() user: JwtPayload) {
     return this.subjectsService.create(dto, user);
   }
@@ -51,7 +51,7 @@ export class SubjectsController {
 
   @Delete(':id')
   @Roles(UserRole.DIRECTOR)
-  @ApiOperation({ summary: 'Fanni o\'chirish' })
+  @ApiOperation({ summary: 'Fanni o‘chirish' })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.subjectsService.remove(id, user);
   }

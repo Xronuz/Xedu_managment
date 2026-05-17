@@ -58,6 +58,11 @@ export function middleware(request: NextRequest) {
     if (isAuthenticated && payload?.isFirstLogin === true && pathname !== '/first-login') {
       return NextResponse.redirect(new URL('/first-login', request.url));
     }
+    // Already logged in and first-login completed → redirect away from first-login page
+    if (isAuthenticated && payload?.isFirstLogin === false && pathname === '/first-login') {
+      const home = ROLE_HOME[role as UserRole] ?? '/dashboard';
+      return NextResponse.redirect(new URL(home, request.url));
+    }
     // Already logged in → redirect away from login pages
     if (isAuthenticated && pathname !== '/first-login') {
       const home = ROLE_HOME[role as UserRole] ?? '/dashboard';

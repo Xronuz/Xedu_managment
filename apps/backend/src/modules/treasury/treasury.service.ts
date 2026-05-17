@@ -178,7 +178,7 @@ export class TreasuryService {
   ) {
     // Prevent cross-school finance policy changes
     if (schoolId !== currentUser.schoolId && !currentUser.isSuperAdmin) {
-      throw new ForbiddenException('Boshqa maktabning moliya rejimini o\'zgartirish taqiqlangan');
+      throw new ForbiddenException('Boshqa maktabning moliya rejimini o‘zgartirish taqiqlangan');
     }
     return this.prisma.school.update({
       where: { id: schoolId },

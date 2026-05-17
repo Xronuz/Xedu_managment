@@ -29,7 +29,7 @@ export class RoomsController {
 
   @Get()
   @Roles(...ROOM_READERS)
-  @ApiOperation({ summary: 'Xonalar ro\'yxati' })
+  @ApiOperation({ summary: 'Xonalar ro‘yxati' })
   @ApiQuery({ name: 'branchId', required: false })
   findAll(
     @CurrentUser() user: JwtPayload,
@@ -65,7 +65,7 @@ export class RoomsController {
 
   @Delete(':id')
   @Roles(...ROOM_MANAGERS)
-  @ApiOperation({ summary: 'Xonani o\'chirish (jadval yo\'q bo\'lsa hard delete, aks holda deactivate)' })
+  @ApiOperation({ summary: 'Xonani o‘chirish (jadval yo‘q bo‘lsa hard delete, aks holda deactivate)' })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.roomsService.remove(id, user);
   }

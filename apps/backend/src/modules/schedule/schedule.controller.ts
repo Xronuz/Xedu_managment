@@ -72,7 +72,7 @@ export class ScheduleController {
 
   @Post()
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
-  @ApiOperation({ summary: 'Jadvalga dars qo\'shish' })
+  @ApiOperation({ summary: 'Jadvalga dars qo‘shish' })
   create(@Body() dto: CreateScheduleDto, @CurrentUser() user: JwtPayload) {
     return this.scheduleService.create(dto, user);
   }
@@ -90,7 +90,7 @@ export class ScheduleController {
 
   @Delete(':id')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
-  @ApiOperation({ summary: 'Darsni jadvaldan o\'chirish' })
+  @ApiOperation({ summary: 'Darsni jadvaldan o‘chirish' })
   remove(
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,

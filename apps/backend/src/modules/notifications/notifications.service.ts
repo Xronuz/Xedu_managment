@@ -150,7 +150,7 @@ export class NotificationsService {
       where: { id, recipientId: userId },
       data: { isRead: true, readAt: new Date() },
     });
-    return { message: 'O\'qildi deb belgilandi' };
+    return { message: 'O‘qildi deb belgilandi' };
   }
 
   async markAllAsRead(userId: string) {
@@ -159,21 +159,21 @@ export class NotificationsService {
       where: { recipientId: userId, isRead: false },
       data: { isRead: true, readAt: now },
     });
-    return { message: 'Barcha bildirishnomalar o\'qildi deb belgilandi' };
+    return { message: 'Barcha bildirishnomalar o‘qildi deb belgilandi' };
   }
 
   async deleteOne(id: string, userId: string) {
     await this.prisma.notification.deleteMany({
       where: { id, recipientId: userId },
     });
-    return { message: 'Bildirishnoma o\'chirildi' };
+    return { message: 'Bildirishnoma o‘chirildi' };
   }
 
   async deleteAll(userId: string) {
     const { count } = await this.prisma.notification.deleteMany({
       where: { recipientId: userId },
     });
-    return { message: `${count} ta bildirishnoma o\'chirildi`, count };
+    return { message: `${count} ta bildirishnoma o‘chirildi`, count };
   }
 
   // ── Notification Preferences ──────────────────────────────────────────────
@@ -244,7 +244,7 @@ export class NotificationsService {
     });
 
     if (eligibleRecipients.length === 0) {
-      return { sent: 0, message: 'Barcha qabul qiluvchilar bildirishnoma sozlamalarini o\'chirgan' };
+      return { sent: 0, message: 'Barcha qabul qiluvchilar bildirishnoma sozlamalarini o‘chirgan' };
     }
 
     await this.prisma.notification.createMany({

@@ -16,7 +16,7 @@ export class AiAnalyticsController {
 
   @Get('students')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.SUPER_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'O\'quvchilar risk profili (AI Analytics)' })
+  @ApiOperation({ summary: 'O‘quvchilar risk profili (AI Analytics)' })
   getStudentProfiles(@CurrentUser() user: JwtPayload) {
     return this.aiService.getStudentRiskProfiles(user);
   }

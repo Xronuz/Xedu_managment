@@ -16,12 +16,12 @@ export function DirectorWelcome() {
   const router = useRouter();
 
   const actions = [
-    { label: 'Maktab sozlash', desc: 'Asosiy ma\'lumotlarni kiriting', icon: Building2, href: '/dashboard/settings', color: 'text-xedu-primary' },
+    { label: 'Maktab sozlash', desc: 'Asosiy ma‘lumotlarni kiriting', icon: Building2, href: '/dashboard/settings', color: 'text-xedu-primary' },
     { label: 'Filiallar', desc: 'Filiallarni boshqarish', icon: GraduationCap, href: '/dashboard/branches', color: 'text-xedu-sky' },
-    { label: 'Xodimlar', desc: 'O\'qituvchi va administratsiya', icon: Users, href: '/dashboard/users', color: 'text-xedu-violet' },
-    { label: 'Hisobotlar', desc: 'Umumiy ko\'rsatkichlar', icon: BarChart3, href: '/dashboard/reports', color: 'text-xedu-amber' },
+    { label: 'Xodimlar', desc: 'O‘qituvchi va administratsiya', icon: Users, href: '/dashboard/users', color: 'text-xedu-violet' },
+    { label: 'Hisobotlar', desc: 'Umumiy ko‘rsatkichlar', icon: BarChart3, href: '/dashboard/reports', color: 'text-xedu-amber' },
     { label: 'Dars jadvali', desc: 'Haftalik jadval tuzish', icon: Calendar, href: '/dashboard/schedule', color: 'text-xedu-ruby' },
-    { label: 'Fanlar', desc: 'O\'quv dasturini sozlash', icon: BookOpen, href: '/dashboard/subjects', color: 'text-xedu-emerald' },
+    { label: 'Fanlar', desc: 'O‘quv dasturini sozlash', icon: BookOpen, href: '/dashboard/subjects', color: 'text-xedu-emerald' },
   ];
 
   return (

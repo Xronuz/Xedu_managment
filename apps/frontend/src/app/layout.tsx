@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'EduPlatform — Maktab Boshqaruv Tizimi',
-  description: 'Hususiy maktablar va o\'quv markazlari uchun boshqaruv tizimi',
+  description: 'Hususiy maktablar va o‘quv markazlari uchun boshqaruv tizimi',
 };
 
 export default async function RootLayout({

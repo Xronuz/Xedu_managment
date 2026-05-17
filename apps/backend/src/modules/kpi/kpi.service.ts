@@ -86,7 +86,7 @@ export class KpiService {
     if (!metric) throw new NotFoundException('KPI metrika topilmadi');
 
     await this.prisma.kpiMetric.delete({ where: { id } });
-    return { message: 'KPI metrika o\'chirildi' };
+    return { message: 'KPI metrika o‘chirildi' };
   }
 
   async createRecord(dto: CreateKpiRecordDto, user: JwtPayload) {

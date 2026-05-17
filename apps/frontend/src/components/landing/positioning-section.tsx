@@ -3,11 +3,11 @@
 import { SectionHeader } from './section-header';
 
 const pillars = [
-  { title: 'ERP', description: 'Kadrlar, moliya, ta\'minot va operatsion jarayonlarni boshqarish.' },
+  { title: 'ERP', description: 'Kadrlar, moliya, ta‘minot va operatsion jarayonlarni boshqarish.' },
   { title: 'LMS', description: 'Dars jadvali, baholash, uy vazifalari va akademik kuzatuv.' },
   { title: 'CRM', description: 'Abiturientlar bilan ishlash, leads va ota-onalar aloqasi.' },
-  { title: 'Finance', description: 'To\'lovlar, byudjet, ish haqi va moliyaviy hisobotlar.' },
-  { title: 'Analytics', description: 'Operatsion ko\'rsatkichlar, KPI va strategik qarorlar uchun ma\'lumotlar.' },
+  { title: 'Finance', description: 'To‘lovlar, byudjet, ish haqi va moliyaviy hisobotlar.' },
+  { title: 'Analytics', description: 'Operatsion ko‘rsatkichlar, KPI va strategik qarorlar uchun ma‘lumotlar.' },
   { title: 'Governance', description: 'Ruxsatlar ierarxiyasi, audit jurnali va institutsional nazorat.' },
 ];
 

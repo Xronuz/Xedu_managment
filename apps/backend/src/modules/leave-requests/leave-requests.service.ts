@@ -8,7 +8,7 @@ import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 
 export class CreateLeaveRequestDto {
-  @ApiProperty({ example: 'Kasal bo\'lgani uchun ta\'til so\'ralmoqda', minLength: 5, maxLength: 500 })
+  @ApiProperty({ example: 'Kasal bo‘lgani uchun ta‘til so‘ralmoqda', minLength: 5, maxLength: 500 })
   @IsString() @MinLength(5) @MaxLength(500)
   reason: string;
 
@@ -23,7 +23,7 @@ export class CreateLeaveRequestDto {
   @ApiPropertyOptional({
     enum: ['sick', 'personal', 'family', 'other'],
     example: 'sick',
-    description: 'Ta\'til turi: sick | personal | family | other',
+    description: 'Ta‘til turi: sick | personal | family | other',
   })
   @IsOptional()
   @IsString()

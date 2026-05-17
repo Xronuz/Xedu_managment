@@ -119,7 +119,7 @@ export function LibrarianDashboard() {
             {(overdueLoans as any[]).map((loan: any, i: number) => (
               <div key={loan.id ?? i} className="flex items-center justify-between rounded-[14px] border border-red-100 p-3.5">
                 <div>
-                  <p className="font-medium text-sm" style={{ color: C.text }}>{loan.book?.title ?? 'Noma\'lum kitob'}</p>
+                  <p className="font-medium text-sm" style={{ color: C.text }}>{loan.book?.title ?? 'Noma‘lum kitob'}</p>
                   <p className="text-xs" style={{ color: C.muted }}>{loan.user?.firstName} {loan.user?.lastName}</p>
                 </div>
                 <div className="text-right">

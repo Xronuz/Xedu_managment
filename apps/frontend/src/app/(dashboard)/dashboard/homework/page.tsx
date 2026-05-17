@@ -198,7 +198,7 @@ function SubmissionsDialog({ homework, open, onClose }: {
   const handleGrade = (submissionId: string) => {
     const score = Number(scores[submissionId]);
     if (isNaN(score) || score < 0) {
-      toast({ variant: 'destructive', title: 'To\'g\'ri ball kiriting' });
+      toast({ variant: 'destructive', title: 'To‘g‘ri ball kiriting' });
       return;
     }
     gradeMutation.mutate({ submissionId, score });
@@ -240,7 +240,7 @@ function SubmissionsDialog({ homework, open, onClose }: {
                     <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">
                       {sub.submittedAt
                         ? new Date(sub.submittedAt).toLocaleString('uz-UZ')
-                        : 'Sana noma\'lum'}
+                        : 'Sana noma‘lum'}
                     </p>
                     {sub.content && (
                       <p className="text-sm mt-2 bg-xedu-slate-50 dark:bg-xedu-slate-800/60 rounded-md p-2 whitespace-pre-wrap">
@@ -322,7 +322,7 @@ export default function HomeworkPage() {
   const createMutation = useMutation({
     mutationFn: homeworkApi.create,
     onSuccess: () => {
-      toast({ title: ' Uy vazifasi qo\'shildi' });
+      toast({ title: ' Uy vazifasi qo‘shildi' });
       queryClient.invalidateQueries({ queryKey: ['homework'] });
       setOpen(false);
       setForm(EMPTY);
@@ -360,7 +360,7 @@ export default function HomeworkPage() {
         return;
       }
       if (!ALLOWED_MIME_TYPES.has(submitFile.type)) {
-        toast({ variant: 'destructive', title: 'Noto\'g\'ri fayl turi', description: 'PDF, DOC, DOCX, TXT, PNG, JPG, XLSX, CSV fayl turlarini yuklash mumkin' });
+        toast({ variant: 'destructive', title: 'Noto‘g‘ri fayl turi', description: 'PDF, DOC, DOCX, TXT, PNG, JPG, XLSX, CSV fayl turlarini yuklash mumkin' });
         return;
       }
     }
@@ -375,7 +375,7 @@ export default function HomeworkPage() {
         });
         fileUrl = data.url;
       } catch {
-        toast({ variant: 'destructive', title: 'Fayl yuklanmadi', description: 'Qayta urinib ko\'ring' });
+        toast({ variant: 'destructive', title: 'Fayl yuklanmadi', description: 'Qayta urinib ko‘ring' });
         setUploading(false);
         return;
       }
@@ -421,7 +421,7 @@ export default function HomeworkPage() {
             <BookMarked className="h-6 w-6 text-primary" /> Uy vazifalari
           </h1>
           <p className="text-xedu-slate-500 dark:text-xedu-slate-400">
-            {isAdmin ? 'Barcha uy vazifalari statistikasi' : isStudent ? 'Uy vazifalaringizni ko\'ring va topshiring' : 'Uy vazifalarini boshqarish'}
+            {isAdmin ? 'Barcha uy vazifalari statistikasi' : isStudent ? 'Uy vazifalaringizni ko‘ring va topshiring' : 'Uy vazifalarini boshqarish'}
           </p>
         </div>
         {canAdd && (
@@ -437,7 +437,7 @@ export default function HomeworkPage() {
           {[
             { label: 'Jami vazifalar', value: hw.length, icon: BookMarked, color: 'text-blue-500', bg: 'bg-blue-500/10' },
             { label: 'Faol vazifalar', value: active.length, icon: Clock, color: 'text-green-500', bg: 'bg-green-500/10' },
-            { label: 'Muddati o\'tgan', value: expired.length, icon: FileX, color: 'text-red-500', bg: 'bg-red-500/10' },
+            { label: 'Muddati o‘tgan', value: expired.length, icon: FileX, color: 'text-red-500', bg: 'bg-red-500/10' },
           ].map(({ label, value, icon: Icon, color, bg }) => (
             <Card key={label}>
               <CardContent className="p-4 flex items-center gap-4">

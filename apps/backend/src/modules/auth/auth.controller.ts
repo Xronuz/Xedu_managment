@@ -44,7 +44,7 @@ export class AuthController {
   @Throttle({ default: { ttl: 60_000, limit: 10 } })
   @ApiOperation({ summary: 'Tizimga kirish' })
   @ApiResponse({ status: 200, description: 'Muvaffaqiyatli kirish' })
-  @ApiResponse({ status: 401, description: 'Email yoki parol noto\'g\'ri' })
+  @ApiResponse({ status: 401, description: 'Email yoki parol noto‘g‘ri' })
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.login(dto);
     // httpOnly cookies for XSS-resistant auth
@@ -125,7 +125,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
-  @ApiOperation({ summary: 'Aktiv sessiyalar ro\'yxati' })
+  @ApiOperation({ summary: 'Aktiv sessiyalar ro‘yxati' })
   async getSessions(@CurrentUser() user: JwtPayload) {
     return this.authService.getSessions(user.sub);
   }
@@ -134,7 +134,7 @@ export class AuthController {
   @Post('forgot-password')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
-  @ApiOperation({ summary: 'Parolni tiklash so\'rovi' })
+  @ApiOperation({ summary: 'Parolni tiklash so‘rovi' })
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.forgotPassword(dto);
   }
@@ -143,7 +143,7 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
-  @ApiOperation({ summary: 'Yangi parol o\'rnatish' })
+  @ApiOperation({ summary: 'Yangi parol o‘rnatish' })
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto);
   }
@@ -152,9 +152,9 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT')
-  @ApiOperation({ summary: 'Birinchi kirishda parolni o\'zgartirish' })
+  @ApiOperation({ summary: 'Birinchi kirishda parolni o‘zgartirish' })
   @ApiResponse({ status: 200, description: 'Parol muvaffaqiyatli yangilandi' })
-  @ApiResponse({ status: 401, description: 'Joriy parol noto\'g\'ri' })
+  @ApiResponse({ status: 401, description: 'Joriy parol noto‘g‘ri' })
   async firstLogin(@Body() dto: FirstLoginDto, @CurrentUser() user: JwtPayload, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.firstLoginPasswordChange(
       user.sub,

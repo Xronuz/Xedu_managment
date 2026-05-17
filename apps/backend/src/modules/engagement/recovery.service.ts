@@ -26,7 +26,7 @@ export class RecoveryService {
 
     const rep = await this.prisma.engagementReputation.findUnique({ where: { userId } });
     if (!rep) {
-      return { eligible: false, reasons: ['Reputatsiya ma\'lumoti topilmadi'] };
+      return { eligible: false, reasons: ['Reputatsiya ma‘lumoti topilmadi'] };
     }
 
     const reasons: string[] = [];
@@ -36,7 +36,7 @@ export class RecoveryService {
     }
 
     if (!rep.lastDeductionAt) {
-      reasons.push('Avval hisobdorlik qo\'llanilmagan');
+      reasons.push('Avval hisobdorlik qo‘llanilmagan');
     }
 
     // Oxirgi tiklanishdan keyin kamida 7 kun o'tishi kerak

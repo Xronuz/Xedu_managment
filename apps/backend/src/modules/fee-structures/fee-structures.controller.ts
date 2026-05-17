@@ -16,7 +16,7 @@ export class FeeStructuresController {
 
   @Get()
   @Roles(UserRole.DIRECTOR, UserRole.ACCOUNTANT, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
-  @ApiOperation({ summary: 'To\'lov tartiblari ro\'yxati' })
+  @ApiOperation({ summary: 'To‘lov tartiblari ro‘yxati' })
   findAll(
     @CurrentUser() user: JwtPayload,
     @Query('academicYear') academicYear?: string,
@@ -26,21 +26,21 @@ export class FeeStructuresController {
 
   @Get(':id')
   @Roles(UserRole.DIRECTOR, UserRole.ACCOUNTANT, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
-  @ApiOperation({ summary: 'To\'lov tartibi ma\'lumoti' })
+  @ApiOperation({ summary: 'To‘lov tartibi ma‘lumoti' })
   findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.feeStructuresService.findOne(id, user);
   }
 
   @Post()
   @Roles(UserRole.DIRECTOR, UserRole.ACCOUNTANT)
-  @ApiOperation({ summary: 'Yangi to\'lov tartibi yaratish' })
+  @ApiOperation({ summary: 'Yangi to‘lov tartibi yaratish' })
   create(@Body() dto: CreateFeeStructureDto, @CurrentUser() user: JwtPayload) {
     return this.feeStructuresService.create(dto, user);
   }
 
   @Put(':id')
   @Roles(UserRole.DIRECTOR, UserRole.ACCOUNTANT)
-  @ApiOperation({ summary: 'To\'lov tartibini yangilash' })
+  @ApiOperation({ summary: 'To‘lov tartibini yangilash' })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateFeeStructureDto,
@@ -51,14 +51,14 @@ export class FeeStructuresController {
 
   @Delete(':id')
   @Roles(UserRole.DIRECTOR)
-  @ApiOperation({ summary: 'To\'lov tartibini o\'chirish' })
+  @ApiOperation({ summary: 'To‘lov tartibini o‘chirish' })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.feeStructuresService.remove(id, user);
   }
 
   @Post(':id/generate-payments')
   @Roles(UserRole.DIRECTOR, UserRole.ACCOUNTANT)
-  @ApiOperation({ summary: 'To\'lov tartibidan payment yozuvlari yaratish' })
+  @ApiOperation({ summary: 'To‘lov tartibidan payment yozuvlari yaratish' })
   generatePayments(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.feeStructuresService.generatePayments(id, user);
   }

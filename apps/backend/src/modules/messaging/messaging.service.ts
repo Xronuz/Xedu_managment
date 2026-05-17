@@ -146,7 +146,7 @@ export class MessagingService {
       data: { isRead: true },
     });
 
-    return { message: 'Xabarlar o\'qildi deb belgilandi' };
+    return { message: 'Xabarlar o‘qildi deb belgilandi' };
   }
 
   async getUnreadCount(currentUser: JwtPayload) {
@@ -166,9 +166,9 @@ export class MessagingService {
     const msg = await this.prisma.message.findFirst({
       where: { id, schoolId: currentUser.schoolId!, senderId: currentUser.sub },
     });
-    if (!msg) throw new NotFoundException('Xabar topilmadi yoki o\'chirish huquqi yo\'q');
+    if (!msg) throw new NotFoundException('Xabar topilmadi yoki o‘chirish huquqi yo‘q');
     await this.prisma.message.delete({ where: { id } });
-    return { message: 'Xabar o\'chirildi' };
+    return { message: 'Xabar o‘chirildi' };
   }
 
   /** Foydalanuvchi bilan butun suhbatni o'chirish (o'z xabarlari) */
@@ -287,7 +287,7 @@ export class MessagingService {
         conversation: { schoolId: currentUser.schoolId! },
       },
     });
-    if (!member) throw new Error('Siz bu guruh a\'zosi emassiz');
+    if (!member) throw new Error('Siz bu guruh a‘zosi emassiz');
 
     const skip = (page - 1) * limit;
     const [messages, total] = await Promise.all([
@@ -326,7 +326,7 @@ export class MessagingService {
         conversation: { schoolId: currentUser.schoolId! },
       },
     });
-    if (!member) throw new Error('Siz bu guruh a\'zosi emassiz');
+    if (!member) throw new Error('Siz bu guruh a‘zosi emassiz');
 
     const message = await this.prisma.groupMessage.create({
       data: {
@@ -371,7 +371,7 @@ export class MessagingService {
     const admin = await this.prisma.conversationParticipant.findFirst({
       where: { conversationId: groupId, userId: currentUser.sub, isAdmin: true },
     });
-    if (!admin) throw new Error('Faqat guruh admini a\'zo qo\'sha oladi');
+    if (!admin) throw new Error('Faqat guruh admini a‘zo qo‘sha oladi');
 
     // Verify target user belongs to same school
     const targetUser = await this.prisma.user.findFirst({
@@ -387,7 +387,7 @@ export class MessagingService {
       create: { conversationId: groupId, userId },
       update: {},
     });
-    return { message: 'A\'zo qo\'shildi' };
+    return { message: 'A‘zo qo‘shildi' };
   }
 
   /** Guruhdan chiqish */
@@ -418,7 +418,7 @@ export class MessagingService {
     });
 
     if (!isSender && !isAdmin) {
-      throw new ForbiddenException('Siz faqat o\'z xabaringizni o\'chirishingiz mumkin');
+      throw new ForbiddenException('Siz faqat o‘z xabaringizni o‘chirishingiz mumkin');
     }
 
     await this.prisma.groupMessage.update({
@@ -426,6 +426,6 @@ export class MessagingService {
       data: { isDeleted: true, deletedAt: new Date() },
     });
 
-    return { message: 'Xabar o\'chirildi' };
+    return { message: 'Xabar o‘chirildi' };
   }
 }

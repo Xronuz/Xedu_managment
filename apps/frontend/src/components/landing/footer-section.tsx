@@ -16,7 +16,7 @@ const footerLinks = {
     { label: 'Aloqa', href: '#demo' },
   ],
   Yordam: [
-    { label: 'Qo\'llanma', href: '#' },
+    { label: 'Qo‘llanma', href: '#' },
     { label: 'API hujjatlari', href: '#' },
     { label: 'Xavfsizlik', href: '#' },
     { label: 'FAQ', href: '#faq' },

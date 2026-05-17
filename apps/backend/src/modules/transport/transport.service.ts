@@ -202,7 +202,7 @@ export class TransportService {
     }
 
     await this.prisma.transportRoute.delete({ where: { id } });
-    return { message: 'Marshrut o\'chirildi' };
+    return { message: 'Marshrut o‘chirildi' };
   }
 
   // ── Student Assignment ────────────────────────────────────────────────────
@@ -218,7 +218,7 @@ export class TransportService {
     const student = await this.prisma.user.findFirst({
       where: { id: dto.studentId, schoolId, role: UserRole.STUDENT as any },
     });
-    if (!student) throw new NotFoundException('O\'quvchi topilmadi');
+    if (!student) throw new NotFoundException('O‘quvchi topilmadi');
 
     // Check capacity
     const currentCount = await this.prisma.transportStudent.count({
@@ -232,7 +232,7 @@ export class TransportService {
     const exists = await this.prisma.transportStudent.findFirst({
       where: { routeId, studentId: dto.studentId },
     });
-    if (exists) throw new ConflictException('O\'quvchi bu marshrutga allaqachon biriktirilgan');
+    if (exists) throw new ConflictException('O‘quvchi bu marshrutga allaqachon biriktirilgan');
 
     return this.prisma.transportStudent.create({
       data: {
@@ -251,10 +251,10 @@ export class TransportService {
     const assignment = await this.prisma.transportStudent.findFirst({
       where: { routeId, studentId, schoolId: currentUser.schoolId! },
     });
-    if (!assignment) throw new NotFoundException('Biriktirilgan o\'quvchi topilmadi');
+    if (!assignment) throw new NotFoundException('Biriktirilgan o‘quvchi topilmadi');
 
     await this.prisma.transportStudent.delete({ where: { id: assignment.id } });
-    return { message: 'O\'quvchi marshrutdan olib tashlandi' };
+    return { message: 'O‘quvchi marshrutdan olib tashlandi' };
   }
 
   async getStudentsByRoute(routeId: string, currentUser: JwtPayload) {

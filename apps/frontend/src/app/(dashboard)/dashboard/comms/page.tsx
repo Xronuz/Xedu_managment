@@ -22,7 +22,7 @@ const TABS = [
   },
   {
     id: 'announcements',
-    label: 'E\'lonlar',
+    label: 'E‘lonlar',
     roles: ['director', 'vice_principal', 'teacher', 'class_teacher'],
   },
 ];

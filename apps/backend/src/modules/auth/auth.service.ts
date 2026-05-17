@@ -54,7 +54,7 @@ export class AuthService {
       const attempts = await this.redis.get(attemptsKey);
       if (attempts && parseInt(attempts) >= MAX_LOGIN_ATTEMPTS) {
         throw new UnauthorizedException(
-          'Juda ko\'p urinish. 15 daqiqadan so\'ng qayta urinib ko\'ring',
+          'Juda ko‘p urinish. 15 daqiqadan so‘ng qayta urinib ko‘ring',
         );
       }
     } catch (err: any) {
@@ -73,13 +73,13 @@ export class AuthService {
 
     if (!user || !user.isActive) {
       await this.incrementLoginAttempts(attemptsKey).catch(() => null);
-      throw new UnauthorizedException('Email yoki parol noto\'g\'ri');
+      throw new UnauthorizedException('Email yoki parol noto‘g‘ri');
     }
 
     const passwordValid = await bcrypt.compare(password, user.passwordHash);
     if (!passwordValid) {
       await this.incrementLoginAttempts(attemptsKey).catch(() => null);
-      throw new UnauthorizedException('Email yoki parol noto\'g\'ri');
+      throw new UnauthorizedException('Email yoki parol noto‘g‘ri');
     }
 
     // Reset login attempts
@@ -113,7 +113,7 @@ export class AuthService {
     try {
       const stored = await this.redis.get(redisKey);
       if (!stored) {
-        throw new UnauthorizedException('Refresh token yaroqsiz yoki muddati o\'tgan');
+        throw new UnauthorizedException('Refresh token yaroqsiz yoki muddati o‘tgan');
       }
       // Backward compatibility: stored value may be plain userId (old sessions) or JSON
       try {
@@ -129,7 +129,7 @@ export class AuthService {
       // Redis mavjud emas — refresh token UUID bo'lgani uchun JWT verify ishlamaydi.
       // BU YERDA FALLBACK YO'Q: Redis down bo'lsa sessionni yangilash mumkin emas.
       this.logger.error(`Redis refresh token tekshiruvi xato: ${err.message}`);
-      throw new UnauthorizedException('Refresh token yaroqsiz yoki muddati o\'tgan');
+      throw new UnauthorizedException('Refresh token yaroqsiz yoki muddati o‘tgan');
     }
 
     const user = await this.prisma.user.findUnique({
@@ -162,7 +162,7 @@ export class AuthService {
         );
       }
     } catch (err: any) {
-      this.logger.warn(`Access token deny-list ga qo\'shishda xato: ${err.message}`);
+      this.logger.warn(`Access token deny-list ga qo‘shishda xato: ${err.message}`);
     }
 
     // 2. Revoke the specific refresh token
@@ -201,7 +201,7 @@ export class AuthService {
         );
       }
     } catch (err: any) {
-      this.logger.warn(`Access token deny-list ga qo\'shishda xato: ${err.message}`);
+      this.logger.warn(`Access token deny-list ga qo‘shishda xato: ${err.message}`);
     }
 
     // We can't enumerate all refresh tokens by userId efficiently with the current
@@ -254,7 +254,7 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
     if (!user) {
       // Don't reveal if email exists
-      return { message: 'Agar email ro\'yxatdan o\'tgan bo\'lsa, tiklash havolasi yuborildi' };
+      return { message: 'Agar email ro‘yxatdan o‘tgan bo‘lsa, tiklash havolasi yuborildi' };
     }
 
     const resetToken = uuidv4();
@@ -266,7 +266,7 @@ export class AuthService {
       );
     } catch (err: any) {
       this.logger.error(`Parol tiklash tokeni Redis ga yozilmadi: ${err.message}`);
-      throw new BadRequestException('Tizimda vaqtinchalik muammo. Iltimos qayta urinib ko\'ring.');
+      throw new BadRequestException('Tizimda vaqtinchalik muammo. Iltimos qayta urinib ko‘ring.');
     }
 
     // Send password reset email
@@ -293,7 +293,7 @@ export class AuthService {
     });
     this.logger.log(`Parol tiklash emaili yuborildi: ${user.email}`);
 
-    return { message: 'Agar email ro\'yxatdan o\'tgan bo\'lsa, tiklash havolasi yuborildi' };
+    return { message: 'Agar email ro‘yxatdan o‘tgan bo‘lsa, tiklash havolasi yuborildi' };
   }
 
   /**
@@ -311,7 +311,7 @@ export class AuthService {
     // School-wide view: faqat director va super_admin uchun ruxsat
     if (!targetBranchId) {
       if (currentUser.role !== UserRole.SUPER_ADMIN && currentUser.role !== UserRole.DIRECTOR) {
-        throw new ForbiddenException('Barcha filiallarni ko\'rish huquqi faqat director/super_admin uchun');
+        throw new ForbiddenException('Barcha filiallarni ko‘rish huquqi faqat director/super_admin uchun');
       }
       const user = await this.prisma.user.findUnique({
         where: { id: currentUser.sub, isActive: true },
@@ -368,11 +368,11 @@ export class AuthService {
       userId = await this.redis.get(`${PASSWORD_RESET_PREFIX}${dto.token}`);
     } catch (err: any) {
       this.logger.error(`Parol tiklash token tekshiruvi xato: ${err.message}`);
-      throw new BadRequestException('Tizimda vaqtinchalik muammo. Iltimos qayta urinib ko\'ring.');
+      throw new BadRequestException('Tizimda vaqtinchalik muammo. Iltimos qayta urinib ko‘ring.');
     }
 
     if (!userId) {
-      throw new BadRequestException('Token yaroqsiz yoki muddati o\'tgan');
+      throw new BadRequestException('Token yaroqsiz yoki muddati o‘tgan');
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
@@ -416,7 +416,7 @@ export class AuthService {
     }
 
     const valid = await bcrypt.compare(currentPassword, user.passwordHash);
-    if (!valid) throw new UnauthorizedException('Joriy parol noto\'g\'ri');
+    if (!valid) throw new UnauthorizedException('Joriy parol noto‘g‘ri');
 
     const passwordHash = await bcrypt.hash(newPassword, 12);
     await this.prisma.user.update({

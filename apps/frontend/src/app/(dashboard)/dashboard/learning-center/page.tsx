@@ -49,7 +49,7 @@ const STATUS_CONFIG = {
 };
 
 function formatCurrency(n: number) {
-  return new Intl.NumberFormat('uz-UZ').format(n) + ' so\'m';
+  return new Intl.NumberFormat('uz-UZ').format(n) + ' so‘m';
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -116,7 +116,7 @@ export default function LearningCenterPage() {
   const createMutation = useMutation({
     mutationFn: learningCenterApi.createCourse,
     onSuccess: () => {
-      toast({ title: 'Kurs qo\'shildi' });
+      toast({ title: 'Kurs qo‘shildi' });
       queryClient.invalidateQueries({ queryKey: ['learning-center'] });
       setCourseOpen(false);
     },
@@ -144,7 +144,7 @@ export default function LearningCenterPage() {
   const deleteMutation = useMutation({
     mutationFn: learningCenterApi.deleteCourse,
     onSuccess: () => {
-      toast({ title: 'Kurs o\'chirildi' });
+      toast({ title: 'Kurs o‘chirildi' });
       queryClient.invalidateQueries({ queryKey: ['learning-center'] });
       if (detailCourseId) setDetailCourseId(null);
     },
@@ -158,7 +158,7 @@ export default function LearningCenterPage() {
     mutationFn: ({ courseId, studentId }: { courseId: string; studentId: string }) =>
       learningCenterApi.enrollStudent(courseId, { studentId }),
     onSuccess: () => {
-      toast({ title: 'O\'quvchi qo\'shildi' });
+      toast({ title: 'O‘quvchi qo‘shildi' });
       queryClient.invalidateQueries({ queryKey: ['learning-center'] });
       setEnrollOpen(false);
       setEnrollStudentId('');
@@ -173,7 +173,7 @@ export default function LearningCenterPage() {
     mutationFn: ({ courseId, enrollmentId }: { courseId: string; enrollmentId: string }) =>
       learningCenterApi.removeEnrollment(courseId, enrollmentId),
     onSuccess: () => {
-      toast({ title: 'O\'quvchi kursdan chiqarildi' });
+      toast({ title: 'O‘quvchi kursdan chiqarildi' });
       queryClient.invalidateQueries({ queryKey: ['learning-center'] });
     },
   });
@@ -346,7 +346,7 @@ export default function LearningCenterPage() {
           {[
             { label: 'Jami kurslar', value: stats.totalCourses, icon: BookOpen, color: 'text-violet-500', bg: 'bg-violet-500/10' },
             { label: 'Faol kurslar', value: stats.activeCourses, icon: MonitorPlay, color: 'text-green-500', bg: 'bg-green-500/10' },
-            { label: 'Faol o\'quvchilar', value: stats.activeStudents, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+            { label: 'Faol o‘quvchilar', value: stats.activeStudents, icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
             { label: 'Yakunlash darajasi', value: `${stats.completionRate}%`, icon: TrendingUp, color: 'text-orange-500', bg: 'bg-orange-500/10' },
           ].map(({ label, value, icon: Icon, color, bg }) => (
             <Card key={label}>
@@ -681,7 +681,7 @@ export default function LearningCenterPage() {
             <Button variant="outline" onClick={() => setCourseOpen(false)}>Bekor</Button>
             <Button onClick={handleSave} disabled={isMutating}>
               {isMutating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {editCourse ? 'Saqlash' : 'Qo\'shish'}
+              {editCourse ? 'Saqlash' : 'Qo‘shish'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -715,7 +715,7 @@ export default function LearningCenterPage() {
             <Button variant="outline" onClick={() => setEnrollOpen(false)}>Bekor</Button>
             <Button
               onClick={() => {
-                if (!enrollStudentId) { toast({ variant: 'destructive', title: 'O\'quvchi tanlang' }); return; }
+                if (!enrollStudentId) { toast({ variant: 'destructive', title: 'O‘quvchi tanlang' }); return; }
                 enrollMutation.mutate({ courseId: enrollCourseId!, studentId: enrollStudentId });
               }}
               disabled={enrollMutation.isPending}

@@ -20,7 +20,7 @@ export class HomeworkController {
     UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN,
     UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT,
   )
-  @ApiOperation({ summary: 'Uyga vazifalar ro\'yxati' })
+  @ApiOperation({ summary: 'Uyga vazifalar ro‘yxati' })
   findAll(
     @CurrentUser() user: JwtPayload,
     @Query('classId') classId?: string,
@@ -34,7 +34,7 @@ export class HomeworkController {
     UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN,
     UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT,
   )
-  @ApiOperation({ summary: 'Uyga vazifa ma\'lumoti' })
+  @ApiOperation({ summary: 'Uyga vazifa ma‘lumoti' })
   findOne(
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,
@@ -58,7 +58,7 @@ export class HomeworkController {
 
   @Delete(':id')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'Uyga vazifani o\'chirish' })
+  @ApiOperation({ summary: 'Uyga vazifani o‘chirish' })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.homeworkService.remove(id, user);
   }
@@ -88,7 +88,7 @@ export class HomeworkController {
 
   @Get(':id/my-submission')
   @Roles(UserRole.STUDENT)
-  @ApiOperation({ summary: 'Mening topshirig\'im' })
+  @ApiOperation({ summary: 'Mening topshirig‘im' })
   getMySubmission(
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,

@@ -17,7 +17,7 @@ export class CreateKpiMetricDto {
   @MaxLength(100)
   name: string;
 
-  @ApiPropertyOptional({ example: 'O\'quvchilarning oylik davomat foizi' })
+  @ApiPropertyOptional({ example: 'O‘quvchilarning oylik davomat foizi' })
   @IsOptional()
   @IsString()
   description?: string;
@@ -48,7 +48,7 @@ export class CreateKpiMetricDto {
   @IsBoolean()
   isActive?: boolean;
 
-  @ApiPropertyOptional({ description: 'Filial ID (null = maktab bo\'yicha)' })
+  @ApiPropertyOptional({ description: 'Filial ID (null = maktab bo‘yicha)' })
   @IsOptional()
   @IsUUID()
   branchId?: string | null;

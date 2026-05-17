@@ -4,8 +4,8 @@ import { Network, Eye, BarChart3, Users, CheckCircle2 } from 'lucide-react';
 
 const capabilities = [
   { icon: Eye, title: 'Markaziy nazorat', description: 'Barcha filiallarning operatsion holatini yagona dashboarddan kuzating.' },
-  { icon: BarChart3, title: 'Filial taqqoslash', description: 'Filiallar o\'rtasida davomat, moliya va akademik natijalarni taqqoslang.' },
-  { icon: Users, title: 'Xodimlar ko\'chirish', description: 'O\'qituvchi va xodimlarni filiallar o\'rtasida tez va oson joylashtiring.' },
+  { icon: BarChart3, title: 'Filial taqqoslash', description: 'Filiallar o‘rtasida davomat, moliya va akademik natijalarni taqqoslang.' },
+  { icon: Users, title: 'Xodimlar ko‘chirish', description: 'O‘qituvchi va xodimlarni filiallar o‘rtasida tez va oson joylashtiring.' },
   { icon: Network, title: 'Masshtablash', description: 'Yangi filiallarni bir necha daqiqada tizimga ulang va standartlarni joriy eting.' },
 ];
 
@@ -30,7 +30,7 @@ export function MultibranchSection() {
             <ul className="mt-10 space-y-4">
               {[
                 'Har bir filial uchun alohida byudjet va hisobot',
-                'Filiallar o\'rtasida o\'quvchi va xodimlar harakati',
+                'Filiallar o‘rtasida o‘quvchi va xodimlar harakati',
                 'Markaziy ota-onalar bazasi va aloqa markazi',
                 'Filial darajasida ruxsatlar va rollar boshqaruvi',
               ].map((item) => (

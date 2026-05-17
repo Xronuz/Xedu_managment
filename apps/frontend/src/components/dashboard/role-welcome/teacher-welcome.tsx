@@ -14,7 +14,7 @@ export function TeacherWelcome() {
     { label: 'Dars jadvali', desc: 'Bugungi va haftalik darslar', icon: Calendar, href: '/dashboard/schedule' },
     { label: 'Uy vazifalari', desc: 'Topshiriqlarni boshqarish', icon: BookOpen, href: '/dashboard/homework' },
     { label: 'Davomat', desc: 'Sinf davomati', icon: ClipboardCheck, href: '/dashboard/attendance' },
-    { label: 'Mening sinfim', desc: 'Sinf ro\'yxati va ma\'lumotlari', icon: GraduationCap, href: '/dashboard/my-class' },
+    { label: 'Mening sinfim', desc: 'Sinf ro‘yxati va ma‘lumotlari', icon: GraduationCap, href: '/dashboard/my-class' },
     { label: 'Baholar', desc: 'Baholash jurnali', icon: FileText, href: '/dashboard/grades' },
     { label: 'Imtihonlar', desc: 'Yaqin imtihonlar', icon: Users, href: '/dashboard/exams' },
   ];
@@ -26,7 +26,7 @@ export function TeacherWelcome() {
           <GraduationCap className="h-6 w-6 text-xedu-primary" />
         </div>
         <div>
-          <h2 className="text-lg font-bold tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100">O\'qituvchi ish stoli</h2>
+          <h2 className="text-lg font-bold tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100">O‘qituvchi ish stoli</h2>
           <p className="text-sm text-xedu-slate-500 mt-0.5 max-w-lg">
             Sizning kundalik ish stolingiz. Dars jadvallari, uy vazifalari, davomat va baholash
             jarayonlarini shu yerdan boshqaring.

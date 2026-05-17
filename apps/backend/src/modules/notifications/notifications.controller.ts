@@ -38,7 +38,7 @@ export class NotificationsController {
 
   @Get()
   @AnyAuthenticated()
-  @ApiOperation({ summary: 'O\'z bildirishnomalar' })
+  @ApiOperation({ summary: 'O‘z bildirishnomalar' })
   getMyNotifications(
     @CurrentUser('sub') userId: string,
     @Query('page') page = 1,
@@ -49,14 +49,14 @@ export class NotificationsController {
 
   @Put(':id/read')
   @AnyAuthenticated()
-  @ApiOperation({ summary: 'O\'qildi deb belgilash' })
+  @ApiOperation({ summary: 'O‘qildi deb belgilash' })
   markAsRead(@Param('id') id: string, @CurrentUser('sub') userId: string) {
     return this.notificationsService.markAsRead(id, userId);
   }
 
   @Put('read-all')
   @AnyAuthenticated()
-  @ApiOperation({ summary: 'Hammasini o\'qildi deb belgilash' })
+  @ApiOperation({ summary: 'Hammasini o‘qildi deb belgilash' })
   markAllAsRead(@CurrentUser('sub') userId: string) {
     return this.notificationsService.markAllAsRead(userId);
   }
@@ -88,7 +88,7 @@ export class NotificationsController {
   @Delete('all')
   @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Barcha o\'z bildirishnomalarni o\'chirish' })
+  @ApiOperation({ summary: 'Barcha o‘z bildirishnomalarni o‘chirish' })
   deleteAll(@CurrentUser('sub') userId: string) {
     return this.notificationsService.deleteAll(userId);
   }
@@ -105,7 +105,7 @@ export class NotificationsController {
   @Delete(':id')
   @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bitta bildirishnomani o\'chirish' })
+  @ApiOperation({ summary: 'Bitta bildirishnomani o‘chirish' })
   deleteOne(@Param('id') id: string, @CurrentUser('sub') userId: string) {
     return this.notificationsService.deleteOne(id, userId);
   }
@@ -113,7 +113,7 @@ export class NotificationsController {
   @Get('health/queue')
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bildirishnoma navbati sog\'lomi' })
+  @ApiOperation({ summary: 'Bildirishnoma navbati sog‘lomi' })
   async queueHealth() {
     return this.notificationsService.getQueueHealth();
   }

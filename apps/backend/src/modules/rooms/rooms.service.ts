@@ -159,7 +159,7 @@ export class RoomsService {
     // Branch-scoped foydalanuvchi faqat o'z filialida xona yarata oladi
     if (!SCHOOL_WIDE_ROLES.has(currentUser.role) && currentUser.branchId) {
       if (dto.branchId !== currentUser.branchId) {
-        throw new ForbiddenException('Siz faqat o\'z filialingizda xona yarata olasiz');
+        throw new ForbiddenException('Siz faqat o‘z filialingizda xona yarata olasiz');
       }
     }
 
@@ -239,7 +239,7 @@ export class RoomsService {
     if (!room) throw new NotFoundException('Xona topilmadi');
 
     if (!SCHOOL_WIDE_ROLES.has(currentUser.role) && currentUser.branchId && room.branchId !== currentUser.branchId) {
-      throw new ForbiddenException('Bu xonani o\'chirish taqiqlangan');
+      throw new ForbiddenException('Bu xonani o‘chirish taqiqlangan');
     }
 
     // Jadvalga bog'liq xona — soft delete (deactivate)
@@ -249,6 +249,6 @@ export class RoomsService {
     }
 
     await this.prisma.room.delete({ where: { id } });
-    return { message: 'Xona o\'chirildi', deleted: true };
+    return { message: 'Xona o‘chirildi', deleted: true };
   }
 }

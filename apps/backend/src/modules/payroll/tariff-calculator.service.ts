@@ -239,7 +239,7 @@ export class TariffCalculatorService {
       ],
       educationLevels: [
         { key: 'secondary_specialized', label: "O'rta maxsus",  bonusPct: 0 },
-        { key: 'higher',                label: 'Oliy ta\'lim',  bonusPct: 10 },
+        { key: 'higher',                label: 'Oliy ta‘lim',  bonusPct: 10 },
         { key: 'master',                label: 'Magistr',       bonusPct: 15 },
         { key: 'doctoral',              label: 'Doktorantura',  bonusPct: 20 },
       ],
@@ -251,12 +251,12 @@ export class TariffCalculatorService {
         { years: '20+',   bonusPct: 30 },
       ],
       academicDegrees: [
-        { key: 'none',      label: 'Yo\'q',                    bonusPct: 0  },
+        { key: 'none',      label: 'Yo‘q',                    bonusPct: 0  },
         { key: 'candidate', label: 'Fan nomzodi (PhD)',         bonusPct: 30 },
         { key: 'doctor',    label: 'Fan doktori',               bonusPct: 50 },
       ],
       honorificTitles: [
-        { key: 'none',                label: 'Yo\'q',                              bonusPct: 0  },
+        { key: 'none',                label: 'Yo‘q',                              bonusPct: 0  },
         { key: 'methodist',           label: 'Metodist',                           bonusPct: 15 },
         { key: 'teacher_of_teachers', label: "O'qituvchilar o'qituvchisi",         bonusPct: 20 },
       ],

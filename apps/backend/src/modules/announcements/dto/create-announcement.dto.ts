@@ -4,12 +4,12 @@ import { UserRole } from '@eduplatform/types';
 import { AnnouncementPriority, AnnouncementStatus } from '@prisma/client';
 
 export class CreateAnnouncementDto {
-  @ApiProperty({ example: 'Yangi o\'quv yili boshlanishi' })
+  @ApiProperty({ example: 'Yangi o‘quv yili boshlanishi' })
   @IsString()
   @MaxLength(200)
   title: string;
 
-  @ApiProperty({ example: '2026-2027 o\'quv yili 1-sentyabrdan boshlanadi...' })
+  @ApiProperty({ example: '2026-2027 o‘quv yili 1-sentyabrdan boshlanadi...' })
   @IsString()
   @MaxLength(5000)
   body: string;

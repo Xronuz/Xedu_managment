@@ -30,7 +30,7 @@ async function hash(p: string) {
 
 async function main() {
   console.log('🔧 Tizim tiklanmoqda...');
-  console.log(RESET ? '   (parollar default qiymatga qaytariladi)' : '   (parollar saqlanadi — agar tiklamoqchi bo\'lsangiz --reset-passwords bilan ishga tushiring)');
+  console.log(RESET ? '   (parollar default qiymatga qaytariladi)' : '   (parollar saqlanadi — agar tiklamoqchi bo‘lsangiz --reset-passwords bilan ishga tushiring)');
   console.log('');
 
   // 1. Direktorlarni faollashtirish
@@ -45,7 +45,7 @@ async function main() {
     console.log(`  ✓ Director faollashtirildi: ${d.email}${d.isActive ? '' : ' (oldin bloklangan)'}`);
   }
   if (directors.length === 0) {
-    console.log('  ⚠️  Direktor topilmadi — qo\'lda yaratish kerak');
+    console.log('  ⚠️  Direktor topilmadi — qo‘lda yaratish kerak');
   }
 
   // 2. Super adminni tekshirish/yaratish/tuzatish

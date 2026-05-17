@@ -144,7 +144,7 @@ export class CanteenService {
     });
     if (!menu) throw new NotFoundException('Menyu topilmadi');
     await this.prisma.menuDay.delete({ where: { id } });
-    return { message: 'Menyu o\'chirildi' };
+    return { message: 'Menyu o‘chirildi' };
   }
 
   /** Bugungi menyu (public-friendly) */

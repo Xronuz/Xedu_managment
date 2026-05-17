@@ -285,7 +285,7 @@ export class LearningCenterService {
           role: { in: [UserRole.TEACHER, UserRole.CLASS_TEACHER] as any },
         },
       });
-      if (!teacher) throw new NotFoundException('O\'qituvchi topilmadi');
+      if (!teacher) throw new NotFoundException('O‘qituvchi topilmadi');
     }
 
     return this.prisma.course.create({
@@ -317,7 +317,7 @@ export class LearningCenterService {
     if (!course) throw new NotFoundException('Kurs topilmadi');
 
     if (!isCourseAdmin(currentUser, course.teacherId)) {
-      throw new ForbiddenException('Siz faqat o\'z kursingizni tahrirlashingiz mumkin');
+      throw new ForbiddenException('Siz faqat o‘z kursingizni tahrirlashingiz mumkin');
     }
 
     if (dto.teacherId) {
@@ -328,7 +328,7 @@ export class LearningCenterService {
           role: { in: [UserRole.TEACHER, UserRole.CLASS_TEACHER] as any },
         },
       });
-      if (!teacher) throw new NotFoundException('O\'qituvchi topilmadi');
+      if (!teacher) throw new NotFoundException('O‘qituvchi topilmadi');
     }
 
     const data: any = {};
@@ -359,7 +359,7 @@ export class LearningCenterService {
     if (!course) throw new NotFoundException('Kurs topilmadi');
 
     if (!isCourseAdmin(currentUser, course.teacherId)) {
-      throw new ForbiddenException('Siz faqat o\'z kursingizni o\'chirishingiz mumkin');
+      throw new ForbiddenException('Siz faqat o‘z kursingizni o‘chirishingiz mumkin');
     }
 
     const activeEnrollments = await this.prisma.courseEnrollment.count({
@@ -372,7 +372,7 @@ export class LearningCenterService {
     }
 
     await this.prisma.course.delete({ where: { id } });
-    return { message: 'Kurs o\'chirildi' };
+    return { message: 'Kurs o‘chirildi' };
   }
 
   // ── Enrollments ───────────────────────────────────────────────────────────
@@ -387,20 +387,20 @@ export class LearningCenterService {
     if (!course.isActive) throw new BadRequestException('Kurs faol emas');
 
     if (!isCourseAdmin(currentUser, course.teacherId)) {
-      throw new ForbiddenException('Siz faqat o\'z kursingizga o\'quvchi qo\'shishingiz mumkin');
+      throw new ForbiddenException('Siz faqat o‘z kursingizga o‘quvchi qo‘shishingiz mumkin');
     }
 
     const student = await this.prisma.user.findFirst({
       where: { id: dto.studentId, schoolId, role: UserRole.STUDENT as any },
     });
-    if (!student) throw new NotFoundException('O\'quvchi topilmadi');
+    if (!student) throw new NotFoundException('O‘quvchi topilmadi');
 
     // Check already enrolled
     const existing = await this.prisma.courseEnrollment.findFirst({
       where: { courseId, studentId: dto.studentId },
     });
     if (existing) {
-      if (existing.status === 'active') throw new ConflictException('O\'quvchi bu kursda allaqachon o\'qiyapti');
+      if (existing.status === 'active') throw new ConflictException('O‘quvchi bu kursda allaqachon o‘qiyapti');
       // Re-enroll if dropped/completed
       return this.prisma.courseEnrollment.update({
         where: { id: existing.id },
@@ -442,10 +442,10 @@ export class LearningCenterService {
       where: { id: enrollmentId, courseId, schoolId: currentUser.schoolId! },
       include: { course: { select: { teacherId: true } } },
     });
-    if (!enrollment) throw new NotFoundException('Ro\'yxatga olish topilmadi');
+    if (!enrollment) throw new NotFoundException('Ro‘yxatga olish topilmadi');
 
     if (!isCourseAdmin(currentUser, enrollment.course.teacherId)) {
-      throw new ForbiddenException('Siz faqat o\'z kursingizdagi ro\'yxatni tahrirlashingiz mumkin');
+      throw new ForbiddenException('Siz faqat o‘z kursingizdagi ro‘yxatni tahrirlashingiz mumkin');
     }
 
     const data: any = {};
@@ -461,14 +461,14 @@ export class LearningCenterService {
       where: { id: enrollmentId, courseId, schoolId: currentUser.schoolId! },
       include: { course: { select: { teacherId: true } } },
     });
-    if (!enrollment) throw new NotFoundException('Ro\'yxatga olish topilmadi');
+    if (!enrollment) throw new NotFoundException('Ro‘yxatga olish topilmadi');
 
     if (!isCourseAdmin(currentUser, enrollment.course.teacherId)) {
-      throw new ForbiddenException('Siz faqat o\'z kursingizdagi ro\'yxatni o\'chirishingiz mumkin');
+      throw new ForbiddenException('Siz faqat o‘z kursingizdagi ro‘yxatni o‘chirishingiz mumkin');
     }
 
     await this.prisma.courseEnrollment.delete({ where: { id: enrollmentId } });
-    return { message: 'O\'quvchi kursdan chiqarildi' };
+    return { message: 'O‘quvchi kursdan chiqarildi' };
   }
 
   // ── Stats ─────────────────────────────────────────────────────────────────
@@ -549,7 +549,7 @@ export class LearningCenterService {
     if (!course) throw new NotFoundException('Kurs topilmadi');
 
     if (!isCourseAdmin(currentUser, course.teacherId)) {
-      throw new ForbiddenException('Siz faqat o\'z kursingizga material qo\'shishingiz mumkin');
+      throw new ForbiddenException('Siz faqat o‘z kursingizga material qo‘shishingiz mumkin');
     }
 
     return this.prisma.courseMaterial.create({
@@ -583,7 +583,7 @@ export class LearningCenterService {
     if (!material) throw new NotFoundException('Material topilmadi');
 
     if (!isCourseAdmin(currentUser, material.course.teacherId)) {
-      throw new ForbiddenException('Siz faqat o\'z kursingizdagi materialni tahrirlashingiz mumkin');
+      throw new ForbiddenException('Siz faqat o‘z kursingizdagi materialni tahrirlashingiz mumkin');
     }
 
     const data: any = {};
@@ -611,10 +611,10 @@ export class LearningCenterService {
     if (!material) throw new NotFoundException('Material topilmadi');
 
     if (!isCourseAdmin(currentUser, material.course.teacherId)) {
-      throw new ForbiddenException('Siz faqat o\'z kursingizdagi materialni o\'chirishingiz mumkin');
+      throw new ForbiddenException('Siz faqat o‘z kursingizdagi materialni o‘chirishingiz mumkin');
     }
 
     await this.prisma.courseMaterial.delete({ where: { id: materialId } });
-    return { message: 'Material o\'chirildi' };
+    return { message: 'Material o‘chirildi' };
   }
 }

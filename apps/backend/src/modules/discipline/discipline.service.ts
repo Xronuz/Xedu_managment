@@ -140,7 +140,7 @@ export class DisciplineService {
     const student = await this.prisma.user.findFirst({
       where: { id: dto.studentId, ...buildTenantWhere(currentUser), role: UserRole.STUDENT },
     });
-    if (!student) throw new NotFoundException('O\'quvchi topilmadi');
+    if (!student) throw new NotFoundException('O‘quvchi topilmadi');
 
     const incident = await this.prisma.disciplineIncident.create({
       data: {
@@ -232,10 +232,10 @@ export class DisciplineService {
       [UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL].includes(currentUser.role as any) ||
       incident.reportedById === currentUser.sub;
 
-    if (!canDelete) throw new ForbiddenException('O\'chirish huquqi yo\'q');
+    if (!canDelete) throw new ForbiddenException('O‘chirish huquqi yo‘q');
 
     await this.prisma.disciplineIncident.delete({ where: { id } });
-    return { message: 'O\'chirildi' };
+    return { message: 'O‘chirildi' };
   }
 
   async getStats(currentUser: JwtPayload) {

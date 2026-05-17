@@ -52,7 +52,7 @@ export default function LibraryPage() {
 
   const createBookMutation = useMutation({
     mutationFn: libraryApi.createBook,
-    onSuccess: () => { toast({ title: ' Kitob qo\'shildi' }); queryClient.invalidateQueries({ queryKey: ['library'] }); setBookOpen(false); setBookForm(EMPTY_BOOK); },
+    onSuccess: () => { toast({ title: ' Kitob qo‘shildi' }); queryClient.invalidateQueries({ queryKey: ['library'] }); setBookOpen(false); setBookForm(EMPTY_BOOK); },
     onError: (err: any) => { const msg = err?.response?.data?.message; toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' }); },
   });
 
@@ -122,7 +122,7 @@ export default function LibraryPage() {
           { label: 'Jami kitoblar', value: stats?.totalBooks ?? 0, icon: BookOpen, color: 'text-blue-500', bg: 'bg-blue-500/10' },
           { label: 'Mavjud nusxalar', value: stats?.availableBooks ?? 0, icon: BookOpen, color: 'text-green-500', bg: 'bg-green-500/10' },
           { label: 'Berilgan kitoblar', value: stats?.activeLoans ?? 0, icon: Users, color: 'text-orange-500', bg: 'bg-orange-500/10' },
-          { label: 'Muddati o\'tgan', value: stats?.overdueLoans ?? 0, icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500/10' },
+          { label: 'Muddati o‘tgan', value: stats?.overdueLoans ?? 0, icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500/10' },
         ].map(({ label, value, icon: Icon, color, bg }) => (
           <Card key={label}>
             <CardContent className="p-4 flex items-center gap-4">
@@ -156,7 +156,7 @@ export default function LibraryPage() {
                 icon={PackageOpen}
                 title="Kitoblar topilmadi"
                 description="Kutubxonaga hali kitob qo'shilmagan yoki qidiruv natijalari bo'sh"
-                action={canManage ? { label: '+ Kitob qo\'shish', onClick: () => setBookOpen(true) } : undefined}
+                action={canManage ? { label: '+ Kitob qo‘shish', onClick: () => setBookOpen(true) } : undefined}
               />
             </CardContent></Card>
           ) : (
@@ -168,7 +168,7 @@ export default function LibraryPage() {
                       <div className="p-2 rounded-lg bg-primary/10"><BookOpen className="h-5 w-5 text-primary" /></div>
                       <div>
                         <p className="font-medium">{book.title}</p>
-                        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{book.author ?? 'Muallif ko\'rsatilmagan'} {book.isbn && `· ISBN: ${book.isbn}`}</p>
+                        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{book.author ?? 'Muallif ko‘rsatilmagan'} {book.isbn && `· ISBN: ${book.isbn}`}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">

@@ -35,36 +35,36 @@ const MODULE_META: Record<string, { icon: React.ElementType; label: string; desc
   // 1. Strategiya va Boshqaruv
   reports:      { icon: BarChart2,    label: 'Hisobotlar',       description: 'KPI, davomat, moliya va akademik hisobotlar',     category: '1. Strategiya' },
   // 2. Akademik Tizim
-  classes:      { icon: GraduationCap, label: 'Sinflar',         description: 'Sinf boshqaruvi va o\'quvchilar taqsimoti',       category: '2. Akademik' },
+  classes:      { icon: GraduationCap, label: 'Sinflar',         description: 'Sinf boshqaruvi va o‘quvchilar taqsimoti',       category: '2. Akademik' },
   schedule:     { icon: Calendar,     label: 'Dars jadvali',    description: 'Haftalik jadval va zal band qilish',              category: '2. Akademik' },
-  subjects:     { icon: BookOpen,     label: 'Fanlar',          description: 'O\'quv fanlari va dasturlar',                     category: '2. Akademik' },
+  subjects:     { icon: BookOpen,     label: 'Fanlar',          description: 'O‘quv fanlari va dasturlar',                     category: '2. Akademik' },
   exams:        { icon: FileText,     label: 'Imtihonlar',      description: 'Imtihon rejalashtirish va natijalar',             category: '2. Akademik' },
   homework:     { icon: ClipboardCheck, label: 'Uy vazifalari', description: 'Vazifalar berish va tekshirish',                  category: '2. Akademik' },
   grades:       { icon: BookOpen,     label: 'Baholar & Jurnal', description: 'Elektron jurnal, baholar va GPA',                category: '2. Akademik' },
-  // 3. O\'qituvchi Tizimi
-  users:        { icon: Users,        label: 'Xodimlar',        description: 'O\'qituvchi va xodimlar boshqaruvi',              category: '3. O\'qituvchi' },
-  payroll:      { icon: DollarSign,   label: 'Ish haqi',        description: 'Maosh hisoblash va avanslar',                     category: '3. O\'qituvchi' },
-  // 4. O\'quvchi Boshqaruvi
-  attendance:   { icon: CheckCircle2, label: 'Davomat',         description: 'Kunlik davomat belgilash va hisobotlar',          category: '4. O\'quvchi' },
+  // 3. O‘qituvchi Tizimi
+  users:        { icon: Users,        label: 'Xodimlar',        description: 'O‘qituvchi va xodimlar boshqaruvi',              category: '3. O‘qituvchi' },
+  payroll:      { icon: DollarSign,   label: 'Ish haqi',        description: 'Maosh hisoblash va avanslar',                     category: '3. O‘qituvchi' },
+  // 4. O‘quvchi Boshqaruvi
+  attendance:   { icon: CheckCircle2, label: 'Davomat',         description: 'Kunlik davomat belgilash va hisobotlar',          category: '4. O‘quvchi' },
   // 5. Marketing & Sales
-  // (leads CRM — hozircha alohida yo\'nalish sifatida ko\'rsatilmagan)
+  // (leads CRM — hozircha alohida yo‘nalish sifatida ko‘rsatilmagan)
   // 6. Moliya Tizimi
-  payments:     { icon: CreditCard,   label: 'To\'lovlar',      description: 'Payme/Click integratsiyasi, qarzdorlik',          category: '6. Moliya' },
-  finance_dashboard: { icon: TrendingUp, label: 'Moliya Dashboard', description: 'Kirim-chiqim va g\'azna nazorati',           category: '6. Moliya' },
+  payments:     { icon: CreditCard,   label: 'To‘lovlar',      description: 'Payme/Click integratsiyasi, qarzdorlik',          category: '6. Moliya' },
+  finance_dashboard: { icon: TrendingUp, label: 'Moliya Dashboard', description: 'Kirim-chiqim va g‘azna nazorati',           category: '6. Moliya' },
   // 7. Operatsiya Tizimi
   transport:    { icon: Bus,          label: 'Transport',       description: 'Avtobus marshrut va tracking',                    category: '7. Operatsiya' },
   canteen:      { icon: Utensils,     label: 'Oshxona',         description: 'Haftalik menyu va ovqatlanish',                   category: '7. Operatsiya' },
   // 8. AI & IT
-  learning_center: { icon: Library,   label: 'O\'quv markazi',  description: 'Onlayn kurslar va materiallar',                   category: '8. AI & IT' },
-  // Qo\'shimcha
-  library:      { icon: BookCopy,     label: 'Kutubxona',       description: 'Kitob katalog, berib-olish',                      category: 'Qo\'shimcha' },
-  notifications:{ icon: Bell,         label: 'Xabarnomalar',    description: 'SMS va push xabarnomalar',                        category: 'Qo\'shimcha' },
-  messaging:    { icon: MessageSquare, label: 'Xabarlar',       description: 'Ichki xabar almashish',                           category: 'Qo\'shimcha' },
-  display:      { icon: Globe,        label: 'Display',         description: 'Maktab ekranlarida ko\'rsatish',                  category: 'Qo\'shimcha' },
-  clubs:        { icon: Users,        label: 'To\'garaklar',    description: 'Maktab to\'garaklari va ro\'yxatdan o\'tish',     category: 'Qo\'shimcha' },
+  learning_center: { icon: Library,   label: 'O‘quv markazi',  description: 'Onlayn kurslar va materiallar',                   category: '8. AI & IT' },
+  // Qo‘shimcha
+  library:      { icon: BookCopy,     label: 'Kutubxona',       description: 'Kitob katalog, berib-olish',                      category: 'Qo‘shimcha' },
+  notifications:{ icon: Bell,         label: 'Xabarnomalar',    description: 'SMS va push xabarnomalar',                        category: 'Qo‘shimcha' },
+  messaging:    { icon: MessageSquare, label: 'Xabarlar',       description: 'Ichki xabar almashish',                           category: 'Qo‘shimcha' },
+  display:      { icon: Globe,        label: 'Display',         description: 'Maktab ekranlarida ko‘rsatish',                  category: 'Qo‘shimcha' },
+  clubs:        { icon: Users,        label: 'To‘garaklar',    description: 'Maktab to‘garaklari va ro‘yxatdan o‘tish',     category: 'Qo‘shimcha' },
 };
 
-const CATEGORIES = ['1. Strategiya', '2. Akademik', '3. O\'qituvchi', '4. O\'quvchi', '6. Moliya', '7. Operatsiya', '8. AI & IT', 'Qo\'shimcha'];
+const CATEGORIES = ['1. Strategiya', '2. Akademik', '3. O‘qituvchi', '4. O‘quvchi', '6. Moliya', '7. Operatsiya', '8. AI & IT', 'Qo‘shimcha'];
 
 export default function SchoolDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -135,7 +135,7 @@ export default function SchoolDetailPage() {
     onError: (err: any) => {
       toast({
         title: 'Xatolik',
-        description: err?.response?.data?.message || err?.message || 'Noma\'lum xatolik yuz berdi',
+        description: err?.response?.data?.message || err?.message || 'Noma‘lum xatolik yuz berdi',
         variant: 'destructive',
       });
     },
@@ -208,7 +208,7 @@ export default function SchoolDetailPage() {
             onClick={() => setShowAdminDialog(true)}
           >
             <UserPlus className="mr-1.5 h-3.5 w-3.5" />
-            Foydalanuvchi qo\'shish
+            Foydalanuvchi qo‘shish
           </Button>
           <Button
             variant={school.isActive ? 'destructive' : 'default'}
@@ -276,7 +276,7 @@ export default function SchoolDetailPage() {
                 : 'border-transparent text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground'
             }`}
           >
-            {tab === 'info' ? 'Ma\'lumotlar' : 'Modullar'}
+            {tab === 'info' ? 'Ma‘lumotlar' : 'Modullar'}
           </button>
         ))}
       </div>
@@ -286,8 +286,8 @@ export default function SchoolDetailPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-base">Maktab ma\'lumotlari</CardTitle>
-              <CardDescription>Asosiy kontakt va manzil ma\'lumotlari</CardDescription>
+              <CardTitle className="text-base">Maktab ma‘lumotlari</CardTitle>
+              <CardDescription>Asosiy kontakt va manzil ma‘lumotlari</CardDescription>
             </div>
             {!editMode ? (
               <Button variant="outline" size="sm" onClick={startEdit}>
@@ -416,7 +416,7 @@ export default function SchoolDetailPage() {
                           </div>
                           <div className="flex items-center gap-3">
                             <span className={`text-xs ${isEnabled ? 'text-green-600 dark:text-green-400' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
-                              {isEnabled ? 'Yoqilgan' : 'O\'chirilgan'}
+                              {isEnabled ? 'Yoqilgan' : 'O‘chirilgan'}
                             </span>
                             <Switch
                               checked={isEnabled}
@@ -441,30 +441,20 @@ export default function SchoolDetailPage() {
       <Dialog open={showAdminDialog} onOpenChange={setShowAdminDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Foydalanuvchi qo\'shish</DialogTitle>
+            <DialogTitle>Foydalanuvchi qo‘shish</DialogTitle>
             <DialogDescription>
-              {school.name} maktabiga yangi foydalanuvchi qo\'shing. Parol tizimga kirish uchun ishlatiladi.
+              {school.name} maktabiga yangi foydalanuvchi qo‘shing. Parol tizimga kirish uchun ishlatiladi.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
               <Label htmlFor="admin-role">Rol</Label>
-              <Select
-                value={adminForm.role}
-                onValueChange={(value) => setAdminForm((f) => ({ ...f, role: value }))}
-              >
-                <SelectTrigger id="admin-role">
-                  <SelectValue placeholder="Rol tanlang" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="director">Direktor</SelectItem>
-                  <SelectItem value="vice_principal">O\'rinbosar</SelectItem>
-                  <SelectItem value="accountant">Hisobchi</SelectItem>
-                  <SelectItem value="teacher">O\'qituvchi</SelectItem>
-                  <SelectItem value="class_teacher">Sinf rahbari</SelectItem>
-                  <SelectItem value="librarian">Kutubxonachi</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground items-center">
+                Direktor
+              </div>
+              <p className="text-xs text-xedu-slate-500">
+                Super Admin faqat Direktor yaratishi mumkin. Boshqa rollarni maktab direktori qo‘shadi.
+              </p>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">

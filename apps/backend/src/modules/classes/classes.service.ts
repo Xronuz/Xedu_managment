@@ -170,7 +170,7 @@ export class ClassesService {
     await this.findOne(id, currentUser);
     const studentCount = await this.prisma.classStudent.count({ where: { classId: id } });
     if (studentCount > 0) {
-      throw new BadRequestException('Sinfda o\'quvchilar bor. Avval ularni chiqaring');
+      throw new BadRequestException('Sinfda o‘quvchilar bor. Avval ularni chiqaring');
     }
     // Defense-in-depth: tenant scope ham WHERE da bo'lsin (TOCTOU racega qarshi)
     const result = await this.prisma.class.deleteMany({
@@ -180,7 +180,7 @@ export class ClassesService {
       throw new NotFoundException('Sinf topilmadi yoki sizga tegishli emas');
     }
     await this.invalidate(currentUser.schoolId!);
-    return { message: 'Sinf o\'chirildi' };
+    return { message: 'Sinf o‘chirildi' };
   }
 
   async getStudents(classId: string, currentUser: JwtPayload) {
@@ -214,7 +214,7 @@ export class ClassesService {
       where: { id: studentId, schoolId: currentUser.schoolId! },
       select: { role: true, firstName: true, lastName: true },
     });
-    if (!student) throw new NotFoundException('O\'quvchi topilmadi');
+    if (!student) throw new NotFoundException('O‘quvchi topilmadi');
     if (student.role !== 'student') {
       throw new BadRequestException(
         `${student.firstName} ${student.lastName} o'quvchi emas. Uning roli: ${student.role}`,
@@ -241,7 +241,7 @@ export class ClassesService {
       where: { classId_studentId: { classId, studentId } },
     });
     await this.invalidate(currentUser.schoolId!);
-    return { message: 'O\'quvchi sinfdan chiqarildi' };
+    return { message: 'O‘quvchi sinfdan chiqarildi' };
   }
 
   /**

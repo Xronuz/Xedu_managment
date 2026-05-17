@@ -24,7 +24,7 @@ export class AnnouncementsController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
-  @ApiOperation({ summary: 'Yangi e\'lon yaratish' })
+  @ApiOperation({ summary: 'Yangi e‘lon yaratish' })
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
   async create(@Body() dto: CreateAnnouncementDto, @CurrentUser() user: JwtPayload) {
     return this.announcementsService.create(dto, user);
@@ -32,7 +32,7 @@ export class AnnouncementsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'E\'lonlar ro\'yxati (admin view)' })
+  @ApiOperation({ summary: 'E‘lonlar ro‘yxati (admin view)' })
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
   async findAll(
     @CurrentUser() user: JwtPayload,
@@ -46,7 +46,7 @@ export class AnnouncementsController {
   @Get('my')
   @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Mening e\'lonlarim (recipient view)' })
+  @ApiOperation({ summary: 'Mening e‘lonlarim (recipient view)' })
   async findMyAnnouncements(
     @CurrentUser() user: JwtPayload,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -63,7 +63,7 @@ export class AnnouncementsController {
   @Get(':id')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT, UserRole.LIBRARIAN, UserRole.STUDENT, UserRole.PARENT)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bitta e\'lon haqida ma\'lumot' })
+  @ApiOperation({ summary: 'Bitta e‘lon haqida ma‘lumot' })
   async findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.announcementsService.findOne(id, user);
   }
@@ -71,7 +71,7 @@ export class AnnouncementsController {
   @Post(':id/read')
   @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'E\'lonni o\'qildi deb belgilash' })
+  @ApiOperation({ summary: 'E‘lonni o‘qildi deb belgilash' })
   async markAsRead(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.announcementsService.markAsRead(id, user);
   }
@@ -79,14 +79,14 @@ export class AnnouncementsController {
   @Post(':id/acknowledge')
   @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'E\'lonni tasdiqlash (agar talab qilingan bo\'lsa)' })
+  @ApiOperation({ summary: 'E‘lonni tasdiqlash (agar talab qilingan bo‘lsa)' })
   async acknowledge(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.announcementsService.acknowledge(id, user);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'E\'lonni tahrirlash (faqat draft)' })
+  @ApiOperation({ summary: 'E‘lonni tahrirlash (faqat draft)' })
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
   async update(@Param('id') id: string, @Body() dto: UpdateAnnouncementDto, @CurrentUser() user: JwtPayload) {
     return this.announcementsService.update(id, dto, user);
@@ -94,7 +94,7 @@ export class AnnouncementsController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'E\'lonni bekor qilish' })
+  @ApiOperation({ summary: 'E‘lonni bekor qilish' })
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
   async cancel(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.announcementsService.cancel(id, user);

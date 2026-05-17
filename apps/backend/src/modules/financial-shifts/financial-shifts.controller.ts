@@ -43,7 +43,7 @@ export class FinancialShiftsController {
 
   @Get(':id')
   @Roles(...SHIFT_ROLES)
-  @ApiOperation({ summary: 'Smena tafsiloti + to\'lovlar ro\'yxati' })
+  @ApiOperation({ summary: 'Smena tafsiloti + to‘lovlar ro‘yxati' })
   findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.svc.findOne(id, user);
   }

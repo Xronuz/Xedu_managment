@@ -125,7 +125,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
       setStep('preview');
     },
     onError: (err: any) => {
-      toast({ variant: 'destructive', title: 'Xato', description: err?.response?.data?.message ?? 'Fayl o\'qilmadi' });
+      toast({ variant: 'destructive', title: 'Xato', description: err?.response?.data?.message ?? 'Fayl o‘qilmadi' });
     },
   });
 

@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from 'react';
 import { SectionHeader } from './section-header';
 
 const stats = [
-  { value: 50, suffix: '+', label: 'Maktab va o\'quv markazi' },
+  { value: 50, suffix: '+', label: 'Maktab va o‘quv markazi' },
   { value: 200, suffix: '+', label: 'Filial' },
-  { value: 45000, suffix: '+', label: 'O\'quvchi' },
+  { value: 45000, suffix: '+', label: 'O‘quvchi' },
   { value: 99.9, suffix: '%', label: 'Platforma mavjudligi' },
 ];
 

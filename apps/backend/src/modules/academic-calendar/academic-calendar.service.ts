@@ -85,7 +85,7 @@ export class AcademicCalendarService {
   async remove(id: string, currentUser: JwtPayload) {
     await this.findOne(id, currentUser);
     await this.prisma.academicEvent.delete({ where: { id } });
-    return { message: 'Tadbir o\'chirildi' };
+    return { message: 'Tadbir o‘chirildi' };
   }
 
   // ─── PDF Export ──────────────────────────────────────────────────────────
@@ -103,7 +103,7 @@ export class AcademicCalendarService {
       quarter_start: 'Chorak boshlanishi',
       quarter_end:   'Chorak tugashi',
       school_event:  'Maktab tadbiri',
-      meeting:       'Yig\'ilish',
+      meeting:       'Yig‘ilish',
       other:         'Boshqa',
     };
 

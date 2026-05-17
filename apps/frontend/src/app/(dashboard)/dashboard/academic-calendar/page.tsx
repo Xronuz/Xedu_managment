@@ -74,7 +74,7 @@ export default function AcademicCalendarPage() {
       color:       form.color,
     }),
     onSuccess: () => {
-      toast({ title: 'Tadbir qo\'shildi' });
+      toast({ title: 'Tadbir qo‘shildi' });
       queryClient.invalidateQueries({ queryKey: ['academic-calendar'] });
       setOpen(false);
       setForm(EMPTY);

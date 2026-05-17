@@ -29,7 +29,7 @@ export class UsersService {
    * Bu yerda "hierarhiyaga" mos ravishda ruxsatlar berilgan.
    */
   private readonly ROLE_CREATION_MATRIX: Record<UserRole, UserRole[]> = {
-    [UserRole.SUPER_ADMIN]: Object.values(UserRole),
+    [UserRole.SUPER_ADMIN]: [UserRole.DIRECTOR],
     [UserRole.DIRECTOR]: [
       UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN,
       UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT,
@@ -204,7 +204,7 @@ export class UsersService {
 
     // Branch admins can only create users in their own branch
     if (currentUser.role === UserRole.BRANCH_ADMIN && branchId !== currentUser.branchId) {
-      throw new ForbiddenException('Faqat o\'z filialingiz uchun foydalanuvchi yaratish mumkin');
+      throw new ForbiddenException('Faqat o‘z filialingiz uchun foydalanuvchi yaratish mumkin');
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
@@ -367,7 +367,7 @@ export class UsersService {
     // Role changes are NOT allowed via generic update — use a dedicated admin endpoint
     if (role !== undefined) {
       throw new ForbiddenException(
-        'Rol o\'zgartirish alohida admin endpoint orqali amalga oshiriladi',
+        'Rol o‘zgartirish alohida admin endpoint orqali amalga oshiriladi',
       );
     }
 
@@ -422,7 +422,7 @@ export class UsersService {
   async hardDelete(id: string, currentUser: JwtPayload) {
     // Faqat director ruxsat berilgan
     if (currentUser.role !== UserRole.DIRECTOR) {
-      throw new ForbiddenException('Faqat direktor foydalanuvchini butunlay o\'chira oladi');
+      throw new ForbiddenException('Faqat direktor foydalanuvchini butunlay o‘chira oladi');
     }
     // Foydalanuvchi mavjudligini va bir maktabda ekanligini tekshirish
     const target = await this.prisma.user.findFirst({
@@ -447,7 +447,7 @@ export class UsersService {
       oldData: { email: target.email, role: target.role, firstName: target.firstName, lastName: target.lastName },
     });
 
-    return { message: 'Foydalanuvchi butunlay o\'chirildi' };
+    return { message: 'Foydalanuvchi butunlay o‘chirildi' };
   }
 
   async restore(id: string, currentUser: JwtPayload) {
@@ -515,7 +515,7 @@ export class UsersService {
       this.prisma.user.findFirst({ where: { id: studentId, schoolId: currentUser.schoolId! } }),
     ]);
     if (!parent) throw new NotFoundException('Ota-ona topilmadi');
-    if (!student) throw new NotFoundException('O\'quvchi topilmadi');
+    if (!student) throw new NotFoundException('O‘quvchi topilmadi');
 
     return this.prisma.parentStudent.upsert({
       where: { parentId_studentId: { parentId, studentId } },
@@ -534,11 +534,11 @@ export class UsersService {
 
     // Birinchi kirish parolini o'zgartirish faqat /auth/first-login orqali
     if (user.isFirstLogin) {
-      throw new ForbiddenException('Birinchi kirishda parolni o\'zgartirish uchun /auth/first-login endpointidan foydalaning');
+      throw new ForbiddenException('Birinchi kirishda parolni o‘zgartirish uchun /auth/first-login endpointidan foydalaning');
     }
 
     const valid = await bcrypt.compare(dto.currentPassword, user.passwordHash);
-    if (!valid) throw new UnauthorizedException('Joriy parol noto\'g\'ri');
+    if (!valid) throw new UnauthorizedException('Joriy parol noto‘g‘ri');
 
     const passwordHash = await bcrypt.hash(dto.newPassword, 12);
     await this.prisma.user.update({ where: { id: userId }, data: { passwordHash } });
@@ -583,11 +583,11 @@ export class UsersService {
     }
 
     if (rows.length === 0) {
-      throw new BadRequestException('CSV fayl bo\'sh');
+      throw new BadRequestException('CSV fayl bo‘sh');
     }
 
     if (rows.length > 500) {
-      throw new BadRequestException('Bir vaqtda 500 tadan ko\'p o\'quvchi yuklab bo\'lmaydi');
+      throw new BadRequestException('Bir vaqtda 500 tadan ko‘p o‘quvchi yuklab bo‘lmaydi');
     }
 
     const errors: string[] = [];

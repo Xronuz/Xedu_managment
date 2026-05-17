@@ -199,7 +199,7 @@ export function SchoolDashboard() {
           <p className="font-bold text-[15px] mb-5" style={{ color: C.text }}>Tezkor harakatlar</p>
           {user?.role === 'director' && (
             <QuickActions items={[
-              { label: 'Foydalanuvchi qo\'sh', href: '/dashboard/users',      icon: Users,         iconColor: '#7C3AED' },
+              { label: 'Foydalanuvchi qo‘sh', href: '/dashboard/users',      icon: Users,         iconColor: '#7C3AED' },
               { label: 'Davomat',              href: '/dashboard/attendance', icon: ClipboardCheck, iconColor: C.primary },
               { label: "To'lovlar",            href: '/dashboard/payments',   icon: CreditCard,     iconColor: '#2563EB' },
               { label: 'Hisobotlar',           href: '/dashboard/reports',    icon: BookOpen,       iconColor: '#D97706' },
@@ -208,7 +208,7 @@ export function SchoolDashboard() {
           {['teacher', 'class_teacher'].includes(user?.role ?? '') && (
             <QuickActions items={[
               { label: 'Davomat belgi', href: '/dashboard/attendance', icon: ClipboardCheck, iconColor: C.primary },
-              { label: 'Baho qo\'sh',   href: '/dashboard/grades',     icon: BookOpen,       iconColor: '#2563EB' },
+              { label: 'Baho qo‘sh',   href: '/dashboard/grades',     icon: BookOpen,       iconColor: '#2563EB' },
               { label: 'Uy vazifasi',   href: '/dashboard/homework',   icon: Calendar,       iconColor: '#7C3AED' },
               { label: 'Imtihon',       href: '/dashboard/exams',      icon: GraduationCap,  iconColor: '#D97706' },
             ]} />

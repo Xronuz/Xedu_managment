@@ -18,13 +18,13 @@ export class ParentController {
   // ── Read endpoints ────────────────────────────────────────────────────────
 
   @Get('children')
-  @ApiOperation({ summary: 'Farzandlar ro\'yxati' })
+  @ApiOperation({ summary: 'Farzandlar ro‘yxati' })
   getChildren(@CurrentUser() user: JwtPayload) {
     return this.parentService.getChildren(user);
   }
 
   @Get('child/:id')
-  @ApiOperation({ summary: 'Farzand ma\'lumoti' })
+  @ApiOperation({ summary: 'Farzand ma‘lumoti' })
   getChild(@Param('id') studentId: string, @CurrentUser() user: JwtPayload) {
     return this.parentService.getChild(studentId, user);
   }
@@ -52,7 +52,7 @@ export class ParentController {
   }
 
   @Get('child/:id/payments')
-  @ApiOperation({ summary: 'Farzand to\'lovlari' })
+  @ApiOperation({ summary: 'Farzand to‘lovlari' })
   getChildPayments(@Param('id') studentId: string, @CurrentUser() user: JwtPayload) {
     return this.parentService.getChildPayments(studentId, user);
   }
@@ -60,7 +60,7 @@ export class ParentController {
   // ── Mutation endpoints ────────────────────────────────────────────────────
 
   @Post('child/:id/leave-request')
-  @ApiOperation({ summary: 'Farzand uchun ta\'til so\'rovi yuborish' })
+  @ApiOperation({ summary: 'Farzand uchun ta‘til so‘rovi yuborish' })
   requestChildLeave(
     @Param('id') studentId: string,
     @Body() dto: RequestChildLeaveDto,
@@ -70,7 +70,7 @@ export class ParentController {
   }
 
   @Get('child/:id/leave-requests')
-  @ApiOperation({ summary: 'Farzandning ta\'til so\'rovlari' })
+  @ApiOperation({ summary: 'Farzandning ta‘til so‘rovlari' })
   getChildLeaveRequests(@Param('id') studentId: string, @CurrentUser() user: JwtPayload) {
     return this.parentService.getChildLeaveRequests(studentId, user);
   }

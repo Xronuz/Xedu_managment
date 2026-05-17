@@ -25,10 +25,10 @@ import type { DayOfWeek } from '@eduplatform/types';
 
 // ── Step constants ─────────────────────────────────────────────────────────────
 const STEPS = [
-  { id: 1, label: 'Maktab',      icon: School,        desc: 'Asosiy ma\'lumotlar' },
-  { id: 2, label: 'Sinflar',     icon: GraduationCap, desc: 'Sinflar ro\'yxati' },
-  { id: 3, label: 'Fanlar',      icon: BookOpen,      desc: 'O\'quv fanlari' },
-  { id: 4, label: 'O\'qituvchi', icon: Users,         desc: 'Xodimlar qo\'shish' },
+  { id: 1, label: 'Maktab',      icon: School,        desc: 'Asosiy ma‘lumotlar' },
+  { id: 2, label: 'Sinflar',     icon: GraduationCap, desc: 'Sinflar ro‘yxati' },
+  { id: 3, label: 'Fanlar',      icon: BookOpen,      desc: 'O‘quv fanlari' },
+  { id: 4, label: 'O‘qituvchi', icon: Users,         desc: 'Xodimlar qo‘shish' },
   { id: 5, label: 'Jadval',      icon: Calendar,      desc: 'Dars jadvali' },
 ] as const;
 
@@ -239,7 +239,7 @@ function Step3Subjects({ onDone }: { onDone: () => void }) {
 
   // Quick templates
   const TEMPLATES = [
-    'Matematika', 'O\'zbek tili', 'Adabiyot', 'Ingliz tili', 'Fizika',
+    'Matematika', 'O‘zbek tili', 'Adabiyot', 'Ingliz tili', 'Fizika',
     'Kimyo', 'Biologiya', 'Tarix', 'Geografiya', 'Informatika',
     'Rus tili', 'Chizmachilik', 'Tarbiya', 'Musiqa', 'Jismoniy tarbiya',
   ];

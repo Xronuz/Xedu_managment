@@ -174,7 +174,7 @@ export default function StudentShopPage() {
                         <div className="flex-1 min-w-0">
                           <h3 className="text-sm font-semibold truncate">{item.name}</h3>
                           <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 line-clamp-2 mt-0.5">
-                            {item.description || 'Tavsif yo\'q'}
+                            {item.description || 'Tavsif yo‘q'}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
                             <Badge variant="outline" className="text-xs border-emerald-200 text-emerald-700 dark:border-emerald-800 dark:text-emerald-400">

@@ -26,12 +26,12 @@ const contextConfig: Record<EmptyContext, { icon: LucideIcon; defaultTitle: stri
   homework: {
     icon: BookOpen,
     defaultTitle: "Uyga vazifa yo'q",
-    defaultDescription: 'Hozircha hech qanday topshirish kerak bo\'lgan vazifa yo\'q',
+    defaultDescription: 'Hozircha hech qanday topshirish kerak bo‘lgan vazifa yo‘q',
   },
   grades: {
     icon: FileText,
     defaultTitle: "Baholar yo'q",
-    defaultDescription: 'Bu davr uchun baholar hali qo\'yilmagan',
+    defaultDescription: 'Bu davr uchun baholar hali qo‘yilmagan',
   },
   schedule: {
     icon: Calendar,
@@ -46,7 +46,7 @@ const contextConfig: Record<EmptyContext, { icon: LucideIcon; defaultTitle: stri
   payments: {
     icon: FileText,
     defaultTitle: "To'lov ma'lumoti yo'q",
-    defaultDescription: 'To\'lov ma\'lumotlari hozircha mavjud emas',
+    defaultDescription: 'To‘lov ma‘lumotlari hozircha mavjud emas',
   },
   exams: {
     icon: FileText,
@@ -56,7 +56,7 @@ const contextConfig: Record<EmptyContext, { icon: LucideIcon; defaultTitle: stri
   general: {
     icon: AlertCircle,
     defaultTitle: "Ma'lumot yo'q",
-    defaultDescription: 'Ko\'rsatilayotgan ma\'lumotlar hozircha mavjud emas',
+    defaultDescription: 'Ko‘rsatilayotgan ma‘lumotlar hozircha mavjud emas',
   },
 };
 

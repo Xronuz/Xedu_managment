@@ -33,7 +33,7 @@ export class RequireAiFeatureGuard implements CanActivate {
     const result = await this.entitlementService.canUseFeature(user, feature);
 
     if (!result.allowed) {
-      throw new ForbiddenException(result.reason ?? 'Bu xususiyatdan foydalanish huquqi yo\'q');
+      throw new ForbiddenException(result.reason ?? 'Bu xususiyatdan foydalanish huquqi yo‘q');
     }
 
     // Quota info'ni response header'ga qo'yish

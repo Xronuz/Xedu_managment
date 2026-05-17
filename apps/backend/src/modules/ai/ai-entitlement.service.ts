@@ -61,7 +61,7 @@ export class AiEntitlementService {
     const features = (userEntitlement?.features as Record<string, boolean>) ?? {};
 
     if (features[feature] === false) {
-      return { allowed: false, reason: 'Foydalanuvchi uchun bu xususiyat o\'chirilgan', tier };
+      return { allowed: false, reason: 'Foydalanuvchi uchun bu xususiyat o‘chirilgan', tier };
     }
 
     // Layer 4: Quota-level (soft check — returns info but doesn't block)

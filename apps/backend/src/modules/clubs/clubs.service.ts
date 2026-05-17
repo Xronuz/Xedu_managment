@@ -94,7 +94,7 @@ export class ClubsService {
         _count: { select: { members: true } },
       },
     });
-    if (!club) throw new NotFoundException('To\'garak topilmadi');
+    if (!club) throw new NotFoundException('To‘garak topilmadi');
     return club;
   }
 
@@ -128,7 +128,7 @@ export class ClubsService {
     const club = await this.prisma.club.findFirst({
       where: { id, ...buildTenantWhere(currentUser) },
     });
-    if (!club) throw new NotFoundException('To\'garak topilmadi');
+    if (!club) throw new NotFoundException('To‘garak topilmadi');
 
     const isAdmin = [UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL].includes(currentUser.role as UserRole);
     const isLeader = club.leaderId === currentUser.sub;
@@ -150,7 +150,7 @@ export class ClubsService {
     const club = await this.prisma.club.findFirst({
       where: { id, ...buildTenantWhere(currentUser) },
     });
-    if (!club) throw new NotFoundException('To\'garak topilmadi');
+    if (!club) throw new NotFoundException('To‘garak topilmadi');
 
     await this.prisma.club.delete({ where: { id } });
 
@@ -163,7 +163,7 @@ export class ClubsService {
       oldData: { name: club.name },
     });
 
-    return { message: 'To\'garak o\'chirildi' };
+    return { message: 'To‘garak o‘chirildi' };
   }
 
   // ─── Request to join (PENDING flow) ──────────────────────────────────────
@@ -172,24 +172,24 @@ export class ClubsService {
       where: { id, schoolId: currentUser.schoolId!, isActive: true },
       include: { _count: { select: { members: true } } },
     });
-    if (!club) throw new NotFoundException('To\'garak topilmadi');
+    if (!club) throw new NotFoundException('To‘garak topilmadi');
 
     if (club.maxMembers && club._count.members >= club.maxMembers) {
-      throw new BadRequestException('To\'garakda joy qolmagan');
+      throw new BadRequestException('To‘garakda joy qolmagan');
     }
 
     // Already a full member
     const alreadyMember = await this.prisma.clubMember.findUnique({
       where: { clubId_studentId: { clubId: id, studentId: currentUser.sub } },
     });
-    if (alreadyMember) throw new ConflictException('Siz allaqachon bu to\'garak a\'zosisiz');
+    if (alreadyMember) throw new ConflictException('Siz allaqachon bu to‘garak a‘zosisiz');
 
     // Already has a pending/approved request
     const existingReq = await this.prisma.clubJoinRequest.findUnique({
       where: { clubId_studentId: { clubId: id, studentId: currentUser.sub } },
     });
     if (existingReq) {
-      if (existingReq.status === 'PENDING') throw new ConflictException('Arizangiz ko\'rib chiqilmoqda');
+      if (existingReq.status === 'PENDING') throw new ConflictException('Arizangiz ko‘rib chiqilmoqda');
       if (existingReq.status === 'APPROVED') throw new ConflictException('Arizangiz allaqachon tasdiqlangan');
       // REJECTED — allow re-applying by updating the record
       return this.prisma.clubJoinRequest.update({
@@ -215,12 +215,12 @@ export class ClubsService {
       include: { club: { include: { _count: { select: { members: true } } } } },
     });
     if (!req) throw new NotFoundException('Ariza topilmadi');
-    if (req.status !== 'PENDING') throw new BadRequestException('Ariza allaqachon ko\'rib chiqilgan');
+    if (req.status !== 'PENDING') throw new BadRequestException('Ariza allaqachon ko‘rib chiqilgan');
 
     this.assertLeaderOrAdmin(req.club, currentUser);
 
     if (req.club.maxMembers && req.club._count.members >= req.club.maxMembers) {
-      throw new BadRequestException('To\'garakda joy qolmagan');
+      throw new BadRequestException('To‘garakda joy qolmagan');
     }
 
     // Final schedule conflict check at approval time
@@ -247,7 +247,7 @@ export class ClubsService {
       include: { club: true },
     });
     if (!req) throw new NotFoundException('Ariza topilmadi');
-    if (req.status !== 'PENDING') throw new BadRequestException('Ariza allaqachon ko\'rib chiqilgan');
+    if (req.status !== 'PENDING') throw new BadRequestException('Ariza allaqachon ko‘rib chiqilgan');
 
     this.assertLeaderOrAdmin(req.club, currentUser);
 
@@ -262,7 +262,7 @@ export class ClubsService {
     const club = await this.prisma.club.findFirst({
       where: { id: clubId, schoolId: currentUser.schoolId! },
     });
-    if (!club) throw new NotFoundException('To\'garak topilmadi');
+    if (!club) throw new NotFoundException('To‘garak topilmadi');
 
     this.assertLeaderOrAdmin(club, currentUser);
 
@@ -280,7 +280,7 @@ export class ClubsService {
     const member = await this.prisma.clubMember.findUnique({
       where: { clubId_studentId: { clubId: id, studentId: currentUser.sub } },
     });
-    if (!member) throw new NotFoundException('Siz bu to\'garak a\'zosi emassiz');
+    if (!member) throw new NotFoundException('Siz bu to‘garak a‘zosi emassiz');
 
     await this.prisma.$transaction([
       this.prisma.clubMember.delete({
@@ -292,7 +292,7 @@ export class ClubsService {
       }),
     ]);
 
-    return { message: 'To\'garakdan chiqildi' };
+    return { message: 'To‘garakdan chiqildi' };
   }
 
   // ─── Remove a member (admin or leader) ───────────────────────────────────
@@ -300,7 +300,7 @@ export class ClubsService {
     const club = await this.prisma.club.findFirst({
       where: { id: clubId, schoolId: currentUser.schoolId! },
     });
-    if (!club) throw new NotFoundException('To\'garak topilmadi');
+    if (!club) throw new NotFoundException('To‘garak topilmadi');
 
     this.assertLeaderOrAdmin(club, currentUser);
 
@@ -309,7 +309,7 @@ export class ClubsService {
       this.prisma.clubJoinRequest.deleteMany({ where: { clubId, studentId } }),
     ]);
 
-    return { message: 'A\'zo chiqarildi' };
+    return { message: 'A‘zo chiqarildi' };
   }
 
   // ─── Get members list ─────────────────────────────────────────────────────
@@ -317,7 +317,7 @@ export class ClubsService {
     const club = await this.prisma.club.findFirst({
       where: { id, ...buildTenantWhere(currentUser) },
     });
-    if (!club) throw new NotFoundException('To\'garak topilmadi');
+    if (!club) throw new NotFoundException('To‘garak topilmadi');
 
     return this.prisma.clubMember.findMany({
       where: { clubId: id },
@@ -333,7 +333,7 @@ export class ClubsService {
   private assertLeaderOrAdmin(club: { leaderId: string }, currentUser: JwtPayload) {
     const isAdmin = [UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR].includes(currentUser.role as UserRole);
     const isLeader = club.leaderId === currentUser.sub;
-    if (!isAdmin && !isLeader) throw new ForbiddenException('Ruxsat yo\'q');
+    if (!isAdmin && !isLeader) throw new ForbiddenException('Ruxsat yo‘q');
   }
 
   /**

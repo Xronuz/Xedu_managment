@@ -90,7 +90,7 @@ export default function ApprovalInboxPage() {
         id: `leave-${r.id}`,
         type: 'leave',
         status: r.status,
-        requesterName: `${r.requester?.firstName ?? ''} ${r.requester?.lastName ?? ''}`.trim() || 'Noma\'lum',
+        requesterName: `${r.requester?.firstName ?? ''} ${r.requester?.lastName ?? ''}`.trim() || 'Noma‘lum',
         requesterRole: r.requester?.role,
         branchName: r.requester?.branch?.name,
         reason: r.reason,
@@ -106,7 +106,7 @@ export default function ApprovalInboxPage() {
         id: `disc-${d.id}`,
         type: 'discipline',
         status: d.resolved ? 'resolved' : 'pending',
-        requesterName: `${d.student?.firstName ?? ''} ${d.student?.lastName ?? ''}`.trim() || 'Noma\'lum',
+        requesterName: `${d.student?.firstName ?? ''} ${d.student?.lastName ?? ''}`.trim() || 'Noma‘lum',
         requesterRole: d.student?.class?.name,
         branchName: undefined,
         reason: d.description,
@@ -517,7 +517,7 @@ function buildEvents(item: ApprovalItem | null): { label: string; value: string;
   const events: any[] = [];
 
   events.push({
-    label: 'So\'rov yuborildi',
+    label: 'So‘rov yuborildi',
     value: item.reason,
     timestamp: item.createdAt,
     tone: 'calm' as const,

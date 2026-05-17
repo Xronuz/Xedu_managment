@@ -27,7 +27,7 @@ export class ClubsController {
 
   @Get()
   @Roles(...ALL_SCHOOL)
-  @ApiOperation({ summary: 'Barcha to\'garaklar ro\'yxati' })
+  @ApiOperation({ summary: 'Barcha to‘garaklar ro‘yxati' })
   findAll(
     @CurrentUser() user: JwtPayload,
     @Query('category') category?: string,
@@ -37,7 +37,7 @@ export class ClubsController {
 
   @Get('my-clubs')
   @Roles(UserRole.STUDENT)
-  @ApiOperation({ summary: 'Mening to\'garaklarim (student)' })
+  @ApiOperation({ summary: 'Mening to‘garaklarim (student)' })
   findMine(@CurrentUser() user: JwtPayload) {
     return this.clubsService.findMine(user);
   }
@@ -51,21 +51,21 @@ export class ClubsController {
 
   @Get('led')
   @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Men rahbar bo\'lgan to\'garaklar' })
+  @ApiOperation({ summary: 'Men rahbar bo‘lgan to‘garaklar' })
   findLed(@CurrentUser() user: JwtPayload) {
     return this.clubsService.findLed(user);
   }
 
   @Get(':id')
   @Roles(...ALL_SCHOOL)
-  @ApiOperation({ summary: 'To\'garak tafsiloti' })
+  @ApiOperation({ summary: 'To‘garak tafsiloti' })
   findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.clubsService.findOne(id, user);
   }
 
   @Post()
   @Roles(UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Yangi to\'garak yaratish' })
+  @ApiOperation({ summary: 'Yangi to‘garak yaratish' })
   create(
     @Body() dto: CreateClubDto,
     @CurrentUser() user: JwtPayload,
@@ -75,7 +75,7 @@ export class ClubsController {
 
   @Put(':id')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'To\'garakni yangilash (admin yoki rahbar)' })
+  @ApiOperation({ summary: 'To‘garakni yangilash (admin yoki rahbar)' })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateClubDto,
@@ -87,7 +87,7 @@ export class ClubsController {
   @Delete(':id')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'To\'garakni o\'chirish' })
+  @ApiOperation({ summary: 'To‘garakni o‘chirish' })
   remove(
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,
@@ -99,7 +99,7 @@ export class ClubsController {
 
   @Post(':id/join')
   @Roles(UserRole.STUDENT)
-  @ApiOperation({ summary: 'To\'garakka qo\'shilish arizasi yuborish (PENDING)' })
+  @ApiOperation({ summary: 'To‘garakka qo‘shilish arizasi yuborish (PENDING)' })
   requestJoin(
     @Param('id') id: string,
     @Body() dto: ClubJoinRequestDto,
@@ -110,7 +110,7 @@ export class ClubsController {
 
   @Get(':id/requests')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'To\'garakka qo\'shilish arizalari ro\'yxati' })
+  @ApiOperation({ summary: 'To‘garakka qo‘shilish arizalari ro‘yxati' })
   @ApiQuery({ name: 'status', required: false, enum: ['PENDING', 'APPROVED', 'REJECTED'] })
   getJoinRequests(
     @Param('id') id: string,
@@ -147,14 +147,14 @@ export class ClubsController {
   @Delete(':id/leave')
   @Roles(UserRole.STUDENT)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'To\'garakdan chiqish' })
+  @ApiOperation({ summary: 'To‘garakdan chiqish' })
   leave(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.clubsService.leave(id, user);
   }
 
   @Get(':id/members')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'To\'garak a\'zolari ro\'yxati' })
+  @ApiOperation({ summary: 'To‘garak a‘zolari ro‘yxati' })
   getMembers(
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,
@@ -165,7 +165,7 @@ export class ClubsController {
   @Delete(':id/members/:studentId')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'A\'zoni to\'garakdan chiqarish' })
+  @ApiOperation({ summary: 'A‘zoni to‘garakdan chiqarish' })
   removeMember(
     @Param('id') id: string,
     @Param('studentId') studentId: string,

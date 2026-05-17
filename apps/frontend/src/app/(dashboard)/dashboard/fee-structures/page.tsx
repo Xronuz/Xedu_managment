@@ -56,11 +56,11 @@ function formatAmount(amount: number, currency: string) {
 const feeSchema = z.object({
   name:          z.string().min(2, 'Nom kiritilishi shart'),
   description:   z.string().optional(),
-  amount:        z.coerce.number().min(1, 'Miqdor 0 dan katta bo\'lishi kerak'),
+  amount:        z.coerce.number().min(1, 'Miqdor 0 dan katta bo‘lishi kerak'),
   currency:      z.string().default('UZS'),
   frequency:     z.string().default('monthly'),
   gradeLevel:    z.coerce.number().optional(),
-  academicYear:  z.string().min(1, 'O\'quv yili tanlanishi shart'),
+  academicYear:  z.string().min(1, 'O‘quv yili tanlanishi shart'),
 });
 type FeeFormValues = z.infer<typeof feeSchema>;
 
@@ -105,7 +105,7 @@ function FeeFormDialog({
           amount:      values.amount,
           frequency:   values.frequency,
         });
-        toast({ title: ' To\'lov tartibi yangilandi' });
+        toast({ title: ' To‘lov tartibi yangilandi' });
       } else {
         await feeStructuresApi.create({
           name:         values.name,
@@ -116,7 +116,7 @@ function FeeFormDialog({
           gradeLevel:   values.gradeLevel || undefined,
           academicYear: values.academicYear,
         });
-        toast({ title: ' To\'lov tartibi qo\'shildi' });
+        toast({ title: ' To‘lov tartibi qo‘shildi' });
       }
       queryClient.invalidateQueries({ queryKey: ['fee-structures'] });
       onClose();
@@ -131,7 +131,7 @@ function FeeFormDialog({
     <Dialog open={open} onOpenChange={(v) => { if (!v) { onClose(); reset(); } }}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{editItem ? 'To\'lov tartibini tahrirlash' : 'Yangi to\'lov tartibi'}</DialogTitle>
+          <DialogTitle>{editItem ? 'To‘lov tartibini tahrirlash' : 'Yangi to‘lov tartibi'}</DialogTitle>
           <DialogDescription>To'lov miqdori va chastotasini belgilang</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-1">
@@ -218,7 +218,7 @@ function FeeFormDialog({
             <Button type="button" variant="outline" onClick={() => { onClose(); reset(); }}>Bekor</Button>
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              {editItem ? 'Saqlash' : 'Qo\'shish'}
+              {editItem ? 'Saqlash' : 'Qo‘shish'}
             </Button>
           </DialogFooter>
         </form>
@@ -250,7 +250,7 @@ export default function FeeStructuresPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => feeStructuresApi.remove(id),
     onSuccess: () => {
-      toast({ title: 'To\'lov tartibi o\'chirildi' });
+      toast({ title: 'To‘lov tartibi o‘chirildi' });
       queryClient.invalidateQueries({ queryKey: ['fee-structures'] });
       setConfirmDelete(null);
     },

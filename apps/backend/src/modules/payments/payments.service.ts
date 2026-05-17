@@ -14,11 +14,11 @@ import { FinancialShiftsService } from '@/modules/financial-shifts/financial-shi
 // ─── Payme JSON-RPC error codes ────────────────────────────────────────────
 const PAYME_ERRORS = {
   METHOD_NOT_FOUND:         { code: -32601, message: { ru: 'Метод не найден',               uz: 'Metod topilmadi' } },
-  WRONG_AMOUNT:             { code: -31001, message: { ru: 'Неверная сумма',                uz: 'Noto\'g\'ri summa' } },
-  OBJECT_NOT_FOUND:         { code: -31050, message: { ru: 'Объект не найден',              uz: 'Ob\'ekt topilmadi' } },
+  WRONG_AMOUNT:             { code: -31001, message: { ru: 'Неверная сумма',                uz: 'Noto‘g‘ri summa' } },
+  OBJECT_NOT_FOUND:         { code: -31050, message: { ru: 'Объект не найден',              uz: 'Ob‘ekt topilmadi' } },
   TRANSACTION_NOT_FOUND:    { code: -31003, message: { ru: 'Транзакция не найдена',         uz: 'Tranzaksiya topilmadi' } },
   UNABLE_TO_PERFORM:        { code: -31008, message: { ru: 'Невозможно выполнить операцию', uz: 'Amaliyotni bajarish mumkin emas' } },
-  CANT_DO_OPERATION:        { code: -31008, message: { ru: 'Нельзя выполнить операцию',     uz: 'Amaliyot bajarib bo\'lmaydi' } },
+  CANT_DO_OPERATION:        { code: -31008, message: { ru: 'Нельзя выполнить операцию',     uz: 'Amaliyot bajarib bo‘lmaydi' } },
 };
 
 export class CreatePaymentDto {
@@ -71,7 +71,7 @@ export class PaymentsService {
         activeShift = await this.shiftsService.getActiveShift(schoolId, effectiveBranchId);
         if (!activeShift) {
           throw new BadRequestException(
-            'To\'lov qabul qilish uchun avval smenani oching (POST /financial-shifts/open)',
+            'To‘lov qabul qilish uchun avval smenani oching (POST /financial-shifts/open)',
           );
         }
       }
@@ -275,7 +275,7 @@ export class PaymentsService {
       });
       studentIds = links.map(l => l.studentId);
     } else {
-      throw new ForbiddenException('Bu endpoint faqat ota-ona va o\'quvchilar uchun');
+      throw new ForbiddenException('Bu endpoint faqat ota-ona va o‘quvchilar uchun');
     }
 
     const [pendingPayments, recentPayments, totalPaid] = await this.prisma.$transaction([
@@ -321,9 +321,9 @@ export class PaymentsService {
     const payment = await this.prisma.payment.findFirst({
       where: { id, ...buildTenantWhere(currentUser) },
     });
-    if (!payment) throw new NotFoundException('To\'lov topilmadi');
+    if (!payment) throw new NotFoundException('To‘lov topilmadi');
     if ((payment.status as string) === 'paid') {
-      throw new BadRequestException('To\'lov allaqachon to\'langan');
+      throw new BadRequestException('To‘lov allaqachon to‘langan');
     }
 
     // ── $transaction: status yangilash + treasury balance yangilash ──────────
@@ -579,7 +579,7 @@ export class PaymentsService {
     // SECURITY: vaqt oralig'ini cheklash — max 31 kun, faqat Payme to'lovlari
     const MS_31_DAYS = 31 * 24 * 60 * 60 * 1000;
     if (to.getTime() - from.getTime() > MS_31_DAYS) {
-      return { id, error: { code: -32400, message: { uz: 'Vaqt oralig\'i 31 kundan oshmasin' } } };
+      return { id, error: { code: -32400, message: { uz: 'Vaqt oralig‘i 31 kundan oshmasin' } } };
     }
 
     // SECURITY: GetStatement requires per-school merchant configuration.

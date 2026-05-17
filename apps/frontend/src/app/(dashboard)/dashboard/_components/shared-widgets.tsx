@@ -208,7 +208,7 @@ export function OnboardingChecklist({ classList, usersData, subjectsCount }: {
   const steps = [
     { id: 'classes',  label: 'Sinflar yarating',        description: 'Kamida 1 ta sinf yarating',      href: '/dashboard/classes',  done: classList.length > 0 },
     { id: 'teachers', label: "O'qituvchilar qo'shing",  description: "Kamida 1 ta o'qituvchi qo'shing", href: '/dashboard/users',    done: teacherCount > 0 },
-    { id: 'subjects', label: 'Fanlar kiriting',          description: 'Dars jadvaliga fan qo\'shing',     href: '/dashboard/subjects', done: subjectsCount > 0 },
+    { id: 'subjects', label: 'Fanlar kiriting',          description: 'Dars jadvaliga fan qo‘shing',     href: '/dashboard/subjects', done: subjectsCount > 0 },
     { id: 'schedule', label: 'Dars jadvali tuzing',      description: 'Haftalik jadval tuzing',           href: '/dashboard/schedule', done: false },
   ];
 
@@ -688,7 +688,7 @@ export function VicePrincipalSection() {
           </div>
           <div className="space-y-2">
             {pendingLeaves.slice(0, 5).map((leave: any) => {
-              const name = `${leave.user?.firstName ?? ''} ${leave.user?.lastName ?? ''}`.trim() || 'Noma\'lum';
+              const name = `${leave.user?.firstName ?? ''} ${leave.user?.lastName ?? ''}`.trim() || 'Noma‘lum';
               const from = leave.startDate ? new Date(leave.startDate).toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' }) : '—';
               const to   = leave.endDate   ? new Date(leave.endDate).toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' }) : '—';
               return (
@@ -985,8 +985,8 @@ export function AcademicCalendarWidget({ canEdit = false }: { canEdit?: boolean 
 
   const createMut = useMutation({
     mutationFn: () => academicCalendarApi.create(form),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['academic-calendar'] }); setShowForm(false); resetForm(); toast({ title: 'Tadbir qo\'shildi' }); },
-    onError: () => toast({ variant: 'destructive', title: 'Xato', description: 'Tadbir qo\'shishda xatolik' }),
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['academic-calendar'] }); setShowForm(false); resetForm(); toast({ title: 'Tadbir qo‘shildi' }); },
+    onError: () => toast({ variant: 'destructive', title: 'Xato', description: 'Tadbir qo‘shishda xatolik' }),
   });
   const updateMut = useMutation({
     mutationFn: () => academicCalendarApi.update(editTarget?.id, form),
@@ -994,7 +994,7 @@ export function AcademicCalendarWidget({ canEdit = false }: { canEdit?: boolean 
   });
   const deleteMut = useMutation({
     mutationFn: (id: string) => academicCalendarApi.remove(id),
-    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['academic-calendar'] }); toast({ title: ' O\'chirildi' }); },
+    onSuccess: () => { queryClient.invalidateQueries({ queryKey: ['academic-calendar'] }); toast({ title: ' O‘chirildi' }); },
   });
 
   const resetForm = () => setForm({ title: '', type: 'holiday', startDate: '', endDate: '', color: '#22c55e' });
@@ -1067,7 +1067,7 @@ export function AcademicCalendarWidget({ canEdit = false }: { canEdit?: boolean 
               disabled={!form.title || !form.startDate || !form.endDate || createMut.isPending || updateMut.isPending}
               className="text-xs px-3 py-1.5 rounded-lg bg-primary text-white disabled:opacity-50"
             >
-              {editTarget ? 'Saqlash' : 'Qo\'shish'}
+              {editTarget ? 'Saqlash' : 'Qo‘shish'}
             </button>
           </div>
         </div>

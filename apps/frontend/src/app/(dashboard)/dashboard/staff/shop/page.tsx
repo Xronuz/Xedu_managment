@@ -329,7 +329,7 @@ export default function AdminShopPage() {
             <Button variant="destructive" onClick={() => confirmDelete && deleteMutation.mutate(confirmDelete)} disabled={deleteMutation.isPending}>
               {deleteMutation.isPending ? (
                 <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-              ) : 'O\'chirish'}
+              ) : 'O‘chirish'}
             </Button>
           </DialogFooter>
         </DialogContent>

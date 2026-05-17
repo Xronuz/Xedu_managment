@@ -40,7 +40,7 @@ export class AcademicCalendarController {
 
   @Post()
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Tadbir qo\'shish' })
+  @ApiOperation({ summary: 'Tadbir qo‘shish' })
   create(@Body() dto: CreateAcademicEventDto, @CurrentUser() user: JwtPayload) {
     return this.service.create(dto, user);
   }
@@ -54,7 +54,7 @@ export class AcademicCalendarController {
 
   @Delete(':id')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Tadbirni o\'chirish' })
+  @ApiOperation({ summary: 'Tadbirni o‘chirish' })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.service.remove(id, user);
   }

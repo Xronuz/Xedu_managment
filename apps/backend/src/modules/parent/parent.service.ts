@@ -30,12 +30,12 @@ export class ParentService {
     const student = await this.prisma.user.findFirst({
       where: { id: studentId, schoolId, role: 'student' },
     });
-    if (!student) throw new NotFoundException('O\'quvchi topilmadi');
+    if (!student) throw new NotFoundException('O‘quvchi topilmadi');
 
     const relation = await this.prisma.parentStudent.findFirst({
       where: { parentId, studentId },
     });
-    if (!relation) throw new ForbiddenException('Siz bu o\'quvchining ota-onasi emassiz');
+    if (!relation) throw new ForbiddenException('Siz bu o‘quvchining ota-onasi emassiz');
   }
 
   // ── Read endpoints ────────────────────────────────────────────────────────
@@ -141,7 +141,7 @@ export class ParentService {
 
     const start = new Date(dto.startDate);
     const end = new Date(dto.endDate);
-    if (end < start) throw new BadRequestException('Tugash sanasi boshlanishdan oldin bo\'lishi mumkin emas');
+    if (end < start) throw new BadRequestException('Tugash sanasi boshlanishdan oldin bo‘lishi mumkin emas');
 
     const schoolId = currentUser.schoolId!;
 
@@ -156,7 +156,7 @@ export class ParentService {
     });
 
     if (approvers.length === 0) {
-      throw new BadRequestException('Maktabda tasdiqlash uchun mas\'ul shaxs topilmadi');
+      throw new BadRequestException('Maktabda tasdiqlash uchun mas‘ul shaxs topilmadi');
     }
 
     // Get student info for notification body

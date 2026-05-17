@@ -64,6 +64,6 @@ export class SubjectsService {
     const subject = await this.prisma.subject.findFirst({ where: { id, schoolId: currentUser.schoolId! } });
     if (!subject) throw new NotFoundException('Fan topilmadi');
     await this.prisma.subject.delete({ where: { id } });
-    return { message: 'Fan o\'chirildi' };
+    return { message: 'Fan o‘chirildi' };
   }
 }

@@ -140,7 +140,7 @@ function ShopItemCard({
           {buying
             ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
             : <ShoppingCart className="h-3.5 w-3.5 mr-1" />}
-          {outOfStock ? 'Tugagan' : !canAfford ? 'Yetarli coin yo\'q' : 'Sotib olish'}
+          {outOfStock ? 'Tugagan' : !canAfford ? 'Yetarli coin yo‘q' : 'Sotib olish'}
         </Button>
       </div>
     </Card>
@@ -255,7 +255,7 @@ function ShopItemFormDialog({
       description: form.description || undefined,
     }),
     onSuccess: () => {
-      toast({ title: 'Mahsulot qo\'shildi' });
+      toast({ title: 'Mahsulot qo‘shildi' });
       qc.invalidateQueries({ queryKey: ['coin-shop-admin'] });
       qc.invalidateQueries({ queryKey: ['coin-shop'] });
       onClose();
@@ -467,7 +467,7 @@ function AdminOrdersTab() {
           <ShoppingBag className="h-5 w-5 text-amber-500 shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">
-              {o.user ? `${o.user.firstName} ${o.user.lastName}` : 'Noma\'lum'}
+              {o.user ? `${o.user.firstName} ${o.user.lastName}` : 'Noma‘lum'}
             </p>
             <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
               {(o.metadata as any)?.itemName ?? 'Mahsulot'} · {formatDate(o.createdAt)}
@@ -536,7 +536,7 @@ function AdminAuditTab() {
 
   const audit = data as any[];
   if (audit.length === 0) {
-    return <p className="text-center text-sm text-xedu-slate-500 py-8">Audit ma\'lumoti yo\'q</p>;
+    return <p className="text-center text-sm text-xedu-slate-500 py-8">Audit ma‘lumoti yo‘q</p>;
   }
 
   return (
@@ -569,9 +569,9 @@ function AdminAnalyticsTab() {
   return (
     <div className="space-y-4 py-4 text-center">
       <BarChart3 className="h-10 w-10 text-xedu-slate-300 mx-auto" />
-      <p className="text-sm text-xedu-slate-500">Analitika ma\'lumotlari</p>
+      <p className="text-sm text-xedu-slate-500">Analitika ma‘lumotlari</p>
       <p className="text-xs text-xedu-slate-400 max-w-sm mx-auto">
-        Batafsil analitika (sinf ishtiroki, mukofot taqsimoti, imtihon bog\'liqligi) tez orada qo\'shiladi.
+        Batafsil analitika (sinf ishtiroki, mukofot taqsimoti, imtihon bog‘liqligi) tez orada qo‘shiladi.
       </p>
     </div>
   );

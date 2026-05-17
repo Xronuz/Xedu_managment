@@ -19,7 +19,7 @@ export class CanteenController {
   /** Barcha menyu yozuvlari ro'yxati (admin CRUD sahifasi uchun) */
   @Get()
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Barcha menyu yozuvlari ro\'yxati (admin)' })
+  @ApiOperation({ summary: 'Barcha menyu yozuvlari ro‘yxati (admin)' })
   findAll(
     @CurrentUser() currentUser: JwtPayload,
     @Query('from') from?: string,
@@ -72,7 +72,7 @@ export class CanteenController {
   /** Menyu o'chirish — faqat admin */
   @Delete(':id')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Menyu o\'chirish' })
+  @ApiOperation({ summary: 'Menyu o‘chirish' })
   remove(
     @Param('id') id: string,
     @CurrentUser() currentUser: JwtPayload,

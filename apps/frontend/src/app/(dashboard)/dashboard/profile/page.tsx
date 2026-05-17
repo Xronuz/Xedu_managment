@@ -56,13 +56,13 @@ export default function ProfilePage() {
   const pwMutation = useMutation({
     mutationFn: usersApi.changePassword,
     onSuccess: () => {
-      toast({ title: ' Parol muvaffaqiyatli o\'zgartirildi' });
+      toast({ title: ' Parol muvaffaqiyatli o‘zgartirildi' });
       setPwOpen(false);
       setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message;
-      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Joriy parol noto\'g\'ri' });
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Joriy parol noto‘g‘ri' });
     },
   });
 

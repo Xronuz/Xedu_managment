@@ -11,8 +11,8 @@ export class AcceptInvitationDto {
   @IsString()
   @MinLength(8)
   @MaxLength(128)
-  @Matches(/[A-Z]/, { message: 'Parol kamida 1 ta katta harfni o\'z ichiga olishi kerak' })
-  @Matches(/\d/, { message: 'Parol kamida 1 ta raqamni o\'z ichiga olishi kerak' })
-  @Matches(/[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\/;'`~]/, { message: 'Parol kamida 1 ta maxsus belgini o\'z ichiga olishi kerak' })
+  @Matches(/[A-Z]/, { message: 'Parol kamida 1 ta katta harfni o‘z ichiga olishi kerak' })
+  @Matches(/\d/, { message: 'Parol kamida 1 ta raqamni o‘z ichiga olishi kerak' })
+  @Matches(/[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\/;'`~]/, { message: 'Parol kamida 1 ta maxsus belgini o‘z ichiga olishi kerak' })
   password: string;
 }

@@ -32,7 +32,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 const CATEGORIES: { value: ClubCategory | 'all'; label: string; icon: React.ElementType; color: string }[] = [
   { value: 'all',      label: 'Hammasi',    icon: Puzzle,    color: 'text-gray-500' },
   { value: 'sport',    label: 'Sport',      icon: Trophy,    color: 'text-orange-500' },
-  { value: 'art',      label: 'San\'at',    icon: Palette,   color: 'text-pink-500' },
+  { value: 'art',      label: 'San‘at',    icon: Palette,   color: 'text-pink-500' },
   { value: 'science',  label: 'Fan',        icon: BookOpen,  color: 'text-blue-500' },
   { value: 'music',    label: 'Musiqa',     icon: Music,     color: 'text-purple-500' },
   { value: 'tech',     label: 'Texno',      icon: Cpu,       color: 'text-green-500' },
@@ -125,7 +125,7 @@ function ClubFormDialog({ open, onClose, editData }: { open: boolean; onClose: (
       return editData ? clubsApi.update(editData.id, payload) : clubsApi.create(payload);
     },
     onSuccess: () => {
-      toast({ title: editData ? 'To\'garak yangilandi ' : 'To\'garak yaratildi ' });
+      toast({ title: editData ? 'To‘garak yangilandi ' : 'To‘garak yaratildi ' });
       qc.invalidateQueries({ queryKey: ['clubs'] });
       onClose();
       setForm(EMPTY_FORM);
@@ -158,12 +158,12 @@ function ClubFormDialog({ open, onClose, editData }: { open: boolean; onClose: (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{editData ? 'To\'garakni tahrirlash' : 'Yangi to\'garak'}</DialogTitle>
+          <DialogTitle>{editData ? 'To‘garakni tahrirlash' : 'Yangi to‘garak'}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1">
             <Label>Nomi *</Label>
-            <Input value={form.name} onChange={e => set('name', e.target.value)} placeholder="Masalan: Robototexnika to\'garagi" />
+            <Input value={form.name} onChange={e => set('name', e.target.value)} placeholder="Masalan: Robototexnika to‘garagi" />
           </div>
           <div className="space-y-1">
             <Label>Tavsif</Label>
@@ -182,7 +182,7 @@ function ClubFormDialog({ open, onClose, editData }: { open: boolean; onClose: (
               </Select>
             </div>
             <div className="space-y-1">
-              <Label>Maks. a\'zo soni</Label>
+              <Label>Maks. a‘zo soni</Label>
               <Input type="number" min="1" value={form.maxMembers} onChange={e => set('maxMembers', e.target.value)} placeholder="Cheksiz" />
             </div>
           </div>
@@ -623,7 +623,7 @@ export default function ClubsPage() {
     onMutate: ({ id }) => setActioningId(id),
     onSettled: () => { setActioningId(null); setJoinTarget(null); },
     onSuccess: () => {
-      toast({ title: 'Ariza yuborildi ', description: 'To\'garak rahbari tasdiqlashini kuting' });
+      toast({ title: 'Ariza yuborildi ', description: 'To‘garak rahbari tasdiqlashini kuting' });
       qc.invalidateQueries({ queryKey: ['clubs'] });
     },
     onError: (err: any) => toast({ title: 'Xatolik', description: err?.response?.data?.message, variant: 'destructive' }),
@@ -634,7 +634,7 @@ export default function ClubsPage() {
     onMutate: (id) => setActioningId(id),
     onSettled: () => setActioningId(null),
     onSuccess: () => {
-      toast({ title: 'To\'garakdan chiqdingiz' });
+      toast({ title: 'To‘garakdan chiqdingiz' });
       qc.invalidateQueries({ queryKey: ['clubs'] });
     },
     onError: (err: any) => toast({ title: 'Xatolik', description: err?.response?.data?.message, variant: 'destructive' }),
@@ -643,7 +643,7 @@ export default function ClubsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => clubsApi.remove(id),
     onSuccess: () => {
-      toast({ title: 'To\'garak o\'chirildi' });
+      toast({ title: 'To‘garak o‘chirildi' });
       qc.invalidateQueries({ queryKey: ['clubs'] });
     },
     onError: (err: any) => toast({ title: 'Xatolik', description: err?.response?.data?.message, variant: 'destructive' }),

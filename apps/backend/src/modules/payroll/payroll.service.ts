@@ -753,7 +753,7 @@ export class PayrollService {
         ['Asosiy maosh',       item.baseSalary],
         ['Ilmiy daraja ustama',(item as any).degreeAllowance],
         ['Sertifikat ustama',  (item as any).certificateAllowance],
-        ['Soatlik ish to\'lovi', item.hourlyAmount],
+        ['Soatlik ish to‘lovi', item.hourlyAmount],
         ["Qo'shimcha dars",    item.extraCurricularAmount],
         ['Bonus',              item.bonuses],
         ['Jarima / ushlab qolish', item.deductions, 'red'],

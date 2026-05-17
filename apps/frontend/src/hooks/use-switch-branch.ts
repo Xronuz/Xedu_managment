@@ -105,7 +105,7 @@ export function useSwitchBranch() {
 
         toast({
           title: `Filial almashtirildi: ${branchMeta?.name ?? branchId}`,
-          description: 'Ma\'lumotlar yangilanmoqda...',
+          description: 'Ma‘lumotlar yangilanmoqda...',
         });
 
       } catch (error: any) {

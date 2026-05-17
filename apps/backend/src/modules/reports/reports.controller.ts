@@ -28,7 +28,7 @@ export class ReportsController {
 
   @Get('analytics/pulse')
   @Roles(...ANALYTICS_ROLES)
-  @ApiOperation({ summary: 'Maktab bugungi real-vaqt ko\'rsatkichlari (Pulse)' })
+  @ApiOperation({ summary: 'Maktab bugungi real-vaqt ko‘rsatkichlari (Pulse)' })
   getSchoolPulse(
     @CurrentUser() user: JwtPayload,
   ) {
@@ -37,7 +37,7 @@ export class ReportsController {
 
   @Get('analytics/finance')
   @Roles(...ANALYTICS_ROLES)
-  @ApiOperation({ summary: 'Global moliyaviy hisobot — oyma-oy, filiallar bo\'yicha' })
+  @ApiOperation({ summary: 'Global moliyaviy hisobot — oyma-oy, filiallar bo‘yicha' })
   @ApiQuery({ name: 'months',   required: false, description: 'Necha oy (default: 12)' })
   @ApiQuery({ name: 'branchId', required: false })
   getGlobalFinance(
@@ -50,7 +50,7 @@ export class ReportsController {
 
   @Get('analytics/branch-comparison')
   @Roles(...ANALYTICS_ROLES)
-  @ApiOperation({ summary: 'Filiallarni akademik ko\'rsatkichlar bo\'yicha solishtirish' })
+  @ApiOperation({ summary: 'Filiallarni akademik ko‘rsatkichlar bo‘yicha solishtirish' })
   getBranchComparison(@CurrentUser() user: JwtPayload) {
     return this.analyticsService.getBranchComparison(user);
   }
@@ -77,7 +77,7 @@ export class ReportsController {
 
   @Get('analytics/at-risk')
   @Roles(...ANALYTICS_ROLES, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'Xavf ostidagi o\'quvchilar — davomat va ball bo\'yicha' })
+  @ApiOperation({ summary: 'Xavf ostidagi o‘quvchilar — davomat va ball bo‘yicha' })
   @ApiQuery({ name: 'attendanceThreshold', required: false, description: 'Davomat chegarasi % (default: 75)' })
   @ApiQuery({ name: 'gradeThreshold',      required: false, description: 'Ball chegarasi %  (default: 60)' })
   @ApiQuery({ name: 'classId',             required: false })

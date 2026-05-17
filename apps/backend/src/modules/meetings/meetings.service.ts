@@ -168,13 +168,13 @@ export class MeetingsService {
     const teacher = await this.prisma.user.findFirst({
       where: { id: dto.teacherId, schoolId, role: { in: [UserRole.TEACHER, UserRole.CLASS_TEACHER] as any } },
     });
-    if (!teacher) throw new NotFoundException('O\'qituvchi topilmadi');
+    if (!teacher) throw new NotFoundException('O‘qituvchi topilmadi');
 
     // Verify student belongs to school
     const student = await this.prisma.user.findFirst({
       where: { id: dto.studentId, schoolId, role: UserRole.STUDENT as any },
     });
-    if (!student) throw new NotFoundException('O\'quvchi topilmadi');
+    if (!student) throw new NotFoundException('O‘quvchi topilmadi');
 
     // Verify parent belongs to same school
     const parent = await this.prisma.user.findFirst({
@@ -185,7 +185,7 @@ export class MeetingsService {
     // Non-admin teachers can only schedule meetings for themselves
     if ((currentUser.role === UserRole.TEACHER || currentUser.role === UserRole.CLASS_TEACHER) &&
         currentUser.sub !== dto.teacherId) {
-      throw new ForbiddenException('Siz faqat o\'zingiz uchun uchrashuv belgilashingiz mumkin');
+      throw new ForbiddenException('Siz faqat o‘zingiz uchun uchrashuv belgilashingiz mumkin');
     }
 
     // Check for scheduling conflict: same teacher, overlapping time
@@ -204,7 +204,7 @@ export class MeetingsService {
       },
     });
     if (conflict) {
-      throw new BadRequestException('O\'qituvchi bu vaqtda allaqachon uchrashuvga belgilangan');
+      throw new BadRequestException('O‘qituvchi bu vaqtda allaqachon uchrashuvga belgilangan');
     }
 
     return this.prisma.parentMeeting.create({
@@ -229,17 +229,17 @@ export class MeetingsService {
     if (!meeting) throw new NotFoundException('Uchrashuv topilmadi');
 
     if (!canManageMeeting(currentUser, meeting)) {
-      throw new ForbiddenException('Siz bu uchrashuvni o\'zgartira olmaysiz');
+      throw new ForbiddenException('Siz bu uchrashuvni o‘zgartira olmaysiz');
     }
 
     // Cancelled meetings can't be updated
     if (meeting.status === 'cancelled' && dto.status !== 'scheduled') {
-      throw new ForbiddenException('Bekor qilingan uchrashuvni o\'zgartirish mumkin emas');
+      throw new ForbiddenException('Bekor qilingan uchrashuvni o‘zgartirish mumkin emas');
     }
 
     // Parents can only add notes, not change status or time
     if (currentUser.role === UserRole.PARENT && (dto.status || dto.scheduledAt)) {
-      throw new ForbiddenException('Ota-ona faqat izoh qo\'shishi mumkin');
+      throw new ForbiddenException('Ota-ona faqat izoh qo‘shishi mumkin');
     }
 
     return this.prisma.parentMeeting.update({
@@ -260,11 +260,11 @@ export class MeetingsService {
     if (!meeting) throw new NotFoundException('Uchrashuv topilmadi');
 
     if (!canManageMeeting(currentUser, meeting)) {
-      throw new ForbiddenException('Siz bu uchrashuvni o\'chira olmaysiz');
+      throw new ForbiddenException('Siz bu uchrashuvni o‘chira olmaysiz');
     }
 
     await this.prisma.parentMeeting.delete({ where: { id } });
-    return { message: 'Uchrashuv o\'chirildi' };
+    return { message: 'Uchrashuv o‘chirildi' };
   }
 
   async getStats(currentUser: JwtPayload) {

@@ -368,7 +368,7 @@ export class GradesService {
     // ── Cache invalidation ────────────────────────────────────────────────────
     await this.invalidate(currentUser.schoolId!);
 
-    return { message: 'Baho o\'chirildi' };
+    return { message: 'Baho o‘chirildi' };
   }
 
   /** Returns just the GPA number for a student */

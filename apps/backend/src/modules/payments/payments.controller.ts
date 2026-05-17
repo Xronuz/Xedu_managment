@@ -17,7 +17,7 @@ export class PaymentsController {
 
   @Post()
   @Roles(UserRole.ACCOUNTANT, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN)
-  @ApiOperation({ summary: 'To\'lov yaratish' })
+  @ApiOperation({ summary: 'To‘lov yaratish' })
   create(
     @Body() dto: CreatePaymentDto,
     @CurrentUser() user: JwtPayload,
@@ -27,7 +27,7 @@ export class PaymentsController {
 
   @Get('history')
   @Roles(UserRole.ACCOUNTANT, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR, UserRole.PARENT, UserRole.STUDENT)
-  @ApiOperation({ summary: 'To\'lovlar tarixi' })
+  @ApiOperation({ summary: 'To‘lovlar tarixi' })
   getHistory(
     @CurrentUser() user: JwtPayload,
     @Query('studentId') studentId?: string,
@@ -50,7 +50,7 @@ export class PaymentsController {
 
   @Put(':id/paid')
   @Roles(UserRole.ACCOUNTANT, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN)
-  @ApiOperation({ summary: 'To\'langan deb belgilash' })
+  @ApiOperation({ summary: 'To‘langan deb belgilash' })
   markAsPaid(
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,
@@ -60,7 +60,7 @@ export class PaymentsController {
 
   @Get('parent-summary')
   @Roles(UserRole.PARENT, UserRole.STUDENT)
-  @ApiOperation({ summary: 'Ota-ona uchun soddalashtirilgan to\'lov xulosasi' })
+  @ApiOperation({ summary: 'Ota-ona uchun soddalashtirilgan to‘lov xulosasi' })
   parentSummary(@CurrentUser() user: JwtPayload) {
     return this.paymentsService.getParentSummary(user);
   }

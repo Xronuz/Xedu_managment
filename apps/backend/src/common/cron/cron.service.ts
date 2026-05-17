@@ -134,7 +134,7 @@ export class CronService {
    */
   @Cron('0 9 25 * *', { name: 'monthly-payment-reminder', timeZone: 'Asia/Tashkent' })
   async sendMonthlyPaymentReminders() {
-    this.logger.log('💳 Cron: Oylik to\'lov eslatmasi');
+    this.logger.log('💳 Cron: Oylik to‘lov eslatmasi');
     try {
       const overduePayments = await this.prisma.payment.findMany({
         where: { status: { in: ['pending', 'overdue'] as any } },
@@ -179,7 +179,7 @@ export class CronService {
       }
       this.logger.log(`✅ ${sent} ta to'lov eslatmasi yuborildi`);
     } catch (err) {
-      this.logger.error('To\'lov eslatmasi cron xatosi:', err);
+      this.logger.error('To‘lov eslatmasi cron xatosi:', err);
     }
   }
 
@@ -472,7 +472,7 @@ export class CronService {
       });
 
       if (!overdueLoans.length) {
-        this.logger.log('Muddati o\'tgan kitoblar yo\'q');
+        this.logger.log('Muddati o‘tgan kitoblar yo‘q');
         return;
       }
 
@@ -528,7 +528,7 @@ export class CronService {
    */
   @Cron('0 7 1 * *', { name: 'monthly-payment-generation', timeZone: 'Asia/Tashkent' })
   async generateMonthlyPayments() {
-    this.logger.log('💰 Cron: Oylik to\'lovlar yaratilmoqda...');
+    this.logger.log('💰 Cron: Oylik to‘lovlar yaratilmoqda...');
     try {
       const now = new Date();
       const year  = now.getFullYear();
@@ -633,7 +633,7 @@ export class CronService {
         });
       }
     } catch (err) {
-      this.logger.error('Oylik to\'lov generation cron xatosi:', err);
+      this.logger.error('Oylik to‘lov generation cron xatosi:', err);
     }
   }
 }

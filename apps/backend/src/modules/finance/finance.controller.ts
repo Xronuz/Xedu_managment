@@ -22,7 +22,7 @@ export class FinanceController {
   }
 
   @Get('monthly-revenue')
-  @ApiOperation({ summary: 'Oylik daromad grafigi (so\'nggi N oy)' })
+  @ApiOperation({ summary: 'Oylik daromad grafigi (so‘nggi N oy)' })
   getMonthlyRevenue(
     @CurrentUser() user: JwtPayload,
     @Query('months') months = 12,
@@ -31,13 +31,13 @@ export class FinanceController {
   }
 
   @Get('debtors')
-  @ApiOperation({ summary: 'Qarzdorlar ro\'yxati' })
+  @ApiOperation({ summary: 'Qarzdorlar ro‘yxati' })
   getDebtors(@CurrentUser() user: JwtPayload) {
     return this.financeService.getDebtors(user);
   }
 
   @Get('fee-summary')
-  @ApiOperation({ summary: 'To\'lov tartiblari xulosa' })
+  @ApiOperation({ summary: 'To‘lov tartiblari xulosa' })
   getFeeSummary(@CurrentUser() user: JwtPayload) {
     return this.financeService.getFeeStructureSummary(user);
   }

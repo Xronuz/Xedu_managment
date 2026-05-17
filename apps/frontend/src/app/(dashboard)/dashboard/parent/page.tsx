@@ -228,9 +228,9 @@ export default function ParentPage() {
     const errs: Record<string, string> = {};
     if (!leaveForm.startDate) errs.startDate = 'Boshlanish sanasini kiriting';
     if (!leaveForm.endDate) errs.endDate = 'Tugash sanasini kiriting';
-    if (!leaveForm.reason || leaveForm.reason.length < 5) errs.reason = 'Sabab kamida 5 ta belgi bo\'lishi kerak';
+    if (!leaveForm.reason || leaveForm.reason.length < 5) errs.reason = 'Sabab kamida 5 ta belgi bo‘lishi kerak';
     if (leaveForm.startDate && leaveForm.endDate && leaveForm.endDate < leaveForm.startDate) {
-      errs.endDate = 'Tugash sanasi boshlanishdan oldin bo\'lishi mumkin emas';
+      errs.endDate = 'Tugash sanasi boshlanishdan oldin bo‘lishi mumkin emas';
     }
     if (Object.keys(errs).length > 0) { setLeaveErrors(errs); return; }
     setLeaveErrors({});
@@ -1049,7 +1049,7 @@ export default function ParentPage() {
                                   </Badge>
                                 )}
                               </div>
-                              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 line-clamp-2">{hw.description || 'Tavsif yo\'q'}</p>
+                              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 line-clamp-2">{hw.description || 'Tavsif yo‘q'}</p>
                               <div className="flex items-center gap-3 mt-2">
                                 <span className="text-xs text-xedu-slate-500">{hw.subject?.name}</span>
                                 <span className="text-xs text-xedu-slate-400">•</span>

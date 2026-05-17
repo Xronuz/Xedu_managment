@@ -7,18 +7,18 @@ import {
 } from 'lucide-react';
 
 const modules = [
-  { icon: Users, title: 'Qabul', description: 'Abiturientlarni ro\'yxatdan o\'tkazish, hujjatlar boshqaruvi va qabul jarayonlarini avtomatlashtirish.' },
-  { icon: GraduationCap, title: 'Akademik', description: 'Dars jadvallari, sinflar, fanlar, baholar va o\'quv rejalari boshqaruvi.' },
+  { icon: Users, title: 'Qabul', description: 'Abiturientlarni ro‘yxatdan o‘tkazish, hujjatlar boshqaruvi va qabul jarayonlarini avtomatlashtirish.' },
+  { icon: GraduationCap, title: 'Akademik', description: 'Dars jadvallari, sinflar, fanlar, baholar va o‘quv rejalari boshqaruvi.' },
   { icon: Building2, title: 'Operatsiyalar', description: 'Xonalar, jihozlar, transport, ovqatxona va kundalik operatsion jarayonlar.' },
-  { icon: Wallet, title: 'Moliya', description: 'O\'quvchi to\'lovlari, ish haqi, byudjet, xarajatlar va moliyaviy hisobotlar.' },
+  { icon: Wallet, title: 'Moliya', description: 'O‘quvchi to‘lovlari, ish haqi, byudjet, xarajatlar va moliyaviy hisobotlar.' },
   { icon: MessageSquare, title: 'Aloqa', description: 'Ota-onalar bilan aloqa, xabarnomalar, uchrashuvlar va ichki xabarlar.' },
-  { icon: BarChart3, title: 'Analitika', description: 'Davomat, o\'quv natijalari, moliyaviy ko\'rsatkichlar va KPI monitoring.' },
+  { icon: BarChart3, title: 'Analitika', description: 'Davomat, o‘quv natijalari, moliyaviy ko‘rsatkichlar va KPI monitoring.' },
   { icon: ShieldCheck, title: 'Intizom', description: 'Intizom jurnali, xulq-atvor monitoringi va xavfsizlik hodisalari.' },
   { icon: CalendarDays, title: 'Kalendar', description: 'Akademik yil, imtihonlar, tadbirlar va milliy bayramlar boshqaruvi.' },
   { icon: ClipboardCheck, title: 'Online imtihon', description: 'Test sinovlari, avtomatik baholash va natijalar tahlili.' },
-  { icon: Bus, title: 'Transport', description: 'O\'quvchilar tashish marshrutlari, haydovchilar va transport monitoring.' },
+  { icon: Bus, title: 'Transport', description: 'O‘quvchilar tashish marshrutlari, haydovchilar va transport monitoring.' },
   { icon: UtensilsCrossed, title: 'Ovqatxona', description: 'Kunlik menyu, ovqatlanish statistikasi va oziq-ovqat xarajatlari.' },
-  { icon: BookOpen, title: 'Kutubxona', description: 'Kitoblar fondi, berish-qaytarish, o\'quvchilar o\'qish statistikasi.' },
+  { icon: BookOpen, title: 'Kutubxona', description: 'Kitoblar fondi, berish-qaytarish, o‘quvchilar o‘qish statistikasi.' },
 ];
 
 export function ModulesSection() {

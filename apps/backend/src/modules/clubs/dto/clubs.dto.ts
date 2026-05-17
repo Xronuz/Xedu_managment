@@ -40,7 +40,7 @@ export class CreateClubDto {
   @IsEnum(ClubCategoryDto)
   category: ClubCategoryDto;
 
-  @ApiProperty({ description: 'Rahbar o\'qituvchi ID' })
+  @ApiProperty({ description: 'Rahbar o‘qituvchi ID' })
   @IsUUID()
   leaderId: string;
 

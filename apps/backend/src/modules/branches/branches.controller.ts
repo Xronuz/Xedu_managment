@@ -32,7 +32,7 @@ export class BranchesController {
 
   @Get()
   @Roles(...BRANCH_READERS)
-  @ApiOperation({ summary: 'Maktab filiallarini ro\'yxati (director/admin uchun)' })
+  @ApiOperation({ summary: 'Maktab filiallarini ro‘yxati (director/admin uchun)' })
   findAll(@CurrentUser() user: JwtPayload) {
     return this.branchesService.findAll(user);
   }
@@ -53,7 +53,7 @@ export class BranchesController {
 
   @Put(':id')
   @Roles(...BRANCH_MANAGERS)
-  @ApiOperation({ summary: 'Filial ma\'lumotlarini yangilash' })
+  @ApiOperation({ summary: 'Filial ma‘lumotlarini yangilash' })
   update(
     @Param('id') id: string,
     @Body() dto: UpdateBranchDto,
@@ -65,7 +65,7 @@ export class BranchesController {
   @Delete(':id')
   @Roles(...BRANCH_MANAGERS)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Filialni o\'chirish (bo\'sh bo\'lsa — to\'liq, aks holda deaktivatsiya)' })
+  @ApiOperation({ summary: 'Filialni o‘chirish (bo‘sh bo‘lsa — to‘liq, aks holda deaktivatsiya)' })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.branchesService.remove(id, user);
   }

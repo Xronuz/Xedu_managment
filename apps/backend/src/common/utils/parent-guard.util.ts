@@ -17,7 +17,7 @@ export async function assertParentOfChild(
   // Students may only access their own data
   if (currentUser.role === UserRole.STUDENT) {
     if (currentUser.sub !== childId) {
-      throw new ForbiddenException('Siz faqat o\'z ma\'lumotlaringizni ko\'rishingiz mumkin');
+      throw new ForbiddenException('Siz faqat o‘z ma‘lumotlaringizni ko‘rishingiz mumkin');
     }
     return;
   }
@@ -29,7 +29,7 @@ export async function assertParentOfChild(
       select: { id: true },
     });
     if (!link) {
-      throw new ForbiddenException('Siz bu o\'quvchining ma\'lumotlarini ko\'rish huquqiga ega emassiz');
+      throw new ForbiddenException('Siz bu o‘quvchining ma‘lumotlarini ko‘rish huquqiga ega emassiz');
     }
     return;
   }

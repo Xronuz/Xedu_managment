@@ -40,7 +40,7 @@ const PERIOD_OPTIONS = [
 ];
 
 const schema = z.object({
-  name: z.string().min(2, 'Kamida 2 ta belgi').max(100, 'Ko\'pi bilan 100 ta belgi'),
+  name: z.string().min(2, 'Kamida 2 ta belgi').max(100, 'Ko‘pi bilan 100 ta belgi'),
   description: z.string().optional(),
   category: z.string().min(1, 'Kategoriya tanlanishi shart'),
   targetValue: z.coerce.number().min(0).optional(),

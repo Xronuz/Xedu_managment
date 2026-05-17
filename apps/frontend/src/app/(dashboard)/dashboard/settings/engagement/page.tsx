@@ -116,8 +116,8 @@ export default function EngagementSettingsPage() {
                 <p className="text-sm font-semibold">Faoliyat tizimi</p>
                 <p className="text-xs text-xedu-slate-500">
                   {current.engagement_enabled
-                    ? 'Tizim faol — o\'quvchilar mukofot va tiklanishni ko\'radi'
-                    : 'Tizim o\'chirilgan — hech kim engagement ko\'ra olmaydi'}
+                    ? 'Tizim faol — o‘quvchilar mukofot va tiklanishni ko‘radi'
+                    : 'Tizim o‘chirilgan — hech kim engagement ko‘ra olmaydi'}
                 </p>
               </div>
             </div>
@@ -132,7 +132,7 @@ export default function EngagementSettingsPage() {
       {!current.engagement_enabled && (
         <div className="rounded-xl bg-xedu-slate-50 dark:bg-xedu-slate-800/50 p-4 text-center">
           <p className="text-sm text-xedu-slate-500">
-            Faoliyat tizimini yoqish uchun yuqoridagi tugmani bosing. Keyin quyidagi sozlamalar ko\'rinadi.
+            Faoliyat tizimini yoqish uchun yuqoridagi tugmani bosing. Keyin quyidagi sozlamalar ko‘rinadi.
           </p>
         </div>
       )}
@@ -143,20 +143,20 @@ export default function EngagementSettingsPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Xususiyatlar</CardTitle>
-              <CardDescription>Har bir xususiyatni alohida yoqish/o\'chirish</CardDescription>
+              <CardDescription>Har bir xususiyatni alohida yoqish/o‘chirish</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <ToggleRow
                 icon={Trophy}
                 label="Mukofotlar"
-                description="O\'quvchilar mukofotlarni olishi mumkin"
+                description="O‘quvchilar mukofotlarni olishi mumkin"
                 checked={!!current.engagement_positive}
                 onChange={() => toggle('engagement_positive')}
               />
               <ToggleRow
                 icon={BookOpen}
                 label="Mukofot tizimi"
-                description="Erishilgan mukofotlarni ko\'rish"
+                description="Erishilgan mukofotlarni ko‘rish"
                 checked={!!current.engagement_achievements}
                 onChange={() => toggle('engagement_achievements')}
               />
@@ -171,28 +171,28 @@ export default function EngagementSettingsPage() {
               <ToggleRow
                 icon={RotateCcw}
                 label="Tiklanish"
-                description="O\'quvchilar salbiy holatdan keyin tiklanishi"
+                description="O‘quvchilar salbiy holatdan keyin tiklanishi"
                 checked={!!current.engagement_recovery_enabled}
                 onChange={() => toggle('engagement_recovery_enabled')}
               />
               <ToggleRow
                 icon={Store}
-                label="Mukofotlar do\'koni"
-                description="O\'quvchilar coinlarni sarflashi mumkin"
+                label="Mukofotlar do‘koni"
+                description="O‘quvchilar coinlarni sarflashi mumkin"
                 checked={!!current.engagement_shop}
                 onChange={() => toggle('engagement_shop')}
               />
               <ToggleRow
                 icon={Users}
-                label="O\'qituvchi mukofoti"
-                description="O\'qituvchilar o\'quvchilarga coin bersin"
+                label="O‘qituvchi mukofoti"
+                description="O‘qituvchilar o‘quvchilarga coin bersin"
                 checked={!!current.engagement_teacher_award}
                 onChange={() => toggle('engagement_teacher_award')}
               />
               <ToggleRow
                 icon={ShieldAlert}
-                label="O\'qituvchi ogohlantiruvi"
-                description="O\'qituvchilar hisobdorlik qo\'llasin"
+                label="O‘qituvchi ogohlantiruvi"
+                description="O‘qituvchilar hisobdorlik qo‘llasin"
                 checked={!!current.engagement_teacher_deduct}
                 onChange={() => toggle('engagement_teacher_deduct')}
                 warning
@@ -200,7 +200,7 @@ export default function EngagementSettingsPage() {
               <ToggleRow
                 icon={BarChart3}
                 label="Oylik imtihon integratsiyasi"
-                description="Imtihon natijalari avtomatik engagement\'ga ta\'sir qilsin"
+                description="Imtihon natijalari avtomatik engagement‘ga ta‘sir qilsin"
                 checked={!!current.engagement_monthly_exam}
                 onChange={() => toggle('engagement_monthly_exam')}
               />
@@ -242,7 +242,7 @@ export default function EngagementSettingsPage() {
                 </CardTitle>
                 <CardDescription className="text-xedu-ruby/70">
                   <AlertTriangle className="h-3 w-3 inline mr-1" />
-                  Bu qoidalar o\'quvchining coinlarini kamaytiradi. Foydalanishdan oldin ota-onalarga xabar bering.
+                  Bu qoidalar o‘quvchining coinlarini kamaytiradi. Foydalanishdan oldin ota-onalarga xabar bering.
                 </CardDescription>
               </CardHeader>
               <CardContent>

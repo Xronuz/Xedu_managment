@@ -14,10 +14,10 @@ export class CreateBranchDto {
   @ApiPropertyOptional({ example: 'CHI', description: 'Qisqa kod (2-10 belgi, faqat harflar va raqamlar)' })
   @IsOptional()
   @IsString()
-  @Matches(/^[A-Z0-9]{2,10}$/, { message: 'code faqat katta harflar va raqamlardan iborat bo\'lishi kerak (2-10 ta)' })
+  @Matches(/^[A-Z0-9]{2,10}$/, { message: 'code faqat katta harflar va raqamlardan iborat bo‘lishi kerak (2-10 ta)' })
   code?: string;
 
-  @ApiPropertyOptional({ example: 'Toshkent sh., Chilonzor tumani, 5-ko\'cha 12-uy' })
+  @ApiPropertyOptional({ example: 'Toshkent sh., Chilonzor tumani, 5-ko‘cha 12-uy' })
   @IsOptional()
   @IsString()
   @MaxLength(300)
@@ -27,7 +27,7 @@ export class CreateBranchDto {
   @IsOptional()
   @IsString()
   @MaxLength(20)
-  @Matches(/^[+\d][\d\s\-().]{5,18}$/, { message: 'phone raqam noto\'g\'ri formatda' })
+  @Matches(/^[+\d][\d\s\-().]{5,18}$/, { message: 'phone raqam noto‘g‘ri formatda' })
   phone?: string;
 
   @ApiPropertyOptional({ example: 'chilonzor@school.uz' })
@@ -37,7 +37,7 @@ export class CreateBranchDto {
 }
 
 export class UpdateBranchDto extends PartialType(CreateBranchDto) {
-  @ApiPropertyOptional({ example: true, description: 'Filialni faollashtirish / o\'chirish' })
+  @ApiPropertyOptional({ example: true, description: 'Filialni faollashtirish / o‘chirish' })
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;

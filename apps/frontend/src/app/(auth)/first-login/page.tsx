@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+
 import {
   ShieldCheck, Eye, EyeOff, Loader2, CheckCircle2, ArrowRight,
   AlertTriangle, XCircle, KeyRound, GraduationCap,
@@ -30,7 +30,7 @@ function checkPasswordStrength(password: string) {
     { label: "Kamida 1 ta maxsus belgi", pass: /[!@#$%^&*(),.?":{}|<>_\-+=\[\]\\/;'`~]/.test(password) },
   ];
   const passed = checks.filter((c) => c.pass).length;
-  const labels = ['Juda zaif', 'Zaif', 'O\'rtacha', 'Yaxshi', 'Kuchli'];
+  const labels = ['Juda zaif', 'Zaif', 'O‘rtacha', 'Yaxshi', 'Kuchli'];
   return { score: passed, label: labels[passed], checks };
 }
 
@@ -59,7 +59,6 @@ function PasswordStrength({ password }: { password: string }) {
 }
 
 export default function FirstLoginPage() {
-  const router = useRouter();
   const { user, setAuth } = useAuthStore();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
@@ -71,6 +70,13 @@ export default function FirstLoginPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // First-login enforcement is handled by middleware.ts via JWT isFirstLogin flag
+
+  // If auth store already has isFirstLogin=false (e.g. after success + refresh), redirect immediately
+  useEffect(() => {
+    if (user?.isFirstLogin === false) {
+      window.location.href = '/dashboard';
+    }
+  }, [user]);
 
   const validate = (): boolean => {
     const e: Record<string, string> = {};
@@ -115,7 +121,7 @@ export default function FirstLoginPage() {
               <p className="font-semibold text-sm">Parol muvaffaqiyatli yangilandi</p>
               <p className="text-sm text-xedu-slate-500">Hisobingiz xavfsizligi ta'minlandi. Endi tizimga kirishingiz mumkin.</p>
             </div>
-            <Button className="w-full h-11 font-semibold" size="lg" onClick={() => router.replace('/dashboard')}>
+            <Button className="w-full h-11 font-semibold" size="lg" onClick={() => { window.location.href = '/dashboard'; }}>
               Bosh sahifaga o'tish
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

@@ -11,11 +11,11 @@ export function ParentWelcome() {
   const router = useRouter();
 
   const actions = [
-    { label: 'Farzand ma\'lumotlari', desc: 'O\'quvchi profili', icon: User, href: '/dashboard/student' },
+    { label: 'Farzand ma‘lumotlari', desc: 'O‘quvchi profili', icon: User, href: '/dashboard/student' },
     { label: 'Dars jadvali', desc: 'Haftalik darslar', icon: Calendar, href: '/dashboard/schedule' },
     { label: 'Davomat', desc: 'Kunlik davomat holati', icon: ClipboardCheck, href: '/dashboard/attendance' },
     { label: 'Baholar', desc: 'Baholar va GPA', icon: FileText, href: '/dashboard/grades' },
-    { label: 'To\'lovlar', desc: 'To\'lov tarixi', icon: CreditCard, href: '/dashboard/payments' },
+    { label: 'To‘lovlar', desc: 'To‘lov tarixi', icon: CreditCard, href: '/dashboard/payments' },
     { label: 'Uy vazifalari', desc: 'Berilgan topshiriqlar', icon: BookOpen, href: '/dashboard/homework' },
   ];
 

@@ -23,8 +23,8 @@ export class CreateClassDto {
   @IsString()
   classTeacherId?: string | null;
 
-  @ApiPropertyOptional({ description: 'Filial ID (null = maktab bo\'yicha)' })
+  @ApiPropertyOptional({ description: 'Filial ID (null = maktab bo‘yicha)' })
   @IsOptional()
-  @IsUUID('4', { message: 'branchId UUID formatida bo\'lishi kerak' })
+  @IsUUID('4', { message: 'branchId UUID formatida bo‘lishi kerak' })
   branchId?: string | null;
 }

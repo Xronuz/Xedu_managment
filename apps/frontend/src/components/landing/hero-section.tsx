@@ -66,7 +66,7 @@ export function HeroSection() {
             <div className="mt-12 flex items-center gap-8">
               {[
                 { label: 'ERP + LMS + CRM', desc: 'Yagona platforma' },
-                { label: 'Ko\'p filial', desc: 'Markaziy boshqaruv' },
+                { label: 'Ko‘p filial', desc: 'Markaziy boshqaruv' },
                 { label: 'Real-time', desc: 'Operatsion analitika' },
               ].map((item) => (
                 <div key={item.label}>
@@ -98,7 +98,7 @@ export function HeroSection() {
                 {/* Top stats */}
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { label: 'O\'quvchilar', value: '1,248', sub: '+12% oylik' },
+                    { label: 'O‘quvchilar', value: '1,248', sub: '+12% oylik' },
                     { label: 'Filiallar', value: '8 ta', sub: '2 ta yangi' },
                     { label: 'Davomat', value: '94.2%', sub: '+1.3% haftalik' },
                   ].map((stat) => (

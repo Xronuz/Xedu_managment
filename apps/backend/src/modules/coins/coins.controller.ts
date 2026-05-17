@@ -183,7 +183,7 @@ export class CoinsController {
 
   @Get('admin/abuse-report')
   @Roles(...ADMIN_ROLES)
-  @ApiOperation({ summary: 'Mukofot sui\'ist\'mol xabari' })
+  @ApiOperation({ summary: 'Mukofot sui‘ist‘mol xabari' })
   getAbuseReport(@CurrentUser() user: JwtPayload) {
     return this.coinsService.getAbuseReport(user);
   }

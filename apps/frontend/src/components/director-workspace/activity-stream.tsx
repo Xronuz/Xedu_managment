@@ -101,7 +101,7 @@ export const ActivityStream = memo(function ActivityStream({
         timestamp: new Date().toISOString(),
         icon: Wallet,
         tone: 'urgent',
-        title: 'Kechikkan to\'lovlar mavjud',
+        title: 'Kechikkan to‘lovlar mavjud',
         detail: `Kechikkan summa: ${overdue.toLocaleString()} UZS`,
         href: '/dashboard/finance',
       });
@@ -251,10 +251,10 @@ function groupByTime(items: ActivityItem[]): { label: string; items: ActivityIte
   const groups: { label: string; items: ActivityItem[] }[] = [];
 
   const buckets = [
-    { label: 'So\'nggi soat', ms: 3600000 },
+    { label: 'So‘nggi soat', ms: 3600000 },
     { label: 'Bugun', ms: 86400000 },
     { label: 'Kecha', ms: 172800000 },
-    { label: 'So\'nggi hafta', ms: 604800000 },
+    { label: 'So‘nggi hafta', ms: 604800000 },
     { label: 'Avvalgi', ms: Infinity },
   ];
 

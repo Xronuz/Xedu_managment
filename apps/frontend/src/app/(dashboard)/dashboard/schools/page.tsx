@@ -113,7 +113,7 @@ export default function SchoolsPage() {
         <Card>
           <CardContent className="py-16 text-center">
             <AlertTriangle className="mx-auto mb-3 h-12 w-12 text-xedu-ruby/40" />
-            <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Ma\'lumotlarni yuklashda xatolik yuz berdi</p>
+            <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Ma‘lumotlarni yuklashda xatolik yuz berdi</p>
             <p className="text-sm text-xedu-ruby mt-1">{(error as any)?.response?.data?.message ?? (error as Error)?.message}</p>
             <Button
               variant="outline"
@@ -129,7 +129,7 @@ export default function SchoolsPage() {
           <CardContent className="py-16 text-center">
             <Building2 className="mx-auto mb-3 h-12 w-12 text-xedu-slate-500 dark:text-xedu-slate-400/40" />
             <p className="text-xedu-slate-500 dark:text-xedu-slate-400">
-              {search ? `"${search}" bo'yicha maktab topilmadi` : 'Hali maktab yo\'q'}
+              {search ? `"${search}" bo'yicha maktab topilmadi` : 'Hali maktab yo‘q'}
             </p>
             <Button asChild className="mt-4">
               <Link href="/dashboard/schools/new">

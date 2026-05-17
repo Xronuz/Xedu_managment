@@ -31,7 +31,7 @@ export class UsersController {
 
   @Get()
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.ACCOUNTANT, UserRole.TEACHER, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'Barcha foydalanuvchilar ro\'yxati' })
+  @ApiOperation({ summary: 'Barcha foydalanuvchilar ro‘yxati' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'search', required: false, type: String })
@@ -48,7 +48,7 @@ export class UsersController {
 
   @Get('me')
   @AnyAuthenticated()
-  @ApiOperation({ summary: 'O\'z profili' })
+  @ApiOperation({ summary: 'O‘z profili' })
   getMe(@CurrentUser('sub') userId: string) {
     return this.usersService.getMe(userId);
   }
@@ -63,14 +63,14 @@ export class UsersController {
 
   @Get(':id')
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Foydalanuvchi ma\'lumoti' })
+  @ApiOperation({ summary: 'Foydalanuvchi ma‘lumoti' })
   findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.usersService.findOne(id, user);
   }
 
   @Post()
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
-  @ApiOperation({ summary: 'Yangi foydalanuvchi qo\'shish' })
+  @ApiOperation({ summary: 'Yangi foydalanuvchi qo‘shish' })
   create(@Body() dto: CreateUserDto, @CurrentUser() user: JwtPayload) {
     return this.usersService.create(dto, user);
   }
@@ -129,14 +129,14 @@ export class UsersController {
   @Delete(':id/permanent')
   @Roles(UserRole.DIRECTOR)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Foydalanuvchini butunlay o\'chirish (faqat direktor)' })
+  @ApiOperation({ summary: 'Foydalanuvchini butunlay o‘chirish (faqat direktor)' })
   hardDelete(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.usersService.hardDelete(id, user);
   }
 
   @Post(':id/link-student/:studentId')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Ota-onani o\'quvchiga bog\'lash' })
+  @ApiOperation({ summary: 'Ota-onani o‘quvchiga bog‘lash' })
   linkParentStudent(
     @Param('id') parentId: string,
     @Param('studentId') studentId: string,
@@ -148,7 +148,7 @@ export class UsersController {
   @Put('me/password')
   @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Parol o\'zgartirish' })
+  @ApiOperation({ summary: 'Parol o‘zgartirish' })
   changePassword(
     @CurrentUser('sub') userId: string,
     @Body() dto: ChangePasswordDto,
@@ -177,7 +177,7 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   @Roles(UserRole.DIRECTOR)
   @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
-  @ApiOperation({ summary: 'CSV fayldan o\'quvchilarni ommaviy import qilish (max 500 ta)' })
+  @ApiOperation({ summary: 'CSV fayldan o‘quvchilarni ommaviy import qilish (max 500 ta)' })
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     schema: {

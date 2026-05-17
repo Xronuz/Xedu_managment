@@ -33,7 +33,7 @@ export class ExamsController {
     UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN,
     UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT,
   )
-  @ApiOperation({ summary: 'Imtihonlar ro\'yxati' })
+  @ApiOperation({ summary: 'Imtihonlar ro‘yxati' })
   findAll(
     @CurrentUser() user: JwtPayload,
     @Query('classId') classId?: string,
@@ -47,7 +47,7 @@ export class ExamsController {
     UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN,
     UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT,
   )
-  @ApiOperation({ summary: 'Imtihon ma\'lumoti' })
+  @ApiOperation({ summary: 'Imtihon ma‘lumoti' })
   findOne(
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,
@@ -71,7 +71,7 @@ export class ExamsController {
 
   @Delete(':id')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Imtihonni o\'chirish' })
+  @ApiOperation({ summary: 'Imtihonni o‘chirish' })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.examsService.remove(id, user);
   }
@@ -109,7 +109,7 @@ export class ExamsController {
 
   @Post('bulk')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Ko\'p sinflar uchun toplu imtihon yaratish' })
+  @ApiOperation({ summary: 'Ko‘p sinflar uchun toplu imtihon yaratish' })
   bulkCreate(@Body() dto: BulkCreateExamDto, @CurrentUser() user: JwtPayload) {
     return this.examsService.bulkCreate(dto, user);
   }

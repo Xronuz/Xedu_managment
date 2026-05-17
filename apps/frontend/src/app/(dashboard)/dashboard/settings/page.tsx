@@ -43,14 +43,14 @@ const BASE_TABS: Tab[] = [
 const ADMIN_TAB: Tab = { key: 'tizim', label: 'Tizim', icon: Settings };
 
 const ROLE_DESCRIPTIONS: Record<string, string> = {
-  [UserRole.SUPER_ADMIN]: 'Butun platforma ustidan to\'liq nazorat',
-  [UserRole.DIRECTOR]: 'Maktab bo\'yicha barcha operatsiyalarni boshqarish',
-  [UserRole.VICE_PRINCIPAL]: 'Maktab mudir o\'rinbosari vakolatlari',
+  [UserRole.SUPER_ADMIN]: 'Butun platforma ustidan to‘liq nazorat',
+  [UserRole.DIRECTOR]: 'Maktab bo‘yicha barcha operatsiyalarni boshqarish',
+  [UserRole.VICE_PRINCIPAL]: 'Maktab mudir o‘rinbosari vakolatlari',
   [UserRole.TEACHER]: 'Dars jadvali, baholar va vazifalarni boshqarish',
   [UserRole.CLASS_TEACHER]: 'Sinf rahbari — davomatni kuzatish va ota-onalar bilan aloqa',
-  [UserRole.ACCOUNTANT]: 'To\'lovlar va moliyaviy hisobotlarni boshqarish',
+  [UserRole.ACCOUNTANT]: 'To‘lovlar va moliyaviy hisobotlarni boshqarish',
   [UserRole.LIBRARIAN]: 'Kutubxona fondini va kitob berishni boshqarish',
-  [UserRole.STUDENT]: 'Darslar, baholar va vazifalarni ko\'rish',
+  [UserRole.STUDENT]: 'Darslar, baholar va vazifalarni ko‘rish',
   [UserRole.PARENT]: 'Farzand natijalarini va davomatini kuzatish',
 };
 
@@ -170,7 +170,7 @@ export default function SettingsPage() {
       });
       setProfileSaved(true);
       setTimeout(() => setProfileSaved(false), 2500);
-      toast({ title: 'Profil saqlandi', description: 'Ma\'lumotlaringiz muvaffaqiyatli yangilandi.' });
+      toast({ title: 'Profil saqlandi', description: 'Ma‘lumotlaringiz muvaffaqiyatli yangilandi.' });
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message;
@@ -196,7 +196,7 @@ export default function SettingsPage() {
       toast({
         variant: 'destructive',
         title: 'Xato',
-        description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Joriy parol noto\'g\'ri',
+        description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Joriy parol noto‘g‘ri',
       });
     },
   });
@@ -222,7 +222,7 @@ export default function SettingsPage() {
   const validatePassword = (): boolean => {
     const errors: Record<string, string> = {};
     if (!pwForm.currentPassword) errors.currentPassword = 'Joriy parol kiritilishi shart';
-    if (pwForm.newPassword.length < 8) errors.newPassword = 'Parol kamida 8 belgi bo\'lishi kerak';
+    if (pwForm.newPassword.length < 8) errors.newPassword = 'Parol kamida 8 belgi bo‘lishi kerak';
     if (pwForm.newPassword !== pwForm.confirmPassword) errors.confirmPassword = 'Parollar mos kelmadi';
     setPwErrors(errors);
     return Object.keys(errors).length === 0;
@@ -408,7 +408,7 @@ export default function SettingsPage() {
                         type="button"
                         onClick={() => setShowCurrent((s) => !s)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground transition-colors"
-                        aria-label={showCurrent ? 'Parolni yashirish' : 'Parolni ko\'rsatish'}
+                        aria-label={showCurrent ? 'Parolni yashirish' : 'Parolni ko‘rsatish'}
                       >
                         {showCurrent ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -441,7 +441,7 @@ export default function SettingsPage() {
                         type="button"
                         onClick={() => setShowNew((s) => !s)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground transition-colors"
-                        aria-label={showNew ? 'Parolni yashirish' : 'Parolni ko\'rsatish'}
+                        aria-label={showNew ? 'Parolni yashirish' : 'Parolni ko‘rsatish'}
                       >
                         {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
@@ -496,7 +496,7 @@ export default function SettingsPage() {
                         type="button"
                         onClick={() => setShowConfirm((s) => !s)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground transition-colors"
-                        aria-label={showConfirm ? 'Parolni yashirish' : 'Parolni ko\'rsatish'}
+                        aria-label={showConfirm ? 'Parolni yashirish' : 'Parolni ko‘rsatish'}
                       >
                         {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>

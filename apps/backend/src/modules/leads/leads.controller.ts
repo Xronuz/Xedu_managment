@@ -42,7 +42,7 @@ export class LeadsController {
 
   @Get('analytics')
   @Roles(...CRM_READ)
-  @ApiOperation({ summary: 'CRM statistika: source/status bo\'yicha tahlil' })
+  @ApiOperation({ summary: 'CRM statistika: source/status bo‘yicha tahlil' })
   @ApiQuery({ name: 'branchId', required: false })
   getAnalytics(
     @CurrentUser() user: JwtPayload,
@@ -55,7 +55,7 @@ export class LeadsController {
 
   @Get()
   @Roles(...CRM_READ)
-  @ApiOperation({ summary: 'Leadlar ro\'yxati (filial + status + qidiruv filter)' })
+  @ApiOperation({ summary: 'Leadlar ro‘yxati (filial + status + qidiruv filter)' })
   @ApiQuery({ name: 'status',       required: false })
   @ApiQuery({ name: 'source',       required: false })
   @ApiQuery({ name: 'search',       required: false })
@@ -138,7 +138,7 @@ export class LeadsController {
 
   @Post(':id/comments')
   @Roles(...CRM_WRITE)
-  @ApiOperation({ summary: 'Leadga muloqot izohi qo\'shish' })
+  @ApiOperation({ summary: 'Leadga muloqot izohi qo‘shish' })
   addComment(
     @Param('id') leadId: string,
     @Body() dto: AddCommentDto,
@@ -163,10 +163,10 @@ export class LeadsController {
   @Post(':id/convert')
   @Roles(...CRM_CONVERT)
   @ApiOperation({
-    summary: 'Lead → O\'quvchi konvertatsiyasi',
+    summary: 'Lead → O‘quvchi konvertatsiyasi',
     description:
       'Prisma.$transaction ichida: User(student) yaratish + ClassStudent + Lead.status=CONVERTED. ' +
-      'Natijada yangi o\'quvchi ma\'lumotlari va vaqtinchalik parol qaytariladi.',
+      'Natijada yangi o‘quvchi ma‘lumotlari va vaqtinchalik parol qaytariladi.',
   })
   convertToStudent(
     @Param('id') leadId: string,

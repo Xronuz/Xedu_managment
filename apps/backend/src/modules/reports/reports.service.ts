@@ -223,7 +223,7 @@ export class ReportsService {
       let y = doc.y;
 
       doc.fillColor('#1e293b').font('Helvetica-Bold').fontSize(9);
-      doc.text('O\'quvchi', C.student, y, { width: 155 });
+      doc.text('O‘quvchi', C.student, y, { width: 155 });
       doc.text('Fan',       C.subject, y, { width: 115 });
       doc.text('Tur',       C.type,    y, { width: 100 });
       doc.text('Ball',      C.score,   y, { width: 45, align: 'center' });
@@ -304,7 +304,7 @@ export class ReportsService {
       // Debtors table
       if (fin.debtors.length > 0) {
         doc.fillColor('#1e293b').font('Helvetica-Bold').fontSize(11)
-           .text('Qarzdorlar ro\'yxati');
+           .text('Qarzdorlar ro‘yxati');
         doc.moveDown(0.5);
 
         const C = { num: 35, name: 60, amount: 360, status: 460 };
@@ -313,7 +313,7 @@ export class ReportsService {
 
         doc.fillColor('#1e293b').font('Helvetica-Bold').fontSize(9);
         doc.text('#',          C.num,    y, { width: 20 });
-        doc.text('O\'quvchi', C.name,   y, { width: 295 });
+        doc.text('O‘quvchi', C.name,   y, { width: 295 });
         doc.text('Summa',     C.amount, y, { width: 95,  align: 'right' });
         doc.text('Holat',     C.status, y, { width: 65,  align: 'center' });
 
@@ -379,7 +379,7 @@ export class ReportsService {
       }),
     ]);
 
-    if (!student) throw new Error('O\'quvchi topilmadi');
+    if (!student) throw new Error('O‘quvchi topilmadi');
 
     const subjectMap = new Map<string, { total: number; count: number; maxTotal: number }>();
     for (const g of grades) {
@@ -557,7 +557,7 @@ export class ReportsService {
       }),
     ]);
 
-    if (!student) throw new Error('O\'quvchi topilmadi');
+    if (!student) throw new Error('O‘quvchi topilmadi');
 
     // Aggregate grades by subject
     const subjectMap = new Map<string, { total: number; count: number; maxTotal: number }>();
@@ -615,7 +615,7 @@ export class ReportsService {
       // ── Student info ──────────────────────────────────────────────────────
       const infoY = doc.y;
       doc.fontSize(11).font('Helvetica-Bold').fillColor('#0f172a')
-         .text('O\'quvchi ma\'lumotlari', 50, infoY);
+         .text('O‘quvchi ma‘lumotlari', 50, infoY);
       doc.moveDown(0.3);
 
       const INFO: [string, string][] = [
@@ -633,7 +633,7 @@ export class ReportsService {
       doc.moveDown(0.8);
 
       // ── Grades table ──────────────────────────────────────────────────────
-      doc.fontSize(11).font('Helvetica-Bold').fillColor('#0f172a').text('Fanlar bo\'yicha baholar');
+      doc.fontSize(11).font('Helvetica-Bold').fillColor('#0f172a').text('Fanlar bo‘yicha baholar');
       doc.moveDown(0.4);
 
       const C = { num: 50, name: 75, count: 360, avg: 430 };

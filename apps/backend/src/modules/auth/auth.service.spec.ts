@@ -198,7 +198,7 @@ describe('AuthService', () => {
 
       const result = await service.forgotPassword({ email: 'ghost@test.uz' });
 
-      expect(result.message).toContain('ro\'yxatdan o\'tgan bo\'lsa');
+      expect(result.message).toContain('ro‘yxatdan o‘tgan bo‘lsa');
       // No token created
       expect(mockRedis.setEx).not.toHaveBeenCalled();
     });
@@ -208,7 +208,7 @@ describe('AuthService', () => {
 
       const result = await service.forgotPassword({ email: mockUser.email });
 
-      expect(result.message).toContain('ro\'yxatdan o\'tgan bo\'lsa');
+      expect(result.message).toContain('ro‘yxatdan o‘tgan bo‘lsa');
       expect(mockRedis.setEx).toHaveBeenCalledWith(
         expect.stringMatching(/^pwd_reset:/),
         expect.any(Number),

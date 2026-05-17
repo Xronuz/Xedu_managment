@@ -150,7 +150,7 @@ export class EngagementAnalyticsService {
 
       return {
         teacherId,
-        teacherName: teacherNames.get(teacherId) ?? 'Noma\'lum',
+        teacherName: teacherNames.get(teacherId) ?? 'Noma‘lum',
         totalAwarded: data.total,
         studentCount: data.students.size,
         averagePerStudent: data.students.size > 0 ? Math.round(data.total / data.students.size) : 0,

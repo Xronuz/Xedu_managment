@@ -61,7 +61,7 @@ function formatDateUz(dateStr: string): string {
 }
 
 function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('uz-UZ').format(amount) + ' so\'m';
+  return new Intl.NumberFormat('uz-UZ').format(amount) + ' so‘m';
 }
 
 // ── Page ──────────────────────────────────────────────────────────────────────
@@ -122,7 +122,7 @@ export default function CanteenPage() {
   const removeMutation = useMutation({
     mutationFn: canteenApi.remove,
     onSuccess: () => {
-      toast({ title: 'Menyu o\'chirildi' });
+      toast({ title: 'Menyu o‘chirildi' });
       queryClient.invalidateQueries({ queryKey: ['canteen'] });
     },
   });

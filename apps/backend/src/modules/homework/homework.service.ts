@@ -147,7 +147,7 @@ export class HomeworkService {
       oldData: { title: homework.title, classId: homework.classId },
     });
 
-    return { message: 'Uyga vazifa o\'chirildi' };
+    return { message: 'Uyga vazifa o‘chirildi' };
   }
 
   async submit(id: string, dto: SubmitHomeworkDto, currentUser: JwtPayload) {

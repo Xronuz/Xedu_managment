@@ -284,7 +284,7 @@ function ScoreEntryTab({ examId, exam, existingGrades }: {
 
 // ── Questions Tab ─────────────────────────────────────────────────────────────
 const QUESTION_TYPE_UZ: Record<string, string> = {
-  multiple_choice: 'Ko\'p variantli',
+  multiple_choice: 'Ko‘p variantli',
   true_false: "To'g'ri/Noto'g'ri",
   short_answer: 'Qisqa javob',
   essay: 'Insho',
@@ -326,7 +326,7 @@ function QuestionsTab({ examId }: { examId: string }) {
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['online-exam', examId, 'questions'] });
-      toast({ title: 'Savol qo\'shildi' });
+      toast({ title: 'Savol qo‘shildi' });
       setShowForm(false);
       setNewQ({ type: 'multiple_choice', text: '', points: 1, explanation: '', options: [
         { text: '', isCorrect: false }, { text: '', isCorrect: false },
@@ -429,7 +429,7 @@ function QuestionsTab({ examId }: { examId: string }) {
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" size="sm" onClick={() => setShowForm(false)}>Bekor</Button>
               <Button size="sm" disabled={!newQ.text.trim() || addMut.isPending} onClick={() => addMut.mutate()}>
-                {addMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Qo\'shish'}
+                {addMut.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Qo‘shish'}
               </Button>
             </div>
           </CardContent>
@@ -1011,8 +1011,8 @@ export default function ExamResultsPage() {
   const { exam, grades, stats } = data;
   const distribution = buildDistribution(grades, exam.maxScore);
   const pieData = [
-    { name: 'O\'tdi', value: stats.passed, color: SCORE_COLORS.excellent },
-    { name: 'O\'tmadi', value: stats.failed, color: SCORE_COLORS.poor },
+    { name: 'O‘tdi', value: stats.passed, color: SCORE_COLORS.excellent },
+    { name: 'O‘tmadi', value: stats.failed, color: SCORE_COLORS.poor },
   ].filter(d => d.value > 0);
 
   return (

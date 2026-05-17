@@ -3,10 +3,10 @@
 import { BrainCircuit, TrendingDown, AlertTriangle, Lightbulb, ShieldCheck } from 'lucide-react';
 
 const aiCapabilities = [
-  { icon: TrendingDown, title: 'O\'quvchi xavfi', description: 'Davomat pasayishi yoki baho tomomilari o\'zgarishida xavfli o\'quvchilarni aniqlash.' },
-  { icon: AlertTriangle, title: 'Moliyaviy anomaliyalar', description: 'Kutilmagan to\'lov kechikishlari yoki xarajat anomaliyalarini avtomatik aniqlash.' },
-  { icon: Lightbulb, title: 'Tavsiyalar', description: 'O\'qituvchi yuklamasi, dars jadvallari va resurslarni optimallashtirish bo\'yicha tavsiyalar.' },
-  { icon: ShieldCheck, title: 'Xavfsizlik monitoring', description: 'G\'alati kirish urinishlari va maxfiylik buzilishlarini real vaqtda aniqlash.' },
+  { icon: TrendingDown, title: 'O‘quvchi xavfi', description: 'Davomat pasayishi yoki baho tomomilari o‘zgarishida xavfli o‘quvchilarni aniqlash.' },
+  { icon: AlertTriangle, title: 'Moliyaviy anomaliyalar', description: 'Kutilmagan to‘lov kechikishlari yoki xarajat anomaliyalarini avtomatik aniqlash.' },
+  { icon: Lightbulb, title: 'Tavsiyalar', description: 'O‘qituvchi yuklamasi, dars jadvallari va resurslarni optimallashtirish bo‘yicha tavsiyalar.' },
+  { icon: ShieldCheck, title: 'Xavfsizlik monitoring', description: 'G‘alati kirish urinishlari va maxfiylik buzilishlarini real vaqtda aniqlash.' },
 ];
 
 export function AiSection() {
@@ -18,8 +18,8 @@ export function AiSection() {
             <div className="rounded-2xl shadow-premium-lg overflow-hidden bg-white border border-xedu-slate-100/50 p-6 space-y-4">
               {[
                 { icon: AlertTriangle, color: 'xedu-amber', title: 'Davomat ogohlantirishi', text: '9-A sinfida oylik davomat 87% gacha tushdi. Tavsiya: sinf rahbari bilan suhbat.', time: '2 soat oldin' },
-                { icon: Lightbulb, color: 'xedu-primary', title: 'Resurs optimallashtirish', text: 'Dushanba ertalabki darslarda xonalar 62% band. Tavsiya: jadvallarni qayta ko\'rib chiqish.', time: 'Bugun' },
-                { icon: TrendingDown, color: 'xedu-sky', title: 'O\'quvchi xavfi', text: 'Aziz Karimovning o\'rtacha bahosi 2 oy ichida 4.2 dan 3.1 gacha tushdi.', time: 'Kecha' },
+                { icon: Lightbulb, color: 'xedu-primary', title: 'Resurs optimallashtirish', text: 'Dushanba ertalabki darslarda xonalar 62% band. Tavsiya: jadvallarni qayta ko‘rib chiqish.', time: 'Bugun' },
+                { icon: TrendingDown, color: 'xedu-sky', title: 'O‘quvchi xavfi', text: 'Aziz Karimovning o‘rtacha bahosi 2 oy ichida 4.2 dan 3.1 gacha tushdi.', time: 'Kecha' },
               ].map((alert) => (
                 <div
                   key={alert.title}

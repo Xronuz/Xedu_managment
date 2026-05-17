@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronLeft, ChevronRight, GraduationCap, ChevronDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn, getCompactRoleLabel } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import { useBranchStore } from '@/store/branch.store';
 import { useUIStore } from '@/store/ui.store';
@@ -24,22 +24,6 @@ function getInitials(firstName?: string, lastName?: string): string {
   const f = firstName?.[0] ?? '';
   const l = lastName?.[0] ?? '';
   return (f + l).toUpperCase() || 'U';
-}
-
-function roleLabel(role: string): string {
-  const map: Record<string, string> = {
-    director:       'Direktor',
-    vice_principal: "O'rinbosar",
-    branch_admin:   'Filial admin',
-    teacher:        "O'qituvchi",
-    class_teacher:  'Sinf rahbari',
-    accountant:     'Buxgalter',
-    librarian:      'Kutubxonachi',
-    student:        "O'quvchi",
-    parent:         'Ota-ona',
-    super_admin:    'Super Admin',
-  };
-  return map[role] ?? role;
 }
 
 /* ── Nav Item Component ──────────────────────────────────────────────────── */
@@ -203,7 +187,7 @@ function ProfileFooter({ collapsed }: { collapsed: boolean }) {
           {displayName}
         </p>
         <p className="truncate text-2xs text-xedu-slate-500">
-          {roleLabel(user.role)}
+          {getCompactRoleLabel(user.role)}
         </p>
       </div>
     </div>
@@ -316,7 +300,7 @@ export function Sidebar() {
         {/* Collapse toggle — doim o'ng yuqori burchakda, logoga tegmaydi */}
         <button
           onClick={toggleSidebar}
-          title={sidebarCollapsed ? 'Kengaytirish' : 'Yig\'ish'}
+          title={sidebarCollapsed ? 'Kengaytirish' : 'Yig‘ish'}
           className={cn(
             'absolute right-2 top-1/2 -translate-y-1/2',
             'flex h-6 w-6 items-center justify-center rounded-md',

@@ -4,17 +4,17 @@ import { SectionHeader } from './section-header';
 import { Wallet, CreditCard, PiggyBank, Receipt, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 
 const financeModules = [
-  { icon: CreditCard, title: 'To\'lovlarni yig\'ish', description: 'O\'quvchi to\'lovlari, qarzdorlik monitoringi va avtomatik eslatmalar.' },
+  { icon: CreditCard, title: 'To‘lovlarni yig‘ish', description: 'O‘quvchi to‘lovlari, qarzdorlik monitoringi va avtomatik eslatmalar.' },
   { icon: PiggyBank, title: 'Ish haqi', description: 'Xodimlar ish haqi, bonuslar, avanslar va moliyaviy hisobotlar.' },
-  { icon: Receipt, title: 'Byudjet', description: 'Filiallar va bo\'limlar kesimida byudjet rejalashtirish va nazorat.' },
+  { icon: Receipt, title: 'Byudjet', description: 'Filiallar va bo‘limlar kesimida byudjet rejalashtirish va nazorat.' },
   { icon: Wallet, title: 'Kassa', description: 'Kunlik kassa operatsiyalari, kassir smenalari va xarajatlar nazorati.' },
 ];
 
 const transactions = [
-  { label: 'Oylik to\'lovlar', amount: '245 000 000', trend: 'up', change: '+8%' },
+  { label: 'Oylik to‘lovlar', amount: '245 000 000', trend: 'up', change: '+8%' },
   { label: 'Qarzdorlik', amount: '42 000 000', trend: 'down', change: '-12%' },
   { label: 'Xarajatlar', amount: '128 000 000', trend: 'up', change: '+3%' },
-  { label: 'Byudjet qoldig\'i', amount: '89 000 000', trend: 'up', change: '+15%' },
+  { label: 'Byudjet qoldig‘i', amount: '89 000 000', trend: 'up', change: '+15%' },
 ];
 
 export function FinanceSection() {

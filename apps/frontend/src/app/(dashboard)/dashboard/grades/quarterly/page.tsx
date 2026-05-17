@@ -75,7 +75,7 @@ export default function QuarterlyGradesPage() {
       const sid = g.student?.id ?? g.studentId;
       const sname = `${g.student?.lastName ?? ''} ${g.student?.firstName ?? ''}`.trim();
       const subId = g.subject?.id ?? g.subjectId;
-      const subName = g.subject?.name ?? 'Noma\'lum';
+      const subName = g.subject?.name ?? 'Noma‘lum';
       const pct = g.maxScore > 0 ? (g.score / g.maxScore) * 100 : 0;
 
       if (!studentMap.has(sid)) studentMap.set(sid, { name: sname, scores: new Map() });
@@ -124,7 +124,7 @@ export default function QuarterlyGradesPage() {
           </div>
         </div>
         <Button variant="outline" size="sm" className="gap-2"
-          onClick={() => toast({ title: 'Excel eksport', description: 'Bu funksiya tez orada qo\'shiladi' })}>
+          onClick={() => toast({ title: 'Excel eksport', description: 'Bu funksiya tez orada qo‘shiladi' })}>
           <Download className="h-4 w-4" /> Excel
         </Button>
       </div>

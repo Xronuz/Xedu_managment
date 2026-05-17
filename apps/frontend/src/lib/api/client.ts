@@ -136,12 +136,12 @@ apiClient.interceptors.response.use(
 
     if (typeof window !== 'undefined') {
       if (status === 403) {
-        showDedupedToast(403, () => appToast.error('Ruxsat yo\'q', {
-          description: 'Bu amalni bajarish uchun sizda yetarli huquq yo\'q.',
+        showDedupedToast(403, () => appToast.error('Ruxsat yo‘q', {
+          description: 'Bu amalni bajarish uchun sizda yetarli huquq yo‘q.',
         }));
       } else if (status === 404) {
         showDedupedToast(404, () => appToast.error('Topilmadi', {
-          description: 'So\'ralgan resurs mavjud emas yoki o\'chirilgan.',
+          description: 'So‘ralgan resurs mavjud emas yoki o‘chirilgan.',
         }));
       } else if (status === 422) {
         // Validation errors — usually handled by the form itself
@@ -152,7 +152,7 @@ apiClient.interceptors.response.use(
       } else if (!status) {
         // Network error (no response)
         showDedupedToast('network', () => appToast.error('Tarmoq xatosi', {
-          description: 'Serverga ulanib bo\'lmadi. Internet aloqangizni tekshiring.',
+          description: 'Serverga ulanib bo‘lmadi. Internet aloqangizni tekshiring.',
         }));
       }
     }

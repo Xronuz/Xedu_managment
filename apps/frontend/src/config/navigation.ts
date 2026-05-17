@@ -44,7 +44,7 @@ const ALL_STAFF = ['director', 'vice_principal', 'branch_admin', 'teacher', 'cla
 // ── DIRECTOR ──────────────────────────────────────────────────────────────────
 export const DIRECTOR_NAV: NavGroup[] = [
   {
-    title: 'Umumiy ko\'rinish',
+    title: 'Umumiy ko‘rinish',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
       { label: 'Filiallar', href: '/dashboard/branches', icon: Building2, roles: ROUTE_PERMISSIONS['/dashboard/branches'] },
@@ -109,7 +109,7 @@ export const DIRECTOR_NAV: NavGroup[] = [
 // ── BRANCH ADMIN ──────────────────────────────────────────────────────────────
 export const BRANCH_ADMIN_NAV: NavGroup[] = [
   {
-    title: 'Umumiy ko\'rinish',
+    title: 'Umumiy ko‘rinish',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
     ],
@@ -166,7 +166,7 @@ export const BRANCH_ADMIN_NAV: NavGroup[] = [
 // ── VICE PRINCIPAL ────────────────────────────────────────────────────────────
 export const VICE_PRINCIPAL_NAV: NavGroup[] = [
   {
-    title: 'Umumiy ko\'rinish',
+    title: 'Umumiy ko‘rinish',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
     ],
@@ -214,7 +214,7 @@ export const VICE_PRINCIPAL_NAV: NavGroup[] = [
 // ── TEACHER / CLASS_TEACHER ───────────────────────────────────────────────────
 export const TEACHER_NAV: NavGroup[] = [
   {
-    title: 'Umumiy ko\'rinish',
+    title: 'Umumiy ko‘rinish',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
     ],
@@ -253,7 +253,7 @@ export const TEACHER_NAV: NavGroup[] = [
 // ── ACCOUNTANT ────────────────────────────────────────────────────────────────
 export const ACCOUNTANT_NAV: NavGroup[] = [
   {
-    title: 'Umumiy ko\'rinish',
+    title: 'Umumiy ko‘rinish',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
     ],
@@ -284,7 +284,7 @@ export const ACCOUNTANT_NAV: NavGroup[] = [
 // ── LIBRARIAN ─────────────────────────────────────────────────────────────────
 export const LIBRARIAN_NAV: NavGroup[] = [
   {
-    title: 'Umumiy ko\'rinish',
+    title: 'Umumiy ko‘rinish',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
     ],
@@ -307,7 +307,7 @@ export const LIBRARIAN_NAV: NavGroup[] = [
 // ── STUDENT ───────────────────────────────────────────────────────────────────
 export const STUDENT_NAV: NavGroup[] = [
   {
-    title: 'Umumiy ko\'rinish',
+    title: 'Umumiy ko‘rinish',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
       { label: "O'quvchi portal", href: '/dashboard/student', icon: GraduationCap, roles: ROUTE_PERMISSIONS['/dashboard/student'] },

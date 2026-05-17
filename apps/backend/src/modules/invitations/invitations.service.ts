@@ -82,7 +82,7 @@ export class InvitationsService {
     if (currentUser.role === UserRole.BRANCH_ADMIN) {
       const allowed = [currentUser.branchId, ...(currentUser.assignedBranchIds ?? [])];
       if (!allowed.includes(branchId)) {
-        throw new ForbiddenException('Siz faqat o\'z filialingizga taklif yuborishingiz mumkin');
+        throw new ForbiddenException('Siz faqat o‘z filialingizga taklif yuborishingiz mumkin');
       }
     }
   }
@@ -203,7 +203,7 @@ export class InvitationsService {
     const invitation = await this.findOne(id, currentUser);
 
     if (invitation.status !== InvitationStatus.PENDING && invitation.status !== InvitationStatus.EXPIRED) {
-      throw new BadRequestException('Faqat kutilayotgan yoki muddati o\'tgan taklifni qayta yuborish mumkin');
+      throw new BadRequestException('Faqat kutilayotgan yoki muddati o‘tgan taklifni qayta yuborish mumkin');
     }
 
     const rawToken = this.generateToken();
@@ -308,11 +308,11 @@ export class InvitationsService {
       });
 
       if (!invitation) {
-        throw new BadRequestException('Taklif havolasi noto\'g\'ri yoki muddati o\'tgan');
+        throw new BadRequestException('Taklif havolasi noto‘g‘ri yoki muddati o‘tgan');
       }
 
       if (invitation.status !== InvitationStatus.PENDING || invitation.expiresAt < new Date()) {
-        throw new BadRequestException('Taklif havolasi noto\'g\'ri yoki muddati o\'tgan');
+        throw new BadRequestException('Taklif havolasi noto‘g‘ri yoki muddati o‘tgan');
       }
 
       // Check if user already exists (FOR UPDATE to prevent race condition)

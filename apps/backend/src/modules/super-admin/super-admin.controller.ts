@@ -31,13 +31,13 @@ export class SuperAdminController {
   }
 
   @Get('schools/:id')
-  @ApiOperation({ summary: 'Maktab ma\'lumoti' })
+  @ApiOperation({ summary: 'Maktab ma‘lumoti' })
   getSchool(@Param('id') id: string) {
     return this.superAdminService.getSchool(id);
   }
 
   @Post('schools')
-  @ApiOperation({ summary: 'Yangi maktab qo\'shish (onboarding)' })
+  @ApiOperation({ summary: 'Yangi maktab qo‘shish (onboarding)' })
   createSchool(@Body() dto: CreateSchoolDto) {
     return this.superAdminService.createSchool(dto);
   }
@@ -55,7 +55,7 @@ export class SuperAdminController {
   }
 
   @Post('schools/:id/modules/toggle')
-  @ApiOperation({ summary: 'Modul yoqish/o\'chirish' })
+  @ApiOperation({ summary: 'Modul yoqish/o‘chirish' })
   toggleModule(@Param('id') id: string, @Body() dto: ToggleModuleDto) {
     return this.superAdminService.toggleModule(id, dto);
   }

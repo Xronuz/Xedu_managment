@@ -17,7 +17,7 @@ export class RedisService extends Redis implements OnModuleInit, OnModuleDestroy
   }
 
   async onModuleInit() {
-    this.on('connect', () => this.logger.log('Redis ulanish o\'rnatildi'));
+    this.on('connect', () => this.logger.log('Redis ulanish o‘rnatildi'));
     this.on('error', (err) => this.logger.error('Redis xatosi', err));
   }
 

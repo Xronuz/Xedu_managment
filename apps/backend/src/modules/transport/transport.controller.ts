@@ -34,7 +34,7 @@ export class TransportController {
     UserRole.STUDENT, UserRole.PARENT,
     UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL,
   )
-  @ApiOperation({ summary: 'Mening marshrutim (o\'quvchi/ota-ona)' })
+  @ApiOperation({ summary: 'Mening marshrutim (o‘quvchi/ota-ona)' })
   getMyRoute(@CurrentUser() user: JwtPayload) {
     return this.transportService.getMyRoute(user);
   }
@@ -46,7 +46,7 @@ export class TransportController {
     UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL,
     UserRole.CLASS_TEACHER,
   )
-  @ApiOperation({ summary: 'Barcha marshrutlar ro\'yxati' })
+  @ApiOperation({ summary: 'Barcha marshrutlar ro‘yxati' })
   getRoutes(@CurrentUser() user: JwtPayload) {
     return this.transportService.getRoutes(user);
   }
@@ -56,7 +56,7 @@ export class TransportController {
     UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL,
     UserRole.TEACHER, UserRole.CLASS_TEACHER,
   )
-  @ApiOperation({ summary: 'Marshrut tafsiloti (o\'quvchilar bilan)' })
+  @ApiOperation({ summary: 'Marshrut tafsiloti (o‘quvchilar bilan)' })
   getRoute(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.transportService.getRoute(id, user);
   }
@@ -81,7 +81,7 @@ export class TransportController {
 
   @Delete('routes/:id')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Marshrutni o\'chirish' })
+  @ApiOperation({ summary: 'Marshrutni o‘chirish' })
   removeRoute(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.transportService.removeRoute(id, user);
   }
@@ -90,14 +90,14 @@ export class TransportController {
 
   @Get('routes/:id/students')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'Marshrutga biriktirilgan o\'quvchilar' })
+  @ApiOperation({ summary: 'Marshrutga biriktirilgan o‘quvchilar' })
   getStudentsByRoute(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.transportService.getStudentsByRoute(id, user);
   }
 
   @Post('routes/:id/students')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'O\'quvchini marshrutga biriktirish' })
+  @ApiOperation({ summary: 'O‘quvchini marshrutga biriktirish' })
   assignStudent(
     @Param('id') routeId: string,
     @Body() dto: AssignStudentDto,
@@ -108,7 +108,7 @@ export class TransportController {
 
   @Delete('routes/:id/students/:studentId')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'O\'quvchini marshrutdan olib tashlash' })
+  @ApiOperation({ summary: 'O‘quvchini marshrutdan olib tashlash' })
   removeStudentFromRoute(
     @Param('id') routeId: string,
     @Param('studentId') studentId: string,

@@ -68,7 +68,7 @@ export class ImportService {
       const errors: string[] = [];
       if (!firstName) errors.push('Ism kiritilmagan');
       if (!lastName)  errors.push('Familiya kiritilmagan');
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email noto\'g\'ri');
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email noto‘g‘ri');
 
       rows.push({
         row: rowIndex,
@@ -162,7 +162,7 @@ export class ImportService {
       const errors: string[] = [];
       if (!firstName) errors.push('Ism kiritilmagan');
       if (!lastName)  errors.push('Familiya kiritilmagan');
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email noto\'g\'ri');
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email noto‘g‘ri');
       if (!VALID_ROLES.includes(role)) errors.push(`Rol noto'g'ri: ${role}. To'g'ri: ${VALID_ROLES.join(', ')}`);
 
       rows.push({
@@ -241,13 +241,13 @@ export class ImportService {
       const roomNumber = String(cells[8] ?? '').trim() || undefined;
 
       const errors: string[] = [];
-      if (!classId)   errors.push('classId yo\'q');
-      if (!subjectId) errors.push('subjectId yo\'q');
-      if (!teacherId) errors.push('teacherId yo\'q');
+      if (!classId)   errors.push('classId yo‘q');
+      if (!subjectId) errors.push('subjectId yo‘q');
+      if (!teacherId) errors.push('teacherId yo‘q');
       if (!DAYS.includes(dayOfWeek)) errors.push(`Kun noto'g'ri: ${dayOfWeek}`);
-      if (isNaN(timeSlot) || timeSlot < 1 || timeSlot > 12) errors.push('timeSlot 1-12 oralig\'ida bo\'lishi kerak');
-      if (!/^\d{2}:\d{2}$/.test(startTime)) errors.push('startTime HH:MM formatida bo\'lishi kerak');
-      if (!/^\d{2}:\d{2}$/.test(endTime))   errors.push('endTime HH:MM formatida bo\'lishi kerak');
+      if (isNaN(timeSlot) || timeSlot < 1 || timeSlot > 12) errors.push('timeSlot 1-12 oralig‘ida bo‘lishi kerak');
+      if (!/^\d{2}:\d{2}$/.test(startTime)) errors.push('startTime HH:MM formatida bo‘lishi kerak');
+      if (!/^\d{2}:\d{2}$/.test(endTime))   errors.push('endTime HH:MM formatida bo‘lishi kerak');
 
       rows.push({
         row: rowIndex,
@@ -341,12 +341,12 @@ export class ImportService {
       const comment   = String(cells[8] ?? '').trim() || undefined;
 
       const errors: string[] = [];
-      if (!studentId) errors.push('studentId yo\'q');
-      if (!subjectId) errors.push('subjectId yo\'q');
-      if (!classId)   errors.push('classId yo\'q');
+      if (!studentId) errors.push('studentId yo‘q');
+      if (!subjectId) errors.push('subjectId yo‘q');
+      if (!classId)   errors.push('classId yo‘q');
       if (!VALID_TYPES.includes(type)) errors.push(`Tur noto'g'ri: ${type}`);
-      if (isNaN(score) || score < 0)  errors.push('Baho noto\'g\'ri');
-      if (isNaN(Date.parse(date)))    errors.push('Sana noto\'g\'ri (YYYY-MM-DD kerak)');
+      if (isNaN(score) || score < 0)  errors.push('Baho noto‘g‘ri');
+      if (isNaN(Date.parse(date)))    errors.push('Sana noto‘g‘ri (YYYY-MM-DD kerak)');
 
       rows.push({
         row: rowIndex,
@@ -427,8 +427,8 @@ export class ImportService {
       const note      = String(cells[4] ?? '').trim() || undefined;
 
       const errors: string[] = [];
-      if (!studentId)                   errors.push('studentId yo\'q');
-      if (isNaN(Date.parse(date)))      errors.push('Sana noto\'g\'ri (YYYY-MM-DD kerak)');
+      if (!studentId)                   errors.push('studentId yo‘q');
+      if (isNaN(Date.parse(date)))      errors.push('Sana noto‘g‘ri (YYYY-MM-DD kerak)');
       if (!VALID_STATUSES.includes(status)) errors.push(`Status noto'g'ri: ${status}. Mumkin: ${VALID_STATUSES.join(', ')}`);
 
       rows.push({
@@ -500,7 +500,7 @@ export class ImportService {
 
   async generateTemplate(type: 'students' | 'users' | 'schedule' | 'grades' | 'attendance'): Promise<Buffer> {
     const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Ma\'lumotlar');
+    const sheet = workbook.addWorksheet('Ma‘lumotlar');
 
     const headerStyle: Partial<ExcelJS.Style> = {
       font: { bold: true, color: { argb: 'FFFFFFFF' } },

@@ -35,10 +35,10 @@ export class MarketingService {
     const statuses = ['NEW', 'CONTACTED', 'TEST_LESSON', 'WAITING_PAYMENT', 'CONVERTED', 'CLOSED'];
     const labels: Record<string, string> = {
       NEW: 'Yangi',
-      CONTACTED: 'Bog\'lanildi',
+      CONTACTED: 'Bog‘lanildi',
       TEST_LESSON: 'Sinov darsi',
-      WAITING_PAYMENT: 'To\'lov kutilmoqda',
-      CONVERTED: 'O\'quvchiga aylantirildi',
+      WAITING_PAYMENT: 'To‘lov kutilmoqda',
+      CONVERTED: 'O‘quvchiga aylantirildi',
       CLOSED: 'Yopildi',
     };
 
@@ -68,8 +68,8 @@ export class MarketingService {
       FACEBOOK: 'Facebook',
       WEBSITE: 'Sayt',
       REFERRAL: 'Tavsiya',
-      CALL: 'Qo\'ng\'iroq',
-      WALK_IN: 'To\'g\'ridan-to\'g\'ri',
+      CALL: 'Qo‘ng‘iroq',
+      WALK_IN: 'To‘g‘ridan-to‘g‘ri',
       OTHER: 'Boshqa',
     };
 

@@ -16,7 +16,7 @@ const styles: Record<InvitationStatus, string> = {
 const labels: Record<InvitationStatus, string> = {
   PENDING:  'Kutilmoqda',
   ACCEPTED: 'Qabul qilingan',
-  EXPIRED:  'Muddati o\'tgan',
+  EXPIRED:  'Muddati o‘tgan',
   REVOKED:  'Bekor qilingan',
 };
 

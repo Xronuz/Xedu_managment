@@ -110,13 +110,13 @@ export class AuditService {
     sheet.columns = [
       { header: 'Vaqt',        key: 'createdAt',  width: 22 },
       { header: 'Amal',        key: 'action',     width: 12 },
-      { header: 'Ob\'ekt',     key: 'entity',     width: 18 },
-      { header: 'Ob\'ekt ID',  key: 'entityId',   width: 38 },
+      { header: 'Ob‘ekt',     key: 'entity',     width: 18 },
+      { header: 'Ob‘ekt ID',  key: 'entityId',   width: 38 },
       { header: 'Foydalanuvchi', key: 'user',     width: 30 },
       { header: 'Rol',         key: 'role',       width: 18 },
       { header: 'IP',          key: 'ip',         width: 16 },
-      { header: 'Eski ma\'lumot', key: 'old',     width: 50 },
-      { header: 'Yangi ma\'lumot', key: 'new',    width: 50 },
+      { header: 'Eski ma‘lumot', key: 'old',     width: 50 },
+      { header: 'Yangi ma‘lumot', key: 'new',    width: 50 },
     ];
 
     const headerRow = sheet.getRow(1);

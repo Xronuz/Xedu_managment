@@ -27,13 +27,13 @@ export class MessagingController {
   constructor(private readonly messagingService: MessagingService) {}
 
   @Get('conversations')
-  @ApiOperation({ summary: 'Suhbatlar ro\'yxati' })
+  @ApiOperation({ summary: 'Suhbatlar ro‘yxati' })
   getConversations(@CurrentUser() user: JwtPayload) {
     return this.messagingService.getConversations(user);
   }
 
   @Get('unread-count')
-  @ApiOperation({ summary: 'O\'qilmagan xabarlar soni' })
+  @ApiOperation({ summary: 'O‘qilmagan xabarlar soni' })
   getUnreadCount(@CurrentUser() user: JwtPayload) {
     return this.messagingService.getUnreadCount(user);
   }
@@ -56,21 +56,21 @@ export class MessagingController {
   }
 
   @Put(':userId/read')
-  @ApiOperation({ summary: 'Xabarlarni o\'qilgan deb belgilash' })
+  @ApiOperation({ summary: 'Xabarlarni o‘qilgan deb belgilash' })
   markAsRead(@Param('userId') userId: string, @CurrentUser() user: JwtPayload) {
     return this.messagingService.markAsRead(userId, user);
   }
 
   @Delete('message/:id')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bitta xabarni o\'chirish (faqat yuboruvchi)' })
+  @ApiOperation({ summary: 'Bitta xabarni o‘chirish (faqat yuboruvchi)' })
   deleteMessage(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.messagingService.deleteMessage(id, user);
   }
 
   @Delete(':userId/conversation')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Foydalanuvchi bilan suhbatni o\'chirish (faqat o\'z xabarlari)' })
+  @ApiOperation({ summary: 'Foydalanuvchi bilan suhbatni o‘chirish (faqat o‘z xabarlari)' })
   deleteConversation(@Param('userId') userId: string, @CurrentUser() user: JwtPayload) {
     return this.messagingService.deleteConversation(userId, user);
   }
@@ -87,7 +87,7 @@ export class MessagingController {
   }
 
   @Get('groups/list')
-  @ApiOperation({ summary: 'O\'z guruhlarim' })
+  @ApiOperation({ summary: 'O‘z guruhlarim' })
   getGroups(@CurrentUser() user: JwtPayload) {
     return this.messagingService.getGroups(user);
   }
@@ -113,7 +113,7 @@ export class MessagingController {
   }
 
   @Post('groups/:groupId/participants')
-  @ApiOperation({ summary: 'Guruhga a\'zo qo\'shish (admin)' })
+  @ApiOperation({ summary: 'Guruhga a‘zo qo‘shish (admin)' })
   addParticipant(
     @Param('groupId') groupId: string,
     @Body('userId') userId: string,
@@ -131,7 +131,7 @@ export class MessagingController {
 
   @Delete('groups/messages/:messageId')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Guruh xabarini o\'chirish (soft delete)' })
+  @ApiOperation({ summary: 'Guruh xabarini o‘chirish (soft delete)' })
   deleteGroupMessage(@Param('messageId') messageId: string, @CurrentUser() user: JwtPayload) {
     return this.messagingService.deleteGroupMessage(messageId, user);
   }

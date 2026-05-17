@@ -132,6 +132,6 @@ export class ExamEngagementService {
       }
     }
 
-    return { action: 'neutral', message: 'Imtihon natijasi o\'rtacha' };
+    return { action: 'neutral', message: 'Imtihon natijasi o‘rtacha' };
   }
 }

@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatCurrency(amount: number, currency = 'UZS') {
   if (currency === 'UZS') {
-    return new Intl.NumberFormat('uz-UZ').format(amount) + ' so\'m';
+    return new Intl.NumberFormat('uz-UZ').format(amount) + ' so‘m';
   }
   return new Intl.NumberFormat('uz-UZ', { style: 'currency', currency }).format(amount);
 }
@@ -30,12 +30,28 @@ export function getRoleLabel(role: string): string {
     super_admin: 'Super Admin',
     director: 'Maktab direktori',
     branch_admin: 'Filial boshqaruvchisi',
-    vice_principal: 'Mudir o\'rinbosari',
-    teacher: 'O\'qituvchi',
+    vice_principal: 'Mudir o‘rinbosari',
+    teacher: 'O‘qituvchi',
     class_teacher: 'Sinf rahbari',
     accountant: 'Moliyachi',
     librarian: 'Kutubxonachi',
-    student: 'O\'quvchi',
+    student: 'O‘quvchi',
+    parent: 'Ota-ona',
+  };
+  return labels[role] ?? role;
+}
+
+export function getCompactRoleLabel(role: string): string {
+  const labels: Record<string, string> = {
+    super_admin: 'Super Admin',
+    director: 'Direktor',
+    branch_admin: 'Filial admin',
+    vice_principal: 'O‘rinbosar',
+    teacher: 'O‘qituvchi',
+    class_teacher: 'Sinf rahbari',
+    accountant: 'Buxgalter',
+    librarian: 'Kutubxonachi',
+    student: 'O‘quvchi',
     parent: 'Ota-ona',
   };
   return labels[role] ?? role;

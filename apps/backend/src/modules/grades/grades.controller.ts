@@ -21,7 +21,7 @@ export class GradesController {
     UserRole.TEACHER, UserRole.CLASS_TEACHER,
     UserRole.STUDENT,
   )
-  @ApiOperation({ summary: 'Baholar ro\'yxati (rol bo\'yicha filtrlangan)' })
+  @ApiOperation({ summary: 'Baholar ro‘yxati (rol bo‘yicha filtrlangan)' })
   findAll(
     @CurrentUser() user: JwtPayload,
     @Query('classId') classId?: string,
@@ -35,7 +35,7 @@ export class GradesController {
 
   @Post()
   @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR)
-  @ApiOperation({ summary: 'Baho qo\'shish' })
+  @ApiOperation({ summary: 'Baho qo‘shish' })
   create(
     @Body() dto: CreateGradeDto,
     @CurrentUser() user: JwtPayload,
@@ -55,7 +55,7 @@ export class GradesController {
 
   @Get('student/:id/gpa')
   @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.STUDENT, UserRole.PARENT)
-  @ApiOperation({ summary: 'O\'quvchi GPA (faqat raqam)' })
+  @ApiOperation({ summary: 'O‘quvchi GPA (faqat raqam)' })
   getStudentGpa(
     @Param('id') studentId: string,
     @CurrentUser() user: JwtPayload,
@@ -65,7 +65,7 @@ export class GradesController {
 
   @Get('class/:id/gpa')
   @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN)
-  @ApiOperation({ summary: 'Sinf bo\'yicha GPA xulosa' })
+  @ApiOperation({ summary: 'Sinf bo‘yicha GPA xulosa' })
   getClassGpa(
     @Param('id') classId: string,
     @CurrentUser() user: JwtPayload,
@@ -75,7 +75,7 @@ export class GradesController {
 
   @Get('student/:id')
   @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.STUDENT, UserRole.PARENT)
-  @ApiOperation({ summary: 'O\'quvchi baholari' })
+  @ApiOperation({ summary: 'O‘quvchi baholari' })
   getStudentGrades(
     @Param('id') studentId: string,
     @CurrentUser() user: JwtPayload,
@@ -110,7 +110,7 @@ export class GradesController {
 
   @Delete(':id')
   @Roles(UserRole.TEACHER, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Bahoni o\'chirish' })
+  @ApiOperation({ summary: 'Bahoni o‘chirish' })
   remove(
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,

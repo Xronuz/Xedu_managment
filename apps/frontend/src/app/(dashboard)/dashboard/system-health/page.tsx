@@ -81,7 +81,7 @@ function StatCard({ label, value, icon: Icon, color, bg, description }: {
 // ── Service status row ────────────────────────────────────────────────────────
 
 function ServiceRow({ name, status, detail }: { name: string; status: 'ok' | 'error' | 'loading' | 'unknown'; detail?: string }) {
-  const labels = { ok: 'Ishlayapti', error: 'Xato', loading: 'Tekshirilmoqda...', unknown: 'Noma\'lum' };
+  const labels = { ok: 'Ishlayapti', error: 'Xato', loading: 'Tekshirilmoqda...', unknown: 'Noma‘lum' };
   const badgeClasses = {
     ok: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
     error: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',

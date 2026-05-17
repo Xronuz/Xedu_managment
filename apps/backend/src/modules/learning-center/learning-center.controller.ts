@@ -24,7 +24,7 @@ export class LearningCenterController {
 
   @Get('stats')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'O\'quv markazi statistikasi' })
+  @ApiOperation({ summary: 'O‘quv markazi statistikasi' })
   getStats(@CurrentUser() user: JwtPayload) {
     return this.service.getStats(user);
   }
@@ -33,7 +33,7 @@ export class LearningCenterController {
 
   @Get('my-courses')
   @Roles(UserRole.STUDENT, UserRole.PARENT)
-  @ApiOperation({ summary: 'Mening kurslarim (o\'quvchi)' })
+  @ApiOperation({ summary: 'Mening kurslarim (o‘quvchi)' })
   getMyCourses(@CurrentUser() user: JwtPayload) {
     return this.service.getMyCourses(user);
   }
@@ -46,7 +46,7 @@ export class LearningCenterController {
     UserRole.TEACHER, UserRole.CLASS_TEACHER,
     UserRole.STUDENT,
   )
-  @ApiOperation({ summary: 'Kurslar ro\'yxati' })
+  @ApiOperation({ summary: 'Kurslar ro‘yxati' })
   @ApiQuery({ name: 'search', required: false })
   getCourses(
     @CurrentUser() user: JwtPayload,
@@ -60,7 +60,7 @@ export class LearningCenterController {
     UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL,
     UserRole.TEACHER, UserRole.CLASS_TEACHER,
   )
-  @ApiOperation({ summary: 'Kurs tafsilotlari (o\'quvchilar bilan)' })
+  @ApiOperation({ summary: 'Kurs tafsilotlari (o‘quvchilar bilan)' })
   getCourseById(
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,
@@ -91,7 +91,7 @@ export class LearningCenterController {
 
   @Delete('courses/:id')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'Kursni o\'chirish' })
+  @ApiOperation({ summary: 'Kursni o‘chirish' })
   removeCourse(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.service.removeCourse(id, user);
   }
@@ -100,7 +100,7 @@ export class LearningCenterController {
 
   @Post('courses/:id/enroll')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'O\'quvchini kursga ro\'yxatdan o\'tkazish' })
+  @ApiOperation({ summary: 'O‘quvchini kursga ro‘yxatdan o‘tkazish' })
   enrollStudent(
     @Param('id') courseId: string,
     @Body() dto: EnrollStudentDto,
@@ -111,7 +111,7 @@ export class LearningCenterController {
 
   @Put('courses/:id/enrollments/:enrollmentId')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'Ro\'yxatga olishni yangilash (baho, holat)' })
+  @ApiOperation({ summary: 'Ro‘yxatga olishni yangilash (baho, holat)' })
   updateEnrollment(
     @Param('id') courseId: string,
     @Param('enrollmentId') enrollmentId: string,
@@ -123,7 +123,7 @@ export class LearningCenterController {
 
   @Delete('courses/:id/enrollments/:enrollmentId')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'O\'quvchini kursdan chiqarish' })
+  @ApiOperation({ summary: 'O‘quvchini kursdan chiqarish' })
   removeEnrollment(
     @Param('id') courseId: string,
     @Param('enrollmentId') enrollmentId: string,
@@ -154,7 +154,7 @@ export class LearningCenterController {
     UserRole.DIRECTOR, UserRole.BRANCH_ADMIN,
     UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER,
   )
-  @ApiOperation({ summary: 'Kursga material qo\'shish' })
+  @ApiOperation({ summary: 'Kursga material qo‘shish' })
   createMaterial(
     @Param('id') courseId: string,
     @Body() dto: CreateCourseMaterialDto,
@@ -183,7 +183,7 @@ export class LearningCenterController {
     UserRole.DIRECTOR, UserRole.BRANCH_ADMIN,
     UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER,
   )
-  @ApiOperation({ summary: 'Materialni o\'chirish' })
+  @ApiOperation({ summary: 'Materialni o‘chirish' })
   removeMaterial(
     @Param('id') courseId: string,
     @Param('materialId') materialId: string,

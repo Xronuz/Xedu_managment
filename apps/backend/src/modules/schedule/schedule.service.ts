@@ -360,7 +360,7 @@ export class ScheduleService {
     this.eventsGateway?.emitToSchool(currentUser.schoolId!, 'schedule:updated', {
       action: 'delete', scheduleId: id,
     });
-    return { message: 'Jadval sloti o\'chirildi' };
+    return { message: 'Jadval sloti o‘chirildi' };
   }
 
   // ── Cross-branch teacher schedule (UI uchun) ──────────────────────────────

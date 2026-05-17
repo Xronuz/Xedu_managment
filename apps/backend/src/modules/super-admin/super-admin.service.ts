@@ -10,7 +10,7 @@ export class CreateSchoolDto {
   name: string;
 
   @IsString()
-  @Matches(/^[a-z0-9-]+$/, { message: 'Slug faqat kichik harf, raqam va defis bo\'lishi kerak' })
+  @Matches(/^[a-z0-9-]+$/, { message: 'Slug faqat kichik harf, raqam va defis bo‘lishi kerak' })
   @MaxLength(60)
   slug: string;
 
@@ -106,11 +106,11 @@ export class SuperAdminService {
       },
     });
 
-    // Auto-create default "Main Campus" branch
+    // Auto-create default "Asosiy filial" branch
     const mainBranch = await this.prisma.branch.create({
       data: {
         schoolId: school.id,
-        name: 'Main Campus',
+        name: 'Asosiy filial',
         code: 'MAIN',
         isActive: true,
       },

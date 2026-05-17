@@ -30,14 +30,14 @@ export class MeetingsController {
 
   @Get('my')
   @Roles(...ALL_RELEVANT)
-  @ApiOperation({ summary: 'O\'zim tegishli uchrashuvlar (o\'qituvchi / ota-ona)' })
+  @ApiOperation({ summary: 'O‘zim tegishli uchrashuvlar (o‘qituvchi / ota-ona)' })
   getMyMeetings(@CurrentUser() user: JwtPayload) {
     return this.service.getMyMeetings(user);
   }
 
   @Get()
   @Roles(...MANAGERS, ...TEACHERS)
-  @ApiOperation({ summary: 'Barcha uchrashuvlar ro\'yxati' })
+  @ApiOperation({ summary: 'Barcha uchrashuvlar ro‘yxati' })
   @ApiQuery({ name: 'status',    required: false })
   @ApiQuery({ name: 'teacherId', required: false })
   @ApiQuery({ name: 'from',      required: false })
@@ -81,7 +81,7 @@ export class MeetingsController {
   @Delete(':id')
   @Roles(...MANAGERS)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Uchrashuvni o\'chirish' })
+  @ApiOperation({ summary: 'Uchrashuvni o‘chirish' })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.service.remove(id, user);
   }

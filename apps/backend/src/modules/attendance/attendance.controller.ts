@@ -46,7 +46,7 @@ export class AttendanceController {
 
   @Get('student/:id/history')
   @Roles(UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.CLASS_TEACHER, UserRole.TEACHER, UserRole.PARENT, UserRole.STUDENT)
-  @ApiOperation({ summary: 'O\'quvchi davomat tarixi' })
+  @ApiOperation({ summary: 'O‘quvchi davomat tarixi' })
   getStudentHistory(
     @Param('id') studentId: string,
     @CurrentUser() user: JwtPayload,

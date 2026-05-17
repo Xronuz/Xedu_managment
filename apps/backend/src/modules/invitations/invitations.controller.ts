@@ -34,7 +34,7 @@ export class InvitationsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Takliflar ro\'yxati' })
+  @ApiOperation({ summary: 'Takliflar ro‘yxati' })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'status', required: false, enum: InvitationStatus })
@@ -50,7 +50,7 @@ export class InvitationsController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Bitta taklif haqida ma\'lumot' })
+  @ApiOperation({ summary: 'Bitta taklif haqida ma‘lumot' })
   @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
   async findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.invitationsService.findOne(id, user);
@@ -90,7 +90,7 @@ export class InvitationsController {
   @Post('accept')
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
-  @ApiOperation({ summary: 'Taklifni qabul qilish va parol o\'rnatish (public)' })
+  @ApiOperation({ summary: 'Taklifni qabul qilish va parol o‘rnatish (public)' })
   async accept(@Body() dto: AcceptInvitationDto) {
     return this.invitationsService.accept(dto.token, dto.password);
   }

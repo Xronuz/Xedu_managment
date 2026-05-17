@@ -79,7 +79,7 @@ export class LibraryService {
     const book = await this.prisma.libraryBook.findFirst({ where: { id, schoolId: currentUser.schoolId! } });
     if (!book) throw new NotFoundException('Kitob topilmadi');
     const activeLoans = await this.prisma.libraryLoan.count({ where: { bookId: id, returnDate: null } });
-    if (activeLoans > 0) throw new BadRequestException('Kitob qaytarilmagan, o\'chirib bo\'lmaydi');
+    if (activeLoans > 0) throw new BadRequestException('Kitob qaytarilmagan, o‘chirib bo‘lmaydi');
     return this.prisma.libraryBook.delete({ where: { id } });
   }
 
@@ -107,7 +107,7 @@ export class LibraryService {
       const activeLoan = await tx.libraryLoan.findFirst({
         where: { bookId: dto.bookId, studentId: dto.studentId, returnDate: null },
       });
-      if (activeLoan) throw new BadRequestException('Bu o\'quvchi ushbu kitobni hali qaytarmagan.');
+      if (activeLoan) throw new BadRequestException('Bu o‘quvchi ushbu kitobni hali qaytarmagan.');
 
       const dueDate = new Date();
       dueDate.setDate(dueDate.getDate() + 14); // 2 hafta
@@ -217,7 +217,7 @@ export class LibraryService {
 
       doc.fillColor('#1e293b').font('Helvetica-Bold').fontSize(8);
       doc.text('#',           COL.num,     y, { width: 16 });
-      doc.text('O\'quvchi',  COL.student,  y, { width: 135 });
+      doc.text('O‘quvchi',  COL.student,  y, { width: 135 });
       doc.text('Kitob',       COL.book,    y, { width: 165 });
       doc.text('Berilgan',    COL.loan,    y, { width: 55 });
       doc.text('Muddat',      COL.due,     y, { width: 55 });

@@ -33,7 +33,7 @@ export class DisciplineController {
 
   @Get()
   @Roles(...MANAGERS)
-  @ApiOperation({ summary: 'Intizom hodisalari ro\'yxati' })
+  @ApiOperation({ summary: 'Intizom hodisalari ro‘yxati' })
   @ApiQuery({ name: 'studentId', required: false })
   @ApiQuery({ name: 'classId',   required: false })
   @ApiQuery({ name: 'from',      required: false })
@@ -58,7 +58,7 @@ export class DisciplineController {
 
   @Get('student/:studentId')
   @Roles(...MANAGERS)
-  @ApiOperation({ summary: 'O\'quvchi intizom tarixi' })
+  @ApiOperation({ summary: 'O‘quvchi intizom tarixi' })
   getStudentHistory(
     @Param('studentId') studentId: string,
     @CurrentUser() user: JwtPayload,
@@ -90,7 +90,7 @@ export class DisciplineController {
   @Delete(':id')
   @Roles(...MANAGERS)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Hodisani o\'chirish' })
+  @ApiOperation({ summary: 'Hodisani o‘chirish' })
   remove(
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,

@@ -318,7 +318,7 @@ function CreateLeadDialog({
   const mutation = useMutation({
     mutationFn: leadsApi.create,
     onSuccess: () => {
-      toast({ title: ' Lead qo\'shildi' });
+      toast({ title: ' Lead qo‘shildi' });
       setForm(EMPTY_FORM);
       setDupError(null);
       onSuccess();
@@ -826,7 +826,7 @@ export default function CrmPage() {
       leadsApi.addComment(leadId, text),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lead'] });
-      toast({ title: 'Izoh qo\'shildi' });
+      toast({ title: 'Izoh qo‘shildi' });
     },
   });
 

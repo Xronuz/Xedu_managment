@@ -78,7 +78,7 @@ export class TreasuryController {
 
   @Patch('finance-type')
   @Roles(UserRole.DIRECTOR)
-  @ApiOperation({ summary: 'Maktab moliya rejimini o\'zgartirish (CENTRALIZED/DECENTRALIZED)' })
+  @ApiOperation({ summary: 'Maktab moliya rejimini o‘zgartirish (CENTRALIZED/DECENTRALIZED)' })
   setFinanceType(@Body() dto: SetFinanceTypeDto, @CurrentUser() user: JwtPayload) {
     return this.svc.setFinanceType(user.schoolId!, dto.financeType, user);
   }

@@ -19,7 +19,7 @@ const TARGET_GROUPS = [
   { value: 'all_parents',    label: 'Barcha ota-onalar' },
   { value: 'all_students',   label: "Barcha o'quvchilar" },
   { value: 'vice_principal', label: "O'rinbosarlar" },
-  { value: 'accountant',     label: 'Moliya bo\'limi' },
+  { value: 'accountant',     label: 'Moliya bo‘limi' },
   { value: 'librarian',      label: 'Kutubxonachilar' },
 ];
 

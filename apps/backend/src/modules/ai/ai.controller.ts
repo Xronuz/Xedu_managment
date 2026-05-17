@@ -55,7 +55,7 @@ export class AiController {
   }
 
   @Get('usage/me')
-  @ApiOperation({ summary: 'O\'z AI foydalanish tarixi' })
+  @ApiOperation({ summary: 'O‘z AI foydalanish tarixi' })
   async getMyUsage(
     @CurrentUser() user: JwtPayload,
     @Query('days', new DefaultValuePipe(30), ParseIntPipe) days: number,
@@ -76,7 +76,7 @@ export class AiController {
 
   @Post('quota/:feature')
   @Roles(...ADMIN_ROLES)
-  @ApiOperation({ summary: 'Xususiyat kvota limitini o\'rnatish' })
+  @ApiOperation({ summary: 'Xususiyat kvota limitini o‘rnatish' })
   async setQuota(
     @CurrentUser() user: JwtPayload,
     @Query('feature') feature: string,
@@ -89,7 +89,7 @@ export class AiController {
   // ─── Entitlement ──────────────────────────────────────────────────────────
 
   @Get('entitlement')
-  @ApiOperation({ summary: 'O\'z entitlement ma\'lumotlari' })
+  @ApiOperation({ summary: 'O‘z entitlement ma‘lumotlari' })
   async getMyEntitlement(@CurrentUser() user: JwtPayload) {
     const entitlement = await this.entitlementService.getUserEntitlement(user.sub);
     return {
@@ -102,7 +102,7 @@ export class AiController {
 
   @Post('entitlement/:userId')
   @Roles(...ADMIN_ROLES)
-  @ApiOperation({ summary: 'Foydalanuvchi entitlement\'ini sozlash' })
+  @ApiOperation({ summary: 'Foydalanuvchi entitlement‘ini sozlash' })
   async setUserEntitlement(
     @Param('userId') userId: string,
     @Body() body: { tier: string; features: Record<string, boolean>; expiresAt?: string },

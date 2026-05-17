@@ -36,21 +36,21 @@ export class ClassesController {
 
   @Get('my-class')
   @Roles(UserRole.CLASS_TEACHER, UserRole.TEACHER)
-  @ApiOperation({ summary: 'O\'z sinfi (class_teacher/teacher)' })
+  @ApiOperation({ summary: 'O‘z sinfi (class_teacher/teacher)' })
   findMyClass(@CurrentUser() user: JwtPayload) {
     return this.classesService.findMyClass(user);
   }
 
   @Get()
   @Roles(UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT, UserRole.ACCOUNTANT)
-  @ApiOperation({ summary: 'Sinflar ro\'yxati' })
+  @ApiOperation({ summary: 'Sinflar ro‘yxati' })
   findAll(@CurrentUser() user: JwtPayload) {
     return this.classesService.findAll(user);
   }
 
   @Get(':id')
   @Roles(UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT, UserRole.ACCOUNTANT)
-  @ApiOperation({ summary: 'Sinf ma\'lumoti' })
+  @ApiOperation({ summary: 'Sinf ma‘lumoti' })
   findOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.classesService.findOne(id, user);
   }
@@ -76,21 +76,21 @@ export class ClassesController {
   @Delete(':id')
   @Roles(UserRole.DIRECTOR)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Sinfni o\'chirish' })
+  @ApiOperation({ summary: 'Sinfni o‘chirish' })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.classesService.remove(id, user);
   }
 
   @Get(':id/students')
   @Roles(UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER)
-  @ApiOperation({ summary: 'Sinfdagi o\'quvchilar ro\'yxati' })
+  @ApiOperation({ summary: 'Sinfdagi o‘quvchilar ro‘yxati' })
   getStudents(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.classesService.getStudents(id, user);
   }
 
   @Post(':id/students/:studentId')
   @Roles(UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'O\'quvchini sinfga qo\'shish' })
+  @ApiOperation({ summary: 'O‘quvchini sinfga qo‘shish' })
   addStudent(
     @Param('id') classId: string,
     @Param('studentId') studentId: string,
@@ -102,7 +102,7 @@ export class ClassesController {
   @Delete(':id/students/:studentId')
   @Roles(UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL)
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'O\'quvchini sinfdan chiqarish' })
+  @ApiOperation({ summary: 'O‘quvchini sinfdan chiqarish' })
   removeStudent(
     @Param('id') classId: string,
     @Param('studentId') studentId: string,
@@ -113,7 +113,7 @@ export class ClassesController {
 
   @Post('promote')
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
-  @ApiOperation({ summary: 'O\'quvchilarni yangi o\'quv yiliga ko\'chirish' })
+  @ApiOperation({ summary: 'O‘quvchilarni yangi o‘quv yiliga ko‘chirish' })
   promoteStudents(
     @Body() dto: PromoteStudentsDto,
     @CurrentUser() user: JwtPayload,

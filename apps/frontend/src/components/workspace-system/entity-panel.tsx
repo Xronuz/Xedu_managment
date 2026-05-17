@@ -69,7 +69,7 @@ const ENTITY_CONFIG: Record<EntityType, { icon: React.ElementType; label: string
   lead:         { icon: TrendingUp, label: 'Lid', color: 'text-xedu-gold' },
   'leave-request': { icon: FileText, label: "Ta'til", color: 'text-xedu-amber' },
   discipline:   { icon: AlertTriangle, label: 'Intizom', color: 'text-xedu-ruby' },
-  default:      { icon: User, label: 'Ob\'ekt', color: 'text-xedu-slate-500' },
+  default:      { icon: User, label: 'Ob‘ekt', color: 'text-xedu-slate-500' },
 };
 
 const STATUS_CONFIG: Record<string, { label: string; dot: string; text: string }> = {

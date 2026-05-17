@@ -12,10 +12,10 @@ export function StudentWelcome() {
 
   const actions = [
     { label: 'Dars jadvali', desc: 'Haftalik darslar', icon: Calendar, href: '/dashboard/schedule' },
-    { label: 'Uy vazifalari', desc: 'Bajarilishi kerak bo\'lgan topshiriqlar', icon: BookOpen, href: '/dashboard/homework' },
-    { label: 'Baholar', desc: 'Fanlar bo\'yicha baholar', icon: FileText, href: '/dashboard/grades' },
+    { label: 'Uy vazifalari', desc: 'Bajarilishi kerak bo‘lgan topshiriqlar', icon: BookOpen, href: '/dashboard/homework' },
+    { label: 'Baholar', desc: 'Fanlar bo‘yicha baholar', icon: FileText, href: '/dashboard/grades' },
     { label: 'Imtihonlar', desc: 'Yaqin imtihonlar jadvali', icon: GraduationCap, href: '/dashboard/exams' },
-    { label: 'Davomat', desc: 'O\'z davomatingiz', icon: ClipboardCheck, href: '/dashboard/attendance' },
+    { label: 'Davomat', desc: 'O‘z davomatingiz', icon: ClipboardCheck, href: '/dashboard/attendance' },
     { label: 'Xedu Coin', desc: 'Mukofot tangalari', icon: Coins, href: '/dashboard/coins' },
   ];
 
@@ -26,7 +26,7 @@ export function StudentWelcome() {
           <GraduationCap className="h-6 w-6 text-xedu-sky" />
         </div>
         <div>
-          <h2 className="text-lg font-bold tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100">O\'quvchi kabineti</h2>
+          <h2 className="text-lg font-bold tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100">O‘quvchi kabineti</h2>
           <p className="text-sm text-xedu-slate-500 mt-0.5 max-w-lg">
             Sizning shaxsiy ta'lim portalinigiz. Dars jadvallari, uy vazifalari, baholar
             va imtihonlarni shu yerdan kuzatib boring.

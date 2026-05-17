@@ -190,7 +190,7 @@ export default function UsersPage() {
   const hardDeleteMutation = useMutation({
     mutationFn: (id: string) => usersApi.hardDelete(id),
     onSuccess: () => {
-      toast({ title: ' Foydalanuvchi butunlay o\'chirildi' });
+      toast({ title: ' Foydalanuvchi butunlay o‘chirildi' });
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setConfirmHardDelete(null);
     },
@@ -787,7 +787,7 @@ export default function UsersPage() {
                             (s) => s.name.toLowerCase() === name.toLowerCase() && s.classId === v
                           );
                           if (alreadyInList) {
-                            toast({ variant: 'destructive', title: 'Bu fan allaqachon ro\'yxatda' });
+                            toast({ variant: 'destructive', title: 'Bu fan allaqachon ro‘yxatda' });
                             return;
                           }
                           setTeacherSubjects(prev => [...prev, { name, classId: v }]);

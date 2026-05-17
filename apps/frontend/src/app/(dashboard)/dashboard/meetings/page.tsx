@@ -31,7 +31,7 @@ const STATUS_CONFIG: Record<MeetingStatus, { label: string; color: string }> = {
 const MEDIUM_CONFIG: Record<MeetingMedium, { label: string; icon: React.ElementType }> = {
   in_person: { label: 'Bevosita',  icon: Users },
   phone:     { label: 'Telefon',   icon: Phone },
-  video:     { label: 'Video qo\'ng\'iroq', icon: Video },
+  video:     { label: 'Video qo‘ng‘iroq', icon: Video },
 };
 
 const EMPTY_FORM = {

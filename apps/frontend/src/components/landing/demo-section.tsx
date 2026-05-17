@@ -30,8 +30,8 @@ export function DemoSection() {
             <div className="mt-12 space-y-6">
               {[
                 { icon: Building2, title: 'Institutsional yondashuv', desc: 'Sizning tashkilotingiz hajmi va tuzilmasiga moslashtirilgan taqdimot' },
-                { icon: Phone, title: 'Shaxsiy maslahatchi', desc: 'Har bir mijozga alohida mas\'ul shaxs tayinlanadi' },
-                { icon: Mail, title: '24 soat ichida javob', desc: 'So\'rovlarni tez va samarali qayta ishlash' },
+                { icon: Phone, title: 'Shaxsiy maslahatchi', desc: 'Har bir mijozga alohida mas‘ul shaxs tayinlanadi' },
+                { icon: Mail, title: '24 soat ichida javob', desc: 'So‘rovlarni tez va samarali qayta ishlash' },
               ].map((item) => (
                 <div key={item.title} className="flex items-start gap-4">
                   <div className="shrink-0 h-10 w-10 rounded-xl bg-xedu-primary/[0.06] flex items-center justify-center">

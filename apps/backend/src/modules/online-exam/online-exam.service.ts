@@ -163,7 +163,7 @@ export class OnlineExamService {
       throw new ForbiddenException("Savol o'chirish huquqi yo'q");
     }
     await this.prisma.examQuestion.delete({ where: { id: qId } });
-    return { message: 'Savol o\'chirildi' };
+    return { message: 'Savol o‘chirildi' };
   }
 
   // ─── DocX Import ──────────────────────────────────────────────────────────
@@ -300,7 +300,7 @@ export class OnlineExamService {
       include: { questions: { include: { options: { orderBy: { order: 'asc' } } }, orderBy: { order: 'asc' } } },
     });
     if (!exam) throw new NotFoundException('Imtihon topilmadi yoki nashr qilinmagan');
-    if (!exam.questions.length) throw new BadRequestException('Imtihonda savollar yo\'q');
+    if (!exam.questions.length) throw new BadRequestException('Imtihonda savollar yo‘q');
 
     // Avvalgi session bor?
     const existing = await this.prisma.examSession.findUnique({
@@ -361,7 +361,7 @@ export class OnlineExamService {
     });
     if (!session) throw new NotFoundException('Sessiya topilmadi');
     if (session.status !== 'in_progress') {
-      throw new BadRequestException('Imtihon topshirilgan, javob o\'zgartirish mumkin emas');
+      throw new BadRequestException('Imtihon topshirilgan, javob o‘zgartirish mumkin emas');
     }
 
     return this.prisma.studentAnswer.upsert({

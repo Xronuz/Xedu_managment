@@ -58,7 +58,7 @@ export class CoinsService {
         where: { id: userId, schoolId },
         select: { id: true, coins: true },
       });
-      if (!user) throw new NotFoundException('O\'quvchi topilmadi');
+      if (!user) throw new NotFoundException('O‘quvchi topilmadi');
 
       const updated = await tx.user.update({
         where:  { id: userId },
@@ -101,7 +101,7 @@ export class CoinsService {
       where:  { id: userId, schoolId },
       select: { coins: true },
     });
-    if (!user) throw new NotFoundException('O\'quvchi topilmadi');
+    if (!user) throw new NotFoundException('O‘quvchi topilmadi');
 
     const deduct = Math.abs(amount);
     if (user.coins < deduct) {
@@ -112,7 +112,7 @@ export class CoinsService {
 
     return this.prisma.$transaction(async (tx) => {
       const owned = await tx.user.findFirst({ where: { id: userId, schoolId }, select: { id: true } });
-      if (!owned) throw new NotFoundException('O\'quvchi topilmadi');
+      if (!owned) throw new NotFoundException('O‘quvchi topilmadi');
 
       const updated = await tx.user.update({
         where:  { id: userId },
@@ -183,7 +183,7 @@ export class CoinsService {
         },
       });
       if (weeklyStudentCount >= 20) {
-        throw new ForbiddenException('Bu o\'quvchiga haftalik mukofot chegarasiga yetildi (20 ta)');
+        throw new ForbiddenException('Bu o‘quvchiga haftalik mukofot chegarasiga yetildi (20 ta)');
       }
     }
   }
@@ -213,7 +213,7 @@ export class CoinsService {
 
     return {
       flagged,
-      reason: flagged ? 'O\'rtacha mukofotdan 3 baravar ko\'p' : undefined,
+      reason: flagged ? 'O‘rtacha mukofotdan 3 baravar ko‘p' : undefined,
       dailyCount: thisTeacher,
       avgDailyCount: Math.round(avgCount * 10) / 10,
     };
@@ -252,7 +252,7 @@ export class CoinsService {
       if (isEarn) {
         // Earned coins were given → deduct them back
         if (user.coins < reverseAmount) {
-          throw new BadRequestException('Bekor qilish uchun yetarli coin yo\'q');
+          throw new BadRequestException('Bekor qilish uchun yetarli coin yo‘q');
         }
         await prismaTx.user.update({
           where: { id: tx.userId },
@@ -331,7 +331,7 @@ export class CoinsService {
   }
 
   async createShopItem(dto: CreateShopItemDto, currentUser: JwtPayload) {
-    if (dto.cost <= 0) throw new BadRequestException('Narx musbat bo\'lishi kerak');
+    if (dto.cost <= 0) throw new BadRequestException('Narx musbat bo‘lishi kerak');
     return this.prisma.coinShopItem.create({
       data: {
         schoolId:    currentUser.schoolId!,
@@ -369,7 +369,7 @@ export class CoinsService {
     });
     if (!item) throw new NotFoundException('Mahsulot topilmadi');
     await this.prisma.coinShopItem.delete({ where: { id } });
-    return { message: 'Mahsulot o\'chirildi' };
+    return { message: 'Mahsulot o‘chirildi' };
   }
 
   // ─── Purchase ──────────────────────────────────────────────────────────────
@@ -434,7 +434,7 @@ export class CoinsService {
       where:  { id: studentId, schoolId: currentUser.schoolId! },
       select: { id: true, firstName: true, lastName: true, role: true },
     });
-    if (!student) throw new NotFoundException('O\'quvchi topilmadi');
+    if (!student) throw new NotFoundException('O‘quvchi topilmadi');
     if (student.role !== 'student') {
       throw new BadRequestException(
         `${student.firstName} ${student.lastName} o'quvchi emas`,
@@ -533,7 +533,7 @@ export class CoinsService {
         teacherId: t.awardedBy,
         actionCount: t._count,
         totalCoins: t._sum.amount ?? 0,
-        flagReason: 'O\'rtacha mukofotdan 3 baravar ko\'p',
+        flagReason: 'O‘rtacha mukofotdan 3 baravar ko‘p',
       }));
 
     return { averageDailyActions: Math.round(avgCount), flaggedTeachers: flagged };

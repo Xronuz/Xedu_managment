@@ -58,7 +58,7 @@ export class CreateLeadDto {
   @ApiProperty({ example: '+998901234567' })
   @IsString() @IsNotEmpty() @MaxLength(20)
   // Must contain at least 7 digits (allows +, spaces, dashes, parens)
-  @Matches(/^[+\d][\d\s\-().]{5,18}$/, { message: 'phone raqam noto\'g\'ri formatda' })
+  @Matches(/^[+\d][\d\s\-().]{5,18}$/, { message: 'phone raqam noto‘g‘ri formatda' })
   phone: string;
 
   @ApiProperty({ enum: LeadSource, default: LeadSource.OTHER })
@@ -86,7 +86,7 @@ export class CreateLeadDto {
   @IsUUID()
   expectedClassId?: string;
 
-  @ApiPropertyOptional({ description: 'Keyingi bog\'lanish sanasi (ISO 8601)' })
+  @ApiPropertyOptional({ description: 'Keyingi bog‘lanish sanasi (ISO 8601)' })
   @IsOptional()
   @IsDateString()
   nextContactDate?: string;
@@ -106,7 +106,7 @@ export class UpdateLeadDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString() @MaxLength(20)
-  @Matches(/^[+\d][\d\s\-().]{5,18}$/, { message: 'phone raqam noto\'g\'ri formatda' })
+  @Matches(/^[+\d][\d\s\-().]{5,18}$/, { message: 'phone raqam noto‘g‘ri formatda' })
   phone?: string;
 
   @ApiPropertyOptional({ enum: LeadSource })
@@ -147,7 +147,7 @@ export class UpdateLeadDto {
 }
 
 export class AddCommentDto {
-  @ApiProperty({ example: 'Qo\'ng\'iroq qildim, sinov darsiga kelishga rozi bo\'ldi.' })
+  @ApiProperty({ example: 'Qo‘ng‘iroq qildim, sinov darsiga kelishga rozi bo‘ldi.' })
   @IsString() @IsNotEmpty() @MaxLength(2000)
   text: string;
 }
@@ -452,7 +452,7 @@ export class LeadsService {
     this.assertBranchAccess(currentUser, lead.branchId);
 
     if (lead.status === 'CONVERTED') {
-      throw new BadRequestException('Bu lead allaqachon o\'quvchiga aylantirilib bo\'lgan');
+      throw new BadRequestException('Bu lead allaqachon o‘quvchiga aylantirilib bo‘lgan');
     }
 
     // Maqsadli sinf/guruh tekshirish
@@ -468,7 +468,7 @@ export class LeadsService {
     ]);
     if (!SCHOOL_WIDE.has(currentUser.role as string) && lead.branchId && cls.branchId && cls.branchId !== lead.branchId) {
       throw new ForbiddenException(
-        'Lead va sinf bir xil filialda bo\'lishi kerak. Cross-branch convert taqiqlangan.',
+        'Lead va sinf bir xil filialda bo‘lishi kerak. Cross-branch convert taqiqlangan.',
       );
     }
 

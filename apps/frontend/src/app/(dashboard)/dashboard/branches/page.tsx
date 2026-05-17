@@ -236,7 +236,7 @@ export default function BranchesPage() {
           icon={Building2}
           title="Filiallar yo'q"
           description="Hali birorta filial yaratilmagan. Birinchi filialni qo'shing."
-          action={{ label: 'Filial qo\'shish', onClick: openCreate }}
+          action={{ label: 'Filial qo‘shish', onClick: openCreate }}
         />
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

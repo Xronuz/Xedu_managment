@@ -154,7 +154,7 @@ export default function MyClassPage() {
   const handleSaveAttendance = () => {
     const entries = Object.entries(attStatus).map(([studentId, status]) => ({ studentId, status }));
     if (entries.length === 0) {
-      toast({ title: 'Davomat belgilanmadi', description: 'Avval o\'quvchilar holatini belgilang', variant: 'destructive' });
+      toast({ title: 'Davomat belgilanmadi', description: 'Avval o‘quvchilar holatini belgilang', variant: 'destructive' });
       return;
     }
     markAttMutation.mutate(entries);

@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Plus, Search, Users, Loader2, Eye, EyeOff, UserCheck, GraduationCap, Heart, Ban, RotateCcw, Link2, Upload, FileText, AlertTriangle, BookOpen, Trash2, SlidersHorizontal, X, ChevronDown, Mail } from 'lucide-react';
+import { Plus, Search, Users, Loader2, Eye, EyeOff, UserCheck, GraduationCap, Heart, Ban, RotateCcw, Link2, Upload, FileText, AlertTriangle, BookOpen, Trash2, SlidersHorizontal, X, ChevronDown, Mail, KeyRound, Copy, Check } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -75,6 +75,9 @@ export default function UsersPage() {
   const [showPass, setShowPass] = useState(false);
   const [confirmDelete, setConfirmDelete]     = useState<any>(null);
   const [confirmHardDelete, setConfirmHardDelete] = useState<any>(null);
+  const [confirmReset, setConfirmReset] = useState<any>(null);
+  const [resetResult, setResetResult] = useState<{ temporaryPassword: string; userName: string } | null>(null);
+  const [copied, setCopied] = useState(false);
   const isDirector = user?.role === 'director';
   const [csvResult, setCsvResult] = useState<{ created: number; skipped: number; errors: string[] } | null>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
@@ -197,6 +200,21 @@ export default function UsersPage() {
     onError: (err: any) => {
       const msg = err?.response?.data?.message;
       toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+    },
+  });
+
+  const resetPasswordMutation = useMutation({
+    mutationFn: (id: string) => usersApi.resetPassword(id),
+    onSuccess: (data) => {
+      setResetResult({ temporaryPassword: data.temporaryPassword, userName: '' });
+      setConfirmReset(null);
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      toast({ title: "Parol muvaffaqiyatli tiklandi", description: data.message });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: 'Parolni tiklashda xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+      setConfirmReset(null);
     },
   });
 
@@ -517,6 +535,26 @@ export default function UsersPage() {
                 </TD>
                 <TD className="text-right">
                   <div className="flex items-center justify-end gap-1.5">
+                    {/* Parolni tiklash */}
+                    {(() => {
+                      const actorRole = user?.role;
+                      const targetRole = u.role;
+                      const sameSchool = u.schoolId === user?.schoolId;
+                      const sameBranch = u.branchId === user?.branchId || u.branchAssignments?.some((a: any) => a.branchId === user?.branchId);
+                      let canReset = false;
+                      if (isSelf) canReset = false;
+                      else if (actorRole === 'super_admin') canReset = targetRole === 'director';
+                      else if (actorRole === 'director' || actorRole === 'vice_principal') {
+                        canReset = sameSchool && targetRole !== 'super_admin' && targetRole !== 'director' && targetRole !== 'director';
+                      } else if (actorRole === 'branch_admin') {
+                        canReset = sameSchool && sameBranch && targetRole !== 'super_admin' && targetRole !== 'director' && targetRole !== 'vice_principal' && targetRole !== 'branch_admin';
+                      }
+                      return canReset ? (
+                        <Btn variant="primary" size="sm" icon={<KeyRound className="h-3.5 w-3.5" />} onClick={() => setConfirmReset(u)} title="Parolni tiklash">
+                          Parol
+                        </Btn>
+                      ) : null;
+                    })()}
                     {isUntouchable ? (
                       <span className="text-[12px]" style={{ color: DS.muted }}>—</span>
                     ) : u.isActive ? (
@@ -602,6 +640,83 @@ export default function UsersPage() {
               onClick={() => hardDeleteMutation.mutate(confirmHardDelete?.id)}
             >
               Ha, o'chirish
+            </Btn>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password reset confirm dialog */}
+      <Dialog open={!!confirmReset} onOpenChange={v => { if (!v) setConfirmReset(null); }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <KeyRound className="h-5 w-5 text-xedu-amber" />
+              Parolni tiklashni tasdiqlang
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              <span className="font-semibold text-foreground">
+                {confirmReset?.firstName} {confirmReset?.lastName}
+              </span>{' '}
+              uchun yangi vaqtinchalik parol yaratiladi. U keyingi kirishda parolni yangilashi kerak.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 pt-2">
+            <Btn variant="secondary" onClick={() => setConfirmReset(null)}>Bekor qilish</Btn>
+            <Btn
+              variant="primary"
+              loading={resetPasswordMutation.isPending}
+              icon={<KeyRound className="h-3.5 w-3.5" />}
+              onClick={() => resetPasswordMutation.mutate(confirmReset?.id)}
+            >
+              Parolni tiklash
+            </Btn>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Password reset success — temporary password display */}
+      <Dialog open={!!resetResult} onOpenChange={v => { if (!v) { setResetResult(null); setCopied(false); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-xedu-emerald" />
+              Parol tiklandi
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              Quyidagi vaqtinchalik parolni xavfsiz tarzda foydalanuvchiga yetkazing. Bu parol faqat bir marta ko&apos;rsatiladi.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="relative">
+              <Input
+                readOnly
+                value={resetResult?.temporaryPassword ?? ''}
+                className="pr-24 font-mono text-base tracking-wider bg-xedu-slate-50 dark:bg-xedu-slate-800"
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-8 gap-1"
+                onClick={() => {
+                  if (resetResult?.temporaryPassword) {
+                    navigator.clipboard.writeText(resetResult.temporaryPassword);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }
+                }}
+              >
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? 'Nusxa olindi' : 'Nusxa olish'}
+              </Button>
+            </div>
+            <div className="rounded-lg bg-xedu-amber/10 border border-xedu-amber/20 px-3 py-2.5 text-xs text-xedu-amber font-medium flex items-start gap-2">
+              <AlertTriangle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+              Foydalanuvchi keyingi kirishda yangi parol o&apos;rnatishi shart.
+            </div>
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Btn variant="primary" onClick={() => { setResetResult(null); setCopied(false); }}>
+              Yopish
             </Btn>
           </div>
         </DialogContent>

@@ -70,6 +70,11 @@ export const usersApi = {
     return data;
   },
 
+  resetPassword: async (id: string) => {
+    const { data } = await apiClient.post(`/users/${id}/reset-password`);
+    return data as { temporaryPassword: string; message: string };
+  },
+
   importCsv: async (file: File) => {
     const form = new FormData();
     form.append('file', file);

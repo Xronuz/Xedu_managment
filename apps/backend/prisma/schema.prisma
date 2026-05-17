@@ -225,6 +225,7 @@ enum AuditAction {
   export
   assign_branch
   unassign_branch
+  password_reset
 }
 
 // ─── Phase 23: New enums for previously String fields ──────────────────────

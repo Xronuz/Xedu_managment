@@ -3,9 +3,11 @@ import {
   ForbiddenException, UnauthorizedException, BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { parse as csvParse } from 'csv-parse/sync';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { AuditService } from '@/common/audit/audit.service';
+import { AuthService } from '@/modules/auth/auth.service';
 import { UserRole, JwtPayload } from '@eduplatform/types';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -22,6 +24,7 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    private readonly authService: AuthService,
   ) {}
 
   /**
@@ -464,6 +467,84 @@ export class UsersService {
       data: { isActive: true },
     });
     return { message: 'Foydalanuvchi faollashtirildi' };
+  }
+
+  /**
+   * Admin tomonidan foydalanuvchi parolini tiklash.
+   * Vaqtinchalik parol yaratiladi, isFirstLogin=true qilinadi,
+   * barcha mavjud sessiyalar bekor qilinadi.
+   */
+  async resetPassword(id: string, currentUser: JwtPayload) {
+    // 1. Target user ni topish
+    const target = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true, email: true, role: true,
+        schoolId: true, branchId: true, isActive: true,
+      },
+    });
+    if (!target) throw new NotFoundException('Foydalanuvchi topilmadi');
+    if (!target.isActive) throw new BadRequestException('Bloklangan foydalanuvchi parolini tiklab bo‘lmaydi');
+
+    // 2. O'zini-o'zi tiklash taqiqlanadi
+    assertNotSelf(currentUser.sub, id);
+
+    // 3. Ruxsatlar matritsasi
+    const actorRole = currentUser.role as UserRole;
+    const targetRole = target.role as UserRole;
+
+    if (actorRole === UserRole.SUPER_ADMIN) {
+      // Super Admin faqat Director parolini tiklay oladi
+      if (targetRole !== UserRole.DIRECTOR) {
+        throw new ForbiddenException('Super Admin faqat Director parolini tiklay oladi');
+      }
+    } else if (actorRole === UserRole.DIRECTOR || actorRole === UserRole.VICE_PRINCIPAL) {
+      // Director/VP faqat o'z maktabidagi o'zidan past rolni tiklay oladi
+      if (target.schoolId !== currentUser.schoolId) {
+        throw new ForbiddenException('Boshqa maktab foydalanuvchisiga ruxsat yo‘q');
+      }
+      assertCanManage(currentUser, targetRole);
+    } else if (actorRole === UserRole.BRANCH_ADMIN) {
+      // Branch Admin faqat o'z filialidagi o'zidan past rolni tiklay oladi
+      if (target.schoolId !== currentUser.schoolId) {
+        throw new ForbiddenException('Boshqa maktab foydalanuvchisiga ruxsat yo‘q');
+      }
+      if (target.branchId !== currentUser.branchId) {
+        throw new ForbiddenException('Boshqa filial foydalanuvchisiga ruxsat yo‘q');
+      }
+      assertCanManage(currentUser, targetRole);
+    } else {
+      throw new ForbiddenException('Sizda parolni tiklash huquqi yo‘q');
+    }
+
+    // 4. Vaqtinchalik parol yaratish (12 ta belgi, xavfsiz)
+    const tempPassword = randomBytes(9).toString('base64').slice(0, 12).replace(/[^a-zA-Z0-9]/g, '') + randomBytes(2).toString('hex').slice(0, 2);
+    const passwordHash = await bcrypt.hash(tempPassword, 12);
+
+    // 5. Foydalanuvchini yangilash
+    await this.prisma.user.update({
+      where: { id },
+      data: { passwordHash, isFirstLogin: true },
+    });
+
+    // 6. Barcha sessiyalarni bekor qilish
+    await this.authService.logoutAll(id);
+
+    // 7. Audit log
+    await this.auditService.log({
+      userId: currentUser.sub,
+      schoolId: currentUser.schoolId ?? undefined,
+      branchId: currentUser.branchId ?? undefined,
+      action: 'password_reset',
+      entity: 'User',
+      entityId: id,
+      newData: { isFirstLogin: true },
+    });
+
+    return {
+      temporaryPassword: tempPassword,
+      message: "Vaqtinchalik parol yaratildi. Foydalanuvchi keyingi kirishda yangi parol o'rnatishi kerak.",
+    };
   }
 
   async getMe(userId: string) {

@@ -189,19 +189,21 @@ export class AuthService {
    * Barcha sessiyalarni bekor qilish (logout from all devices).
    * Foydalanuvchining barcha refresh tokenlarini o'chiradi.
    */
-  async logoutAll(userId: string, currentAccessToken: string): Promise<void> {
-    // Deny-list current access token
-    try {
-      const payload = this.jwtService.decode(currentAccessToken) as any;
-      if (payload?.jti) {
-        await this.redis.setEx(
-          `${TOKEN_DENYLIST_PREFIX}${payload.jti}`,
-          TOKEN_DENYLIST_TTL,
-          userId,
-        );
+  async logoutAll(userId: string, currentAccessToken?: string): Promise<void> {
+    // Deny-list current access token (if provided)
+    if (currentAccessToken) {
+      try {
+        const payload = this.jwtService.decode(currentAccessToken) as any;
+        if (payload?.jti) {
+          await this.redis.setEx(
+            `${TOKEN_DENYLIST_PREFIX}${payload.jti}`,
+            TOKEN_DENYLIST_TTL,
+            userId,
+          );
+        }
+      } catch (err: any) {
+        this.logger.warn(`Access token deny-list ga qo‘shishda xato: ${err.message}`);
       }
-    } catch (err: any) {
-      this.logger.warn(`Access token deny-list ga qo‘shishda xato: ${err.message}`);
     }
 
     // We can't enumerate all refresh tokens by userId efficiently with the current

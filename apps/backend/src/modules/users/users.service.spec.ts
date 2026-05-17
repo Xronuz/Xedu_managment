@@ -3,6 +3,7 @@ import { ForbiddenException, ConflictException, BadRequestException } from '@nes
 import { UsersService } from './users.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { AuditService } from '@/common/audit/audit.service';
+import { AuthService } from '@/modules/auth/auth.service';
 import { UserRole } from '@eduplatform/types';
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
@@ -22,6 +23,10 @@ const mockAudit = {
   log: jest.fn(() => Promise.resolve()),
 };
 
+const mockAuth = {
+  logoutAll: jest.fn(() => Promise.resolve()),
+};
+
 // ── Test Suite ─────────────────────────────────────────────────────────────
 
 describe('UsersService', () => {
@@ -35,6 +40,7 @@ describe('UsersService', () => {
         UsersService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: AuditService, useValue: mockAudit },
+        { provide: AuthService, useValue: mockAuth },
       ],
     }).compile();
 

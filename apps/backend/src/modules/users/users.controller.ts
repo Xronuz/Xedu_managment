@@ -145,6 +145,14 @@ export class UsersController {
     return this.usersService.linkParentStudent(parentId, studentId, user);
   }
 
+  @Post(':id/reset-password')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Foydalanuvchi parolini tiklash (vaqtinchalik parol)" })
+  async resetPassword(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.usersService.resetPassword(id, user);
+  }
+
   @Put('me/password')
   @AnyAuthenticated()
   @HttpCode(HttpStatus.OK)

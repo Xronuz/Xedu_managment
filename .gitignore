@@ -51,3 +51,6 @@ redis-data/
 # Claude Code worktrees
 .claude/worktrees/
 .claire/
+
+# TypeScript incremental build cache — never commit
+*.tsbuildinfo

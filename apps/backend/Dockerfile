@@ -30,8 +30,8 @@ RUN pnpm --filter backend exec prisma generate
 # Build shared types
 RUN pnpm --filter @eduplatform/types build
 
-# Build backend
-RUN pnpm --filter backend build
+# Build backend (remove stale tsbuildinfo to force full emit)
+RUN rm -f apps/backend/tsconfig.tsbuildinfo && pnpm --filter backend build
 
 # ─── Stage 2: Runner ──────────────────────────────────────────────────────
 FROM node:20-alpine AS runner

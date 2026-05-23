@@ -111,6 +111,7 @@ export default function SchoolDetailPage() {
     mutationFn: (payload: object) => superAdminApi.updateSchool(id, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['school', id] });
+      queryClient.invalidateQueries({ queryKey: ['school-users', id] });
       queryClient.invalidateQueries({ queryKey: ['schools'] });
       setEditMode(false);
     },

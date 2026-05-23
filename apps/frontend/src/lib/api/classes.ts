@@ -16,8 +16,8 @@ export const classesApi = {
     return data;
   },
 
-  update: async (id: string, payload: Partial<{ name: string; gradeLevel: number; classTeacherId: string | null }>) => {
-    const { data } = await apiClient.patch(`/classes/${id}`, payload);
+  update: async (id: string, payload: Partial<{ name: string; gradeLevel: number; classTeacherId: string | null; branchId?: string }>) => {
+    const { data } = await apiClient.put(`/classes/${id}`, payload);
     return data;
   },
 

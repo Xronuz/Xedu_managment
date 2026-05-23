@@ -89,7 +89,11 @@ export function ClassesWorkspace() {
   const isTeacher = user?.role === 'teacher';
   const isClassTeacher = user?.role === 'class_teacher';
   const canManage = isDirector || isVP || isBranchAdmin;
-  const canDelete = isDirector;
+  const canDeleteClass = (cls: ClassRow) => {
+    if (isDirector) return true;
+    if (isVP || isBranchAdmin) return cls.branchId === user?.branchId;
+    return false;
+  };
 
   // ── Filters ────────────────────────────────────────────────────────────────
   const [search, setSearch] = useState('');
@@ -191,7 +195,10 @@ export function ClassesWorkspace() {
 
   const openCreate = () => {
     setEditClass(null);
-    setForm(MODAL_EMPTY);
+    setForm({
+      ...MODAL_EMPTY,
+      branchId: (isVP || isBranchAdmin) ? (user?.branchId ?? '') : '',
+    });
     setErrors({});
     setModalOpen(true);
   };
@@ -203,7 +210,9 @@ export function ClassesWorkspace() {
       gradeLevel: String(cls.gradeLevel),
       academicYear: cls.academicYear,
       classTeacherId: cls.classTeacherId ?? '',
-      branchId: cls.branchId ?? '',
+      branchId: (isVP || isBranchAdmin)
+        ? (cls.branchId ?? user?.branchId ?? '')
+        : (cls.branchId ?? ''),
     });
     setErrors({});
     setModalOpen(true);
@@ -593,7 +602,7 @@ export function ClassesWorkspace() {
                     title="Tahrirlash"
                     onClick={() => openEdit(c)}
                   />
-                  {canDelete && (
+                  {canDeleteClass(c) && (
                     <IconAction
                       icon={<Trash2 className="h-3.5 w-3.5" />}
                       title="O'chirish"
@@ -766,15 +775,20 @@ export function ClassesWorkspace() {
             {branches.length > 0 && (
               <div className="space-y-1.5">
                 <Label>Filial</Label>
-                <Select value={form.branchId || '__auto__'} onValueChange={(v) => sel('branchId')(v === '__auto__' ? '' : v)}>
-                  <SelectTrigger><SelectValue placeholder="Filial tanlang..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__auto__">Joriy filial (avtomatik)</SelectItem>
-                    {branches.map((b: any) => (
-                      <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                {(isVP || isBranchAdmin) ? (
+                  <div className="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground items-center">
+                    {branches.find((b: any) => b.id === user?.branchId)?.name ?? 'Filial aniqlanmagan'}
+                  </div>
+                ) : (
+                  <Select value={form.branchId || ''} onValueChange={sel('branchId')}>
+                    <SelectTrigger><SelectValue placeholder="Filial tanlang..." /></SelectTrigger>
+                    <SelectContent>
+                      {branches.map((b: any) => (
+                        <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
             )}
           </div>

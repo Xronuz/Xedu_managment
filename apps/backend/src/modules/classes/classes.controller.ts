@@ -74,7 +74,7 @@ export class ClassesController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.DIRECTOR)
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Sinfni o‘chirish' })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { Optional } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
@@ -91,12 +91,43 @@ export class ClassesService {
     return cls;
   }
 
+  private resolveBranchId(
+    dtoBranchId: string | null | undefined,
+    currentUser: JwtPayload,
+  ): string {
+    const resolved = dtoBranchId || currentUser.branchId;
+
+    if (!resolved) {
+      throw new BadRequestException('Filial ID talab qilinadi');
+    }
+
+    // Director can manage any branch in their school
+    if (currentUser.role === 'director' || currentUser.role === 'super_admin') {
+      return resolved;
+    }
+
+    // For other roles, branchId must be in their allowed branches
+    const allowedBranches = [
+      currentUser.branchId,
+      ...(currentUser.assignedBranchIds ?? []),
+    ].filter((b): b is string => !!b);
+
+    if (!allowedBranches.includes(resolved)) {
+      throw new ForbiddenException(
+        'Sizga ruxsat etilmagan filialga sinf qo\'sha olmaysiz',
+      );
+    }
+
+    return resolved;
+  }
+
   async create(dto: CreateClassDto, currentUser: JwtPayload) {
+    const resolvedBranchId = this.resolveBranchId(dto.branchId, currentUser);
     const result = await this.prisma.class.create({
       data: {
         ...dto,
         schoolId: currentUser.schoolId!,
-        branchId: dto.branchId ?? currentUser.branchId! ?? currentUser.branchId ?? undefined,
+        branchId: resolvedBranchId,
       },
     });
     await this.invalidate(currentUser.schoolId!);
@@ -114,7 +145,23 @@ export class ClassesService {
   }
 
   async update(id: string, dto: Partial<CreateClassDto>, currentUser: JwtPayload) {
-    await this.findOne(id, currentUser);
+    const existing = await this.findOne(id, currentUser);
+
+    // Validate that the existing class belongs to user's allowed branches
+    if (
+      existing.branchId &&
+      currentUser.role !== 'director' &&
+      currentUser.role !== 'super_admin'
+    ) {
+      const allowedBranches = [
+        currentUser.branchId,
+        ...(currentUser.assignedBranchIds ?? []),
+      ].filter((b): b is string => !!b);
+
+      if (!allowedBranches.includes(existing.branchId)) {
+        throw new ForbiddenException('Sinf sizga tegishli filialda emas');
+      }
+    }
 
     // If branchId changed, backfill denormalized branchId on related models
     if (dto.branchId !== undefined) {
@@ -150,7 +197,10 @@ export class ClassesService {
 
     const { branchId, ...rest } = dto as any;
     const updateData: any = { ...rest };
-    if (branchId) updateData.branchId = branchId;
+    if (branchId !== undefined) {
+      const resolvedBranchId = this.resolveBranchId(branchId, currentUser);
+      updateData.branchId = resolvedBranchId;
+    }
     const result = await this.prisma.class.update({ where: { id }, data: updateData });
     await this.invalidate(currentUser.schoolId!);
 
@@ -167,7 +217,24 @@ export class ClassesService {
   }
 
   async remove(id: string, currentUser: JwtPayload) {
-    await this.findOne(id, currentUser);
+    const existing = await this.findOne(id, currentUser);
+
+    // Validate that the existing class belongs to user's allowed branches
+    if (
+      existing.branchId &&
+      currentUser.role !== 'director' &&
+      currentUser.role !== 'super_admin'
+    ) {
+      const allowedBranches = [
+        currentUser.branchId,
+        ...(currentUser.assignedBranchIds ?? []),
+      ].filter((b): b is string => !!b);
+
+      if (!allowedBranches.includes(existing.branchId)) {
+        throw new ForbiddenException('Sinf sizga tegishli filialda emas');
+      }
+    }
+
     const studentCount = await this.prisma.classStudent.count({ where: { classId: id } });
     if (studentCount > 0) {
       throw new BadRequestException('Sinfda o‘quvchilar bor. Avval ularni chiqaring');

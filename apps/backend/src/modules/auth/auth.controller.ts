@@ -27,12 +27,39 @@ export class AuthController {
   ) {}
 
   private get cookieOptions() {
-    const isHttps = this.config.get('APP_URL', '').startsWith('https://');
+    const appUrl = this.config.get('APP_URL', '');
+    const isHttps = appUrl.startsWith('https://');
+    const nodeEnv = this.config.get('NODE_ENV', 'development');
+
+    // COOKIE_DOMAIN is the explicit source of truth for cookie domain.
+    //   Production: COOKIE_DOMAIN=.xedu.uz  (leading dot = share across subdomains)
+    //   Dev/local:  leave empty → browser defaults to the host that set the cookie
+    const explicitDomain = this.config.get('COOKIE_DOMAIN', '');
+
+    let domain: string | undefined;
+    if (explicitDomain) {
+      domain = explicitDomain;
+    } else if (nodeEnv === 'production' && isHttps) {
+      // Fallback: derive from APP_URL only if no explicit COOKIE_DOMAIN is set.
+      // Strip protocol and port to get the bare domain.
+      const derived = appUrl.replace(/^https?:\/\//, '').split(':')[0];
+      // For sub-domain sharing we want the root domain.
+      // If derived is "api.xedu.uz" we still set "xedu.uz" (no leading dot).
+      // Modern browsers treat "xedu.uz" the same as ".xedu.uz" for subdomains.
+      if (derived && !derived.includes('localhost')) {
+        const parts = derived.split('.');
+        domain = parts.length > 2
+          ? parts.slice(-2).join('.')   // api.xedu.uz → xedu.uz
+          : derived;                     // xedu.uz → xedu.uz
+      }
+    }
+
     return {
       httpOnly: true,
       secure: isHttps,
       sameSite: isHttps ? ('none' as const) : ('lax' as const),
       path: '/',
+      ...(domain ? { domain } : {}),
     };
   }
 

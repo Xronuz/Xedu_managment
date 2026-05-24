@@ -449,10 +449,24 @@ export class AuthService {
       data: { passwordHash, isFirstLogin: false },
     });
 
-    // Yangi tokenlar isFirstLogin=false bilan generatsiya qilinadi
-    const tokens = await this.generateTokens({ ...user, isFirstLogin: false });
-    this.logger.log(`Foydalanuvchi birinchi parolni o'zgartirdi: ${userId}`);
-    return { message: 'Parol muvaffaqiyatli yangilandi', tokens };
+    try {
+      // Yangi tokenlar isFirstLogin=false bilan generatsiya qilinadi
+      const tokens = await this.generateTokens({ ...user, isFirstLogin: false });
+      this.logger.log(`Foydalanuvchi birinchi parolni o'zgartirdi: ${userId}`);
+      return { message: 'Parol muvaffaqiyatli yangilandi', tokens };
+    } catch (err: any) {
+      // Token generation failed — rollback password change so user can retry
+      this.logger.error(
+        `Token generation failed after password change for ${userId}: ${err.message}`,
+      );
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { passwordHash: user.passwordHash, isFirstLogin: true },
+      });
+      throw new BadRequestException(
+        'Parolni saqlashda xatolik yuz berdi. Iltimos, qayta urinib ko\'ring.',
+      );
+    }
   }
 
   private async generateTokens(user: {

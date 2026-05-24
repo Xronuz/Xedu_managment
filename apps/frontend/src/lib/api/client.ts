@@ -30,7 +30,7 @@ const MAX_REFRESH_ATTEMPTS = 3;
 let failedQueue: { resolve: (v: string) => void; reject: (e: unknown) => void }[] = [];
 
 /** Auth endpointlariga 401 kelsa refresh urinmasligi kerak (login, refresh, logout, etc.) */
-const PUBLIC_AUTH_ENDPOINTS = new Set(['/auth/login', '/auth/refresh', '/auth/logout', '/auth/forgot-password', '/auth/reset-password', '/auth/first-login']);
+const PUBLIC_AUTH_ENDPOINTS = new Set(['/auth/login', '/auth/refresh', '/auth/logout', '/auth/forgot-password', '/auth/reset-password']);
 
 function processQueue(error: unknown, token: string | null) {
   failedQueue.forEach(({ resolve, reject }) => {

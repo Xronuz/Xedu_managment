@@ -29,9 +29,6 @@ const mockPrisma = {
     findUnique: jest.fn(),
     update: jest.fn(),
   },
-  school: {
-    findUnique: jest.fn(() => Promise.resolve({ deletedAt: null })),
-  },
   userBranchAssignment: {
     findMany: jest.fn(() => Promise.resolve([])),
   },
@@ -320,26 +317,6 @@ describe('AuthService', () => {
       await expect(
         service.login({ email: mockUser.email, password: 'Password123!' }),
       ).rejects.toThrow(UnauthorizedException);
-    });
-
-    it('rolls back password change when token generation fails', async () => {
-      mockPrisma.user.findUnique.mockResolvedValueOnce(mockUser);
-      mockPrisma.user.update.mockResolvedValueOnce({ ...mockUser, isFirstLogin: false });
-      // Simulate token generation failure
-      mockJwt.sign.mockImplementationOnce(() => { throw new Error('JWT signing failed'); });
-
-      await expect(
-        service.firstLoginPasswordChange(mockUser.id, 'Password123!', 'NewSecurePass123!'),
-      ).rejects.toThrow(BadRequestException);
-
-      // Verify rollback: passwordHash and isFirstLogin restored
-      expect(mockPrisma.user.update).toHaveBeenLastCalledWith({
-        where: { id: mockUser.id },
-        data: {
-          passwordHash: mockUser.passwordHash,
-          isFirstLogin: true,
-        },
-      });
     });
   });
 

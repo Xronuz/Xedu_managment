@@ -157,6 +157,53 @@ describe('UsersService', () => {
 
       expect(result.role).toBe(UserRole.VICE_PRINCIPAL);
     });
+
+    it('allows DIRECTOR to create BRANCH_ADMIN', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.user.create.mockResolvedValueOnce({ id: 'new-user-dir-ba', email: baseDto.email, role: UserRole.BRANCH_ADMIN });
+
+      const result = await service.create({ ...baseDto, role: UserRole.BRANCH_ADMIN }, director);
+
+      expect(result.role).toBe(UserRole.BRANCH_ADMIN);
+    });
+  });
+
+  describe('VICE_PRINCIPAL restrictions', () => {
+    const vp = {
+      sub: 'vp-1',
+      email: 'vp@school.uz',
+      role: UserRole.VICE_PRINCIPAL,
+      schoolId: 'school-1',
+      branchId: 'branch-1',
+      isSuperAdmin: false,
+    };
+
+    const baseDto = {
+      firstName: 'Test',
+      lastName: 'User',
+      email: 'test@school.uz',
+      password: 'Password123!',
+      branchId: 'branch-1',
+    };
+
+    it('rejects VP creating BRANCH_ADMIN', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create({ ...baseDto, role: UserRole.BRANCH_ADMIN }, vp),
+      ).rejects.toThrow(ForbiddenException);
+
+      expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('allows VP creating TEACHER', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.user.create.mockResolvedValueOnce({ id: 'new-user-vp-t', email: baseDto.email, role: UserRole.TEACHER });
+
+      const result = await service.create({ ...baseDto, role: UserRole.TEACHER }, vp);
+
+      expect(result.role).toBe(UserRole.TEACHER);
+    });
   });
 
   describe('BRANCH_ADMIN hard restrictions — RBAC security', () => {

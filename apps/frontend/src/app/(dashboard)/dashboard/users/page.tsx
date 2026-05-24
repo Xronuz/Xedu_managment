@@ -68,7 +68,7 @@ function getCreatableRoles(actorRole?: string) {
     case 'director':
       return ALL_ROLES.filter((r) => !['director', 'super_admin'].includes(r.value));
     case 'vice_principal':
-      return ALL_ROLES.filter((r) => !['director', 'super_admin', 'vice_principal'].includes(r.value));
+      return ALL_ROLES.filter((r) => !['director', 'super_admin', 'vice_principal', 'branch_admin'].includes(r.value));
     case 'branch_admin':
       // Branch Admin can ONLY create lower operational roles in their own branch
       return ALL_ROLES.filter((r) => ['teacher', 'class_teacher', 'accountant', 'librarian', 'student', 'parent'].includes(r.value));

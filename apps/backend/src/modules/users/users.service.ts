@@ -39,7 +39,7 @@ export class UsersService {
       UserRole.LIBRARIAN, UserRole.STUDENT, UserRole.PARENT,
     ],
     [UserRole.VICE_PRINCIPAL]: [
-      UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER,
+      UserRole.TEACHER, UserRole.CLASS_TEACHER,
       UserRole.ACCOUNTANT, UserRole.LIBRARIAN, UserRole.STUDENT, UserRole.PARENT,
     ],
     [UserRole.BRANCH_ADMIN]: [

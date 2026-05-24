@@ -8,17 +8,19 @@ import { usePageActions } from '@/lib/header-actions-context';
 import { useAuthStore } from '@/store/auth.store';
 
 import BranchesPage      from '../branches/page';
-import CrmPage           from '../crm/page';
+
 import LeaveRequestsPage from '../leave-requests/page';
 import DisciplinePage    from '../discipline/page';
 import MeetingsPage      from '../meetings/page';
 import { StaffWorkspace } from './_components/staff-workspace';
 
+const ALL_STAFF = ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher', 'accountant', 'librarian'];
+
 const TABS = [
-  { id: 'users',      label: 'Foydalanuvchilar', roles: ['director'] },
+  { id: 'staff',      label: 'Xodimlar',          roles: ALL_STAFF },
+  { id: 'users',      label: 'Foydalanuvchilar',  roles: ['director'] },
   { id: 'branches',   label: 'Filiallar',         roles: ['director'] },
-  { id: 'crm',        label: 'CRM — Leadlar',     roles: ['director', 'branch_admin', 'vice_principal'] },
-  { id: 'leave',      label: "Ta'til so'rovlari", roles: ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher', 'accountant', 'librarian'] },
+  { id: 'leave',      label: "Ta'til so'rovlari", roles: ALL_STAFF },
   { id: 'discipline', label: 'Intizom jurnali',   roles: ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher'] },
   { id: 'meetings',   label: 'Uchrashuvlar',      roles: ['director', 'vice_principal', 'class_teacher'] },
 ];
@@ -35,7 +37,6 @@ function TabFallback() {
 function TabContent({ tab }: { tab: string }) {
   switch (tab) {
     case 'branches':   return <BranchesPage />;
-    case 'crm':        return <CrmPage />;
     case 'leave':      return <LeaveRequestsPage />;
     case 'discipline': return <DisciplinePage />;
     case 'meetings':   return <MeetingsPage />;

@@ -85,7 +85,12 @@ export const DIRECTOR_NAV: NavGroup[] = [
     ],
   },
   {
-    // Kommunikatsiya — Bildirishnomalar bilan birlashtirildi; CRM, Uchrashuvlar, Marketing — Cmd+K
+    title: 'Sotuv',
+    items: [
+      { label: 'CRM — Leadlar', href: '/dashboard/crm', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/crm'] },
+    ],
+  },
+  {
     title: 'Aloqa',
     items: [
       { label: 'Bildirishnomalar', href: '/dashboard/notifications', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/notifications'] },
@@ -146,6 +151,12 @@ export const BRANCH_ADMIN_NAV: NavGroup[] = [
       { label: 'Moliya', href: '/dashboard/finance', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/finance'] },
       { label: "To'lovlar", href: '/dashboard/payments', icon: CreditCard, roles: ROUTE_PERMISSIONS['/dashboard/payments'] },
       { label: 'Tariflar', href: '/dashboard/fee-structures', icon: Wallet, roles: ROUTE_PERMISSIONS['/dashboard/fee-structures'] },
+    ],
+  },
+  {
+    title: 'Sotuv',
+    items: [
+      { label: 'CRM — Leadlar', href: '/dashboard/crm', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/crm'] },
     ],
   },
   {

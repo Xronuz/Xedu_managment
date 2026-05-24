@@ -32,6 +32,8 @@ const SEGMENT_LABELS: Record<string, string> = {
   canteen: 'Oshxona',
   'learning-center': 'O‘quv markazi',
   transport: 'Transport',
+  staff: 'Xodimlar',
+  crm: 'CRM — Leadlar',
   discipline: 'Intizom jurnali',
   meetings: 'Ota-ona uchrashuvlari',
   'fee-structures': 'To‘lov tartiblari',

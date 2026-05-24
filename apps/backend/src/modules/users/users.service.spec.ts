@@ -158,4 +158,135 @@ describe('UsersService', () => {
       expect(result.role).toBe(UserRole.VICE_PRINCIPAL);
     });
   });
+
+  describe('BRANCH_ADMIN hard restrictions — RBAC security', () => {
+    const branchAdmin = {
+      sub: 'branch-admin-1',
+      email: 'ba@school.uz',
+      role: UserRole.BRANCH_ADMIN,
+      schoolId: 'school-1',
+      branchId: 'branch-alpha',
+      isSuperAdmin: false,
+    };
+
+    const baseDto = {
+      firstName: 'Test',
+      lastName: 'User',
+      email: 'test@school.uz',
+      password: 'Password123!',
+      branchId: 'branch-alpha',
+    };
+
+    it('rejects BRANCH_ADMIN creating BRANCH_ADMIN', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create({ ...baseDto, role: UserRole.BRANCH_ADMIN }, branchAdmin),
+      ).rejects.toThrow(ForbiddenException);
+
+      expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects BRANCH_ADMIN creating DIRECTOR', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create({ ...baseDto, role: UserRole.DIRECTOR }, branchAdmin),
+      ).rejects.toThrow(ForbiddenException);
+
+      expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects BRANCH_ADMIN creating VICE_PRINCIPAL', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create({ ...baseDto, role: UserRole.VICE_PRINCIPAL }, branchAdmin),
+      ).rejects.toThrow(ForbiddenException);
+
+      expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects BRANCH_ADMIN creating SUPER_ADMIN', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create({ ...baseDto, role: UserRole.SUPER_ADMIN }, branchAdmin),
+      ).rejects.toThrow(ForbiddenException);
+
+      expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects BRANCH_ADMIN creating user in another branch', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+
+      await expect(
+        service.create({ ...baseDto, role: UserRole.TEACHER, branchId: 'branch-other' }, branchAdmin),
+      ).rejects.toThrow(ForbiddenException);
+
+      expect(mockPrisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('allows BRANCH_ADMIN creating TEACHER in own branch', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.user.create.mockResolvedValueOnce({ id: 'new-user-4', email: baseDto.email, role: UserRole.TEACHER });
+
+      const result = await service.create({ ...baseDto, role: UserRole.TEACHER }, branchAdmin);
+
+      expect(result.role).toBe(UserRole.TEACHER);
+      expect(mockPrisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ branchId: 'branch-alpha' }) }),
+      );
+    });
+
+    it('allows BRANCH_ADMIN creating ACCOUNTANT in own branch', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.user.create.mockResolvedValueOnce({ id: 'new-user-5', email: baseDto.email, role: UserRole.ACCOUNTANT });
+
+      const result = await service.create({ ...baseDto, role: UserRole.ACCOUNTANT }, branchAdmin);
+
+      expect(result.role).toBe(UserRole.ACCOUNTANT);
+    });
+
+    it('allows BRANCH_ADMIN creating LIBRARIAN in own branch', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.user.create.mockResolvedValueOnce({ id: 'new-user-6', email: baseDto.email, role: UserRole.LIBRARIAN });
+
+      const result = await service.create({ ...baseDto, role: UserRole.LIBRARIAN }, branchAdmin);
+
+      expect(result.role).toBe(UserRole.LIBRARIAN);
+    });
+
+    it('allows BRANCH_ADMIN creating STUDENT in own branch', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.user.create.mockResolvedValueOnce({ id: 'new-user-7', email: baseDto.email, role: UserRole.STUDENT });
+
+      const result = await service.create({ ...baseDto, role: UserRole.STUDENT }, branchAdmin);
+
+      expect(result.role).toBe(UserRole.STUDENT);
+    });
+
+    it('allows BRANCH_ADMIN creating PARENT in own branch', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.user.create.mockResolvedValueOnce({ id: 'new-user-8', email: baseDto.email, role: UserRole.PARENT });
+
+      const result = await service.create({ ...baseDto, role: UserRole.PARENT }, branchAdmin);
+
+      expect(result.role).toBe(UserRole.PARENT);
+    });
+
+    it('forces branchId to own branch even if payload omits it', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce(null);
+      mockPrisma.user.create.mockResolvedValueOnce({ id: 'new-user-9', email: baseDto.email, role: UserRole.TEACHER });
+
+      const result = await service.create(
+        { firstName: 'A', lastName: 'B', email: 'a@b.uz', password: 'Password123!', role: UserRole.TEACHER },
+        branchAdmin,
+      );
+
+      expect(mockPrisma.user.create).toHaveBeenCalledWith(
+        expect.objectContaining({ data: expect.objectContaining({ branchId: 'branch-alpha' }) }),
+      );
+    });
+  });
 });

@@ -50,16 +50,32 @@ function useSuperAdminGuard() {
   return user?.role === 'super_admin';
 }
 
-const ROLES = [
+const ALL_ROLES = [
+  { value: 'director',       label: 'Direktor' },
   { value: 'vice_principal', label: "O'quv ishlari bo'yicha direktor" },
-  { value: 'branch_admin', label: 'Filial admin' },
-  { value: 'teacher', label: "O'qituvchi" },
-  { value: 'class_teacher', label: 'Sinf rahbari' },
-  { value: 'accountant', label: 'Buxgalter' },
-  { value: 'librarian', label: 'Kutubxonachi' },
-  { value: 'student', label: "O'quvchi" },
-  { value: 'parent', label: 'Ota-ona' },
+  { value: 'branch_admin',   label: 'Filial admin' },
+  { value: 'teacher',        label: "O'qituvchi" },
+  { value: 'class_teacher',  label: 'Sinf rahbari' },
+  { value: 'accountant',     label: 'Buxgalter' },
+  { value: 'librarian',      label: 'Kutubxonachi' },
+  { value: 'student',        label: "O'quvchi" },
+  { value: 'parent',         label: 'Ota-ona' },
 ];
+
+/** Role dropdown filter by creator role */
+function getCreatableRoles(actorRole?: string) {
+  switch (actorRole) {
+    case 'director':
+      return ALL_ROLES.filter((r) => !['director', 'super_admin'].includes(r.value));
+    case 'vice_principal':
+      return ALL_ROLES.filter((r) => !['director', 'super_admin', 'vice_principal'].includes(r.value));
+    case 'branch_admin':
+      // Branch Admin can ONLY create lower operational roles in their own branch
+      return ALL_ROLES.filter((r) => ['teacher', 'class_teacher', 'accountant', 'librarian', 'student', 'parent'].includes(r.value));
+    default:
+      return [];
+  }
+}
 
 export default function UsersPage() {
   const isSuperAdmin = useSuperAdminGuard();
@@ -220,6 +236,12 @@ export default function UsersPage() {
 
   const onSubmit = async (values: UserFormValues) => {
     try {
+      // Enforce branch scope for Branch Admin in API payload
+      const isBranchAdmin = user?.role === 'branch_admin';
+      const branchId = isBranchAdmin
+        ? (user?.branchId ?? '')
+        : (values.branchId?.trim() || undefined);
+
       // 1. Create user
       const created = await usersApi.create({
         firstName: values.firstName,
@@ -228,7 +250,7 @@ export default function UsersPage() {
         password:  values.password,
         phone:     values.phone?.trim() || undefined,
         role:      values.role,
-        branchId:  values.branchId?.trim() || undefined,
+        branchId:  branchId || undefined,
       } as any);
 
       // 2. Student → enroll in class if selected
@@ -397,7 +419,7 @@ export default function UsersPage() {
               <div className="space-y-1.5">
                 <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">Rol</p>
                 <div className="space-y-0.5">
-                  {[{ value: '', label: 'Barchasi' }, ...ROLES].map(r => (
+                  {[{ value: '', label: 'Barchasi' }, ...ALL_ROLES].map(r => (
                     <button key={r.value}
                       onClick={() => { setFilterRole(r.value); setPage(1); }}
                       className="w-full text-left px-2.5 py-1.5 rounded-[8px] text-[12px] font-medium transition-colors"
@@ -790,15 +812,25 @@ export default function UsersPage() {
                 render={({ field }) => (
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger><SelectValue placeholder="Rol tanlang..." /></SelectTrigger>
-                    <SelectContent>{ROLES.map(r => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}</SelectContent>
+                    <SelectContent>{getCreatableRoles(user?.role).map(r => <SelectItem key={r.value} value={r.value}>{r.label}</SelectItem>)}</SelectContent>
                   </Select>
                 )}
               />
               {errors.role && <p className="text-xs text-xedu-ruby">{errors.role.message}</p>}
             </div>
 
-            {/* Branch selector for school-wide roles */}
-            {branchesList.length > 0 && (
+            {/* Branch selector — locked for Branch Admin */}
+            {user?.role === 'branch_admin' ? (
+              <div className="space-y-1.5">
+                <Label>Filial</Label>
+                <div className="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground items-center">
+                  {branchesList.find((b: any) => b.id === user?.branchId)?.name ?? 'Joriy filial'}
+                </div>
+                <p className="text-xs text-xedu-slate-500">
+                  Filial admin faqat o'z filialiga foydalanuvchi qo'sha oladi
+                </p>
+              </div>
+            ) : branchesList.length > 0 && (
               <div className="space-y-1.5">
                 <Label>Filial</Label>
                 <Controller

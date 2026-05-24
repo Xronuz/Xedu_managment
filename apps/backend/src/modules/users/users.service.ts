@@ -178,7 +178,7 @@ export class UsersService {
       throw new ConflictException("Bu email allaqachon ro'yxatdan o'tgan");
     }
 
-    // 1. Role authorization check
+    // 1. Role authorization check (matrix-based hierarchy)
     this.validateRoleCreation(currentUser.role as UserRole, dto.role);
 
     // 2. Non-super-admin can only create users for their school
@@ -205,7 +205,30 @@ export class UsersService {
       throw new BadRequestException('Foydalanuvchi uchun branchId majburiy');
     }
 
-    // Branch admins can only create users in their own branch
+    // ═══════════════════════════════════════════════════════════════════════════
+    // BRANCH_ADMIN hard restrictions — defense-in-depth beyond ROLE_CREATION_MATRIX
+    // ═══════════════════════════════════════════════════════════════════════════
+    if (currentUser.role === UserRole.BRANCH_ADMIN) {
+      const forbiddenRoles = new Set<UserRole>([
+        UserRole.SUPER_ADMIN,
+        UserRole.DIRECTOR,
+        UserRole.VICE_PRINCIPAL,
+        UserRole.BRANCH_ADMIN,
+      ]);
+
+      if (forbiddenRoles.has(dto.role)) {
+        throw new ForbiddenException('Filial admin bu rolni yaratishga ruxsatga ega emas');
+      }
+
+      if (dto.branchId && dto.branchId !== currentUser.branchId) {
+        throw new ForbiddenException("Filial admin boshqa filialga foydalanuvchi qo'sha olmaydi");
+      }
+
+      // Force branchId to own branch — ignore any payload override
+      branchId = currentUser.branchId!;
+    }
+
+    // Legacy branch-scoped guard (covers VP and other branch-scoped creators too)
     if (currentUser.role === UserRole.BRANCH_ADMIN && branchId !== currentUser.branchId) {
       throw new ForbiddenException('Faqat o‘z filialingiz uchun foydalanuvchi yaratish mumkin');
     }

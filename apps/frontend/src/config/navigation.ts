@@ -208,6 +208,12 @@ export const VICE_PRINCIPAL_NAV: NavGroup[] = [
     ],
   },
   {
+    title: 'Sotuv',
+    items: [
+      { label: 'CRM — Leadlar', href: '/dashboard/crm', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/crm'] },
+    ],
+  },
+  {
     title: 'Analitika',
     items: [
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },

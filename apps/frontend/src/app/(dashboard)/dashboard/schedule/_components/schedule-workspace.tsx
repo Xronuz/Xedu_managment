@@ -229,7 +229,7 @@ function WeeklyGrid({
   const getSlot = (day: DayOfWeek, slot: number) =>
     schedule.filter((s) => s.dayOfWeek === day && s.timeSlot === slot);
 
-  const todayKey = DAYS[new Date().getDay() === 0 ? 4 : new Date().getDay() - 1]?.key;
+  const todayKey = DAYS[new Date().getDay() === 0 ? 5 : new Date().getDay() - 1]?.key;
 
   return (
     <div className="overflow-x-auto">
@@ -515,7 +515,7 @@ export function StudentScheduleView() {
 
   const todayKey = (() => {
     const i = new Date().getDay();
-    return DAYS[i === 0 ? 4 : i - 1]?.key ?? DayOfWeek.MONDAY;
+    return DAYS[i === 0 ? 5 : i - 1]?.key ?? DayOfWeek.MONDAY;
   })();
 
   return (
@@ -617,13 +617,13 @@ export function ScheduleWorkspace() {
   const ask = useConfirm();
   const router = useRouter();
 
-  const canManage = ['director', 'vice_principal'].includes(user?.role ?? '');
+  const canManage = ['director', 'vice_principal', 'branch_admin'].includes(user?.role ?? '');
 
   // ── View state ───────────────────────────────────────────────────────────────
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeDay, setActiveDay] = useState<DayOfWeek>(() => {
     const i = new Date().getDay();
-    return DAYS[i === 0 ? 4 : i - 1]?.key ?? DayOfWeek.MONDAY;
+    return DAYS[i === 0 ? 5 : i - 1]?.key ?? DayOfWeek.MONDAY;
   });
 
   // ── Filters ──────────────────────────────────────────────────────────────────
@@ -823,7 +823,7 @@ export function ScheduleWorkspace() {
   }, [filterClass, filterTeacher, classes, teachers]);
 
   // ── Intelligence ─────────────────────────────────────────────────────────────
-  const todayKey = DAYS[new Date().getDay() === 0 ? 4 : new Date().getDay() - 1]?.key;
+  const todayKey = DAYS[new Date().getDay() === 0 ? 5 : new Date().getDay() - 1]?.key;
   const totalSlots = schedule.length;
   const crossBranchCount = schedule.filter((s) => s.isCrossBranch).length;
   const todaySlots = schedule.filter((s) => s.dayOfWeek === todayKey).length;
@@ -984,7 +984,7 @@ export function ScheduleWorkspace() {
           <button
             onClick={() => {
               const i = new Date().getDay();
-              setActiveDay(DAYS[i === 0 ? 4 : i - 1]?.key ?? DayOfWeek.MONDAY);
+              setActiveDay(DAYS[i === 0 ? 5 : i - 1]?.key ?? DayOfWeek.MONDAY);
               if (viewMode === 'grid') setViewMode('list');
             }}
             className="flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 text-xs font-semibold text-xedu-slate-600 hover:bg-xedu-slate-50 transition-colors"

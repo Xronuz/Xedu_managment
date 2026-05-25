@@ -16,11 +16,11 @@
  *  - Frontend foydalanuvchi vaqtida ko'rsatish uchun school.timezone ishlatsin
  */
 
-import { Injectable, NotFoundException, ConflictException, Optional } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException, Optional } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 import { RedisService } from '@/common/redis/redis.service';
-import { JwtPayload, DayOfWeek } from '@eduplatform/types';
+import { JwtPayload, DayOfWeek, UserRole } from '@eduplatform/types';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
 import {
@@ -222,6 +222,11 @@ export class ScheduleService {
     if (!cls) throw new NotFoundException('Sinf topilmadi');
     const branchId = cls.branchId;
 
+    // Branch Admin faqat o'z filialidagi sinf uchun jadval yaratishi mumkin
+    if (currentUser.role === UserRole.BRANCH_ADMIN && branchId !== currentUser.branchId) {
+      throw new ForbiddenException('Filial admin faqat o\'z filialidagi sinf uchun jadval yaratishi mumkin');
+    }
+
     // Teacher ↔ Subject bog'liqligini tekshirish
     const subject = await this.prisma.subject.findFirst({
       where: { id: dto.subjectId, schoolId },
@@ -241,7 +246,7 @@ export class ScheduleService {
     // Global conflict detection
     await this.conflictDetector.assertNoClash({
       schoolId,
-      branchId: currentUser.branchId!,
+      branchId,
       teacherId: dto.teacherId,
       roomId:    dto.roomId,
       classId:   dto.classId,
@@ -254,7 +259,7 @@ export class ScheduleService {
     const result = await this.prisma.schedule.create({
       data: {
         schoolId,
-        branchId: currentUser.branchId!,
+        branchId,
         classId:         dto.classId,
         subjectId:       dto.subjectId,
         teacherId:       dto.teacherId,

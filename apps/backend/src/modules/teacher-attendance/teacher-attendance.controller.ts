@@ -2,10 +2,11 @@ import {
   Controller, Get, Post, Put, Body, Param, Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { TeacherAttendanceService } from './teacher-attendance.service';
+import { SubstitutionWorkflowService } from './substitution-workflow.service';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
@@ -22,7 +23,10 @@ const MANAGER_ROLES = [UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRAN
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller({ path: 'teacher-attendance', version: '1' })
 export class TeacherAttendanceController {
-  constructor(private readonly service: TeacherAttendanceService) {}
+  constructor(
+    private readonly service: TeacherAttendanceService,
+    private readonly workflow: SubstitutionWorkflowService,
+  ) {}
 
   // ── Attendance ────────────────────────────────────────────────────────────
 
@@ -55,11 +59,11 @@ export class TeacherAttendanceController {
     return this.service.markAttendance(body, user);
   }
 
-  // ── Substitutions ─────────────────────────────────────────────────────────
+  // ── Legacy Substitutions (backward compatible) ────────────────────────────
 
   @Get('substitutions')
   @Roles(...STAFF_ROLES)
-  @ApiOperation({ summary: 'Almashtirishlar ro\'yxati' })
+  @ApiOperation({ summary: 'Almashtirishlar ro\'yxati (legacy)' })
   findSubstitutions(
     @CurrentUser() user: JwtPayload,
     @Query('status') status?: string,
@@ -71,14 +75,14 @@ export class TeacherAttendanceController {
 
   @Get('substitutions/:id')
   @Roles(...STAFF_ROLES)
-  @ApiOperation({ summary: 'Almashtirish tafsiloti' })
+  @ApiOperation({ summary: 'Almashtirish tafsiloti (legacy)' })
   findSubstitutionById(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.service.findSubstitutionById(id, user);
   }
 
   @Post('substitutions')
   @Roles(...MANAGER_ROLES)
-  @ApiOperation({ summary: 'Almashtirish yaratish' })
+  @ApiOperation({ summary: 'Almashtirish yaratish (legacy)' })
   createSubstitution(
     @Body() body: {
       date: string;
@@ -95,12 +99,120 @@ export class TeacherAttendanceController {
 
   @Put('substitutions/:id/review')
   @Roles(...MANAGER_ROLES)
-  @ApiOperation({ summary: 'Almashtirishni tasdiqlash/rad etish' })
+  @ApiOperation({ summary: 'Almashtirishni tasdiqlash/rad etish (legacy)' })
   reviewSubstitution(
     @Param('id') id: string,
     @Body() dto: { action: 'approve' | 'reject'; comment?: string },
     @CurrentUser() user: JwtPayload,
   ) {
     return this.service.reviewSubstitution(id, dto, user);
+  }
+
+  // ── Substitution Workflow (Phase 5B.2) ────────────────────────────────────
+
+  @Get('substitutions/affected')
+  @Roles(...STAFF_ROLES)
+  @ApiOperation({ summary: "Ta'til ta'sirlangan dars slotlari" })
+  @ApiQuery({ name: 'leaveRequestId', required: true })
+  getAffectedSchedules(
+    @Query('leaveRequestId') leaveRequestId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.workflow.getAffectedSchedules(leaveRequestId, user);
+  }
+
+  @Get('substitutions/candidates')
+  @Roles(...MANAGER_ROLES)
+  @ApiOperation({ summary: "O'rinbosar nomzodlarini reytinglash" })
+  @ApiQuery({ name: 'scheduleId', required: true })
+  @ApiQuery({ name: 'date', required: true })
+  getCandidates(
+    @Query('scheduleId') scheduleId: string,
+    @Query('date') date: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.workflow.getCandidates(scheduleId, date, user);
+  }
+
+  @Post('substitutions/propose')
+  @Roles(...MANAGER_ROLES)
+  @ApiOperation({ summary: 'Almashtirish taklif qilish' })
+  proposeSubstitutions(
+    @Body() body: {
+      leaveRequestId: string;
+      selections: Array<{ scheduleId: string; date: string; substituteTeacherId: string; reason?: string }>;
+    },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.workflow.proposeSubstitutions(body, user);
+  }
+
+  @Post('substitutions/:id/approve')
+  @Roles(...MANAGER_ROLES)
+  @ApiOperation({ summary: 'Almashtirishni tasdiqlash' })
+  approveSubstitution(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.workflow.approveSubstitution(id, user);
+  }
+
+  @Post('substitutions/:id/reject')
+  @Roles(...MANAGER_ROLES)
+  @ApiOperation({ summary: 'Almashtirishni rad etish' })
+  rejectSubstitution(
+    @Param('id') id: string,
+    @Body() body: { reason?: string },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.workflow.rejectSubstitution(id, body.reason, user);
+  }
+
+  @Post('substitutions/:id/apply')
+  @Roles(...MANAGER_ROLES)
+  @ApiOperation({ summary: "Almashtirishni qo'llash" })
+  applySubstitution(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.workflow.applySubstitution(id, user);
+  }
+
+  @Post('substitutions/:id/cancel')
+  @Roles(...MANAGER_ROLES)
+  @ApiOperation({ summary: 'Almashtirishni bekor qilish' })
+  cancelSubstitution(
+    @Param('id') id: string,
+    @Body() body: { reason?: string },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.workflow.cancelSubstitution(id, body.reason, user);
+  }
+
+  // List and detail via workflow
+  @Get('substitutions/list')
+  @Roles(...STAFF_ROLES)
+  @ApiOperation({ summary: 'Almashtirishlar ro\'yxati' })
+  @ApiQuery({ name: 'status', required: false })
+  @ApiQuery({ name: 'teacherId', required: false })
+  @ApiQuery({ name: 'date', required: false })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'offset', required: false, type: Number })
+  listSubstitutions(
+    @CurrentUser() user: JwtPayload,
+    @Query('status') status?: string,
+    @Query('teacherId') teacherId?: string,
+    @Query('date') date?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    return this.workflow.listSubstitutions(user, {
+      status,
+      teacherId,
+      date,
+      limit: limit ? parseInt(limit, 10) : undefined,
+      offset: offset ? parseInt(offset, 10) : undefined,
+    });
+  }
+
+  @Get('substitutions/detail/:id')
+  @Roles(...STAFF_ROLES)
+  @ApiOperation({ summary: 'Almashtirish tafsiloti' })
+  getSubstitution(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.workflow.getSubstitution(id, user);
   }
 }

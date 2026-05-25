@@ -1420,11 +1420,13 @@ model LeaveRequest {
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
 
-  school    School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch    Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  requester User            @relation("LeaveRequests", fields: [requesterId], references: [id], onDelete: Cascade)
-  createdBy User?           @relation("LeaveRequestCreator", fields: [createdById], references: [id], onDelete: SetNull)
-  approvals LeaveApproval[]
+  school               School                @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch               Branch                @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  requester            User                  @relation("LeaveRequests", fields: [requesterId], references: [id], onDelete: Cascade)
+  createdBy            User?                 @relation("LeaveRequestCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  approvals            LeaveApproval[]
+  teacherSubstitutions TeacherSubstitution[] @relation("LeaveRequestSubstitutions")
+  teacherAttendances   TeacherAttendance[]
 
   @@index([schoolId, status])
   @@index([requesterId])
@@ -1461,26 +1463,32 @@ enum TeacherAttendanceStatus {
 }
 
 model TeacherAttendance {
-  id           String                  @id @default(uuid())
-  schoolId     String
-  branchId     String
-  teacherId    String
-  date         DateTime                @db.Date
-  status       TeacherAttendanceStatus @default(present)
-  scheduleId   String?                 // future: per-slot granularity
-  notes        String?
-  source       String?                 // manual | schedule | leave
-  createdAt    DateTime                @default(now())
-  updatedAt    DateTime                @updatedAt
+  id             String                  @id @default(uuid())
+  schoolId       String
+  branchId       String
+  teacherId      String
+  date           DateTime                @db.Date
+  status         TeacherAttendanceStatus @default(present)
+  scheduleId     String?                 // future: per-slot granularity
+  leaveRequestId String?
+  substitutionId String?
+  notes          String?
+  source         String?                 // manual | schedule | leave | substitution
+  createdAt      DateTime                @default(now())
+  updatedAt      DateTime                @updatedAt
 
-  school  School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch  Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  teacher User   @relation("TeacherAttendance", fields: [teacherId], references: [id], onDelete: Cascade)
+  school       School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch       Branch             @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  teacher      User               @relation("TeacherAttendance", fields: [teacherId], references: [id], onDelete: Cascade)
+  leaveRequest LeaveRequest?      @relation(fields: [leaveRequestId], references: [id], onDelete: SetNull)
+  substitution TeacherSubstitution? @relation(fields: [substitutionId], references: [id], onDelete: SetNull)
 
   @@unique([teacherId, date, scheduleId])
   @@index([schoolId, branchId])
   @@index([teacherId, date])
   @@index([status])
+  @@index([leaveRequestId])
+  @@index([substitutionId])
   @@map("teacher_attendances")
 }
 
@@ -1500,6 +1508,7 @@ model TeacherSubstitution {
   scheduleId          String
   originalTeacherId   String
   substituteTeacherId String
+  leaveRequestId      String?
   status              SubstitutionStatus @default(proposed)
   reason              String?
   notes               String?
@@ -1508,18 +1517,21 @@ model TeacherSubstitution {
   createdAt           DateTime           @default(now())
   updatedAt           DateTime           @updatedAt
 
-  school            School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch            Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  schedule          Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
-  originalTeacher   User     @relation("OriginalTeacher", fields: [originalTeacherId], references: [id], onDelete: Cascade)
-  substituteTeacher User     @relation("SubstituteTeacher", fields: [substituteTeacherId], references: [id], onDelete: Cascade)
-  approvedBy        User?    @relation("SubstitutionApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  school            School            @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch            Branch            @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  schedule          Schedule          @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  originalTeacher   User              @relation("OriginalTeacher", fields: [originalTeacherId], references: [id], onDelete: Cascade)
+  substituteTeacher User              @relation("SubstituteTeacher", fields: [substituteTeacherId], references: [id], onDelete: Cascade)
+  approvedBy        User?             @relation("SubstitutionApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  leaveRequest      LeaveRequest?     @relation("LeaveRequestSubstitutions", fields: [leaveRequestId], references: [id], onDelete: SetNull)
+  attendances       TeacherAttendance[]
 
   @@index([schoolId, branchId])
   @@index([originalTeacherId])
   @@index([substituteTeacherId])
   @@index([status])
   @@index([date])
+  @@index([leaveRequestId])
   @@map("teacher_substitutions")
 }
 

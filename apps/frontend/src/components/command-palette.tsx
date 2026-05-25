@@ -20,7 +20,7 @@ import {
   CheckSquare, Briefcase, Clock, Search, History,
   ShieldAlert, Bus, CalendarCheck, Shield, Banknote,
   Building2, Award, Wallet, Package, Coins, ShoppingBag,
-  Brain, Megaphone,
+  Brain, Megaphone, UserCheck,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { usersApi } from '@/lib/api/users';
@@ -73,6 +73,7 @@ const NAV_ITEMS = [
   { label: 'Hisobotlar', href: '/dashboard/reports', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
   { label: 'Intizom', href: '/dashboard/discipline', icon: ShieldAlert, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
   { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: Clock, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
+  { label: "O'qituvchi almashtirish", href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
   { label: 'Resurslar', href: '/dashboard/resources', icon: Package, roles: ROUTE_PERMISSIONS['/dashboard/resources'] },
   { label: 'Kutubxona', href: '/dashboard/library', icon: Library, roles: ROUTE_PERMISSIONS['/dashboard/library'] },
   { label: 'EduCoin', href: '/dashboard/coins', icon: Coins, roles: ROUTE_PERMISSIONS['/dashboard/coins'] },

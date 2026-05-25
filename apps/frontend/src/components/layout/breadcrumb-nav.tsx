@@ -23,6 +23,7 @@ const SEGMENT_LABELS: Record<string, string> = {
   messages: 'Xabarlar',
   notifications: 'Bildirishnomalar',
   'leave-requests': 'Ta‘til so‘rovlari',
+  'teacher-substitutions': "O'qituvchi almashtirishlari",
   schools: 'Maktablar',
   profile: 'Profil',
   settings: 'Sozlamalar',

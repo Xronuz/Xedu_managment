@@ -13,6 +13,7 @@ export { homeworkApi } from './homework';
 export { subjectsApi } from './subjects';
 export { canteenApi } from './canteen';
 export { leaveRequestsApi } from './leave-requests';
+export { teacherSubstitutionsApi } from './teacher-substitutions';
 export { payrollApi } from './payroll';
 export { superAdminApi } from './super-admin';
 export { parentApi } from './parent';

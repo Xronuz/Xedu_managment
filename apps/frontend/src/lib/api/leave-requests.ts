@@ -25,4 +25,9 @@ export const leaveRequestsApi = {
     const { data } = await apiClient.put(`/leave-requests/${id}/cancel`);
     return data;
   },
+
+  getAffectedSchedules: async (id: string) => {
+    const { data } = await apiClient.get(`/leave-requests/${id}/affected-schedules`);
+    return data;
+  },
 };

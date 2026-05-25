@@ -166,6 +166,11 @@ function LeaveRequestPanel({ request, open, onClose, canReview, onApprove, onRej
             <SecondaryAction icon={<MonitorPlay className="h-3.5 w-3.5" />} onClick={() => router.push('/dashboard/schedule')}>
               Jadval
             </SecondaryAction>
+            {request.status === 'approved' && (
+              <SecondaryAction icon={<Users className="h-3.5 w-3.5" />} onClick={() => router.push(`/dashboard/teacher-substitutions?leaveRequestId=${request.id}`)}>
+                O'rinbosar
+              </SecondaryAction>
+            )}
           </div>
         </div>
       ),

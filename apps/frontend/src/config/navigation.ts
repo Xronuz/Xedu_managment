@@ -17,7 +17,7 @@ import {
   Brain, Megaphone, MessageSquare, Bell, Settings,
   Building2, Package, Library, Bus, School,
   ShoppingBag, Coins, Heart, ClipboardCheck,
-  BarChart2,
+  BarChart2, UserCheck,
 } from 'lucide-react';
 import { ROUTE_PERMISSIONS } from './permissions';
 
@@ -67,6 +67,7 @@ export const DIRECTOR_NAV: NavGroup[] = [
     title: 'Operatsiyalar',
     items: [
       { label: 'Intizom', href: '/dashboard/discipline', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
+      { label: "O'qituvchi almashtirish", href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
     ],
   },
   {
@@ -124,6 +125,7 @@ export const BRANCH_ADMIN_NAV: NavGroup[] = [
     items: [
       { label: 'Intizom', href: '/dashboard/discipline', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
       { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
+      { label: "O'qituvchi almashtirish", href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
     ],
   },
   {
@@ -198,6 +200,7 @@ export const VICE_PRINCIPAL_NAV: NavGroup[] = [
     items: [
       { label: 'Intizom', href: '/dashboard/discipline', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
       { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
+      { label: "O'qituvchi almashtirish", href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
     ],
   },
   {

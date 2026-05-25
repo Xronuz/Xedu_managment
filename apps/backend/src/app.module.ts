@@ -49,7 +49,8 @@ import { ClubsModule } from './modules/clubs/clubs.module';
 import { BranchesModule } from './modules/branches/branches.module';
 import { TreasuryModule } from './modules/treasury/treasury.module';
 import { FinancialShiftsModule } from './modules/financial-shifts/financial-shifts.module';
-import { RoomsModule }  from './modules/rooms/rooms.module';
+import { RoomsModule }   from './modules/rooms/rooms.module';
+import { PeriodsModule } from './modules/periods/periods.module';
 import { LeadsModule }  from './modules/leads/leads.module';
 import { CoinsModule }  from './modules/coins/coins.module';
 import { EngagementModule } from './modules/engagement/engagement.module';
@@ -139,6 +140,7 @@ import { envValidationSchema } from './common/config/env.validation';
     TreasuryModule,          // G'azna / kassa boshqaruvi (Phase 3)
     FinancialShiftsModule,   // Kassir smenalari (Phase 3)
     RoomsModule,             // Xonalar CRUD (Phase 4 — conflict detection uchun)
+    PeriodsModule,           // Dars soatlari (bell schedule) — Phase 1
     LeadsModule,             // CRM Lead boshqaruvi (Phase 5)
     CoinsModule,
     EngagementModule,

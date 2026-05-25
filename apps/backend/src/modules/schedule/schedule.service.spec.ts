@@ -4,6 +4,7 @@ import { ScheduleService } from './schedule.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
 import { ConflictDetectorService } from '@/common/utils/conflict-detector';
+import { PeriodsService } from '@/modules/periods/periods.service';
 import { JwtPayload, UserRole, DayOfWeek } from '@eduplatform/types';
 
 const mockDirector: JwtPayload = {
@@ -47,6 +48,10 @@ const mockConflictDetector = {
   assertNoClash: jest.fn().mockResolvedValue(undefined),
 };
 
+const mockPeriodsService = {
+  resolvePeriod: jest.fn().mockResolvedValue({ startTime: '08:00', endTime: '08:45' }),
+};
+
 describe('ScheduleService', () => {
   let service: ScheduleService;
   let prisma: any;
@@ -77,6 +82,7 @@ describe('ScheduleService', () => {
         { provide: PrismaService, useValue: prisma },
         { provide: RedisService, useValue: mockRedis },
         { provide: ConflictDetectorService, useValue: mockConflictDetector },
+        { provide: PeriodsService, useValue: mockPeriodsService },
       ],
     }).compile();
 
@@ -114,6 +120,7 @@ describe('ScheduleService', () => {
         timeSlot: 1,
         teacherId: 'teacher-1',
         classId: 'class-1',
+        branchId: 'branch-1',
       });
 
       expect(result.hasConflict).toBe(false);
@@ -130,6 +137,7 @@ describe('ScheduleService', () => {
         dayOfWeek: DayOfWeek.MONDAY,
         timeSlot: 1,
         teacherId: 'teacher-1',
+        branchId: 'branch-1',
       });
 
       expect(result.hasConflict).toBe(true);

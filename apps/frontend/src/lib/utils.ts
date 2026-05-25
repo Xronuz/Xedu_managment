@@ -94,3 +94,35 @@ export function getScoreColorClass(score: number | null | undefined): string {
   if (score >= 50) return 'text-xedu-amber';
   return 'text-xedu-ruby';
 }
+
+import { DayOfWeek } from '@eduplatform/types';
+
+const DAYS_ORDER: DayOfWeek[] = [
+  DayOfWeek.MONDAY,
+  DayOfWeek.TUESDAY,
+  DayOfWeek.WEDNESDAY,
+  DayOfWeek.THURSDAY,
+  DayOfWeek.FRIDAY,
+  DayOfWeek.SATURDAY,
+  DayOfWeek.SUNDAY,
+];
+
+/**
+ * Map JS Date.getDay() to DayOfWeek enum.
+ * JS getDay(): 0=Sun, 1=Mon, ..., 6=Sat
+ * @returns DayOfWeek or null if non-school day (Sunday not enabled)
+ */
+export function jsDayToTimetableDay(
+  jsDayIndex: number,
+  includeSunday = false,
+): DayOfWeek | null {
+  if (jsDayIndex === 0) {
+    return includeSunday ? DayOfWeek.SUNDAY : null;
+  }
+  return DAYS_ORDER[jsDayIndex - 1] ?? null;
+}
+
+/** Get the index of a DayOfWeek in the standard school-week order (Mon=0..Sat=5). */
+export function timetableDayIndex(day: DayOfWeek): number {
+  return DAYS_ORDER.indexOf(day);
+}

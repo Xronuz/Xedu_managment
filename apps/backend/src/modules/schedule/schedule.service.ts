@@ -23,6 +23,7 @@ import { RedisService } from '@/common/redis/redis.service';
 import { JwtPayload, DayOfWeek, UserRole } from '@eduplatform/types';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
+import { PeriodsService } from '@/modules/periods/periods.service';
 import {
   ConflictDetectorService,
   toWeeklyUtcMin,
@@ -36,6 +37,7 @@ export class ScheduleService {
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
     private readonly conflictDetector: ConflictDetectorService,
+    private readonly periodsService: PeriodsService,
     @Optional() private readonly eventsGateway: EventsGateway,
   ) {}
 
@@ -182,15 +184,24 @@ export class ScheduleService {
     const schoolId = currentUser.schoolId!;
     const timezone = await this.getSchoolTimezone(schoolId);
 
-    // startTime ni timeSlot dan taxminiy hisoblash (agar yo'q bo'lsa)
-    // 1-slot = 08:00, har slot 45 daqiqa
-    const slotHour   = 7 + Math.floor(((params.timeSlot - 1) * 45) / 60);
-    const slotMin    = ((params.timeSlot - 1) * 45) % 60;
-    const startTime  = `${String(slotHour).padStart(2, '0')}:${String(slotMin).padStart(2, '0')}`;
-    const endMinutes = (params.timeSlot - 1) * 45 + 45;
-    const endHour    = 7 + Math.floor(endMinutes / 60);
-    const endMin     = endMinutes % 60;
-    const endTime    = `${String(endHour).padStart(2, '0')}:${String(endMin).padStart(2, '0')}`;
+    // Period sozlamalaridan startTime/endTime ni olish
+    const effectiveBranchId = params.branchId ?? currentUser.branchId;
+    if (!effectiveBranchId) {
+      throw new ConflictException('Filial IDsi topilmadi — dars soatlari sozlanmagan');
+    }
+    const period = await this.periodsService.resolvePeriod(
+      schoolId,
+      effectiveBranchId,
+      params.timeSlot,
+    );
+    if (!period) {
+      throw new ConflictException(
+        `${params.timeSlot}-dars soati uchun sozlangan vaqt topilmadi. ` +
+        "Iltimos, avval 'Dars soatlari' bo'limida bell schedule ni sozlang."
+      );
+    }
+    const startTime = period.startTime;
+    const endTime   = period.endTime;
 
     const conflicts = await this.conflictDetector.checkClash({
       schoolId,
@@ -225,6 +236,16 @@ export class ScheduleService {
     // Branch Admin faqat o'z filialidagi sinf uchun jadval yaratishi mumkin
     if (currentUser.role === UserRole.BRANCH_ADMIN && branchId !== currentUser.branchId) {
       throw new ForbiddenException('Filial admin faqat o\'z filialidagi sinf uchun jadval yaratishi mumkin');
+    }
+
+    // Xona tekshiruvi — xona shu filialga tegishli bo'lishi kerak
+    if (dto.roomId) {
+      const room = await this.prisma.room.findFirst({
+        where: { id: dto.roomId, schoolId, branchId },
+      });
+      if (!room) {
+        throw new NotFoundException('Xona topilmadi yoki bu filialga tegishli emas');
+      }
     }
 
     // Teacher ↔ Subject bog'liqligini tekshirish
@@ -297,6 +318,16 @@ export class ScheduleService {
     if (!slot) throw new NotFoundException('Jadval sloti topilmadi');
 
     const timezone = await this.getSchoolTimezone(schoolId);
+
+    // Xona tekshiruvi — yangi xona shu filialga tegishli bo'lishi kerak
+    if (dto.roomId) {
+      const room = await this.prisma.room.findFirst({
+        where: { id: dto.roomId, schoolId, branchId: (slot as any).class?.branchId ?? slot.branchId },
+      });
+      if (!room) {
+        throw new NotFoundException('Xona topilmadi yoki bu filialga tegishli emas');
+      }
+    }
 
     // Teacher ↔ Subject bog'liqligini tekshirish (agar o'zgartirilsa)
     const effectiveSubjectId  = dto.subjectId  ?? slot.subjectId;

@@ -276,20 +276,93 @@ export class ImportService {
           // Classdan branchId ni olish (agar override berilmagan bo'lsa)
           let branchId = branchIdOverride;
           if (!branchId) {
-            const cls = await tx.class.findUnique({ where: { id: row.data.classId }, select: { branchId: true } });
-            branchId = cls!.branchId;
+            const cls = await tx.class.findUnique({ where: { id: row.data.classId }, select: { branchId: true, schoolId: true } });
+            if (!cls || cls.schoolId !== schoolId) {
+              errors.push(`Qator ${row.row}: Sinf boshqa maktabga tegishli`);
+              skipped++;
+              continue;
+            }
+            branchId = cls.branchId;
           }
 
-          // Konflikt tekshirish
-          const conflict = await tx.schedule.findFirst({
+          // Period sozlamalari tekshiruvi
+          const period = await tx.period.findFirst({
+            where: { schoolId, branchId, periodNumber: row.data.timeSlot, isActive: true },
+          });
+          if (!period) {
+            errors.push(`Qator ${row.row}: ${row.data.timeSlot}-dars soati uchun sozlangan vaqt topilmadi`);
+            skipped++;
+            continue;
+          }
+          if (row.data.startTime !== period.startTime || row.data.endTime !== period.endTime) {
+            errors.push(`Qator ${row.row}: Vaqt (${row.data.startTime}-${row.data.endTime}) sozlangan period (${period.startTime}-${period.endTime}) bilan mos emas`);
+            skipped++;
+            continue;
+          }
+
+          // Teacher ↔ Subject mosligi
+          const subject = await tx.subject.findFirst({
+            where: { id: row.data.subjectId, schoolId },
+            select: { teacherId: true, name: true },
+          });
+          if (!subject) {
+            errors.push(`Qator ${row.row}: Fan topilmadi`);
+            skipped++;
+            continue;
+          }
+          if (subject.teacherId !== row.data.teacherId) {
+            errors.push(`Qator ${row.row}: O'qituvchi "${subject.name}" faniga biriktirilmagan`);
+            skipped++;
+            continue;
+          }
+
+          // Teacher konflikti
+          const teacherConflict = await tx.schedule.findFirst({
             where: {
               schoolId,
+              teacherId: row.data.teacherId,
               dayOfWeek: row.data.dayOfWeek as any,
               timeSlot: row.data.timeSlot,
-              classId: row.data.classId,
             },
           });
-          if (conflict) { skipped++; continue; }
+          if (teacherConflict) {
+            errors.push(`Qator ${row.row}: O'qituvchi bu vaqtda band`);
+            skipped++;
+            continue;
+          }
+
+          // Room konflikti
+          if (row.data.roomNumber) {
+            const roomConflict = await tx.schedule.findFirst({
+              where: {
+                schoolId,
+                branchId,
+                roomNumber: row.data.roomNumber,
+                dayOfWeek: row.data.dayOfWeek as any,
+                timeSlot: row.data.timeSlot,
+              },
+            });
+            if (roomConflict) {
+              errors.push(`Qator ${row.row}: Xona bu vaqtda band`);
+              skipped++;
+              continue;
+            }
+          }
+
+          // Class konflikti
+          const classConflict = await tx.schedule.findFirst({
+            where: {
+              schoolId,
+              classId: row.data.classId,
+              dayOfWeek: row.data.dayOfWeek as any,
+              timeSlot: row.data.timeSlot,
+            },
+          });
+          if (classConflict) {
+            errors.push(`Qator ${row.row}: Sinf bu vaqtda boshqa darsga band`);
+            skipped++;
+            continue;
+          }
 
           await tx.schedule.create({
             data: {

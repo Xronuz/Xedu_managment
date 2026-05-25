@@ -10,7 +10,9 @@ import { scheduleApi } from '@/lib/api/schedule';
 import { classesApi } from '@/lib/api/classes';
 import { subjectsApi } from '@/lib/api/subjects';
 import { usersApi } from '@/lib/api/users';
-import { formatDate, cn } from '@/lib/utils';
+import { roomsApi } from '@/lib/api/rooms';
+import { periodsApi } from '@/lib/api/periods';
+import { formatDate, cn, jsDayToTimetableDay } from '@/lib/utils';
 import Link from 'next/link';
 import { DayOfWeek } from '@eduplatform/types';
 
@@ -109,7 +111,7 @@ interface ConflictResult {
 
 const EMPTY = {
   classId: '', subjectId: '', teacherId: '', dayOfWeek: '' as DayOfWeek | '',
-  timeSlot: '', startTime: '08:00', endTime: '08:45', roomNumber: '',
+  timeSlot: '', startTime: '08:00', endTime: '08:45', roomNumber: '', roomId: '',
 };
 
 // ── Lesson Entity Panel ───────────────────────────────────────────────────────
@@ -229,7 +231,7 @@ function WeeklyGrid({
   const getSlot = (day: DayOfWeek, slot: number) =>
     schedule.filter((s) => s.dayOfWeek === day && s.timeSlot === slot);
 
-  const todayKey = DAYS[new Date().getDay() === 0 ? 5 : new Date().getDay() - 1]?.key;
+  const todayKey = jsDayToTimetableDay(new Date().getDay());
 
   return (
     <div className="overflow-x-auto">
@@ -513,10 +515,7 @@ export function StudentScheduleView() {
     return map;
   }, [schedule]);
 
-  const todayKey = (() => {
-    const i = new Date().getDay();
-    return DAYS[i === 0 ? 5 : i - 1]?.key ?? DayOfWeek.MONDAY;
-  })();
+  const todayKey = jsDayToTimetableDay(new Date().getDay());
 
   return (
     <div className="space-y-6">
@@ -622,8 +621,7 @@ export function ScheduleWorkspace() {
   // ── View state ───────────────────────────────────────────────────────────────
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [activeDay, setActiveDay] = useState<DayOfWeek>(() => {
-    const i = new Date().getDay();
-    return DAYS[i === 0 ? 5 : i - 1]?.key ?? DayOfWeek.MONDAY;
+    return jsDayToTimetableDay(new Date().getDay()) ?? DayOfWeek.MONDAY;
   });
 
   // ── Filters ──────────────────────────────────────────────────────────────────
@@ -668,6 +666,33 @@ export function ScheduleWorkspace() {
   // ── Create / Edit modal ──────────────────────────────────────────────────────
   const [modalOpen, setModalOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+
+  const { data: roomsData } = useQuery({
+    queryKey: ['rooms', activeBranchId],
+    queryFn: () => roomsApi.getAll(activeBranchId ?? undefined),
+    enabled: modalOpen,
+  });
+
+  const { data: periodsData } = useQuery({
+    queryKey: ['periods', activeBranchId],
+    queryFn: () => periodsApi.getAll(activeBranchId ?? undefined),
+    enabled: modalOpen,
+  });
+
+  const rooms: any[] = Array.isArray(roomsData) ? roomsData : (roomsData as any)?.data ?? [];
+  const periods: any[] = Array.isArray(periodsData) ? periodsData : (periodsData as any)?.data ?? [];
+
+  // Build SLOT_TIMES from periods if available, else fallback to hard-coded
+  const slotTimes = useMemo(() => {
+    if (periods.length > 0) {
+      const map: Record<number, { start: string; end: string }> = {};
+      for (const p of periods) {
+        map[p.periodNumber] = { start: p.startTime, end: p.endTime };
+      }
+      return map;
+    }
+    return SLOT_TIMES;
+  }, [periods]);
   const [editingSlot, setEditingSlot] = useState<ScheduleSlot | null>(null);
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -690,15 +715,16 @@ export function ScheduleWorkspace() {
       startTime: slot.startTime,
       endTime: slot.endTime,
       roomNumber: slot.roomNumber ?? '',
+      roomId: slot.roomId ?? '',
     });
     setErrors({});
     setModalOpen(true);
   };
 
   const openForDaySlot = (day: DayOfWeek, slot: number) => {
-    const times = SLOT_TIMES[slot];
+    const times = slotTimes[slot];
     setEditingSlot(null);
-    setForm({ ...EMPTY, dayOfWeek: day, timeSlot: String(slot), startTime: times.start, endTime: times.end });
+    setForm({ ...EMPTY, dayOfWeek: day, timeSlot: String(slot), startTime: times?.start ?? '08:00', endTime: times?.end ?? '08:45' });
     setErrors({});
     setModalOpen(true);
   };
@@ -777,7 +803,7 @@ export function ScheduleWorkspace() {
 
   const handleSubmit = () => {
     if (!validate()) return;
-    const payload = {
+    const payload: any = {
       classId: form.classId,
       subjectId: form.subjectId,
       teacherId: form.teacherId,
@@ -787,6 +813,7 @@ export function ScheduleWorkspace() {
       endTime: form.endTime,
       roomNumber: form.roomNumber || undefined,
     };
+    if (form.roomId) payload.roomId = form.roomId;
     if (editingSlot) {
       updateMutation.mutate({ id: editingSlot.id, payload });
     } else {
@@ -823,7 +850,7 @@ export function ScheduleWorkspace() {
   }, [filterClass, filterTeacher, classes, teachers]);
 
   // ── Intelligence ─────────────────────────────────────────────────────────────
-  const todayKey = DAYS[new Date().getDay() === 0 ? 5 : new Date().getDay() - 1]?.key;
+  const todayKey = jsDayToTimetableDay(new Date().getDay());
   const totalSlots = schedule.length;
   const crossBranchCount = schedule.filter((s) => s.isCrossBranch).length;
   const todaySlots = schedule.filter((s) => s.dayOfWeek === todayKey).length;
@@ -984,7 +1011,7 @@ export function ScheduleWorkspace() {
           <button
             onClick={() => {
               const i = new Date().getDay();
-              setActiveDay(DAYS[i === 0 ? 5 : i - 1]?.key ?? DayOfWeek.MONDAY);
+              setActiveDay(jsDayToTimetableDay(i) ?? DayOfWeek.MONDAY);
               if (viewMode === 'grid') setViewMode('list');
             }}
             className="flex items-center gap-1.5 h-8 px-2.5 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 text-xs font-semibold text-xedu-slate-600 hover:bg-xedu-slate-50 transition-colors"
@@ -1181,12 +1208,12 @@ export function ScheduleWorkspace() {
               <div className="space-y-1.5">
                 <Label>Dars raqami <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.timeSlot} onValueChange={(v) => {
-                  const times = SLOT_TIMES[Number(v)];
+                  const times = slotTimes[Number(v)];
                   setForm(f => ({ ...f, timeSlot: v, startTime: times?.start ?? f.startTime, endTime: times?.end ?? f.endTime }));
                   setErrors(e => { const n = { ...e }; delete n.timeSlot; return n; });
                 }}>
                   <SelectTrigger><SelectValue placeholder="1-7..." /></SelectTrigger>
-                  <SelectContent>{[1,2,3,4,5,6,7].map(n => <SelectItem key={n} value={String(n)}>{n}-dars ({SLOT_TIMES[n]?.start})</SelectItem>)}</SelectContent>
+                  <SelectContent>{Object.keys(slotTimes).map(n => <SelectItem key={n} value={n}>{n}-dars ({slotTimes[Number(n)]?.start})</SelectItem>)}</SelectContent>
                 </Select>
                 {errors.timeSlot && <p className="text-xs text-xedu-ruby">{errors.timeSlot}</p>}
               </div>
@@ -1202,7 +1229,14 @@ export function ScheduleWorkspace() {
               </div>
               <div className="space-y-1.5">
                 <Label>Xona</Label>
-                <Input placeholder="101" value={form.roomNumber} onChange={e => setForm(f => ({ ...f, roomNumber: e.target.value }))} />
+                {rooms.length > 0 ? (
+                  <Select value={form.roomId} onValueChange={sel('roomId')}>
+                    <SelectTrigger><SelectValue placeholder="Xona tanlang..." /></SelectTrigger>
+                    <SelectContent>{rooms.map((r: any) => <SelectItem key={r.id} value={r.id}>{r.name}</SelectItem>)}</SelectContent>
+                  </Select>
+                ) : (
+                  <Input placeholder="101" value={form.roomNumber} onChange={e => setForm(f => ({ ...f, roomNumber: e.target.value }))} />
+                )}
               </div>
             </div>
           </div>

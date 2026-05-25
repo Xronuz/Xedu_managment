@@ -364,6 +364,7 @@ model School {
   invitations         Invitation[]
   financialShifts     FinancialShift[] // Smena jurnali
   rooms               Room[] // Xonalar (filial bo'yicha)
+  periods             Period[] // Dars soatlari (bell schedule)
   courseMaterials     CourseMaterial[] // Markaziy o'quv materiallari
   leads               Lead[] // CRM leadlar
   leadComments        LeadComment[]
@@ -410,6 +411,7 @@ model Branch {
   treasuries          Treasury[]
   financialShifts     FinancialShift[]
   rooms               Room[]
+  periods             Period[]
   schedules           Schedule[]
   leads               Lead[] // CRM leadlar (filial kesimi)
   kpiMetrics          KpiMetric[]
@@ -799,6 +801,29 @@ model Schedule {
   @@index([classId, dayOfWeek])
   @@index([roomId, dayOfWeek])
   @@map("schedules")
+}
+
+// ─── Periods (Bell Schedule) ──────────────────────────────────────────────
+
+model Period {
+  id           String   @id @default(uuid())
+  schoolId     String
+  branchId     String
+  dayType      String?  // e.g. "standard", "short", "exam" — optional schedule variant
+  periodNumber Int
+  startTime    String   // "HH:MM" — mahalliy vaqt
+  endTime      String   // "HH:MM" — mahalliy vaqt
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolId, branchId, periodNumber])
+  @@index([schoolId, branchId])
+  @@index([branchId])
+  @@map("periods")
 }
 
 // ─── Attendance ───────────────────────────────────────────────────────────

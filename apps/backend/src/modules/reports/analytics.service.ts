@@ -275,7 +275,7 @@ export class AnalyticsService {
       // Schedule slot counts per branch
       this.prisma.schedule.groupBy({
         by:    ['branchId'],
-        where: { schoolId },
+        where: { schoolId, status: 'published' },
         _count: { _all: true },
       }),
       // Lead status counts per branch

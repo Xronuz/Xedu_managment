@@ -20,7 +20,7 @@ import {
   Calendar, Clock, Plus, Loader2, Trash2, LayoutGrid, List,
   AlertTriangle, Upload, Search, X, Filter, Eye, Edit3, ArrowRight,
   School, Users, BookOpen, BarChart3, TrendingUp, MonitorPlay,
-  CheckCircle, MessageSquare, BarChart2, Trophy,
+  CheckCircle, MessageSquare, BarChart2, Trophy, Archive, XCircle,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -98,6 +98,8 @@ interface ScheduleSlot {
   roomNumber?: string;
   roomId?: string;
   branchId?: string;
+  status?: string;
+  weekType?: string;
   isCrossBranch?: boolean;
   class?: { id: string; name: string; branchId?: string };
   branch?: { id: string; name: string; code?: string };
@@ -117,13 +119,17 @@ const EMPTY = {
 
 // ── Lesson Entity Panel ───────────────────────────────────────────────────────
 
-function LessonPanel({ slot, open, onClose, canManage, onEdit, onDelete }: {
+function LessonPanel({ slot, open, onClose, canManage, onEdit, onDelete, onValidate, onPublish, onUnpublish, onArchive }: {
   slot: ScheduleSlot | null;
   open: boolean;
   onClose: () => void;
   canManage: boolean;
   onEdit?: (s: ScheduleSlot) => void;
   onDelete?: (id: string) => void;
+  onValidate?: (id: string) => void;
+  onPublish?: (id: string) => void;
+  onUnpublish?: (id: string) => void;
+  onArchive?: (id: string) => void;
 }) {
   const router = useRouter();
   if (!slot) return null;
@@ -176,6 +182,26 @@ function LessonPanel({ slot, open, onClose, canManage, onEdit, onDelete }: {
                 onClick={() => onDelete(slot.id)}
               >
                 O'chirish
+              </SecondaryAction>
+            )}
+            {canManage && slot.status === 'draft' && onValidate && (
+              <PrimaryAction icon={<CheckCircle className="h-3.5 w-3.5" />} onClick={() => onValidate(slot.id)}>
+                Tasdiqlash
+              </PrimaryAction>
+            )}
+            {canManage && slot.status === 'validated' && onPublish && (
+              <PrimaryAction icon={<CheckCircle className="h-3.5 w-3.5" />} onClick={() => onPublish(slot.id)}>
+                Chop etish
+              </PrimaryAction>
+            )}
+            {canManage && (slot.status === 'published' || slot.status === 'validated') && onUnpublish && (
+              <SecondaryAction icon={<XCircle className="h-3.5 w-3.5" />} onClick={() => onUnpublish(slot.id)}>
+                Tasdiqdan olish
+              </SecondaryAction>
+            )}
+            {canManage && slot.status !== 'archived' && onArchive && (
+              <SecondaryAction icon={<Archive className="h-3.5 w-3.5" />} onClick={() => onArchive(slot.id)}>
+                Arxivlash
               </SecondaryAction>
             )}
           </div>
@@ -320,6 +346,15 @@ function WeeklyGrid({
                             {cell.branch?.code ?? 'boshqa'}
                           </span>
                         )}
+                        {canManage && cell.status && cell.status !== 'published' && (
+                          <span className={`absolute top-0.5 ${isCross ? 'right-8' : 'right-0.5'} rounded text-[8px] px-1 ${
+                            cell.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+                            cell.status === 'validated' ? 'bg-blue-100 text-blue-700' :
+                            'bg-gray-100 text-gray-500'
+                          }`}>
+                            {cell.status === 'draft' ? 'Q' : cell.status === 'validated' ? 'T' : 'A'}
+                          </span>
+                        )}
                         <p className="font-semibold truncate pr-5">{cell.subject?.name}</p>
                         <p className="opacity-70 truncate">{cell.class?.name}</p>
                         {(cell.roomNumber || cell.room?.name) && (
@@ -446,6 +481,15 @@ function ListView({
                     {isCross && (
                       <Badge variant="outline" className="text-2xs h-4 px-1 border-muted-foreground/40 text-xedu-slate-500 dark:text-xedu-slate-400">
                         {slot.branch?.name ?? 'boshqa filial'}
+                      </Badge>
+                    )}
+                    {canManage && slot.status && slot.status !== 'published' && (
+                      <Badge variant="outline" className={`text-2xs h-4 px-1 ${
+                        slot.status === 'draft' ? 'border-yellow-300 text-yellow-700 bg-yellow-50' :
+                        slot.status === 'validated' ? 'border-blue-300 text-blue-700 bg-blue-50' :
+                        'border-gray-300 text-gray-500 bg-gray-50'
+                      }`}>
+                        {slot.status === 'draft' ? 'Qoralama' : slot.status === 'validated' ? 'Tasdiqlangan' : 'Arxiv'}
                       </Badge>
                     )}
                   </div>
@@ -624,6 +668,9 @@ export function ScheduleWorkspace() {
   const [activeDay, setActiveDay] = useState<DayOfWeek>(() => {
     return jsDayToTimetableDay(new Date().getDay()) ?? DayOfWeek.MONDAY;
   });
+  const [activeWeekType, setActiveWeekType] = useState<string>('all');
+  const [showDrafts, setShowDrafts] = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
 
   // ── Filters ──────────────────────────────────────────────────────────────────
   const [filterClass, setFilterClass] = useState('');
@@ -632,8 +679,12 @@ export function ScheduleWorkspace() {
 
   // ── Data fetching ────────────────────────────────────────────────────────────
   const { data: weekSchedule, isLoading } = useQuery<ScheduleSlot[]>({
-    queryKey: ['schedule', 'week', activeBranchId],
-    queryFn: () => scheduleApi.getWeek(),
+    queryKey: ['schedule', 'week', activeBranchId, activeWeekType, showDrafts, showArchived],
+    queryFn: () => scheduleApi.getWeek({
+      weekType: activeWeekType,
+      includeDrafts: canManage && showDrafts,
+      includeArchived: canManage && showArchived,
+    }),
   });
 
   const { data: classesData } = useQuery({
@@ -831,6 +882,35 @@ export function ScheduleWorkspace() {
     },
   });
 
+  const validateMutation = useMutation({
+    mutationFn: scheduleApi.validate,
+    onSuccess: () => {
+      toast({ title: 'Tasdiqlandi' });
+      queryClient.invalidateQueries({ queryKey: ['schedule'] });
+    },
+  });
+  const publishMutation = useMutation({
+    mutationFn: scheduleApi.publish,
+    onSuccess: () => {
+      toast({ title: 'Chop etildi' });
+      queryClient.invalidateQueries({ queryKey: ['schedule'] });
+    },
+  });
+  const unpublishMutation = useMutation({
+    mutationFn: scheduleApi.unpublish,
+    onSuccess: () => {
+      toast({ title: 'Tasdiqdan olindi' });
+      queryClient.invalidateQueries({ queryKey: ['schedule'] });
+    },
+  });
+  const archiveMutation = useMutation({
+    mutationFn: scheduleApi.archive,
+    onSuccess: () => {
+      toast({ title: 'Arxivlandi' });
+      queryClient.invalidateQueries({ queryKey: ['schedule'] });
+    },
+  });
+
   const handleDelete = async (id: string) => {
     if (await ask({ title: "Jadval qatorini o'chirishni tasdiqlang", description: "Bu jadval qatori o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" })) {
       deleteMutation.mutate(id);
@@ -975,6 +1055,35 @@ export function ScheduleWorkspace() {
               <List className="h-3.5 w-3.5" />
             </Button>
           </div>
+
+          {/* Week type toggle */}
+          <div className="flex items-center rounded-lg border p-1 gap-1">
+            {(['all', 'numerator', 'denominator'] as const).map((wt) => (
+              <Button
+                key={wt}
+                variant={activeWeekType === wt ? 'secondary' : 'ghost'}
+                size="sm"
+                className="h-7 px-2 text-xs"
+                onClick={() => setActiveWeekType(wt)}
+              >
+                {wt === 'all' ? 'Oddiy' : wt === 'numerator' ? 'Surat' : 'Maxraj'}
+              </Button>
+            ))}
+          </div>
+
+          {/* Manager status filters */}
+          {canManage && (
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-1 text-xs text-xedu-slate-600">
+                <input type="checkbox" checked={showDrafts} onChange={e => setShowDrafts(e.target.checked)} />
+                Qoralama
+              </label>
+              <label className="flex items-center gap-1 text-xs text-xedu-slate-600">
+                <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} />
+                Arxiv
+              </label>
+            </div>
+          )}
 
           <button
             onClick={() => setShowFilters((v) => !v)}
@@ -1167,6 +1276,10 @@ export function ScheduleWorkspace() {
         canManage={canManage}
         onEdit={canManage ? openEdit : undefined}
         onDelete={canManage ? handleDelete : undefined}
+        onValidate={canManage ? (id) => validateMutation.mutate(id) : undefined}
+        onPublish={canManage ? (id) => publishMutation.mutate(id) : undefined}
+        onUnpublish={canManage ? (id) => unpublishMutation.mutate(id) : undefined}
+        onArchive={canManage ? (id) => archiveMutation.mutate(id) : undefined}
       />
 
       {/* Create / Edit modal */}

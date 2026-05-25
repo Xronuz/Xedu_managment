@@ -216,6 +216,19 @@ enum DayOfWeek {
   sunday
 }
 
+enum ScheduleStatus {
+  draft
+  validated
+  published
+  archived
+}
+
+enum WeekType {
+  all
+  numerator
+  denominator
+}
+
 enum AuditAction {
   create
   update
@@ -768,7 +781,7 @@ model Subject {
 
 // ─── Schedule ─────────────────────────────────────────────────────────────
 model Schedule {
-  id             String    @id @default(uuid())
+  id             String         @id @default(uuid())
   schoolId       String
   branchId       String
   classId        String
@@ -784,8 +797,16 @@ model Schedule {
   // startDayMinUtc = dayOfWeek_index * 1440 + (startHour * 60 + startMin) - tzOffsetMinutes
   startDayMinUtc Int? // Haftaning boshidan UTC minutlar soni
   endDayMinUtc   Int? // Haftaning boshidan UTC minutlar soni
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+
+  // ── Phase 3: Lifecycle & 2-week support ──
+  status         ScheduleStatus @default(draft)
+  weekType       WeekType       @default(all)
+  versionNote    String?
+  publishedAt    DateTime?
+  publishedBy    String?
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
 
   school     School       @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   branch     Branch       @relation(fields: [branchId], references: [id], onDelete: Cascade)
@@ -795,7 +816,12 @@ model Schedule {
   room       Room?        @relation(fields: [roomId], references: [id], onDelete: SetNull)
   attendance Attendance[]
 
-  @@index([schoolId, branchId])
+  @@index([schoolId, branchId, status])
+  @@index([schoolId, branchId, weekType])
+  @@index([schoolId, status, weekType])
+  @@index([teacherId, dayOfWeek, status])
+  @@index([classId, dayOfWeek, status])
+  @@index([roomId, dayOfWeek, status])
   @@index([schoolId, dayOfWeek])
   @@index([teacherId, dayOfWeek])
   @@index([branchId, dayOfWeek])

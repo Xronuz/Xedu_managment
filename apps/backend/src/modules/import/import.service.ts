@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, ForbiddenException, NotFoundException 
 import * as bcrypt from 'bcrypt';
 import * as ExcelJS from 'exceljs';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { JwtPayload, UserRole } from '@eduplatform/types';
+import { JwtPayload, UserRole, WeekType, ScheduleStatus } from '@eduplatform/types';
 import { UsersService } from '@/modules/users/users.service';
 import { ConflictDetectorService, toWeeklyUtcMin } from '@/common/utils/conflict-detector';
 
@@ -237,6 +237,7 @@ export class ImportService {
     currentUser: JwtPayload,
     branchIdOverride?: string | null,
   ): Promise<ImportResult> {
+    const WEEK_TYPES = ['all', 'numerator', 'denominator'];
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(buffer as any);
     const sheet = workbook.worksheets[0];
@@ -258,6 +259,7 @@ export class ImportService {
       endTime?: string;
       roomId?: string;
       roomNumber?: string;
+      weekType?: string;
     }
 
     const rawRows: RawRow[] = [];
@@ -279,16 +281,19 @@ export class ImportService {
       let endTime: string | undefined;
       let roomId: string | undefined;
       let roomNumber: string | undefined;
+      let weekType: string | undefined;
 
       if (isOldFormat) {
         startTime = cell6;
         endTime   = String(cells[7] ?? '').trim() || undefined;
         roomNumber = String(cells[8] ?? '').trim() || undefined;
+        weekType   = String(cells[9] ?? '').trim().toLowerCase() || 'all';
       } else {
         roomId     = cell6 || undefined;
         roomNumber = String(cells[7] ?? '').trim() || undefined;
         startTime  = String(cells[8] ?? '').trim() || undefined;
         endTime    = String(cells[9] ?? '').trim() || undefined;
+        weekType   = String(cells[10] ?? '').trim().toLowerCase() || 'all';
       }
 
       const errors: string[] = [];
@@ -299,6 +304,7 @@ export class ImportService {
       if (isNaN(timeSlot) || timeSlot < 1 || timeSlot > 20) errors.push('timeSlot 1-20 oralig‘ida bo‘lishi kerak');
       if (startTime && !/^\d{2}:\d{2}$/.test(startTime)) errors.push('startTime HH:MM formatida bo‘lishi kerak');
       if (endTime && !/^\d{2}:\d{2}$/.test(endTime))     errors.push('endTime HH:MM formatida bo‘lishi kerak');
+      if (!WEEK_TYPES.includes(weekType)) errors.push(`Hafta turi noto'g'ri: ${weekType}`);
 
       rawRows.push({
         rowIndex, classId, subjectId, teacherId, dayOfWeek, timeSlot,
@@ -462,6 +468,7 @@ export class ImportService {
           endTime: raw.endTime,
           roomNumber: raw.roomNumber,
           roomId: resolvedRoomId,
+          weekType: raw.weekType,
           schoolId,
         },
         errors,
@@ -516,6 +523,7 @@ export class ImportService {
     currentUser: JwtPayload,
     branchIdOverride?: string | null,
     overwriteExisting?: boolean,
+    publishAfterImport?: boolean,
   ): Promise<CommitResult> {
     const schoolId = currentUser.schoolId!;
     const validRows = rows.filter(r => r.valid);
@@ -595,6 +603,8 @@ export class ImportService {
           continue;
         }
 
+        const weekType = row.data.weekType ?? WeekType.ALL;
+
         // Existing slot check
         const existing = await this.prisma.schedule.findFirst({
           where: {
@@ -602,6 +612,7 @@ export class ImportService {
             classId: row.data.classId,
             dayOfWeek: row.data.dayOfWeek as any,
             timeSlot: row.data.timeSlot,
+            weekType: { in: [WeekType.ALL, weekType] },
           },
         });
         if (existing && !overwriteExisting) {
@@ -621,6 +632,8 @@ export class ImportService {
           startTime,
           endTime,
           timezone,
+          weekType,
+          status: [ScheduleStatus.PUBLISHED, ScheduleStatus.VALIDATED],
         });
         if (conflicts.length > 0) {
           errors.push(`Qator ${row.row}: ${conflicts.map(c => c.message).join('; ')}`);
@@ -636,23 +649,31 @@ export class ImportService {
           await this.prisma.schedule.delete({ where: { id: existing.id } });
         }
 
-        await this.prisma.schedule.create({
-          data: {
-            schoolId,
-            branchId,
-            classId:    row.data.classId,
-            subjectId:  row.data.subjectId,
-            teacherId:  row.data.teacherId,
-            roomId:     roomId || null,
-            roomNumber: row.data.roomNumber || null,
-            dayOfWeek:  row.data.dayOfWeek as any,
-            timeSlot:   row.data.timeSlot,
-            startTime,
-            endTime,
-            startDayMinUtc,
-            endDayMinUtc,
-          },
-        });
+        const slotData: any = {
+          schoolId,
+          branchId,
+          classId:    row.data.classId,
+          subjectId:  row.data.subjectId,
+          teacherId:  row.data.teacherId,
+          roomId:     roomId || null,
+          roomNumber: row.data.roomNumber || null,
+          dayOfWeek:  row.data.dayOfWeek as any,
+          timeSlot:   row.data.timeSlot,
+          startTime,
+          endTime,
+          startDayMinUtc,
+          endDayMinUtc,
+          status:     ScheduleStatus.DRAFT,
+          weekType,
+        };
+
+        if (publishAfterImport) {
+          slotData.status = ScheduleStatus.PUBLISHED;
+          slotData.publishedAt = new Date();
+          slotData.publishedBy = currentUser.sub;
+        }
+
+        await this.prisma.schedule.create({ data: slotData });
         created++;
       } catch (e: any) {
         errors.push(`Qator ${row.row}: ${e.message}`);
@@ -871,8 +892,8 @@ export class ImportService {
       addHeaders(['Ism', 'Familiya', 'Email', 'Telefon', 'Rol (teacher/accountant/...)', 'Parol', 'Filial ID (ixtiyoriy)']);
       sheet.addRow(['Jasur', 'Toshmatov', 'jasur@example.com', '+998901234567', 'teacher', 'Staff@123', '']);
     } else if (type === 'schedule') {
-      addHeaders(['Sinf ID', 'Fan ID', "O'qituvchi ID", 'Kun (monday-sunday)', 'Slot (1-12)', 'Xona ID (ixtiyoriy)', 'Xona nomi (ixtiyoriy)', 'Boshlanish (ixtiyoriy)', 'Tugash (ixtiyoriy)']);
-      sheet.addRow(['class-uuid', 'subject-uuid', 'teacher-uuid', 'monday', '1', 'room-uuid', '', '', '']);
+      addHeaders(['Sinf ID', 'Fan ID', "O'qituvchi ID", 'Kun (monday-sunday)', 'Slot (1-12)', 'Xona ID (ixtiyoriy)', 'Xona nomi (ixtiyoriy)', 'Boshlanish (ixtiyoriy)', 'Tugash (ixtiyoriy)', 'Hafta turi (all/numerator/denominator)']);
+      sheet.addRow(['class-uuid', 'subject-uuid', 'teacher-uuid', 'monday', '1', 'room-uuid', '', '', '', 'all']);
     } else if (type === 'grades') {
       addHeaders(["O'quvchi ID", 'Fan ID', 'Sinf ID', 'Tur (homework/test/exam/...)', 'Baho', 'Maks baho', 'Sana (YYYY-MM-DD)', 'Izoh']);
       sheet.addRow(['student-uuid', 'subject-uuid', 'class-uuid', 'test', '85', '100', '2026-03-15', '']);

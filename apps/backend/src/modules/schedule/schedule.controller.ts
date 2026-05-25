@@ -10,7 +10,7 @@ import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { GenerateScheduleDto } from './dto/generate-schedule.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
-import { JwtPayload, UserRole } from '@eduplatform/types';
+import { JwtPayload, UserRole, WeekType } from '@eduplatform/types';
 
 @ApiTags('schedule')
 @ApiBearerAuth('JWT')
@@ -32,6 +32,7 @@ export class ScheduleController {
   @ApiQuery({ name: 'classId', required: false })
   @ApiQuery({ name: 'excludeId', required: false })
   @ApiQuery({ name: 'branchId', required: false })
+  @ApiQuery({ name: 'weekType', required: false, enum: WeekType })
   checkConflict(
     @CurrentUser() user: JwtPayload,
     @Query('dayOfWeek') dayOfWeek: string,
@@ -42,37 +43,68 @@ export class ScheduleController {
     @Query('classId') classId?: string,
     @Query('excludeId') excludeId?: string,
     @Query('branchId') branchId?: string,
+    @Query('weekType') weekType?: WeekType,
   ) {
     return this.scheduleService.checkConflict(user, {
-      dayOfWeek, timeSlot, teacherId, roomNumber, roomId, classId, excludeId, branchId,
+      dayOfWeek, timeSlot, teacherId, roomNumber, roomId, classId, excludeId, branchId, weekType,
     });
   }
 
   @Get('today')
   @ApiOperation({ summary: 'Bugungi darslar' })
+  @ApiQuery({ name: 'weekType', required: false, enum: WeekType })
+  @ApiQuery({ name: 'includeDrafts', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeArchived', required: false, type: Boolean })
   getToday(
     @CurrentUser() user: JwtPayload,
+    @Query('weekType') weekType?: WeekType,
+    @Query('includeDrafts') includeDrafts?: string,
+    @Query('includeArchived') includeArchived?: string,
   ) {
-    return this.scheduleService.getToday(user);
+    return this.scheduleService.getToday(user, {
+      weekType,
+      includeDrafts: includeDrafts === 'true',
+      includeArchived: includeArchived === 'true',
+    });
   }
 
   @Get('week')
   @ApiOperation({ summary: 'Haftalik jadval' })
   @ApiQuery({ name: 'classId', required: false })
+  @ApiQuery({ name: 'weekType', required: false, enum: WeekType })
+  @ApiQuery({ name: 'includeDrafts', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeArchived', required: false, type: Boolean })
   getWeek(
     @CurrentUser() user: JwtPayload,
     @Query('classId') classId?: string,
+    @Query('weekType') weekType?: WeekType,
+    @Query('includeDrafts') includeDrafts?: string,
+    @Query('includeArchived') includeArchived?: string,
   ) {
-    return this.scheduleService.getWeek(user, classId);
+    return this.scheduleService.getWeek(user, classId, {
+      weekType,
+      includeDrafts: includeDrafts === 'true',
+      includeArchived: includeArchived === 'true',
+    });
   }
 
   @Get('class/:classId')
   @ApiOperation({ summary: 'Sinf jadvali' })
+  @ApiQuery({ name: 'weekType', required: false, enum: WeekType })
+  @ApiQuery({ name: 'includeDrafts', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeArchived', required: false, type: Boolean })
   findByClass(
     @Param('classId') classId: string,
     @CurrentUser() user: JwtPayload,
+    @Query('weekType') weekType?: WeekType,
+    @Query('includeDrafts') includeDrafts?: string,
+    @Query('includeArchived') includeArchived?: string,
   ) {
-    return this.scheduleService.findByClass(classId, user);
+    return this.scheduleService.findByClass(classId, user, {
+      weekType,
+      includeDrafts: includeDrafts === 'true',
+      includeArchived: includeArchived === 'true',
+    });
   }
 
   @Post()
@@ -107,12 +139,14 @@ export class ScheduleController {
   @Roles(UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL)
   @ApiOperation({ summary: "O'qituvchining barcha filiallardagi darslarini olish (UI greyed-out uchun)" })
   @ApiQuery({ name: 'viewerBranchId', required: false })
+  @ApiQuery({ name: 'weekType', required: false, enum: WeekType })
   getTeacherCrossBranch(
     @Param('teacherId') teacherId: string,
     @CurrentUser() user: JwtPayload,
     @Query('viewerBranchId') viewerBranchId?: string,
+    @Query('weekType') weekType?: WeekType,
   ) {
-    return this.scheduleService.getTeacherCrossBranch(teacherId, user, viewerBranchId ?? user.branchId);
+    return this.scheduleService.getTeacherCrossBranch(teacherId, user, viewerBranchId ?? user.branchId, { weekType });
   }
 
   @Post('generate')
@@ -133,5 +167,51 @@ export class ScheduleController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.generatorService.commitProposed(body.slots, user, body.overwriteExisting);
+  }
+
+  // ── Lifecycle endpoints ───────────────────────────────────────────────────
+
+  @Post(':id/validate')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: 'Jadval slotini tasdiqlash (draft → validated)' })
+  validate(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.scheduleService.validate(id, user);
+  }
+
+  @Post(':id/publish')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
+  @ApiOperation({ summary: 'Jadval slotini nashr qilish (validated|draft → published)' })
+  publish(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.scheduleService.publish(id, user);
+  }
+
+  @Post(':id/unpublish')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
+  @ApiOperation({ summary: 'Jadval slotini nashrdan olish (published → draft)' })
+  unpublish(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.scheduleService.unpublish(id, user);
+  }
+
+  @Post(':id/archive')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
+  @ApiOperation({ summary: 'Jadval slotini arxivlash' })
+  archive(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.scheduleService.archive(id, user);
+  }
+
+  @Post('bulk-publish')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
+  @ApiOperation({ summary: 'Bir nechta jadval slotlarini nashr qilish' })
+  bulkPublish(
+    @Body() body: { ids: string[] },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.scheduleService.bulkPublish(body.ids, user);
+  }
+
+  @Get('week-type/current')
+  @ApiOperation({ summary: 'Joriy hafta turi (surat/maxraj)' })
+  getCurrentWeekType() {
+    return this.scheduleService.getCurrentWeekType();
   }
 }

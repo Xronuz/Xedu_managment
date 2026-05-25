@@ -113,6 +113,19 @@ export enum DayOfWeek {
   SUNDAY = 'sunday',
 }
 
+export enum ScheduleStatus {
+  DRAFT = 'draft',
+  VALIDATED = 'validated',
+  PUBLISHED = 'published',
+  ARCHIVED = 'archived',
+}
+
+export enum WeekType {
+  ALL = 'all',
+  NUMERATOR = 'numerator',
+  DENOMINATOR = 'denominator',
+}
+
 export enum AuditAction {
   CREATE = 'create',
   UPDATE = 'update',

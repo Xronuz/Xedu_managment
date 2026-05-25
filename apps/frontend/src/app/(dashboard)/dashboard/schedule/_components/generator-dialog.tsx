@@ -25,6 +25,7 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
   const { toast } = useToast();
   const [step, setStep] = useState<Step>('config');
   const [overwriteExisting, setOverwriteExisting] = useState(false);
+  const [weekType, setWeekType] = useState<string>('all');
   const [report, setReport] = useState<GeneratorConflictReport | null>(null);
 
   const generateMutation = useMutation({
@@ -32,6 +33,7 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
       branchId,
       strategy: 'greedy',
       overwriteExisting,
+      weekType,
     }),
     onSuccess: (data) => {
       setReport(data);
@@ -61,6 +63,7 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
     setStep('config');
     setReport(null);
     setOverwriteExisting(false);
+    setWeekType('all');
   }
 
   function handleClose(v: boolean) {
@@ -98,6 +101,22 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
               <label htmlFor="gen-overwrite" className="text-sm text-yellow-800 cursor-pointer">
                 Mavjud jadvalni ustiga yozish
               </label>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-xedu-slate-600 dark:text-xedu-slate-400">Hafta turi:</span>
+              {(['all','numerator','denominator'] as const).map((wt) => (
+                <button
+                  key={wt}
+                  type="button"
+                  onClick={() => setWeekType(wt)}
+                  className={`h-7 px-2 rounded text-xs border transition-colors ${
+                    weekType === wt ? 'bg-primary text-white border-primary' : 'bg-white dark:bg-xedu-slate-800 text-xedu-slate-600 border-xedu-slate-200'
+                  }`}
+                >
+                  {wt === 'all' ? 'Oddiy' : wt === 'numerator' ? 'Surat' : 'Maxraj'}
+                </button>
+              ))}
             </div>
 
             <div className="p-3 rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 border text-sm text-xedu-slate-600 dark:text-xedu-slate-400">

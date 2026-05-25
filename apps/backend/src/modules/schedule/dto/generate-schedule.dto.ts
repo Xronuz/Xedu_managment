@@ -1,7 +1,7 @@
 import { IsString, IsOptional, IsArray, IsInt, Min, IsBoolean, IsEnum } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { DayOfWeek } from '@eduplatform/types';
+import { DayOfWeek, WeekType } from '@eduplatform/types';
 
 export class GenerateScheduleDto {
   @ApiPropertyOptional({ description: 'Filial ID (null = barcha filiallar uchun Director)' })
@@ -44,4 +44,9 @@ export class GenerateScheduleDto {
   @Min(1000)
   @Type(() => Number)
   timeoutMs?: number;
+
+  @ApiPropertyOptional({ description: 'Hafta turi', enum: WeekType, default: WeekType.ALL })
+  @IsOptional()
+  @IsEnum(WeekType)
+  weekType?: WeekType;
 }

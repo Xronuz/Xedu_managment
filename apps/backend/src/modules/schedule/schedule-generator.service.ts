@@ -1,7 +1,7 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ConflictDetectorService, toWeeklyUtcMin } from '@/common/utils/conflict-detector';
-import { JwtPayload, DayOfWeek, UserRole } from '@eduplatform/types';
+import { JwtPayload, DayOfWeek, UserRole, WeekType, ScheduleStatus } from '@eduplatform/types';
 
 // ─── Tip lar ─────────────────────────────────────────────────────────────────
 
@@ -69,6 +69,7 @@ export class ScheduleGeneratorService {
       classIds?: string[];
       subjectIds?: string[];
       overwriteExisting?: boolean;
+      weekType?: WeekType;
     },
     currentUser: JwtPayload,
   ): Promise<GeneratorConflictReport> {
@@ -93,6 +94,11 @@ export class ScheduleGeneratorService {
     const timezone = await this.getSchoolTimezone(schoolId);
 
     // ── 1. Load data ──────────────────────────────────────────────────────────
+    const weekType = dto.weekType ?? WeekType.ALL;
+    const weekTypeFilter = weekType === WeekType.ALL
+      ? undefined
+      : { in: [WeekType.ALL, weekType] };
+
     const [subjects, periods, rooms, existingSchedules] = await Promise.all([
       this.prisma.subject.findMany({
         where: {
@@ -120,6 +126,8 @@ export class ScheduleGeneratorService {
           branchId: targetBranchId,
           ...(dto.classIds?.length ? { classId: { in: dto.classIds } } : {}),
           dayOfWeek: { in: daysOfWeek as any },
+          status: { in: [ScheduleStatus.PUBLISHED, ScheduleStatus.VALIDATED] },
+          ...(weekTypeFilter ? { weekType: weekTypeFilter } : {}),
         },
         select: {
           classId: true, teacherId: true, roomId: true,
@@ -234,6 +242,8 @@ export class ScheduleGeneratorService {
             startTime: candidate.startTime,
             endTime: candidate.endTime,
             timezone,
+            weekType,
+            status: [ScheduleStatus.PUBLISHED, ScheduleStatus.VALIDATED],
           });
 
           if (conflicts.length > 0) {
@@ -261,7 +271,8 @@ export class ScheduleGeneratorService {
             timeSlot: candidate.timeSlot,
             startTime: candidate.startTime,
             endTime: candidate.endTime,
-          });
+            weekType,
+          } as any);
 
           placedKeys.add(classKey);
           placedKeys.add(teacherKey);
@@ -341,6 +352,7 @@ export class ScheduleGeneratorService {
             classId: slot.classId,
             dayOfWeek: slot.dayOfWeek as any,
             timeSlot: slot.timeSlot,
+            weekType: { in: [WeekType.ALL, (slot as any).weekType ?? WeekType.ALL] },
           },
         });
         if (existing && !overwriteExisting) {
@@ -358,6 +370,8 @@ export class ScheduleGeneratorService {
           startTime: slot.startTime,
           endTime: slot.endTime,
           timezone,
+          weekType: (slot as any).weekType ?? WeekType.ALL,
+          status: [ScheduleStatus.PUBLISHED, ScheduleStatus.VALIDATED],
         });
         if (conflicts.length > 0) {
           errors.push(`Slot ${slot.id}: ${conflicts.map(c => c.message).join('; ')}`);
@@ -385,6 +399,8 @@ export class ScheduleGeneratorService {
             endTime: slot.endTime,
             startDayMinUtc,
             endDayMinUtc,
+            status: ScheduleStatus.DRAFT,
+            weekType: (slot as any).weekType ?? WeekType.ALL,
           },
         });
         created++;

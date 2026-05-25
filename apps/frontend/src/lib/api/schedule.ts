@@ -2,25 +2,24 @@ import { apiClient } from './client';
 import type { DayOfWeek } from '@eduplatform/types';
 
 export const scheduleApi = {
-  getToday: async () => {
-    const { data } = await apiClient.get('/schedule/today');
+  getToday: async (params?: { weekType?: string; includeDrafts?: boolean; includeArchived?: boolean }) => {
+    const { data } = await apiClient.get('/schedule/today', { params });
     return data;
   },
 
-  getWeek: async (classId?: string) => {
-    const { data } = await apiClient.get('/schedule/week', { params: { classId } });
+  getWeek: async (params?: { classId?: string; weekType?: string; includeDrafts?: boolean; includeArchived?: boolean }) => {
+    const { data } = await apiClient.get('/schedule/week', { params });
     return data;
   },
 
-  getByClass: async (classId: string) => {
-    const { data } = await apiClient.get(`/schedule/class/${classId}`);
+  getByClass: async (classId: string, params?: { weekType?: string; includeDrafts?: boolean; includeArchived?: boolean }) => {
+    const { data } = await apiClient.get(`/schedule/class/${classId}`, { params });
     return data;
   },
 
-  /** O'qituvchining barcha filiallardagi darslarini olish (greyed-out UI uchun) */
-  getTeacherCrossBranch: async (teacherId: string, viewerBranchId?: string) => {
+  getTeacherCrossBranch: async (teacherId: string, viewerBranchId?: string, weekType?: string) => {
     const { data } = await apiClient.get(`/schedule/teacher/${teacherId}/cross-branch`, {
-      params: { viewerBranchId },
+      params: { viewerBranchId, weekType },
     });
     return data;
   },
@@ -35,6 +34,7 @@ export const scheduleApi = {
     timeSlot: number;
     startTime: string;
     endTime: string;
+    weekType?: string;
   }) => {
     const { data } = await apiClient.post('/schedule', payload);
     return data;
@@ -47,6 +47,7 @@ export const scheduleApi = {
     endTime: string;
     dayOfWeek: DayOfWeek;
     timeSlot: number;
+    weekType?: string;
   }>) => {
     const { data } = await apiClient.put(`/schedule/${id}`, payload);
     return data;
@@ -55,6 +56,36 @@ export const scheduleApi = {
   remove: async (id: string) => {
     const { data } = await apiClient.delete(`/schedule/${id}`);
     return data;
+  },
+
+  validate: async (id: string) => {
+    const { data } = await apiClient.post(`/schedule/${id}/validate`);
+    return data;
+  },
+
+  publish: async (id: string) => {
+    const { data } = await apiClient.post(`/schedule/${id}/publish`);
+    return data;
+  },
+
+  unpublish: async (id: string) => {
+    const { data } = await apiClient.post(`/schedule/${id}/unpublish`);
+    return data;
+  },
+
+  archive: async (id: string) => {
+    const { data } = await apiClient.post(`/schedule/${id}/archive`);
+    return data;
+  },
+
+  bulkPublish: async (ids: string[]) => {
+    const { data } = await apiClient.post('/schedule/bulk-publish', { ids });
+    return data;
+  },
+
+  getCurrentWeekType: async () => {
+    const { data } = await apiClient.get('/schedule/week-type/current');
+    return data as { weekType: string; isoWeekNumber: number };
   },
 
   checkConflict: async (params: {
@@ -66,6 +97,7 @@ export const scheduleApi = {
     classId?: string;
     excludeId?: string;
     branchId?: string;
+    weekType?: string;
   }): Promise<{ hasConflict: boolean; conflicts: { type: string; message: string }[] }> => {
     const { data } = await apiClient.get('/schedule/check-conflict', { params });
     return data;

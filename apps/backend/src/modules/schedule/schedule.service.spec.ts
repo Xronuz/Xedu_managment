@@ -5,7 +5,8 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
 import { ConflictDetectorService } from '@/common/utils/conflict-detector';
 import { PeriodsService } from '@/modules/periods/periods.service';
-import { JwtPayload, UserRole, DayOfWeek } from '@eduplatform/types';
+import { AuditService } from '@/common/audit/audit.service';
+import { JwtPayload, UserRole, DayOfWeek, ScheduleStatus } from '@eduplatform/types';
 
 const mockDirector: JwtPayload = {
   sub: 'user-1',
@@ -52,6 +53,10 @@ const mockPeriodsService = {
   resolvePeriod: jest.fn().mockResolvedValue({ startTime: '08:00', endTime: '08:45' }),
 };
 
+const mockAuditService = {
+  log: jest.fn().mockResolvedValue(undefined),
+};
+
 describe('ScheduleService', () => {
   let service: ScheduleService;
   let prisma: any;
@@ -83,6 +88,7 @@ describe('ScheduleService', () => {
         { provide: RedisService, useValue: mockRedis },
         { provide: ConflictDetectorService, useValue: mockConflictDetector },
         { provide: PeriodsService, useValue: mockPeriodsService },
+        { provide: AuditService, useValue: mockAuditService },
       ],
     }).compile();
 

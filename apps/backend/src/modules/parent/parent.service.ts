@@ -113,7 +113,7 @@ export class ParentService {
     });
     if (!enrollment) return [];
     return this.prisma.schedule.findMany({
-      where: { classId: enrollment.classId, schoolId: currentUser.schoolId! },
+      where: { classId: enrollment.classId, schoolId: currentUser.schoolId!, status: 'published' },
       include: { subject: { include: { teacher: { select: { firstName: true, lastName: true } } } } },
       orderBy: [{ dayOfWeek: 'asc' }, { timeSlot: 'asc' }],
     });

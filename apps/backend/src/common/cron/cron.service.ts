@@ -31,7 +31,7 @@ export class CronService {
 
       // Bugun darsi bo'lgan o'qituvchilar
       const schedules = await this.prisma.schedule.findMany({
-        where: { dayOfWeek: today as any },
+        where: { dayOfWeek: today as any, status: 'published' },
         include: {
           subject: {
             include: {

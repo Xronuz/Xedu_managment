@@ -31,7 +31,7 @@ export class DisplayService {
     const today = dayMap[jsDay];
 
     const schedule = await this.prisma.schedule.findMany({
-      where: { schoolId: school.id, dayOfWeek: today },
+      where: { schoolId: school.id, dayOfWeek: today, status: 'published' },
       include: {
         subject: {
           select: {

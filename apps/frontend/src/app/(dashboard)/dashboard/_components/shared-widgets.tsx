@@ -193,7 +193,7 @@ export function TodayScheduleWidget() {
   const { activeBranchId } = useAuthStore();
   const { data: todaySlots, isLoading } = useQuery({
     queryKey: ['schedule', 'today', activeBranchId],
-    queryFn: scheduleApi.getToday,
+    queryFn: () => scheduleApi.getToday(),
     staleTime: 10 * 60_000,
   });
   const slots: any[] = Array.isArray(todaySlots) ? todaySlots : [];
@@ -505,7 +505,7 @@ export function TeacherKPISection() {
 
   const { data: todaySlots, isLoading: schedLoading } = useQuery({
     queryKey: ['schedule', 'today', activeBranchId],
-    queryFn: scheduleApi.getToday,
+    queryFn: () => scheduleApi.getToday(),
     staleTime: 10 * 60_000,
   });
 

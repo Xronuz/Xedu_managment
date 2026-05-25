@@ -42,7 +42,7 @@ const TYPE_CONFIG: Record<ImportType, {
   schedule: {
     title: 'Jadval import',
     description: "Dars jadvalini Excel fayl orqali yuklash",
-    columns: ['Sinf ID', 'Fan ID', "O'qituvchi ID", 'Kun', 'Slot', 'Boshlanish', 'Tugash', 'Xona'],
+    columns: ['Sinf ID', 'Fan ID', "O'qituvchi ID", 'Kun', 'Slot', 'Boshlanish', 'Tugash', 'Xona', 'Hafta turi (all/numerator/denominator)'],
   },
   grades: {
     title: 'Baholar import',
@@ -64,7 +64,7 @@ const PARSE_FUNS: Record<ImportType, (f: File) => Promise<ImportResult>> = {
   attendance: importApi.parseAttendance,
 };
 
-const COMMIT_FUNS: Record<ImportType, (rows: ImportRow[], branchId?: string, overwriteExisting?: boolean) => Promise<CommitResult>> = {
+const COMMIT_FUNS: Record<ImportType, (rows: ImportRow[], branchId?: string, overwriteExisting?: boolean, publishAfterImport?: boolean) => Promise<CommitResult>> = {
   students:   importApi.commitStudents,
   users:      importApi.commitUsers,
   schedule:   importApi.commitSchedule,
@@ -95,6 +95,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
   const [showErrors, setShowErrors] = useState(false);
   const [branchId, setBranchId] = useState('');
   const [overwriteExisting, setOverwriteExisting] = useState(false);
+  const [publishAfterImport, setPublishAfterImport] = useState(false);
 
   const { data: branchesData } = useQuery({
     queryKey: ['branches', user?.schoolId],
@@ -110,6 +111,8 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
     setCommitResult(null);
     setShowErrors(false);
     setBranchId('');
+    setOverwriteExisting(false);
+    setPublishAfterImport(false);
   }
 
   function handleClose(v: boolean) {
@@ -133,7 +136,12 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
   // ── Commit mutation ─────────────────────────────────────────────────────────
 
   const commitMutation = useMutation({
-    mutationFn: (rows: ImportRow[]) => COMMIT_FUNS[type](rows, branchId || undefined, type === 'schedule' ? overwriteExisting : undefined),
+    mutationFn: (rows: ImportRow[]) => COMMIT_FUNS[type](
+      rows,
+      branchId || undefined,
+      type === 'schedule' ? overwriteExisting : undefined,
+      type === 'schedule' ? publishAfterImport : undefined,
+    ),
     onSuccess: (result) => {
       setCommitResult(result);
       setStep('result');
@@ -316,17 +324,31 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
             )}
 
             {type === 'schedule' && parseResult.valid > 0 && (
-              <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
-                <input
-                  id="overwrite"
-                  type="checkbox"
-                  checked={overwriteExisting}
-                  onChange={e => setOverwriteExisting(e.target.checked)}
-                  className="h-4 w-4 rounded border-gray-300"
-                />
-                <label htmlFor="overwrite" className="text-sm text-yellow-800 cursor-pointer">
-                  Mavjud jadvalni ustiga yozish
-                </label>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+                  <input
+                    id="overwrite"
+                    type="checkbox"
+                    checked={overwriteExisting}
+                    onChange={e => setOverwriteExisting(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="overwrite" className="text-sm text-yellow-800 cursor-pointer">
+                    Mavjud jadvalni ustiga yozish
+                  </label>
+                </div>
+                <div className="flex items-center gap-2 p-3 rounded-lg bg-green-50 border border-green-200">
+                  <input
+                    id="publish-after-import"
+                    type="checkbox"
+                    checked={publishAfterImport}
+                    onChange={e => setPublishAfterImport(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="publish-after-import" className="text-sm text-green-800 cursor-pointer">
+                    Importdan so&apos;ng darhol chop etish (faqat Direktor/VP)
+                  </label>
+                </div>
               </div>
             )}
 

@@ -52,6 +52,7 @@ export interface GenerateScheduleDto {
   strategy?: 'greedy';
   overwriteExisting?: boolean;
   timeoutMs?: number;
+  weekType?: string;
 }
 
 export const scheduleGeneratorApi = {

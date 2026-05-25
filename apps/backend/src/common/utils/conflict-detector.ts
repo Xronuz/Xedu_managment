@@ -24,18 +24,21 @@
 
 import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { ScheduleStatus, WeekType } from '@eduplatform/types';
 
 export interface ClashParams {
   schoolId:    string;
-  branchId?:   string | null;   // tekshirilayotgan filial (xona uchun)
+  branchId?:   string | null;
   teacherId?:  string;
   roomId?:     string;
   classId?:    string;
-  dayOfWeek:   string;          // "monday" ... "sunday"
-  startTime:   string;          // "HH:MM"
-  endTime:     string;          // "HH:MM"
-  timezone:    string;          // "Asia/Tashkent"
-  excludeId?:  string;          // yangilashda o'zini istisno qilish
+  dayOfWeek:   string;
+  startTime:   string;
+  endTime:     string;
+  timezone:    string;
+  excludeId?:  string;
+  weekType?:   WeekType;
+  status?:     ScheduleStatus[];
 }
 
 export interface ConflictDetail {
@@ -137,7 +140,19 @@ export class ConflictDetectorService {
     const {
       schoolId, branchId, teacherId, roomId, classId,
       dayOfWeek, startTime, endTime, timezone, excludeId,
+      weekType, status,
     } = params;
+
+    const effectiveWeekType = weekType ?? WeekType.ALL;
+    const effectiveStatus = status ?? [ScheduleStatus.PUBLISHED, ScheduleStatus.VALIDATED];
+
+    // Week-type conflict scope:
+    // - 'all' conflicts with ALL week types
+    // - 'numerator' conflicts with 'all' and 'numerator'
+    // - 'denominator' conflicts with 'all' and 'denominator'
+    const weekTypeFilter = effectiveWeekType === WeekType.ALL
+      ? undefined
+      : { in: [WeekType.ALL, effectiveWeekType] };
 
     // Yangi slotning UTC minutlari
     const newStart = toWeeklyUtcMin(dayOfWeek, startTime, timezone);
@@ -154,12 +169,13 @@ export class ConflictDetectorService {
 
     // ── 1. O'QITUVCHI to'qnashuvi — SCHOOL-WIDE ─────────────────────────────
     if (teacherId) {
-      // O'qituvchining o'sha kunda barcha filiallardagi darslarini olamiz
       const teacherSlots = await this.prisma.schedule.findMany({
         where: {
           schoolId,
           teacherId,
           dayOfWeek: dayOfWeek as any,
+          status: { in: effectiveStatus },
+          ...(weekTypeFilter ? { weekType: weekTypeFilter } : {}),
           ...exclude,
         },
         select: {
@@ -195,15 +211,16 @@ export class ConflictDetectorService {
       }
     }
 
-    // ── 2. XONA to'qnashuvi — SCHOOL-WIDE (xona noyob ID bilan aniqlanadi) ────
-    // branchId null bo'lsa ham tekshiriladi — xona ikki marta band qilinmasin.
+    // ── 2. XONA to'qnashuvi ──────────────────────────────────────────────────
     if (roomId) {
       const roomSlots = await this.prisma.schedule.findMany({
         where: {
           schoolId,
-          ...(branchId ? { branchId } : {}),  // branchId berilsa filtrlaymiz, yo'qsa school-wide
+          ...(branchId ? { branchId } : {}),
           roomId,
           dayOfWeek: dayOfWeek as any,
+          status: { in: effectiveStatus },
+          ...(weekTypeFilter ? { weekType: weekTypeFilter } : {}),
           ...exclude,
         },
         select: {
@@ -240,6 +257,8 @@ export class ConflictDetectorService {
           schoolId,
           classId,
           dayOfWeek: dayOfWeek as any,
+          status: { in: effectiveStatus },
+          ...(weekTypeFilter ? { weekType: weekTypeFilter } : {}),
           ...exclude,
         },
         select: {

@@ -103,10 +103,13 @@ export class ImportController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Jadvalni bazaga saqlash' })
   commitSchedule(
-    @Body() body: { rows: ImportRow[]; branchId?: string; overwriteExisting?: boolean },
+    @Body() body: { rows: ImportRow[]; branchId?: string; overwriteExisting?: boolean; publishAfterImport?: boolean },
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.importService.commitSchedule(body.rows, user, body.branchId ?? user.branchId, body.overwriteExisting);
+    return this.importService.commitSchedule(
+      body.rows, user, body.branchId ?? user.branchId,
+      body.overwriteExisting, body.publishAfterImport,
+    );
   }
 
   // ─── Baholar import ───────────────────────────────────────────────────────

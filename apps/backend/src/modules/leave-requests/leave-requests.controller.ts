@@ -82,4 +82,14 @@ export class LeaveRequestsController {
   cancel(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.service.cancel(id, user);
   }
+
+  @Get(':id/affected-schedules')
+  @Roles(
+    UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN,
+    UserRole.TEACHER, UserRole.CLASS_TEACHER,
+  )
+  @ApiOperation({ summary: "Ta'til davomida ta'sirlangan dars slotlari" })
+  findAffectedSchedules(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.service.findAffectedSchedules(id, user);
+  }
 }

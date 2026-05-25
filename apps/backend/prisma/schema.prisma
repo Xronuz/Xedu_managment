@@ -252,10 +252,17 @@ enum Semester {
 
 enum LeaveType {
   sick
-  personal
-  family
+  personal       // legacy: maps conceptually to unpaid
+  family         // legacy: maps conceptually to unpaid
   other
-  professional
+  professional   // legacy: maps conceptually to training
+  unpaid
+  paid
+  vacation
+  training
+  business_trip
+  maternity
+  emergency
 }
 
 enum AuditAction {
@@ -373,6 +380,8 @@ model School {
   teachingLoads       TeachingLoad[]
   schedules           Schedule[]
   attendance          Attendance[]
+  teacherAttendances  TeacherAttendance[]
+  teacherSubstitutions TeacherSubstitution[]
   grades              Grade[]
   exams               Exam[]
   payments            Payment[]
@@ -443,6 +452,8 @@ model Branch {
   classes             Class[]
   teachingLoads       TeachingLoad[]
   attendance          Attendance[]
+  teacherAttendances  TeacherAttendance[]
+  teacherSubstitutions TeacherSubstitution[]
   grades              Grade[]
   payments            Payment[]
   leaveRequests       LeaveRequest[]
@@ -640,6 +651,12 @@ model User {
   leaveRequests        LeaveRequest[]  @relation("LeaveRequests")
   leaveRequestsCreated LeaveRequest[]  @relation("LeaveRequestCreator")
   leaveApprovals       LeaveApproval[] @relation("LeaveApprovals")
+
+  // Phase 5A.4: Teacher attendance & substitution
+  teacherAttendances    TeacherAttendance[]   @relation("TeacherAttendance")
+  originalSubstitutions TeacherSubstitution[] @relation("OriginalTeacher")
+  substituteAssignments TeacherSubstitution[] @relation("SubstituteTeacher")
+  substitutionApprovals TeacherSubstitution[] @relation("SubstitutionApprover")
 
   // Online exam sessions
   examSessions ExamSession[] @relation("ExamSessions")
@@ -887,6 +904,7 @@ model Schedule {
   teacher    User         @relation("ScheduleTeacher", fields: [teacherId], references: [id])
   room       Room?        @relation(fields: [roomId], references: [id], onDelete: SetNull)
   attendance Attendance[]
+  teacherSubstitutions TeacherSubstitution[]
 
   @@index([schoolId, branchId, status])
   @@index([schoolId, branchId, weekType])
@@ -1386,18 +1404,20 @@ enum LeaveStatus {
 }
 
 model LeaveRequest {
-  id          String      @id @default(uuid())
-  schoolId    String
-  branchId    String
-  requesterId String
-  reason      String
-  startDate   DateTime    @db.Date
-  endDate     DateTime    @db.Date
-  status      LeaveStatus @default(pending)
-  type        LeaveType?
-  createdById String?
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  id             String      @id @default(uuid())
+  schoolId       String
+  branchId       String
+  requesterId    String
+  reason         String
+  startDate      DateTime    @db.Date
+  endDate        DateTime    @db.Date
+  status         LeaveStatus @default(pending)
+  type           LeaveType?
+  affectsSchedule Boolean    @default(true)
+  affectsPayroll  Boolean    @default(true)
+  createdById    String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 
   school    School          @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   branch    Branch          @relation(fields: [branchId], references: [id], onDelete: Cascade)
@@ -1405,9 +1425,9 @@ model LeaveRequest {
   createdBy User?           @relation("LeaveRequestCreator", fields: [createdById], references: [id], onDelete: SetNull)
   approvals LeaveApproval[]
 
-  @@index([schoolId, status]) // D-2: status filtr O(1)
-  @@index([requesterId]) // D-2: talaba/xodim so'rovlari O(1)
-  @@index([schoolId, startDate]) // D-2: sana oralig'i qidirish
+  @@index([schoolId, status])
+  @@index([requesterId])
+  @@index([schoolId, startDate])
   @@index([requesterId, status])
   @@index([branchId, status])
   @@map("leave_requests")
@@ -1427,6 +1447,79 @@ model LeaveApproval {
 
   @@unique([leaveRequestId, approverId])
   @@map("leave_approvals")
+}
+
+// ─── Phase 5A.4: Teacher Attendance & Substitution ─────────────────────────
+
+enum TeacherAttendanceStatus {
+  present
+  absent
+  late
+  excused
+  substituted
+}
+
+model TeacherAttendance {
+  id           String                  @id @default(uuid())
+  schoolId     String
+  branchId     String
+  teacherId    String
+  date         DateTime                @db.Date
+  status       TeacherAttendanceStatus @default(present)
+  scheduleId   String?                 // future: per-slot granularity
+  notes        String?
+  source       String?                 // manual | schedule | leave
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
+
+  school  School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch  Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  teacher User   @relation("TeacherAttendance", fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, date, scheduleId])
+  @@index([schoolId, branchId])
+  @@index([teacherId, date])
+  @@index([status])
+  @@map("teacher_attendances")
+}
+
+enum SubstitutionStatus {
+  proposed
+  approved
+  rejected
+  applied
+  cancelled
+}
+
+model TeacherSubstitution {
+  id                  String             @id @default(uuid())
+  schoolId            String
+  branchId            String
+  date                DateTime           @db.Date
+  scheduleId          String
+  originalTeacherId   String
+  substituteTeacherId String
+  status              SubstitutionStatus @default(proposed)
+  reason              String?
+  notes               String?
+  approvedById        String?
+  approvedAt          DateTime?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  school            School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch            Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  schedule          Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  originalTeacher   User     @relation("OriginalTeacher", fields: [originalTeacherId], references: [id], onDelete: Cascade)
+  substituteTeacher User     @relation("SubstituteTeacher", fields: [substituteTeacherId], references: [id], onDelete: Cascade)
+  approvedBy        User?    @relation("SubstitutionApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+
+  @@index([schoolId, branchId])
+  @@index([originalTeacherId])
+  @@index([substituteTeacherId])
+  @@index([status])
+  @@index([date])
+  @@map("teacher_substitutions")
 }
 
 // ─── Staff Salary & Payroll ───────────────────────────────────────────────

@@ -201,4 +201,27 @@ export enum LeaveType {
   FAMILY = 'family',
   OTHER = 'other',
   PROFESSIONAL = 'professional',
+  UNPAID = 'unpaid',
+  PAID = 'paid',
+  VACATION = 'vacation',
+  TRAINING = 'training',
+  BUSINESS_TRIP = 'business_trip',
+  MATERNITY = 'maternity',
+  EMERGENCY = 'emergency',
+}
+
+export enum TeacherAttendanceStatus {
+  PRESENT = 'present',
+  ABSENT = 'absent',
+  LATE = 'late',
+  EXCUSED = 'excused',
+  SUBSTITUTED = 'substituted',
+}
+
+export enum SubstitutionStatus {
+  PROPOSED = 'proposed',
+  APPROVED = 'approved',
+  REJECTED = 'rejected',
+  APPLIED = 'applied',
+  CANCELLED = 'cancelled',
 }

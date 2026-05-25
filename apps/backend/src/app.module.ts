@@ -41,6 +41,7 @@ import { AcademicCalendarModule } from './modules/academic-calendar/academic-cal
 import { FeeStructuresModule } from './modules/fee-structures/fee-structures.module';
 import { ImportModule } from './modules/import/import.module';
 import { TeachingLoadModule } from './modules/teaching-load/teaching-load.module';
+import { TeacherAttendanceModule } from './modules/teacher-attendance/teacher-attendance.module';
 import { OnlineExamModule } from './modules/online-exam/online-exam.module';
 import { SystemConfigModule } from './modules/system-config/system-config.module';
 import { DisciplineModule } from './modules/discipline/discipline.module';
@@ -131,7 +132,8 @@ import { envValidationSchema } from './common/config/env.validation';
     AcademicCalendarModule,  // Akademik kalendar
     FeeStructuresModule,     // To'lov tartiblari
     ImportModule,            // Excel import (students, users, schedule, grades)
-    TeachingLoadModule,      // O'quv yuklamasi (tarifikatsiya)
+    TeachingLoadModule,
+    TeacherAttendanceModule,      // O'quv yuklamasi (tarifikatsiya)
     OnlineExamModule,        // Online imtihon platformasi
     SystemConfigModule,      // Maktab konfiguratsiyasi (BHM, akademik yil)
     DisciplineModule,        // Intizom jurnali

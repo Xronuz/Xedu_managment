@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Optional } from '@nestjs/common';
-import { IsString, IsDateString, IsOptional, IsIn, MinLength, MaxLength } from 'class-validator';
+import { IsString, IsDateString, IsOptional, IsIn, MinLength, MaxLength, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
@@ -21,14 +21,24 @@ export class CreateLeaveRequestDto {
   endDate: string;
 
   @ApiPropertyOptional({
-    enum: ['sick', 'personal', 'family', 'other'],
+    enum: ['sick', 'personal', 'family', 'other', 'professional', 'unpaid', 'paid', 'vacation', 'training', 'business_trip', 'maternity', 'emergency'],
     example: 'sick',
-    description: 'Ta‘til turi: sick | personal | family | other',
+    description: 'Ta‘til turi',
   })
   @IsOptional()
   @IsString()
-  @IsIn(['sick', 'personal', 'family', 'other'])
+  @IsIn(['sick', 'personal', 'family', 'other', 'professional', 'unpaid', 'paid', 'vacation', 'training', 'business_trip', 'maternity', 'emergency'])
   type?: string;
+
+  @ApiPropertyOptional({ example: true, description: 'Jadvalga ta‘sir qiladimi' })
+  @IsOptional()
+  @IsBoolean()
+  affectsSchedule?: boolean;
+
+  @ApiPropertyOptional({ example: true, description: 'Maoshga ta‘sir qiladimi' })
+  @IsOptional()
+  @IsBoolean()
+  affectsPayroll?: boolean;
 }
 
 export class ReviewLeaveDto {
@@ -82,6 +92,9 @@ export class LeaveRequestsService {
         reason: dto.reason,
         startDate: start,
         endDate: end,
+        type: dto.type as any,
+        affectsSchedule: dto.affectsSchedule ?? true,
+        affectsPayroll: dto.affectsPayroll ?? true,
         createdById: currentUser.sub,
         approvals: {
           create: approvers.map((a) => ({
@@ -356,5 +369,119 @@ export class LeaveRequestsService {
       where: { id },
       data: { status: 'cancelled' as any },
     });
+  }
+
+  // ── Phase 5A.4: Affected schedule detection ────────────────────────────────
+
+  /**
+   * Berilgan ta'til so'rovi davomida o'qituvchining qaysi published
+   * dars slotlari ta'sirlanishini aniqlaydi.
+   * weekType (all/numerator/denominator) inobatga olinadi.
+   */
+  async findAffectedSchedules(leaveRequestId: string, currentUser: JwtPayload) {
+    const req = await this.prisma.leaveRequest.findFirst({
+      where: { id: leaveRequestId, ...buildTenantWhere(currentUser) },
+    });
+    if (!req) throw new NotFoundException("So'rov topilmadi");
+
+    // Faqat o'qituvchi ta'tillari uchun
+    const requester = await this.prisma.user.findUnique({
+      where: { id: req.requesterId },
+      select: { role: true, firstName: true, lastName: true },
+    });
+    const isTeacher = ['teacher', 'class_teacher'].includes(requester?.role ?? '');
+    if (!isTeacher || !req.affectsSchedule) {
+      return { leaveRequestId, teacherId: req.requesterId, teacherName: requester?.firstName + ' ' + requester?.lastName, affectedSlots: [] };
+    }
+
+    const start = new Date(req.startDate);
+    const end = new Date(req.endDate);
+
+    // Get all published schedules for this teacher
+    const schedules = await this.prisma.schedule.findMany({
+      where: {
+        schoolId: req.schoolId,
+        teacherId: req.requesterId,
+        status: 'published' as any,
+        ...(currentUser.role === UserRole.BRANCH_ADMIN ? { branchId: currentUser.branchId! } : {}),
+      },
+      include: {
+        subject: { select: { name: true } },
+        class: { select: { name: true } },
+        room: { select: { name: true } },
+        branch: { select: { name: true } },
+      },
+    });
+
+    const affectedSlots: Array<{
+      scheduleId: string;
+      date: string;
+      dayOfWeek: string;
+      timeSlot: number;
+      startTime: string;
+      endTime: string;
+      subjectName: string;
+      className: string;
+      roomName: string | null;
+      branchName: string;
+      weekType: string;
+    }> = [];
+
+    for (const s of schedules) {
+      const scheduleDayIndex = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].indexOf(s.dayOfWeek as string);
+      if (scheduleDayIndex === -1) continue;
+
+      const cur = new Date(start);
+      while (cur <= end) {
+        if (cur.getDay() === scheduleDayIndex) {
+          const isoWeek = this.getISOWeek(cur);
+          const isNumeratorWeek = isoWeek % 2 === 1;
+
+          let counts = false;
+          if (s.weekType === 'all') counts = true;
+          else if (s.weekType === 'numerator' && isNumeratorWeek) counts = true;
+          else if (s.weekType === 'denominator' && !isNumeratorWeek) counts = true;
+
+          if (counts) {
+            affectedSlots.push({
+              scheduleId: s.id,
+              date: cur.toISOString().split('T')[0],
+              dayOfWeek: s.dayOfWeek as string,
+              timeSlot: s.timeSlot,
+              startTime: s.startTime,
+              endTime: s.endTime,
+              subjectName: s.subject?.name ?? '',
+              className: s.class?.name ?? '',
+              roomName: s.room?.name ?? null,
+              branchName: s.branch?.name ?? '',
+              weekType: s.weekType as string,
+            });
+          }
+        }
+        cur.setDate(cur.getDate() + 1);
+      }
+    }
+
+    return {
+      leaveRequestId,
+      teacherId: req.requesterId,
+      teacherName: `${requester?.firstName} ${requester?.lastName}`,
+      startDate: req.startDate.toISOString().split('T')[0],
+      endDate: req.endDate.toISOString().split('T')[0],
+      affectedCount: affectedSlots.length,
+      affectedSlots: affectedSlots.sort((a, b) => a.date.localeCompare(b.date) || a.timeSlot - b.timeSlot),
+    };
+  }
+
+  private getISOWeek(date: Date): number {
+    const tmp = new Date(date.valueOf());
+    const dayNr = (date.getDay() + 6) % 7;
+    tmp.setDate(tmp.getDate() - dayNr + 3);
+    const firstThursday = tmp.valueOf();
+    tmp.setMonth(0, 1);
+    if (tmp.getDay() !== 4) {
+      tmp.setMonth(0, 1 + ((4 - tmp.getDay()) + 7) % 7);
+    }
+    return 1 + Math.ceil((firstThursday - tmp.valueOf()) / 604800000);
   }
 }

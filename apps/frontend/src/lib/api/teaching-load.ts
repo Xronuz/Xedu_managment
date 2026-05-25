@@ -120,4 +120,59 @@ export const teachingLoadApi = {
     const { data } = await apiClient.post('/teaching-loads/import/commit', { rows });
     return data;
   },
+
+  // ── Workload aggregation endpoints ──────────────────────────────────────────
+  getWorkloadSummary: async (): Promise<WorkloadSummary> => {
+    const { data } = await apiClient.get('/teaching-loads/workload/summary');
+    return data;
+  },
+  getTeacherWorkloads: async (): Promise<TeacherWorkload[]> => {
+    const { data } = await apiClient.get('/teaching-loads/workload/teachers');
+    return data;
+  },
+  getTeacherWorkloadDetail: async (teacherId: string): Promise<TeacherWorkloadDetail> => {
+    const { data } = await apiClient.get(`/teaching-loads/workload/teachers/${teacherId}`);
+    return data;
+  },
 };
+
+// ── Workload types ────────────────────────────────────────────────────────────
+export interface WorkloadSummary {
+  totalTeachers: number;
+  totalPlannedHours: number;
+  totalContractualHours: number;
+  balancedCount: number;
+  underloadedCount: number;
+  overloadedCount: number;
+  missingContractCount: number;
+  noLoadCount: number;
+  avgUtilizationPercent: number;
+  alerts: WorkloadAlert[];
+}
+
+export interface WorkloadAlert {
+  type: 'underloaded' | 'overloaded' | 'missingContractHours' | 'noApprovedTeachingLoad';
+  severity: 'warning' | 'danger';
+  teacherId?: string;
+  teacherName?: string;
+  message: string;
+}
+
+export interface TeacherWorkload {
+  teacherId: string;
+  firstName: string;
+  lastName: string;
+  branchName: string;
+  plannedWeeklyHours: number;
+  coefficientWeightedHours: number;
+  contractualWeeklyHours: number;
+  utilizationPercent: number;
+  status: 'underloaded' | 'balanced' | 'overloaded';
+  classCount: number;
+  subjectCount: number;
+  splitClassCount: number;
+}
+
+export interface TeacherWorkloadDetail extends TeacherWorkload {
+  loads: TeachingLoad[];
+}

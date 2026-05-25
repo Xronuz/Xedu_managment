@@ -83,6 +83,32 @@ export class TeachingLoadController {
   async importCommit(@Body() dto: ImportCommitDto, @CurrentUser() user: JwtPayload) {
     return this.importService.commit(dto.rows, user);
   }
+
+  // ── Workload endpoints ────────────────────────────────────────────────────
+
+  @Get('workload/summary')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Ish yuklamasi umumiy xulosasi' })
+  getWorkloadSummary(@CurrentUser() user: JwtPayload) {
+    return this.service.getWorkloadSummary(user);
+  }
+
+  @Get('workload/teachers')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Barcha o\'qituvchilar ish yuklamasi' })
+  getTeacherWorkloads(@CurrentUser() user: JwtPayload) {
+    return this.service.getTeacherWorkloads(user);
+  }
+
+  @Get('workload/teachers/:teacherId')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER)
+  @ApiOperation({ summary: 'Bitta o\'qituvchi ish yuklamasi' })
+  getTeacherWorkloadDetail(
+    @Param('teacherId') teacherId: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.getTeacherWorkloadDetail(teacherId, user);
+  }
 }
 
 // Need to import BadRequestException

@@ -17,6 +17,49 @@ import {
 } from '@eduplatform/types';
 import { CreateTeachingLoadDto, UpdateTeachingLoadDto } from './dto/create-teaching-load.dto';
 
+export interface TeacherWorkloadItem {
+  teacherId: string;
+  teacherName: string;
+  plannedWeeklyHours: number;
+  contractualWeeklyHours: number;
+  utilizationPercent: number;
+  status: 'underloaded' | 'balanced' | 'overloaded';
+  classCount: number;
+  subjectCount: number;
+  branchCount: number;
+  splitClassCount: number;
+  coefficientWeightedHours: number;
+  loads: Array<{
+    id: string;
+    subjectName: string;
+    className: string;
+    hoursPerWeek: number;
+    coefficient: number;
+    groupType: string;
+    isSplitClass: boolean;
+    branchName: string;
+  }>;
+}
+
+export interface WorkloadAlert {
+  type: string;
+  severity: 'info' | 'warning' | 'critical';
+  teacherId?: string;
+  teacherName?: string;
+  message: string;
+}
+
+export interface WorkloadSummary {
+  totalTeachers: number;
+  totalPlannedHours: number;
+  balancedCount: number;
+  underloadedCount: number;
+  overloadedCount: number;
+  missingContractCount: number;
+  noLoadCount: number;
+  alerts: WorkloadAlert[];
+}
+
 @Injectable()
 export class TeachingLoadService {
   constructor(
@@ -273,6 +316,193 @@ export class TeachingLoadService {
     });
 
     return { synced: true, subjectId: subject.id };
+  }
+
+  // ── Workload Aggregation ──────────────────────────────────────────────────
+
+  async getWorkloadSummary(currentUser: JwtPayload): Promise<WorkloadSummary> {
+    this.assertCanRead(currentUser);
+    const workloads = await this.getTeacherWorkloads(currentUser);
+
+    let totalPlannedHours = 0;
+    let balancedCount = 0;
+    let underloadedCount = 0;
+    let overloadedCount = 0;
+    let missingContractCount = 0;
+    let noLoadCount = 0;
+    const alerts: WorkloadAlert[] = [];
+
+    for (const w of workloads) {
+      totalPlannedHours += w.plannedWeeklyHours;
+
+      if (w.contractualWeeklyHours <= 0) {
+        missingContractCount++;
+        alerts.push({
+          type: 'missingContractHours',
+          severity: 'warning',
+          teacherId: w.teacherId,
+          teacherName: w.teacherName,
+          message: `${w.teacherName} uchun StaffSalary konfiguratsiyasi yo'q`,
+        });
+        continue;
+      }
+
+      if (w.plannedWeeklyHours === 0) {
+        noLoadCount++;
+        alerts.push({
+          type: 'noApprovedTeachingLoad',
+          severity: 'info',
+          teacherId: w.teacherId,
+          teacherName: w.teacherName,
+          message: `${w.teacherName} uchun tasdiqlangan o'quv yuklamasi yo'q`,
+        });
+        continue;
+      }
+
+      if (w.status === 'balanced') balancedCount++;
+      else if (w.status === 'underloaded') {
+        underloadedCount++;
+        alerts.push({
+          type: 'underloaded',
+          severity: 'info',
+          teacherId: w.teacherId,
+          teacherName: w.teacherName,
+          message: `${w.teacherName} yuklamasi yetarli emas (${w.utilizationPercent.toFixed(0)}%)`,
+        });
+      } else if (w.status === 'overloaded') {
+        overloadedCount++;
+        alerts.push({
+          type: 'overloaded',
+          severity: 'critical',
+          teacherId: w.teacherId,
+          teacherName: w.teacherName,
+          message: `${w.teacherName} haddan oshgan yuklama (${w.utilizationPercent.toFixed(0)}%)`,
+        });
+      }
+    }
+
+    return {
+      totalTeachers: workloads.length,
+      totalPlannedHours,
+      balancedCount,
+      underloadedCount,
+      overloadedCount,
+      missingContractCount,
+      noLoadCount,
+      alerts,
+    };
+  }
+
+  async getTeacherWorkloads(currentUser: JwtPayload, teacherId?: string): Promise<TeacherWorkloadItem[]> {
+    if (teacherId) this.assertCanRead(currentUser, teacherId);
+    else this.assertCanRead(currentUser);
+
+    const schoolId = currentUser.schoolId!;
+    const branchFilter = currentUser.role === UserRole.BRANCH_ADMIN && currentUser.branchId
+      ? { branchId: currentUser.branchId }
+      : undefined;
+
+    // Fetch all active teachers in scope
+    const teachers = await this.prisma.user.findMany({
+      where: {
+        schoolId,
+        ...(branchFilter ?? {}),
+        role: { in: [UserRole.TEACHER, UserRole.CLASS_TEACHER] },
+        isActive: true,
+        ...(teacherId ? { id: teacherId } : {}),
+      },
+      select: {
+        id: true, firstName: true, lastName: true, branchId: true,
+      },
+    });
+
+    const teacherIds = teachers.map(t => t.id);
+
+    // Fetch approved teaching loads for these teachers
+    const loads = await this.prisma.teachingLoad.findMany({
+      where: {
+        schoolId,
+        ...(branchFilter ?? {}),
+        teacherId: { in: teacherIds },
+        status: TeachingLoadStatus.APPROVED,
+      },
+      include: {
+        subject: { select: { name: true } },
+        class: { select: { name: true } },
+        branch: { select: { name: true } },
+      },
+    });
+
+    // Fetch StaffSalary configs
+    const salaries = await this.prisma.staffSalary.findMany({
+      where: { userId: { in: teacherIds } },
+      select: { userId: true, weeklyLessonHours: true },
+    });
+    const salaryMap = new Map(salaries.map(s => [s.userId, s.weeklyLessonHours ?? 18]));
+
+    // Group loads by teacher
+    const loadsByTeacher = new Map<string, typeof loads>();
+    for (const load of loads) {
+      const arr = loadsByTeacher.get(load.teacherId) ?? [];
+      arr.push(load);
+      loadsByTeacher.set(load.teacherId, arr);
+    }
+
+    const results: TeacherWorkloadItem[] = [];
+
+    for (const teacher of teachers) {
+      const teacherLoads = loadsByTeacher.get(teacher.id) ?? [];
+      const contractualHours = salaryMap.get(teacher.id) ?? 0;
+      const plannedHours = teacherLoads.reduce((s, l) => s + l.hoursPerWeek, 0);
+      const coefficientWeighted = teacherLoads.reduce((s, l) => s + l.hoursPerWeek * (l.coefficient ?? 1), 0);
+
+      const classIds = new Set(teacherLoads.map(l => l.classId));
+      const subjectIds = new Set(teacherLoads.map(l => l.subjectId));
+      const branchIds = new Set(teacherLoads.map(l => l.branchId));
+      const splitCount = teacherLoads.filter(l => l.isSplitClass).length;
+
+      let status: 'underloaded' | 'balanced' | 'overloaded' = 'balanced';
+      if (contractualHours > 0) {
+        const ratio = plannedHours / contractualHours;
+        if (ratio < 0.8) status = 'underloaded';
+        else if (ratio > 1.1) status = 'overloaded';
+      }
+
+      results.push({
+        teacherId: teacher.id,
+        teacherName: `${teacher.firstName} ${teacher.lastName}`,
+        plannedWeeklyHours: plannedHours,
+        contractualWeeklyHours: contractualHours,
+        utilizationPercent: contractualHours > 0 ? Math.round((plannedHours / contractualHours) * 100) : 0,
+        status,
+        classCount: classIds.size,
+        subjectCount: subjectIds.size,
+        branchCount: branchIds.size,
+        splitClassCount: splitCount,
+        coefficientWeightedHours: Math.round(coefficientWeighted * 10) / 10,
+        loads: teacherLoads.map(l => ({
+          id: l.id,
+          subjectName: l.subject.name,
+          className: l.class.name,
+          hoursPerWeek: l.hoursPerWeek,
+          coefficient: l.coefficient,
+          groupType: l.groupType ?? 'class',
+          isSplitClass: l.isSplitClass,
+          branchName: l.branch.name,
+        })),
+      });
+    }
+
+    // Sort by utilization descending
+    return results.sort((a, b) => b.utilizationPercent - a.utilizationPercent);
+  }
+
+  async getTeacherWorkloadDetail(teacherId: string, currentUser: JwtPayload): Promise<TeacherWorkloadItem> {
+    this.assertCanRead(currentUser, teacherId);
+    const items = await this.getTeacherWorkloads(currentUser, teacherId);
+    const item = items.find(i => i.teacherId === teacherId);
+    if (!item) throw new NotFoundException('O\'qituvchi yuklamasi topilmadi');
+    return item;
   }
 
   // ── Audit helper ──────────────────────────────────────────────────────────

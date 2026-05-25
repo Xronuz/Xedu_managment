@@ -5,7 +5,9 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger'
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { ScheduleService } from './schedule.service';
+import { ScheduleGeneratorService } from './schedule-generator.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
+import { GenerateScheduleDto } from './dto/generate-schedule.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
@@ -15,7 +17,10 @@ import { JwtPayload, UserRole } from '@eduplatform/types';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller({ path: 'schedule', version: '1' })
 export class ScheduleController {
-  constructor(private readonly scheduleService: ScheduleService) {}
+  constructor(
+    private readonly scheduleService: ScheduleService,
+    private readonly generatorService: ScheduleGeneratorService,
+  ) {}
 
   @Get('check-conflict')
   @ApiOperation({ summary: 'Jadval ziddiyatini tekshirish' })
@@ -108,5 +113,25 @@ export class ScheduleController {
     @Query('viewerBranchId') viewerBranchId?: string,
   ) {
     return this.scheduleService.getTeacherCrossBranch(teacherId, user, viewerBranchId ?? user.branchId);
+  }
+
+  @Post('generate')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: 'Avto-jadval generatsiyasi (greedy MVP)' })
+  async generate(
+    @Body() dto: GenerateScheduleDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.generatorService.generate(dto, user);
+  }
+
+  @Post('generate/commit')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: 'Generatsiya qilingan jadvalni saqlash' })
+  async commitGenerated(
+    @Body() body: { slots: any[]; overwriteExisting?: boolean },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.generatorService.commitProposed(body.slots, user, body.overwriteExisting);
   }
 }

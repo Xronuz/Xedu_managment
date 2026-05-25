@@ -46,6 +46,7 @@ export class SubjectsService {
           teacherId: dto.teacherId,
           schoolId: currentUser.schoolId!,
           branchId: currentUser.branchId!,
+          hoursPerWeek: dto.hoursPerWeek ?? 2,
         },
         include: { teacher: { select: { id: true, firstName: true, lastName: true } } },
       });

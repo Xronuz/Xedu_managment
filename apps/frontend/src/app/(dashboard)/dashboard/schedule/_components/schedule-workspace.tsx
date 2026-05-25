@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/select';
 
 import { ImportDialog } from '@/components/import/import-dialog';
+import { GeneratorDialog } from './generator-dialog';
 
 import {
   WorkspaceShell, WorkspaceHeader, WorkspaceToolbar, WorkspaceMain, WorkspaceSidebar, WorkspaceSection,
@@ -666,6 +667,7 @@ export function ScheduleWorkspace() {
   // ── Create / Edit modal ──────────────────────────────────────────────────────
   const [modalOpen, setModalOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [generatorOpen, setGeneratorOpen] = useState(false);
 
   const { data: roomsData } = useQuery({
     queryKey: ['rooms', activeBranchId],
@@ -914,9 +916,14 @@ export function ScheduleWorkspace() {
                   </PrimaryAction>
                 }
                 secondary={
-                  <SecondaryAction onClick={() => setImportOpen(true)} icon={<Upload className="h-3.5 w-3.5" />}>
-                    Excel import
-                  </SecondaryAction>
+                  <>
+                    <SecondaryAction onClick={() => setGeneratorOpen(true)} icon={<Calendar className="h-3.5 w-3.5" />}>
+                      Avto-jadval
+                    </SecondaryAction>
+                    <SecondaryAction onClick={() => setImportOpen(true)} icon={<Upload className="h-3.5 w-3.5" />}>
+                      Excel import
+                    </SecondaryAction>
+                  </>
                 }
               />
             )
@@ -1270,6 +1277,14 @@ export function ScheduleWorkspace() {
         open={importOpen}
         onOpenChange={setImportOpen}
         type="schedule"
+        onSuccess={() => queryClient.invalidateQueries({ queryKey: ['schedule'] })}
+      />
+
+      {/* Generator dialog */}
+      <GeneratorDialog
+        open={generatorOpen}
+        onOpenChange={setGeneratorOpen}
+        branchId={activeBranchId ?? undefined}
         onSuccess={() => queryClient.invalidateQueries({ queryKey: ['schedule'] })}
       />
     </WorkspaceShell>

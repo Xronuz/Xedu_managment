@@ -14,6 +14,7 @@ import { JwtPayload, UserRole } from '@eduplatform/types';
 import { PrismaService } from '@/common/prisma/prisma.service';
 
 const MANAGERS = [UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL];
+const SCHEDULE_MANAGERS = [UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN];
 
 @ApiTags('import')
 @ApiBearerAuth('JWT')
@@ -84,21 +85,28 @@ export class ImportController {
   // ─── Jadval import ────────────────────────────────────────────────────────
 
   @Post('schedule/parse')
-  @Roles(...MANAGERS)
+  @Roles(...SCHEDULE_MANAGERS)
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: 5 * 1024 * 1024 } }))
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Jadval Excel faylini tekshirish (preview)' })
-  parseSchedule(@UploadedFile() file: Express.Multer.File, @CurrentUser() user: JwtPayload) {
+  parseSchedule(
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: JwtPayload,
+    @Query('branchId') branchId?: string,
+  ) {
     if (!file) throw new Error('Fayl yuklanmadi');
-    return this.importService.parseSchedule(file.buffer, user);
+    return this.importService.parseSchedule(file.buffer, user, branchId ?? user.branchId);
   }
 
   @Post('schedule/commit')
-  @Roles(...MANAGERS)
+  @Roles(...SCHEDULE_MANAGERS)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Jadvalni bazaga saqlash' })
-  commitSchedule(@Body() body: { rows: ImportRow[]; branchId?: string }, @CurrentUser() user: JwtPayload) {
-    return this.importService.commitSchedule(body.rows, user, body.branchId ?? user.branchId);
+  commitSchedule(
+    @Body() body: { rows: ImportRow[]; branchId?: string; overwriteExisting?: boolean },
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.importService.commitSchedule(body.rows, user, body.branchId ?? user.branchId, body.overwriteExisting);
   }
 
   // ─── Baholar import ───────────────────────────────────────────────────────

@@ -90,8 +90,8 @@ export const importApi = {
     return data;
   },
 
-  commitSchedule: async (rows: ImportRow[], branchId?: string): Promise<CommitResult> => {
-    const { data } = await apiClient.post('/import/schedule/commit', { rows, branchId });
+  commitSchedule: async (rows: ImportRow[], branchId?: string, overwriteExisting?: boolean): Promise<CommitResult> => {
+    const { data } = await apiClient.post('/import/schedule/commit', { rows, branchId, overwriteExisting });
     return data;
   },
 

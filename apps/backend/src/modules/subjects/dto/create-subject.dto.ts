@@ -1,4 +1,4 @@
-import { IsString, IsUUID, IsOptional, MaxLength, IsArray } from 'class-validator';
+import { IsString, IsUUID, IsOptional, MaxLength, IsArray, IsInt, Min, Max } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateSubjectDto {
@@ -21,6 +21,13 @@ export class CreateSubjectDto {
   @ApiProperty()
   @IsUUID()
   teacherId: string;
+
+  @ApiPropertyOptional({ example: 2, description: 'Haftalik dars soatlari' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(40)
+  hoursPerWeek?: number;
 }
 
 export class UpdateSubjectDto {
@@ -39,4 +46,11 @@ export class UpdateSubjectDto {
   @IsOptional()
   @IsUUID()
   teacherId?: string;
+
+  @ApiPropertyOptional({ example: 2, description: 'Haftalik dars soatlari' })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(40)
+  hoursPerWeek?: number;
 }

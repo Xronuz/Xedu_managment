@@ -64,7 +64,7 @@ const PARSE_FUNS: Record<ImportType, (f: File) => Promise<ImportResult>> = {
   attendance: importApi.parseAttendance,
 };
 
-const COMMIT_FUNS: Record<ImportType, (rows: ImportRow[], branchId?: string) => Promise<CommitResult>> = {
+const COMMIT_FUNS: Record<ImportType, (rows: ImportRow[], branchId?: string, overwriteExisting?: boolean) => Promise<CommitResult>> = {
   students:   importApi.commitStudents,
   users:      importApi.commitUsers,
   schedule:   importApi.commitSchedule,
@@ -94,6 +94,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
   const [commitResult, setCommitResult] = useState<CommitResult | null>(null);
   const [showErrors, setShowErrors] = useState(false);
   const [branchId, setBranchId] = useState('');
+  const [overwriteExisting, setOverwriteExisting] = useState(false);
 
   const { data: branchesData } = useQuery({
     queryKey: ['branches', user?.schoolId],
@@ -132,7 +133,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
   // ── Commit mutation ─────────────────────────────────────────────────────────
 
   const commitMutation = useMutation({
-    mutationFn: (rows: ImportRow[]) => COMMIT_FUNS[type](rows, branchId || undefined),
+    mutationFn: (rows: ImportRow[]) => COMMIT_FUNS[type](rows, branchId || undefined, type === 'schedule' ? overwriteExisting : undefined),
     onSuccess: (result) => {
       setCommitResult(result);
       setStep('result');
@@ -311,6 +312,21 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
                     )}
                   </div>
                 </ScrollArea>
+              </div>
+            )}
+
+            {type === 'schedule' && parseResult.valid > 0 && (
+              <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
+                <input
+                  id="overwrite"
+                  type="checkbox"
+                  checked={overwriteExisting}
+                  onChange={e => setOverwriteExisting(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300"
+                />
+                <label htmlFor="overwrite" className="text-sm text-yellow-800 cursor-pointer">
+                  Mavjud jadvalni ustiga yozish
+                </label>
               </div>
             )}
 

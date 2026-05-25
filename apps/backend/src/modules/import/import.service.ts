@@ -1,9 +1,10 @@
-import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as ExcelJS from 'exceljs';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 import { UsersService } from '@/modules/users/users.service';
+import { ConflictDetectorService, toWeeklyUtcMin } from '@/common/utils/conflict-detector';
 
 // ─── Natija tipi ───────────────────────────────────────────────────────────────
 
@@ -34,6 +35,7 @@ export class ImportService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
+    private readonly conflictDetector: ConflictDetectorService,
   ) {}
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -215,10 +217,26 @@ export class ImportService {
   // ─────────────────────────────────────────────────────────────────────────────
   // SCHEDULE IMPORT
   // ─────────────────────────────────────────────────────────────────────────────
-  // A: classId | B: subjectId | C: teacherId | D: dayOfWeek | E: timeSlot
-  // F: startTime (HH:MM) | G: endTime (HH:MM) | H: roomNumber (ixtiyoriy)
+  // OLD format (backward compatible):
+  //   A: classId | B: subjectId | C: teacherId | D: dayOfWeek | E: timeSlot
+  //   F: startTime (HH:MM) | G: endTime (HH:MM) | H: roomNumber (ixtiyoriy)
+  // NEW format (preferred):
+  //   A: classId | B: subjectId | C: teacherId | D: dayOfWeek | E: timeSlot
+  //   F: roomId (ixtiyoriy) | G: roomName (ixtiyoriy) | H: startTime (ixtiyoriy) | I: endTime (ixtiyoriy)
 
-  async parseSchedule(buffer: Buffer, currentUser: JwtPayload): Promise<ImportResult> {
+  private async getSchoolTimezone(schoolId: string): Promise<string> {
+    const school = await this.prisma.school.findUnique({
+      where: { id: schoolId },
+      select: { timezone: true },
+    });
+    return school?.timezone ?? 'Asia/Tashkent';
+  }
+
+  async parseSchedule(
+    buffer: Buffer,
+    currentUser: JwtPayload,
+    branchIdOverride?: string | null,
+  ): Promise<ImportResult> {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(buffer as any);
     const sheet = workbook.worksheets[0];
@@ -226,36 +244,264 @@ export class ImportService {
 
     const DAYS = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
     const schoolId = currentUser.schoolId!;
-    const rows: ImportRow[] = [];
+    const effectiveBranchId = branchIdOverride ?? currentUser.branchId ?? null;
+
+    // ── 1. Raw parse ───────────────────────────────────────────────────────────
+    interface RawRow {
+      rowIndex: number;
+      classId: string;
+      subjectId: string;
+      teacherId: string;
+      dayOfWeek: string;
+      timeSlot: number;
+      startTime?: string;
+      endTime?: string;
+      roomId?: string;
+      roomNumber?: string;
+    }
+
+    const rawRows: RawRow[] = [];
 
     sheet.eachRow({ includeEmpty: false }, (row, rowIndex) => {
       if (rowIndex === 1) return;
       const cells = row.values as any[];
-      const classId    = String(cells[1] ?? '').trim();
-      const subjectId  = String(cells[2] ?? '').trim();
-      const teacherId  = String(cells[3] ?? '').trim();
-      const dayOfWeek  = String(cells[4] ?? '').trim().toLowerCase();
-      const timeSlot   = Number(cells[5]);
-      const startTime  = String(cells[6] ?? '').trim();
-      const endTime    = String(cells[7] ?? '').trim();
-      const roomNumber = String(cells[8] ?? '').trim() || undefined;
+      const classId   = String(cells[1] ?? '').trim();
+      const subjectId = String(cells[2] ?? '').trim();
+      const teacherId = String(cells[3] ?? '').trim();
+      const dayOfWeek = String(cells[4] ?? '').trim().toLowerCase();
+      const timeSlot  = Number(cells[5]);
+
+      // Format detection: if col6 is HH:MM → old format
+      const cell6 = String(cells[6] ?? '').trim();
+      const isOldFormat = /^\d{2}:\d{2}$/.test(cell6);
+
+      let startTime: string | undefined;
+      let endTime: string | undefined;
+      let roomId: string | undefined;
+      let roomNumber: string | undefined;
+
+      if (isOldFormat) {
+        startTime = cell6;
+        endTime   = String(cells[7] ?? '').trim() || undefined;
+        roomNumber = String(cells[8] ?? '').trim() || undefined;
+      } else {
+        roomId     = cell6 || undefined;
+        roomNumber = String(cells[7] ?? '').trim() || undefined;
+        startTime  = String(cells[8] ?? '').trim() || undefined;
+        endTime    = String(cells[9] ?? '').trim() || undefined;
+      }
 
       const errors: string[] = [];
       if (!classId)   errors.push('classId yo‘q');
       if (!subjectId) errors.push('subjectId yo‘q');
       if (!teacherId) errors.push('teacherId yo‘q');
       if (!DAYS.includes(dayOfWeek)) errors.push(`Kun noto'g'ri: ${dayOfWeek}`);
-      if (isNaN(timeSlot) || timeSlot < 1 || timeSlot > 12) errors.push('timeSlot 1-12 oralig‘ida bo‘lishi kerak');
-      if (!/^\d{2}:\d{2}$/.test(startTime)) errors.push('startTime HH:MM formatida bo‘lishi kerak');
-      if (!/^\d{2}:\d{2}$/.test(endTime))   errors.push('endTime HH:MM formatida bo‘lishi kerak');
+      if (isNaN(timeSlot) || timeSlot < 1 || timeSlot > 20) errors.push('timeSlot 1-20 oralig‘ida bo‘lishi kerak');
+      if (startTime && !/^\d{2}:\d{2}$/.test(startTime)) errors.push('startTime HH:MM formatida bo‘lishi kerak');
+      if (endTime && !/^\d{2}:\d{2}$/.test(endTime))     errors.push('endTime HH:MM formatida bo‘lishi kerak');
+
+      rawRows.push({
+        rowIndex, classId, subjectId, teacherId, dayOfWeek, timeSlot,
+        startTime, endTime, roomId, roomNumber,
+      });
+    });
+
+    // ── 2. Bulk DB lookups ─────────────────────────────────────────────────────
+    const classIds   = [...new Set(rawRows.map(r => r.classId).filter(Boolean))];
+    const roomIds    = [...new Set(rawRows.map(r => r.roomId).filter(Boolean))];
+    const roomNames  = [...new Set(rawRows.map(r => r.roomNumber).filter(Boolean))];
+    const subjectIds = [...new Set(rawRows.map(r => r.subjectId).filter(Boolean))];
+    const teacherIds = [...new Set(rawRows.map(r => r.teacherId).filter(Boolean))];
+
+    const [
+      classes,
+      subjects,
+      periods,
+      rooms,
+      existingSchedules,
+    ] = await Promise.all([
+      this.prisma.class.findMany({
+        where: { id: { in: classIds }, schoolId },
+        select: { id: true, branchId: true },
+      }),
+      this.prisma.subject.findMany({
+        where: { id: { in: subjectIds }, schoolId },
+        select: { id: true, teacherId: true, name: true, branchId: true },
+      }),
+      this.prisma.period.findMany({
+        where: { schoolId, isActive: true },
+        select: { branchId: true, periodNumber: true, startTime: true, endTime: true },
+      }),
+      this.prisma.room.findMany({
+        where: { schoolId },
+        select: { id: true, name: true, branchId: true },
+      }),
+      this.prisma.schedule.findMany({
+        where: { schoolId },
+        select: {
+          teacherId: true, classId: true, roomId: true, roomNumber: true,
+          dayOfWeek: true, timeSlot: true,
+        },
+      }),
+    ]);
+
+    const classMap   = new Map(classes.map(c => [c.id, c]));
+    const subjectMap = new Map(subjects.map(s => [s.id, s]));
+    const periodMap  = new Map(periods.map(p => [`${p.branchId}:${p.periodNumber}`, p]));
+    const roomById   = new Map(rooms.map(r => [r.id, r]));
+    const roomByName = new Map(rooms.map(r => [r.name, r]));
+
+    // ── 3. Row-level validation ────────────────────────────────────────────────
+    const rows: ImportRow[] = [];
+
+    for (const raw of rawRows) {
+      const errors: string[] = [];
+      const cls = classMap.get(raw.classId);
+      const sub = subjectMap.get(raw.subjectId);
+
+      // Class exists & school match
+      if (!cls) {
+        errors.push('Sinf topilmadi');
+      } else if (cls.branchId !== schoolId && !classMap.has(raw.classId)) {
+        // already handled above
+      }
+
+      // Branch Admin scope
+      if (currentUser.role === UserRole.BRANCH_ADMIN && cls && cls.branchId !== currentUser.branchId) {
+        errors.push('Sinf boshqa filialga tegishli');
+      }
+
+      // Subject exists & teacher match
+      if (!sub) {
+        errors.push('Fan topilmadi');
+      } else if (sub.teacherId !== raw.teacherId) {
+        errors.push(`O'qituvchi "${sub.name}" faniga biriktirilmagan`);
+      }
+
+      // Period config
+      const branchId = cls?.branchId ?? effectiveBranchId;
+      const periodKey = `${branchId}:${raw.timeSlot}`;
+      const period = periodMap.get(periodKey);
+      if (!period) {
+        errors.push(`${raw.timeSlot}-dars soati uchun sozlangan vaqt topilmadi`);
+      } else {
+        const expectedStart = raw.startTime ?? period.startTime;
+        const expectedEnd   = raw.endTime   ?? period.endTime;
+        if (raw.startTime && raw.startTime !== period.startTime) {
+          errors.push(`Boshlanish vaqti (${raw.startTime}) sozlangan period (${period.startTime}) bilan mos emas`);
+        }
+        if (raw.endTime && raw.endTime !== period.endTime) {
+          errors.push(`Tugash vaqti (${raw.endTime}) sozlangan period (${period.endTime}) bilan mos emas`);
+        }
+        // Fill in missing times from period config
+        if (!raw.startTime) raw.startTime = period.startTime;
+        if (!raw.endTime)   raw.endTime   = period.endTime;
+      }
+
+      // Room validation
+      let resolvedRoomId = raw.roomId;
+      if (resolvedRoomId) {
+        const room = roomById.get(resolvedRoomId);
+        if (!room) {
+          errors.push('Xona topilmadi');
+        } else if (room.branchId !== branchId) {
+          errors.push('Xona boshqa filialga tegishli');
+        }
+      } else if (raw.roomNumber) {
+        const room = roomByName.get(raw.roomNumber);
+        if (room) {
+          if (room.branchId !== branchId) {
+            errors.push('Xona boshqa filialga tegishli');
+          } else {
+            resolvedRoomId = room.id;
+          }
+        }
+        // If room not found by name, allow roomNumber as free text (legacy)
+      }
+
+      // Existing DB conflicts
+      const teacherConflict = existingSchedules.find(
+        s => s.teacherId === raw.teacherId && s.dayOfWeek === raw.dayOfWeek && s.timeSlot === raw.timeSlot,
+      );
+      if (teacherConflict) {
+        errors.push("O'qituvchi bu vaqtda band");
+      }
+
+      const classConflict = existingSchedules.find(
+        s => s.classId === raw.classId && s.dayOfWeek === raw.dayOfWeek && s.timeSlot === raw.timeSlot,
+      );
+      if (classConflict) {
+        errors.push('Sinf bu vaqtda boshqa darsga band');
+      }
+
+      if (resolvedRoomId) {
+        const roomConflict = existingSchedules.find(
+          s => s.roomId === resolvedRoomId && s.dayOfWeek === raw.dayOfWeek && s.timeSlot === raw.timeSlot,
+        );
+        if (roomConflict) {
+          errors.push('Xona bu vaqtda band');
+        }
+      } else if (raw.roomNumber) {
+        const roomConflict = existingSchedules.find(
+          s => s.roomNumber === raw.roomNumber && s.dayOfWeek === raw.dayOfWeek && s.timeSlot === raw.timeSlot,
+        );
+        if (roomConflict) {
+          errors.push('Xona bu vaqtda band');
+        }
+      }
 
       rows.push({
-        row: rowIndex,
-        data: { classId, subjectId, teacherId, dayOfWeek, timeSlot, startTime, endTime, roomNumber, schoolId },
+        row: raw.rowIndex,
+        data: {
+          classId: raw.classId,
+          subjectId: raw.subjectId,
+          teacherId: raw.teacherId,
+          dayOfWeek: raw.dayOfWeek,
+          timeSlot: raw.timeSlot,
+          startTime: raw.startTime,
+          endTime: raw.endTime,
+          roomNumber: raw.roomNumber,
+          roomId: resolvedRoomId,
+          schoolId,
+        },
         errors,
         valid: errors.length === 0,
       });
-    });
+    }
+
+    // ── 4. Intra-file conflict detection ───────────────────────────────────────
+    const teacherSlotCounts = new Map<string, number>();
+    const classSlotCounts   = new Map<string, number>();
+    const roomSlotCounts    = new Map<string, number>();
+
+    for (const row of rows) {
+      if (!row.valid) continue;
+      const tKey = `${row.data.teacherId}:${row.data.dayOfWeek}:${row.data.timeSlot}`;
+      const cKey = `${row.data.classId}:${row.data.dayOfWeek}:${row.data.timeSlot}`;
+      const rKey = `${row.data.roomId ?? row.data.roomNumber}:${row.data.dayOfWeek}:${row.data.timeSlot}`;
+      teacherSlotCounts.set(tKey, (teacherSlotCounts.get(tKey) ?? 0) + 1);
+      classSlotCounts.set(cKey, (classSlotCounts.get(cKey) ?? 0) + 1);
+      roomSlotCounts.set(rKey, (roomSlotCounts.get(rKey) ?? 0) + 1);
+    }
+
+    for (const row of rows) {
+      if (!row.valid) continue;
+      const tKey = `${row.data.teacherId}:${row.data.dayOfWeek}:${row.data.timeSlot}`;
+      const cKey = `${row.data.classId}:${row.data.dayOfWeek}:${row.data.timeSlot}`;
+      const rKey = `${row.data.roomId ?? row.data.roomNumber}:${row.data.dayOfWeek}:${row.data.timeSlot}`;
+      if ((teacherSlotCounts.get(tKey) ?? 0) > 1) {
+        row.errors.push("Faylda o'qituvchi ikki marta bir vaqtda belgilangan");
+        row.valid = false;
+      }
+      if ((classSlotCounts.get(cKey) ?? 0) > 1) {
+        row.errors.push('Faylda sinf ikki marta bir vaqtda belgilangan');
+        row.valid = false;
+      }
+      if ((roomSlotCounts.get(rKey) ?? 0) > 1) {
+        row.errors.push('Faylda xona ikki marta bir vaqtda belgilangan');
+        row.valid = false;
+      }
+    }
 
     return {
       total: rows.length,
@@ -265,125 +511,155 @@ export class ImportService {
     };
   }
 
-  async commitSchedule(rows: ImportRow[], currentUser: JwtPayload, branchIdOverride?: string | null): Promise<CommitResult> {
+  async commitSchedule(
+    rows: ImportRow[],
+    currentUser: JwtPayload,
+    branchIdOverride?: string | null,
+    overwriteExisting?: boolean,
+  ): Promise<CommitResult> {
     const schoolId = currentUser.schoolId!;
     const validRows = rows.filter(r => r.valid);
     let created = 0; let skipped = 0; const errors: string[] = [];
 
-    try {
-      await this.prisma.$transaction(async (tx) => {
-        for (const row of validRows) {
-          // Classdan branchId ni olish (agar override berilmagan bo'lsa)
-          let branchId = branchIdOverride;
-          if (!branchId) {
-            const cls = await tx.class.findUnique({ where: { id: row.data.classId }, select: { branchId: true, schoolId: true } });
-            if (!cls || cls.schoolId !== schoolId) {
-              errors.push(`Qator ${row.row}: Sinf boshqa maktabga tegishli`);
-              skipped++;
-              continue;
-            }
-            branchId = cls.branchId;
-          }
-
-          // Period sozlamalari tekshiruvi
-          const period = await tx.period.findFirst({
-            where: { schoolId, branchId, periodNumber: row.data.timeSlot, isActive: true },
-          });
-          if (!period) {
-            errors.push(`Qator ${row.row}: ${row.data.timeSlot}-dars soati uchun sozlangan vaqt topilmadi`);
-            skipped++;
-            continue;
-          }
-          if (row.data.startTime !== period.startTime || row.data.endTime !== period.endTime) {
-            errors.push(`Qator ${row.row}: Vaqt (${row.data.startTime}-${row.data.endTime}) sozlangan period (${period.startTime}-${period.endTime}) bilan mos emas`);
-            skipped++;
-            continue;
-          }
-
-          // Teacher ↔ Subject mosligi
-          const subject = await tx.subject.findFirst({
-            where: { id: row.data.subjectId, schoolId },
-            select: { teacherId: true, name: true },
-          });
-          if (!subject) {
-            errors.push(`Qator ${row.row}: Fan topilmadi`);
-            skipped++;
-            continue;
-          }
-          if (subject.teacherId !== row.data.teacherId) {
-            errors.push(`Qator ${row.row}: O'qituvchi "${subject.name}" faniga biriktirilmagan`);
-            skipped++;
-            continue;
-          }
-
-          // Teacher konflikti
-          const teacherConflict = await tx.schedule.findFirst({
-            where: {
-              schoolId,
-              teacherId: row.data.teacherId,
-              dayOfWeek: row.data.dayOfWeek as any,
-              timeSlot: row.data.timeSlot,
-            },
-          });
-          if (teacherConflict) {
-            errors.push(`Qator ${row.row}: O'qituvchi bu vaqtda band`);
-            skipped++;
-            continue;
-          }
-
-          // Room konflikti
-          if (row.data.roomNumber) {
-            const roomConflict = await tx.schedule.findFirst({
-              where: {
-                schoolId,
-                branchId,
-                roomNumber: row.data.roomNumber,
-                dayOfWeek: row.data.dayOfWeek as any,
-                timeSlot: row.data.timeSlot,
-              },
-            });
-            if (roomConflict) {
-              errors.push(`Qator ${row.row}: Xona bu vaqtda band`);
-              skipped++;
-              continue;
-            }
-          }
-
-          // Class konflikti
-          const classConflict = await tx.schedule.findFirst({
-            where: {
-              schoolId,
-              classId: row.data.classId,
-              dayOfWeek: row.data.dayOfWeek as any,
-              timeSlot: row.data.timeSlot,
-            },
-          });
-          if (classConflict) {
-            errors.push(`Qator ${row.row}: Sinf bu vaqtda boshqa darsga band`);
-            skipped++;
-            continue;
-          }
-
-          await tx.schedule.create({
-            data: {
-              schoolId,
-              branchId,
-              classId:    row.data.classId,
-              subjectId:  row.data.subjectId,
-              teacherId:  row.data.teacherId,
-              dayOfWeek:  row.data.dayOfWeek as any,
-              timeSlot:   row.data.timeSlot,
-              startTime:  row.data.startTime,
-              endTime:    row.data.endTime,
-              roomNumber: row.data.roomNumber,
-            },
-          });
-          created++;
-        }
-      });
-    } catch (e: any) {
-      errors.push(e.message);
+    // Branch Admin scope check
+    if (currentUser.role === UserRole.BRANCH_ADMIN && branchIdOverride && branchIdOverride !== currentUser.branchId) {
+      throw new ForbiddenException('Filial admin faqat o\'z filialiga import qilishi mumkin');
     }
+
+    const timezone = await this.getSchoolTimezone(schoolId);
+
+    for (const row of validRows) {
+      try {
+        // Resolve branchId
+        let branchId = branchIdOverride;
+        if (!branchId) {
+          const cls = await this.prisma.class.findUnique({
+            where: { id: row.data.classId },
+            select: { branchId: true, schoolId: true },
+          });
+          if (!cls || cls.schoolId !== schoolId) {
+            errors.push(`Qator ${row.row}: Sinf boshqa maktabga tegishli`);
+            skipped++;
+            continue;
+          }
+          branchId = cls.branchId;
+        }
+
+        // Period validation
+        const period = await this.prisma.period.findFirst({
+          where: { schoolId, branchId, periodNumber: row.data.timeSlot, isActive: true },
+        });
+        if (!period) {
+          errors.push(`Qator ${row.row}: ${row.data.timeSlot}-dars soati uchun sozlangan vaqt topilmadi`);
+          skipped++;
+          continue;
+        }
+
+        const startTime = row.data.startTime ?? period.startTime;
+        const endTime   = row.data.endTime   ?? period.endTime;
+
+        // Resolve roomId
+        let roomId: string | undefined = row.data.roomId;
+        if (!roomId && row.data.roomNumber) {
+          const room = await this.prisma.room.findFirst({
+            where: { schoolId, branchId, name: row.data.roomNumber },
+          });
+          if (room) roomId = room.id;
+        }
+
+        // Room branch validation
+        if (roomId) {
+          const room = await this.prisma.room.findFirst({
+            where: { id: roomId, schoolId, branchId },
+          });
+          if (!room) {
+            errors.push(`Qator ${row.row}: Xona topilmadi yoki bu filialga tegishli emas`);
+            skipped++;
+            continue;
+          }
+        }
+
+        // Teacher-subject validation
+        const subject = await this.prisma.subject.findFirst({
+          where: { id: row.data.subjectId, schoolId },
+          select: { teacherId: true, name: true },
+        });
+        if (!subject) {
+          errors.push(`Qator ${row.row}: Fan topilmadi`);
+          skipped++;
+          continue;
+        }
+        if (subject.teacherId !== row.data.teacherId) {
+          errors.push(`Qator ${row.row}: O'qituvchi "${subject.name}" faniga biriktirilmagan`);
+          skipped++;
+          continue;
+        }
+
+        // Existing slot check
+        const existing = await this.prisma.schedule.findFirst({
+          where: {
+            schoolId,
+            classId: row.data.classId,
+            dayOfWeek: row.data.dayOfWeek as any,
+            timeSlot: row.data.timeSlot,
+          },
+        });
+        if (existing && !overwriteExisting) {
+          errors.push(`Qator ${row.row}: Bu vaqtda sinf uchun jadval allaqachon mavjud`);
+          skipped++;
+          continue;
+        }
+
+        // ConflictDetectorService (same as manual create)
+        const conflicts = await this.conflictDetector.checkClash({
+          schoolId,
+          branchId,
+          teacherId: row.data.teacherId,
+          roomId: roomId || undefined,
+          classId: row.data.classId,
+          dayOfWeek: row.data.dayOfWeek,
+          startTime,
+          endTime,
+          timezone,
+        });
+        if (conflicts.length > 0) {
+          errors.push(`Qator ${row.row}: ${conflicts.map(c => c.message).join('; ')}`);
+          skipped++;
+          continue;
+        }
+
+        // UTC minutes
+        const startDayMinUtc = toWeeklyUtcMin(row.data.dayOfWeek, startTime, timezone);
+        const endDayMinUtc   = toWeeklyUtcMin(row.data.dayOfWeek, endTime, timezone);
+
+        if (existing && overwriteExisting) {
+          await this.prisma.schedule.delete({ where: { id: existing.id } });
+        }
+
+        await this.prisma.schedule.create({
+          data: {
+            schoolId,
+            branchId,
+            classId:    row.data.classId,
+            subjectId:  row.data.subjectId,
+            teacherId:  row.data.teacherId,
+            roomId:     roomId || null,
+            roomNumber: row.data.roomNumber || null,
+            dayOfWeek:  row.data.dayOfWeek as any,
+            timeSlot:   row.data.timeSlot,
+            startTime,
+            endTime,
+            startDayMinUtc,
+            endDayMinUtc,
+          },
+        });
+        created++;
+      } catch (e: any) {
+        errors.push(`Qator ${row.row}: ${e.message}`);
+        skipped++;
+      }
+    }
+
     return { created, skipped, errors };
   }
 
@@ -595,8 +871,8 @@ export class ImportService {
       addHeaders(['Ism', 'Familiya', 'Email', 'Telefon', 'Rol (teacher/accountant/...)', 'Parol', 'Filial ID (ixtiyoriy)']);
       sheet.addRow(['Jasur', 'Toshmatov', 'jasur@example.com', '+998901234567', 'teacher', 'Staff@123', '']);
     } else if (type === 'schedule') {
-      addHeaders(['Sinf ID', 'Fan ID', "O'qituvchi ID", 'Kun (monday-sunday)', 'Slot (1-12)', 'Boshlanish (HH:MM)', 'Tugash (HH:MM)', 'Xona (ixtiyoriy)']);
-      sheet.addRow(['class-uuid', 'subject-uuid', 'teacher-uuid', 'monday', '1', '08:00', '08:45', '101']);
+      addHeaders(['Sinf ID', 'Fan ID', "O'qituvchi ID", 'Kun (monday-sunday)', 'Slot (1-12)', 'Xona ID (ixtiyoriy)', 'Xona nomi (ixtiyoriy)', 'Boshlanish (ixtiyoriy)', 'Tugash (ixtiyoriy)']);
+      sheet.addRow(['class-uuid', 'subject-uuid', 'teacher-uuid', 'monday', '1', 'room-uuid', '', '', '']);
     } else if (type === 'grades') {
       addHeaders(["O'quvchi ID", 'Fan ID', 'Sinf ID', 'Tur (homework/test/exam/...)', 'Baho', 'Maks baho', 'Sana (YYYY-MM-DD)', 'Izoh']);
       sheet.addRow(['student-uuid', 'subject-uuid', 'class-uuid', 'test', '85', '100', '2026-03-15', '']);

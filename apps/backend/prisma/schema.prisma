@@ -742,13 +742,14 @@ model ClassStudent {
 // ─── Subjects ─────────────────────────────────────────────────────────────
 
 model Subject {
-  id        String   @id @default(uuid())
-  schoolId  String
-  branchId  String
-  classId   String
-  name      String
-  teacherId String
-  createdAt DateTime @default(now())
+  id           String   @id @default(uuid())
+  schoolId     String
+  branchId     String
+  classId      String
+  name         String
+  teacherId    String
+  hoursPerWeek Int      @default(2)
+  createdAt    DateTime @default(now())
 
   school    School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   branch    Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)

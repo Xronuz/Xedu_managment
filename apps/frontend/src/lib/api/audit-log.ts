@@ -75,12 +75,6 @@ export const auditLogApi = {
       Object.fromEntries(Object.entries(filters).filter(([, v]) => v !== undefined && v !== '')) as any,
     );
     const baseUrl = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1').replace(/\/api\/v1$/, '');
-    const token = typeof window !== 'undefined'
-      ? localStorage.getItem('accessToken') ?? ''
-      : '';
-    const link = document.createElement('a');
-    link.href = `${baseUrl}/api/v1/audit-logs/export?${params.toString()}`;
-    // Token header bilan download uchun axios ishlatamiz
     import('@/lib/api/client').then(({ apiClient: ac }) => {
       ac.get(`/audit-logs/export?${params.toString()}`, { responseType: 'blob' }).then(res => {
         const url = URL.createObjectURL(res.data);
@@ -93,5 +87,13 @@ export const auditLogApi = {
         URL.revokeObjectURL(url);
       });
     });
+  },
+
+  /** Specific entity timeline (used by schedule lesson panel) */
+  getByEntity: async (entity: string, entityId: string, limit = 20) => {
+    const { data } = await apiClient.get('/audit-logs', {
+      params: { entity, entityId, limit },
+    });
+    return data as { logs: AuditLog[]; total: number };
   },
 };

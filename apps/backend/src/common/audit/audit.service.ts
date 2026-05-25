@@ -149,6 +149,7 @@ export class AuditService {
       page?: number;
       limit?: number;
       entity?: string;
+      entityId?: string;
       action?: AuditAction;
       userId?: string;
       from?: string;
@@ -161,6 +162,7 @@ export class AuditService {
 
     const where: any = { schoolId };
     if (opts.entity) where.entity = opts.entity;
+    if (opts.entityId) where.entityId = opts.entityId;
     if (opts.action) where.action = opts.action;
     if (opts.userId) where.userId = opts.userId;
     if (opts.from || opts.to) {

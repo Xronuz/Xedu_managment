@@ -28,6 +28,7 @@ export class AuditController {
   @ApiQuery({ name: 'entity', required: false, type: String, description: 'Filter by entity: User, Grade, Attendance, Payment...' })
   @ApiQuery({ name: 'action', required: false, enum: ['create', 'update', 'delete', 'login', 'logout', 'export'] })
   @ApiQuery({ name: 'userId', required: false, type: String })
+  @ApiQuery({ name: 'entityId', required: false, type: String, description: 'Filter by specific entity ID' })
   @ApiQuery({ name: 'from', required: false, type: String, description: 'ISO date string' })
   @ApiQuery({ name: 'to', required: false, type: String, description: 'ISO date string' })
   getSchoolLogs(
@@ -37,6 +38,7 @@ export class AuditController {
     @Query('entity') entity?: string,
     @Query('action') action?: AuditAction,
     @Query('userId') userId?: string,
+    @Query('entityId') entityId?: string,
     @Query('from') from?: string,
     @Query('to') to?: string,
   ) {
@@ -46,6 +48,7 @@ export class AuditController {
       entity,
       action,
       userId,
+      entityId,
       from,
       to,
     });

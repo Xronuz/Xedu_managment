@@ -1,16 +1,18 @@
 import {
-  Controller, Get, Post, Put, Delete, Body, Param, Query, Version, ParseIntPipe, DefaultValuePipe, UseGuards,
+  Controller, Get, Post, Put, Delete, Body, Param, Query, Version, ParseIntPipe, DefaultValuePipe, UseGuards, Res,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { ScheduleService } from './schedule.service';
+import { ScheduleExportService } from './schedule-export.service';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { MoveScheduleDto } from './dto/move-schedule.dto';
 import { GenerateScheduleDto } from './dto/generate-schedule.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
+import { Response } from 'express';
 import { JwtPayload, UserRole, WeekType } from '@eduplatform/types';
 
 @ApiTags('schedule')
@@ -20,6 +22,7 @@ import { JwtPayload, UserRole, WeekType } from '@eduplatform/types';
 export class ScheduleController {
   constructor(
     private readonly scheduleService: ScheduleService,
+    private readonly exportService: ScheduleExportService,
     private readonly generatorService: ScheduleGeneratorService,
   ) {}
 
@@ -244,5 +247,31 @@ export class ScheduleController {
   @ApiOperation({ summary: 'Joriy hafta turi (surat/maxraj)' })
   getCurrentWeekType() {
     return this.scheduleService.getCurrentWeekType();
+  }
+
+  @Get('export/excel')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: 'Jadvalni Excel formatida yuklab olish' })
+  @ApiQuery({ name: 'classId', required: false })
+  @ApiQuery({ name: 'weekType', required: false, enum: WeekType })
+  @ApiQuery({ name: 'includeDrafts', required: false, type: Boolean })
+  @ApiQuery({ name: 'includeArchived', required: false, type: Boolean })
+  async exportExcel(
+    @CurrentUser() user: JwtPayload,
+    @Res() res: Response,
+    @Query('classId') classId?: string,
+    @Query('weekType') weekType?: WeekType,
+    @Query('includeDrafts') includeDrafts?: string,
+    @Query('includeArchived') includeArchived?: string,
+  ) {
+    const buffer = await this.exportService.exportExcel(user, {
+      classId,
+      weekType,
+      includeDrafts: includeDrafts === 'true',
+      includeArchived: includeArchived === 'true',
+    });
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+    res.setHeader('Content-Disposition', `attachment; filename="jadval_${Date.now()}.xlsx"`);
+    res.send(buffer);
   }
 }

@@ -7,6 +7,8 @@ import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/ui/use-toast';
 import { useConfirm } from '@/store/confirm.store';
 import { scheduleApi } from '@/lib/api/schedule';
+import { auditLogApi } from '@/lib/api/audit-log';
+import { formatAuditChange } from '@/lib/audit-formatter';
 import { classesApi } from '@/lib/api/classes';
 import { subjectsApi } from '@/lib/api/subjects';
 import { usersApi } from '@/lib/api/users';
@@ -137,6 +139,12 @@ function LessonPanel({ slot, open, onClose, canManage, onEdit, onDelete, onValid
   const router = useRouter();
   if (!slot) return null;
 
+  const { data: auditData } = useQuery({
+    queryKey: ['audit-log', 'schedule', slot.id],
+    queryFn: () => auditLogApi.getByEntity('schedule', slot.id, 20),
+    enabled: open && !!slot.id,
+  });
+
   const dayLabel = DAYS.find(d => d.key === slot.dayOfWeek)?.label ?? slot.dayOfWeek;
 
   const tabs = [
@@ -208,6 +216,30 @@ function LessonPanel({ slot, open, onClose, canManage, onEdit, onDelete, onValid
               </SecondaryAction>
             )}
           </div>
+        </div>
+      ),
+    },
+    {
+      id: 'history',
+      label: 'Tarix',
+      content: (
+        <div className="p-4 space-y-3 max-h-80 overflow-y-auto">
+          {(!auditData?.logs || auditData.logs.length === 0) && (
+            <p className="text-sm text-xedu-slate-400 text-center py-4">Tarix mavjud emas</p>
+          )}
+          {auditData?.logs.map((log) => (
+            <div key={log.id} className="flex items-start gap-3 text-sm">
+              <div className="mt-1 h-2 w-2 rounded-full bg-xedu-primary shrink-0" />
+              <div className="flex-1">
+                <p className="font-medium text-xedu-slate-800 dark:text-xedu-slate-200">
+                  {formatAuditChange(log.action, log.oldData, log.newData)}
+                </p>
+                <p className="text-xs text-xedu-slate-400">
+                  {log.user ? `${log.user.firstName} ${log.user.lastName}` : log.userId} · {new Date(log.createdAt).toLocaleString('uz-UZ')}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       ),
     },
@@ -1009,6 +1041,33 @@ export function ScheduleWorkspace() {
             <Calendar className="h-3.5 w-3.5" />
             Bugun
           </button>
+
+          <div className="flex items-center rounded-lg border p-1 gap-1">
+            <button
+              onClick={async () => {
+                const el = document.getElementById('schedule-grid-capture');
+                if (el) {
+                  const { exportElementToPDF } = await import('@/lib/export-pdf');
+                  await exportElementToPDF(el, `jadval_${activeWeekType}_${Date.now()}.pdf`);
+                }
+              }}
+              className="flex items-center gap-1 h-7 px-2 rounded text-xs font-semibold text-xedu-slate-600 hover:bg-xedu-slate-50 transition-colors"
+              title="PDF yuklab olish"
+            >
+              PDF
+            </button>
+            <button
+              onClick={() => scheduleApi.exportExcel({
+                weekType: activeWeekType,
+                includeDrafts: canManage && showDrafts,
+                includeArchived: canManage && showArchived,
+              })}
+              className="flex items-center gap-1 h-7 px-2 rounded text-xs font-semibold text-xedu-slate-600 hover:bg-xedu-slate-50 transition-colors"
+              title="Excel yuklab olish"
+            >
+              Excel
+            </button>
+          </div>
         </WorkspaceToolbar>
 
         {showFilters && (
@@ -1052,14 +1111,16 @@ export function ScheduleWorkspace() {
           <Card>
             <CardContent className={viewMode === 'grid' ? 'pt-4' : 'pt-4 space-y-4'}>
               {viewMode === 'grid' ? (
-                <WeeklyGrid
-                  schedule={filteredSchedule}
-                  canManage={canManage}
-                  onDelete={handleDelete}
-                  onAdd={openForDaySlot}
-                  onSelect={(s) => setPanelSlot(s)}
-                  onMove={(id, dayOfWeek, timeSlot) => moveMutation.mutate({ id, payload: { dayOfWeek, timeSlot } })}
-                />
+                <div id="schedule-grid-capture">
+                  <WeeklyGrid
+                    schedule={filteredSchedule}
+                    canManage={canManage}
+                    onDelete={handleDelete}
+                    onAdd={openForDaySlot}
+                    onSelect={(s) => setPanelSlot(s)}
+                    onMove={(id, dayOfWeek, timeSlot) => moveMutation.mutate({ id, payload: { dayOfWeek, timeSlot } })}
+                  />
+                </div>
               ) : (
                 <ListView
                   schedule={filteredSchedule}

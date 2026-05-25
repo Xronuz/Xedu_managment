@@ -108,6 +108,22 @@ export const scheduleApi = {
     return data;
   },
 
+  exportExcel: async (params?: { classId?: string; weekType?: string; includeDrafts?: boolean; includeArchived?: boolean }) => {
+    const response = await apiClient.get('/schedule/export/excel', {
+      params,
+      responseType: 'blob',
+    });
+    const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `jadval_${Date.now()}.xlsx`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(url);
+  },
+
   getCurrentWeekType: async () => {
     const { data } = await apiClient.get('/schedule/week-type/current');
     return data as { weekType: string; isoWeekNumber: number };

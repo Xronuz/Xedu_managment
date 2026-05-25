@@ -3,6 +3,7 @@ import { Cron } from '@nestjs/schedule';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { NotificationQueueService } from '@/modules/notifications/notification-queue.service';
 import { SmsService } from '@/modules/notifications/sms.service';
+import { getCurrentWeekType } from '@/common/utils/week-type.util';
 
 @Injectable()
 export class CronService {
@@ -29,9 +30,14 @@ export class CronService {
       const today = dayMap[new Date().getDay()];
       if (!today) return;
 
-      // Bugun darsi bo'lgan o'qituvchilar
+      // Bugun darsi bo'lgan o'qituvchilar (joriy hafta turini hisobga olgan holda)
+      const currentWeekType = getCurrentWeekType();
       const schedules = await this.prisma.schedule.findMany({
-        where: { dayOfWeek: today as any, status: 'published' },
+        where: {
+          dayOfWeek: today as any,
+          status: 'published',
+          weekType: { in: ['all' as any, currentWeekType] },
+        },
         include: {
           subject: {
             include: {

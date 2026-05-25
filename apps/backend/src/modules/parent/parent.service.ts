@@ -4,6 +4,7 @@ import {
 import { IsString, IsDateString, IsOptional, MinLength, MaxLength } from 'class-validator';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
+import { getCurrentWeekType } from '@/common/utils/week-type.util';
 
 // ─── DTOs ─────────────────────────────────────────────────────────────────────
 
@@ -113,7 +114,12 @@ export class ParentService {
     });
     if (!enrollment) return [];
     return this.prisma.schedule.findMany({
-      where: { classId: enrollment.classId, schoolId: currentUser.schoolId!, status: 'published' },
+      where: {
+        classId: enrollment.classId,
+        schoolId: currentUser.schoolId!,
+        status: 'published',
+        weekType: { in: ['all' as any, getCurrentWeekType()] },
+      },
       include: { subject: { include: { teacher: { select: { firstName: true, lastName: true } } } } },
       orderBy: [{ dayOfWeek: 'asc' }, { timeSlot: 'asc' }],
     });

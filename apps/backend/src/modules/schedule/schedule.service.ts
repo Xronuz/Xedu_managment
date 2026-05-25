@@ -17,27 +17,9 @@ import {
   ConflictDetectorService,
   toWeeklyUtcMin,
 } from '@/common/utils/conflict-detector';
+import { getCurrentWeekType } from '@/common/utils/week-type.util';
 
 const SCHEDULE_TTL = 5 * 60;
-
-/** ISO hafta raqami asosida weekType aniqlash */
-function getCurrentWeekType(): WeekType {
-  const now = new Date();
-  const isoWeek = getISOWeek(now);
-  return isoWeek % 2 === 1 ? WeekType.NUMERATOR : WeekType.DENOMINATOR;
-}
-
-function getISOWeek(date: Date): number {
-  const tmp = new Date(date.valueOf());
-  const dayNr = (date.getDay() + 6) % 7;
-  tmp.setDate(tmp.getDate() - dayNr + 3);
-  const firstThursday = tmp.valueOf();
-  tmp.setMonth(0, 1);
-  if (tmp.getDay() !== 4) {
-    tmp.setMonth(0, 1 + ((4 - tmp.getDay()) + 7) % 7);
-  }
-  return 1 + Math.ceil((firstThursday - tmp.valueOf()) / 604800000);
-}
 
 @Injectable()
 export class ScheduleService {
@@ -56,9 +38,27 @@ export class ScheduleService {
     return `schedule:${schoolId}:${suffix}`;
   }
 
+  /**
+   * SCAN-based cache invalidation — production-safe, no blocking KEYS.
+   * Batched cursor iteration (100 keys per batch) to maintain low latency.
+   */
   private async invalidateSchoolCache(schoolId: string) {
-    const keys = await this.redis.keys(`schedule:${schoolId}:*`);
-    if (keys.length > 0) await this.redis.del(...keys);
+    const pattern = `schedule:${schoolId}:*`;
+    let cursor = '0';
+    let totalDeleted = 0;
+
+    do {
+      const [nextCursor, keys] = await this.redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+      cursor = nextCursor;
+      if (keys.length > 0) {
+        await this.redis.del(...keys);
+        totalDeleted += keys.length;
+      }
+    } while (cursor !== '0');
+
+    if (totalDeleted > 0) {
+      // no-op; kept for future telemetry hook
+    }
   }
 
   // ── Timezone helper ───────────────────────────────────────────────────────
@@ -95,6 +95,29 @@ export class ScheduleService {
     if (slot.status === ScheduleStatus.ARCHIVED) {
       throw new ConflictException('Arxivlangan jadvalni tahrirlash mumkin emas.');
     }
+  }
+
+  /**
+   * Service-layer RBAC defense-in-depth.
+   * Must be called after the slot is fetched (so branchId is known).
+   */
+  private assertCanManage(slot: any, currentUser: JwtPayload) {
+    const { role, branchId } = currentUser;
+
+    // Teacher, Student, Parent — forbidden for all mutations
+    if (role === UserRole.TEACHER || role === UserRole.STUDENT || role === UserRole.PARENT) {
+      throw new ForbiddenException('Bu amalni bajarish uchun yetarli huquq yo\'q');
+    }
+
+    // Branch Admin — own branch only
+    if (role === UserRole.BRANCH_ADMIN) {
+      const slotBranchId = slot.class?.branchId ?? slot.branchId;
+      if (slotBranchId !== branchId) {
+        throw new ForbiddenException('Filial admin faqat o\'z filialidagi jadvalni boshqarishi mumkin');
+      }
+    }
+
+    // Director, VP, Super Admin — allowed school-wide (tenant where already enforced)
   }
 
   // ── Audit helper ──────────────────────────────────────────────────────────
@@ -289,6 +312,10 @@ export class ScheduleService {
       throw new ForbiddenException('Filial admin faqat o\'z filialidagi sinf uchun jadval yaratishi mumkin');
     }
 
+    if (currentUser.role === UserRole.TEACHER || currentUser.role === UserRole.STUDENT || currentUser.role === UserRole.PARENT) {
+      throw new ForbiddenException('Bu amalni bajarish uchun yetarli huquq yo\'q');
+    }
+
     if (dto.status && dto.status !== ScheduleStatus.DRAFT && !this.canPublish(currentUser.role)) {
       throw new ForbiddenException('Faqat direktor yoki o\'rinbosar boshlang\'ich statusni draftdan boshqa holatda yaratishi mumkin');
     }
@@ -355,6 +382,7 @@ export class ScheduleService {
       include: { class: { select: { branchId: true } } },
     });
     if (!slot) throw new NotFoundException('Jadval sloti topilmadi');
+    this.assertCanManage(slot, currentUser);
     this.assertCanModify(slot);
 
     // Status lifecycle changes must go through dedicated endpoints
@@ -437,6 +465,7 @@ export class ScheduleService {
       where: { id, ...buildTenantWhere(currentUser) },
     });
     if (!slot) throw new NotFoundException('Jadval sloti topilmadi');
+    this.assertCanManage(slot, currentUser);
     this.assertCanModify(slot);
 
     await this.prisma.schedule.delete({ where: { id } });
@@ -461,6 +490,7 @@ export class ScheduleService {
         include: { class: { select: { branchId: true } } },
       });
       if (!slot) throw new NotFoundException('Jadval sloti topilmadi');
+      this.assertCanManage(slot, currentUser);
       this.assertCanModify(slot);
 
       // Same position → no-op
@@ -550,6 +580,7 @@ export class ScheduleService {
       where: { id, ...buildTenantWhere(currentUser) },
     });
     if (!slot) throw new NotFoundException('Jadval sloti topilmadi');
+    this.assertCanManage(slot, currentUser);
     if (slot.status !== ScheduleStatus.DRAFT) {
       throw new ConflictException('Faqat qoralama holatidagi jadval tasdiqlanishi mumkin');
     }
@@ -824,10 +855,19 @@ export class ScheduleService {
   // ── Week type utility ─────────────────────────────────────────────────────
 
   getCurrentWeekType(): { weekType: WeekType; isoWeekNumber: number } {
-    const isoWeek = getISOWeek(new Date());
-    return {
-      weekType: isoWeek % 2 === 1 ? WeekType.NUMERATOR : WeekType.DENOMINATOR,
-      isoWeekNumber: isoWeek,
-    };
+    const wt = getCurrentWeekType();
+    const isoWeek = (() => {
+      const d = new Date();
+      const tmp = new Date(d.valueOf());
+      const dayNr = (d.getDay() + 6) % 7;
+      tmp.setDate(tmp.getDate() - dayNr + 3);
+      const firstThursday = tmp.valueOf();
+      tmp.setMonth(0, 1);
+      if (tmp.getDay() !== 4) {
+        tmp.setMonth(0, 1 + ((4 - tmp.getDay()) + 7) % 7);
+      }
+      return 1 + Math.ceil((firstThursday - tmp.valueOf()) / 604800000);
+    })();
+    return { weekType: wt, isoWeekNumber: isoWeek };
   }
 }

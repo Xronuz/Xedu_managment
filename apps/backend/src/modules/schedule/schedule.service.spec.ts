@@ -35,12 +35,39 @@ const mockVP: JwtPayload = {
   isSuperAdmin: false,
 };
 
+const mockTeacher: JwtPayload = {
+  sub: 'user-4',
+  email: 'teacher@test.com',
+  role: UserRole.TEACHER,
+  schoolId: 'school-1',
+  branchId: 'branch-1',
+  isSuperAdmin: false,
+};
+
+const mockStudent: JwtPayload = {
+  sub: 'user-5',
+  email: 'student@test.com',
+  role: UserRole.STUDENT,
+  schoolId: 'school-1',
+  branchId: 'branch-1',
+  isSuperAdmin: false,
+};
+
+const mockParent: JwtPayload = {
+  sub: 'user-6',
+  email: 'parent@test.com',
+  role: UserRole.PARENT,
+  schoolId: 'school-1',
+  branchId: 'branch-1',
+  isSuperAdmin: false,
+};
+
 const mockRedis = {
   get: jest.fn().mockResolvedValue(null),
   set: jest.fn().mockResolvedValue(undefined),
   getJson: jest.fn().mockResolvedValue(null),
   setJson: jest.fn().mockResolvedValue(undefined),
-  keys: jest.fn().mockResolvedValue([]),
+  scan: jest.fn().mockResolvedValue(['0', []]),
   del: jest.fn().mockResolvedValue(undefined),
 };
 
@@ -79,6 +106,10 @@ describe('ScheduleService', () => {
       school: {
         findUnique: jest.fn(),
       },
+      $transaction: jest.fn(async (fn: any) => {
+        if (typeof fn === 'function') return fn(prisma);
+        return Promise.all(fn);
+      }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -96,7 +127,7 @@ describe('ScheduleService', () => {
     jest.clearAllMocks();
     mockRedis.get.mockResolvedValue(null);
     mockRedis.getJson.mockResolvedValue(null);
-    mockRedis.keys.mockResolvedValue([]);
+    mockRedis.scan.mockResolvedValue(['0', []]);
     mockConflictDetector.checkClash.mockResolvedValue([]);
     mockConflictDetector.assertNoClash.mockResolvedValue(undefined);
   });
@@ -258,7 +289,7 @@ describe('ScheduleService', () => {
 
       expect(result.id).toBe('new-slot');
       expect(prisma.schedule.create).toHaveBeenCalled();
-      expect(mockRedis.keys).toHaveBeenCalled();
+      expect(mockRedis.scan).toHaveBeenCalled();
     });
 
     it('should throw NotFoundException when class not found', async () => {
@@ -323,6 +354,31 @@ describe('ScheduleService', () => {
         .rejects.toThrow(ForbiddenException);
       expect(prisma.schedule.create).not.toHaveBeenCalled();
     });
+
+    // ── RBAC defense-in-depth ────────────────────────────────────────────────
+    it('should reject Teacher creating schedule', async () => {
+      prisma.class.findFirst.mockResolvedValue({ branchId: 'branch-1' });
+
+      await expect(service.create(baseCreateDto, mockTeacher))
+        .rejects.toThrow(ForbiddenException);
+      expect(prisma.schedule.create).not.toHaveBeenCalled();
+    });
+
+    it('should reject Student creating schedule', async () => {
+      prisma.class.findFirst.mockResolvedValue({ branchId: 'branch-1' });
+
+      await expect(service.create(baseCreateDto, mockStudent))
+        .rejects.toThrow(ForbiddenException);
+      expect(prisma.schedule.create).not.toHaveBeenCalled();
+    });
+
+    it('should reject Parent creating schedule', async () => {
+      prisma.class.findFirst.mockResolvedValue({ branchId: 'branch-1' });
+
+      await expect(service.create(baseCreateDto, mockParent))
+        .rejects.toThrow(ForbiddenException);
+      expect(prisma.schedule.create).not.toHaveBeenCalled();
+    });
   });
 
   // ═════════════════════════════════════════════════════════════════════════════
@@ -367,6 +423,39 @@ describe('ScheduleService', () => {
       await expect(service.update('slot-1', { teacherId: 'teacher-1', subjectId: 'subject-1' }, mockDirector))
         .rejects.toThrow(ConflictException);
     });
+
+    // ── RBAC defense-in-depth ────────────────────────────────────────────────
+    it('should reject Teacher updating schedule', async () => {
+      await expect(service.update('slot-1', { dayOfWeek: DayOfWeek.TUESDAY }, mockTeacher))
+        .rejects.toThrow(ForbiddenException);
+    });
+
+    it('should reject Student updating schedule', async () => {
+      await expect(service.update('slot-1', { dayOfWeek: DayOfWeek.TUESDAY }, mockStudent))
+        .rejects.toThrow(ForbiddenException);
+    });
+
+    it('should reject Parent updating schedule', async () => {
+      await expect(service.update('slot-1', { dayOfWeek: DayOfWeek.TUESDAY }, mockParent))
+        .rejects.toThrow(ForbiddenException);
+    });
+
+    it('should reject Branch Admin updating schedule in another branch', async () => {
+      prisma.schedule.findFirst.mockResolvedValue({
+        id: 'slot-1',
+        subjectId: 'subject-1',
+        teacherId: 'teacher-1',
+        classId: 'class-1',
+        dayOfWeek: DayOfWeek.MONDAY,
+        startTime: '08:00',
+        endTime: '08:45',
+        roomId: null,
+        class: { branchId: 'branch-2' },
+      });
+
+      await expect(service.update('slot-1', { dayOfWeek: DayOfWeek.TUESDAY }, mockBranchAdmin))
+        .rejects.toThrow(ForbiddenException);
+    });
   });
 
   // ═════════════════════════════════════════════════════════════════════════════
@@ -381,16 +470,92 @@ describe('ScheduleService', () => {
         .rejects.toThrow(NotFoundException);
     });
 
-    it('should delete and invalidate cache', async () => {
-      prisma.schedule.findFirst.mockResolvedValue({ id: 'slot-1' });
+    it('should delete and invalidate cache via SCAN', async () => {
+      prisma.schedule.findFirst.mockResolvedValue({ id: 'slot-1', class: { branchId: 'branch-1' } });
       prisma.schedule.delete.mockResolvedValue({ id: 'slot-1' });
-      mockRedis.keys.mockResolvedValue(['schedule:school-1:week:all']);
+      mockRedis.scan.mockResolvedValue(['0', ['schedule:school-1:week:all']]);
 
       const result = await service.remove('slot-1', mockDirector);
 
       expect(prisma.schedule.delete).toHaveBeenCalledWith({ where: { id: 'slot-1' } });
+      expect(mockRedis.scan).toHaveBeenCalledWith('0', 'MATCH', 'schedule:school-1:*', 'COUNT', 100);
       expect(mockRedis.del).toHaveBeenCalledWith('schedule:school-1:week:all');
       expect(result.message).toContain('chirildi');
+    });
+
+    it('should reject Teacher deleting schedule', async () => {
+      prisma.schedule.findFirst.mockResolvedValue({ id: 'slot-1', class: { branchId: 'branch-1' } });
+
+      await expect(service.remove('slot-1', mockTeacher))
+        .rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  // ═════════════════════════════════════════════════════════════════════════════
+  // move — RBAC
+  // ═════════════════════════════════════════════════════════════════════════════
+
+  describe('move', () => {
+    beforeEach(() => {
+      prisma.schedule.findFirst.mockResolvedValue({
+        id: 'slot-1', schoolId: 'school-1', branchId: 'branch-1', classId: 'c1',
+        teacherId: 't1', roomId: 'r1', dayOfWeek: DayOfWeek.MONDAY, timeSlot: 1,
+        startTime: '08:00', endTime: '08:45', status: ScheduleStatus.DRAFT, weekType: 'all',
+        class: { branchId: 'branch-1' },
+      });
+      prisma.schedule.update.mockResolvedValue({});
+      prisma.school.findUnique.mockResolvedValue({ timezone: 'Asia/Tashkent' });
+    });
+
+    it('should reject Teacher moving schedule', async () => {
+      await expect(service.move('slot-1', { dayOfWeek: DayOfWeek.TUESDAY, timeSlot: 2 }, mockTeacher))
+        .rejects.toThrow(ForbiddenException);
+    });
+
+    it('should reject Branch Admin moving schedule in another branch', async () => {
+      prisma.schedule.findFirst.mockResolvedValue({
+        id: 'slot-1', schoolId: 'school-1', branchId: 'branch-2', classId: 'c1',
+        teacherId: 't1', roomId: 'r1', dayOfWeek: DayOfWeek.MONDAY, timeSlot: 1,
+        startTime: '08:00', endTime: '08:45', status: ScheduleStatus.DRAFT, weekType: 'all',
+        class: { branchId: 'branch-2' },
+      });
+
+      await expect(service.move('slot-1', { dayOfWeek: DayOfWeek.TUESDAY, timeSlot: 2 }, mockBranchAdmin))
+        .rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  // ═════════════════════════════════════════════════════════════════════════════
+  // validate — RBAC
+  // ═════════════════════════════════════════════════════════════════════════════
+
+  describe('validate', () => {
+    beforeEach(() => {
+      prisma.schedule.findFirst.mockResolvedValue({
+        id: 'slot-1', schoolId: 'school-1', branchId: 'branch-1', classId: 'c1',
+        teacherId: 't1', roomId: 'r1', dayOfWeek: DayOfWeek.MONDAY, timeSlot: 1,
+        startTime: '08:00', endTime: '08:45', status: ScheduleStatus.DRAFT, weekType: 'all',
+        class: { branchId: 'branch-1' },
+      });
+      prisma.schedule.update.mockResolvedValue({});
+      prisma.school.findUnique.mockResolvedValue({ timezone: 'Asia/Tashkent' });
+    });
+
+    it('should reject Teacher validating schedule', async () => {
+      await expect(service.validate('slot-1', mockTeacher))
+        .rejects.toThrow(ForbiddenException);
+    });
+
+    it('should reject Branch Admin validating schedule in another branch', async () => {
+      prisma.schedule.findFirst.mockResolvedValue({
+        id: 'slot-1', schoolId: 'school-1', branchId: 'branch-2', classId: 'c1',
+        teacherId: 't1', roomId: 'r1', dayOfWeek: DayOfWeek.MONDAY, timeSlot: 1,
+        startTime: '08:00', endTime: '08:45', status: ScheduleStatus.DRAFT, weekType: 'all',
+        class: { branchId: 'branch-2' },
+      });
+
+      await expect(service.validate('slot-1', mockBranchAdmin))
+        .rejects.toThrow(ForbiddenException);
     });
   });
 

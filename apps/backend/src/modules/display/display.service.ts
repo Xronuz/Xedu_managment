@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { DayOfWeek } from '@eduplatform/types';
+import { getCurrentWeekType } from '@/common/utils/week-type.util';
 
 @Injectable()
 export class DisplayService {
@@ -30,8 +31,15 @@ export class DisplayService {
     ];
     const today = dayMap[jsDay];
 
+    const currentWeekType = getCurrentWeekType();
+
     const schedule = await this.prisma.schedule.findMany({
-      where: { schoolId: school.id, dayOfWeek: today, status: 'published' },
+      where: {
+        schoolId: school.id,
+        dayOfWeek: today,
+        status: 'published',
+        weekType: { in: ['all' as any, currentWeekType] },
+      },
       include: {
         subject: {
           select: {

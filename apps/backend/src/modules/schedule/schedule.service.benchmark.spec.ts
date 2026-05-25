@@ -29,7 +29,7 @@ const mockRedis = () => ({
   set: jest.fn().mockResolvedValue(undefined),
   getJson: jest.fn().mockResolvedValue(null),
   setJson: jest.fn().mockResolvedValue(undefined),
-  keys: jest.fn().mockResolvedValue([]),
+  scan: jest.fn().mockResolvedValue(['0', []]),
   del: jest.fn().mockResolvedValue(undefined),
 });
 
@@ -436,18 +436,7 @@ describe('ScheduleService Production Audit', () => {
           expect(e).not.toBeInstanceOf(ForbiddenException);
         }
       } else {
-        // NOTE: update/move/validate lack SERVICE-LEVEL RBAC checks (only controller guards).
-        // Teacher/Student/Parent calling the service directly can succeed if the slot is draft.
-        // This is an ARCHITECTURAL finding, not a bug per se, but documented in the audit.
-        if (['update', 'move', 'validate'].includes(actionName)) {
-          // These actions don't check role at service level — controller guards block them
-          try {
-            await promise;
-          } catch (e) {
-            // Either rejected or not — both are acceptable at service level
-          }
-          return;
-        }
+        // After hardening: ALL mutations have service-level RBAC checks
         await expect(promise).rejects.toBeDefined();
       }
     });
@@ -510,19 +499,19 @@ describe('ScheduleService Production Audit', () => {
   // ═════════════════════════════════════════════════════════════════════════════
 
   describe('Cache Invalidation', () => {
-    it('create should invalidate school cache', async () => {
-      redis.keys.mockResolvedValueOnce(['schedule:school-1:week']);
+    it('create should invalidate school cache via SCAN', async () => {
+      redis.scan.mockResolvedValueOnce(['0', ['schedule:school-1:week']]);
       prisma.class.findFirst.mockResolvedValue({ id: 'c1', branchId: 'branch-1' });
       prisma.subject.findFirst.mockResolvedValue({ id: 's1', teacherId: 't1', name: 'Fan' });
       prisma.schedule.create.mockResolvedValue({ id: 'new', schoolId: 'school-1', branchId: 'branch-1', weekType: WeekType.ALL });
       prisma.room.findFirst.mockResolvedValue({ id: 'r1' });
 
       await service.create({ classId: 'c1', subjectId: 's1', teacherId: 't1', dayOfWeek: DayOfWeek.MONDAY, timeSlot: 1, startTime: '08:00', endTime: '08:45' } as any, makeUser(UserRole.DIRECTOR));
-      expect(redis.keys).toHaveBeenCalledWith('schedule:school-1:*');
+      expect(redis.scan).toHaveBeenCalledWith('0', 'MATCH', 'schedule:school-1:*', 'COUNT', 100);
       expect(redis.del).toHaveBeenCalledWith('schedule:school-1:week');
     });
 
-    it('move should invalidate school cache', async () => {
+    it('move should invalidate school cache via SCAN', async () => {
       prisma.schedule.findFirst.mockResolvedValue({
         id: 's1', schoolId: 'school-1', branchId: 'branch-1', classId: 'c1',
         teacherId: 't1', roomId: 'r1', dayOfWeek: DayOfWeek.MONDAY, timeSlot: 1,
@@ -532,10 +521,10 @@ describe('ScheduleService Production Audit', () => {
       prisma.schedule.update.mockResolvedValue({});
 
       await service.move('s1', { dayOfWeek: DayOfWeek.TUESDAY, timeSlot: 2 }, makeUser(UserRole.DIRECTOR));
-      expect(redis.keys).toHaveBeenCalledWith('schedule:school-1:*');
+      expect(redis.scan).toHaveBeenCalledWith('0', 'MATCH', 'schedule:school-1:*', 'COUNT', 100);
     });
 
-    it('publish should invalidate school cache', async () => {
+    it('publish should invalidate school cache via SCAN', async () => {
       prisma.schedule.findFirst.mockResolvedValue({
         id: 's1', schoolId: 'school-1', branchId: 'branch-1', classId: 'c1',
         teacherId: 't1', roomId: 'r1', dayOfWeek: DayOfWeek.MONDAY, timeSlot: 1,
@@ -544,7 +533,21 @@ describe('ScheduleService Production Audit', () => {
       prisma.schedule.update.mockResolvedValue({});
 
       await service.publish('s1', makeUser(UserRole.DIRECTOR));
-      expect(redis.keys).toHaveBeenCalledWith('schedule:school-1:*');
+      expect(redis.scan).toHaveBeenCalledWith('0', 'MATCH', 'schedule:school-1:*', 'COUNT', 100);
+    });
+
+    it('SCAN should iterate multiple batches if cursor not zero', async () => {
+      redis.scan
+        .mockResolvedValueOnce(['1', ['schedule:school-1:batch1']])
+        .mockResolvedValueOnce(['0', ['schedule:school-1:batch2']]);
+      prisma.class.findFirst.mockResolvedValue({ id: 'c1', branchId: 'branch-1' });
+      prisma.subject.findFirst.mockResolvedValue({ id: 's1', teacherId: 't1', name: 'Fan' });
+      prisma.schedule.create.mockResolvedValue({ id: 'new', schoolId: 'school-1', branchId: 'branch-1', weekType: WeekType.ALL });
+
+      await service.create({ classId: 'c1', subjectId: 's1', teacherId: 't1', dayOfWeek: DayOfWeek.MONDAY, timeSlot: 1, startTime: '08:00', endTime: '08:45' } as any, makeUser(UserRole.DIRECTOR));
+      expect(redis.scan).toHaveBeenCalledTimes(2);
+      expect(redis.del).toHaveBeenCalledWith('schedule:school-1:batch1');
+      expect(redis.del).toHaveBeenCalledWith('schedule:school-1:batch2');
     });
 
     it('cached read should skip DB on second call', async () => {

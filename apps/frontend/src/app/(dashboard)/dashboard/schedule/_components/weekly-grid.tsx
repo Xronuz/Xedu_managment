@@ -177,7 +177,7 @@ export function WeeklyGrid({
 }: WeeklyGridProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 5 } })
+    useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 5 } })
   );
 
   const subjectColorMap = useMemo(() => {

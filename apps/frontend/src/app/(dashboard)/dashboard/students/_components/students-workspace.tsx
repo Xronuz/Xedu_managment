@@ -19,6 +19,8 @@ import { useConfirm } from '@/store/confirm.store';
 import { usersApi } from '@/lib/api/users';
 import { branchesApi } from '@/lib/api/branches';
 import { classesApi } from '@/lib/api/classes';
+import { StudentCreateModal } from '@/components/students/student-create-modal';
+import { ParentLinkModal } from '@/components/students/parent-link-modal';
 
 import {
   WorkspaceShell,
@@ -113,6 +115,9 @@ export function StudentsWorkspace() {
   // ── Selection state ────────────────────────────────────────────────────────
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [panelStudent, setPanelStudent] = useState<StudentRow | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [linkParentOpen, setLinkParentOpen] = useState(false);
+  const [linkParentStudent, setLinkParentStudent] = useState<StudentRow | null>(null);
 
   const toggleSelect = useCallback((id: string) => {
     setSelectedIds((prev) =>
@@ -254,12 +259,7 @@ export function StudentsWorkspace() {
             canManage && (
               <ActionBar
                 primary={
-                  <PrimaryAction
-                    onClick={() => {
-                      /* Navigate to add student - reuse users page logic or modal */
-                      window.location.href = '/dashboard/users';
-                    }}
-                  >
+                  <PrimaryAction onClick={() => setCreateOpen(true)}>
                     + O'quvchi qo'shish
                   </PrimaryAction>
                 }
@@ -385,7 +385,6 @@ export function StudentsWorkspace() {
           onSelect={toggleSelect}
           onSelectAll={selectAll}
           rowTone={(s) => !s.isActive ? 'muted' : 'neutral'}
-          rowHref={(s) => `/dashboard/users/${s.id}`}
           rowActions={(s) => (
             <>
               <IconAction
@@ -416,10 +415,18 @@ export function StudentsWorkspace() {
           isLoading={isLoading}
           skeletonRows={6}
           emptyState={
-            <div className="flex flex-col items-center justify-center py-12 gap-2">
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
               <GraduationCap className="h-8 w-8 text-xedu-slate-300" />
               <p className="text-sm font-medium text-xedu-slate-500">O'quvchilar topilmadi</p>
               <p className="text-xs text-xedu-slate-400">Filterlarni yoki qidiruvni o'zgartirib ko'ring</p>
+              {canManage && (
+                <button
+                  onClick={() => setCreateOpen(true)}
+                  className="mt-1 h-8 px-3 rounded-lg text-xs font-semibold text-white bg-xedu-primary hover:bg-xedu-primary-dark transition-colors"
+                >
+                  + O'quvchi qo'shish
+                </button>
+              )}
             </div>
           }
         />
@@ -464,7 +471,7 @@ export function StudentsWorkspace() {
             <QuickLink href="/dashboard/attendance" icon={ClipboardCheck} label="Davomat" />
             <QuickLink href="/dashboard/grades" icon={GraduationCap} label="Baholar" />
             <QuickLink href="/dashboard/exams" icon={AlertTriangle} label="Imtihonlar" />
-            <QuickLink href="/dashboard/users/link-parent" icon={Users} label="Ota-ona biriktirish" />
+            <QuickLink href="/dashboard/attendance" icon={ClipboardCheck} label="Davomat" />
           </div>
         </WorkspaceSection>
       </WorkspaceSidebar>
@@ -474,7 +481,27 @@ export function StudentsWorkspace() {
         student={panelStudent}
         open={!!panelStudent}
         onClose={() => setPanelStudent(null)}
+        onLinkParent={(s) => {
+          setLinkParentStudent(s);
+          setLinkParentOpen(true);
+        }}
       />
+
+      {/* Create Student Modal */}
+      <StudentCreateModal open={createOpen} onClose={() => setCreateOpen(false)} />
+
+      {/* Link Parent Modal */}
+      {linkParentStudent && (
+        <ParentLinkModal
+          open={linkParentOpen}
+          onClose={() => {
+            setLinkParentOpen(false);
+            setLinkParentStudent(null);
+          }}
+          studentId={linkParentStudent.id}
+          studentName={`${linkParentStudent.firstName} ${linkParentStudent.lastName}`}
+        />
+      )}
 
       {/* Bulk toolbar */}
       <FloatingBulkToolbar
@@ -524,10 +551,12 @@ function StudentPanel({
   student,
   open,
   onClose,
+  onLinkParent,
 }: {
   student: StudentRow | null;
   open: boolean;
   onClose: () => void;
+  onLinkParent?: (student: StudentRow) => void;
 }) {
   if (!student) return null;
 
@@ -560,18 +589,20 @@ function StudentPanel({
 
           {/* Quick actions */}
           <div className="flex flex-wrap gap-2 pt-2">
-            <SecondaryAction icon={<Eye className="h-3.5 w-3.5" />} onClick={() => { window.location.href = `/dashboard/users/${student.id}`; }}>
-              Profil
+            <SecondaryAction icon={<Eye className="h-3.5 w-3.5" />} onClick={() => {}}>
+              Ko'rish
             </SecondaryAction>
             <SecondaryAction icon={<MessageSquare className="h-3.5 w-3.5" />} onClick={() => {}}>
               Xabar
             </SecondaryAction>
-            <SecondaryAction icon={<Wallet className="h-3.5 w-3.5" />} onClick={() => { window.location.href = '/dashboard/payments'; }}>
-              To'lov
-            </SecondaryAction>
-            <SecondaryAction icon={<ClipboardCheck className="h-3.5 w-3.5" />} onClick={() => { window.location.href = '/dashboard/attendance'; }}>
-              Davomat
-            </SecondaryAction>
+            {onLinkParent && (
+              <SecondaryAction
+                icon={<Users className="h-3.5 w-3.5" />}
+                onClick={() => onLinkParent(student)}
+              >
+                Ota-ona biriktirish
+              </SecondaryAction>
+            )}
           </div>
         </div>
       ),

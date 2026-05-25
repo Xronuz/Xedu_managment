@@ -10,6 +10,7 @@ import { RedisModule } from './common/redis/redis.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ClassesModule } from './modules/classes/classes.module';
+import { StudentsModule } from './modules/students/students.module';
 import { SubjectsModule } from './modules/subjects/subjects.module';
 import { ScheduleModule as SchoolScheduleModule } from './modules/schedule/schedule.module';
 import { AttendanceModule } from './modules/attendance/attendance.module';
@@ -101,6 +102,7 @@ import { envValidationSchema } from './common/config/env.validation';
     AuthModule,
     UsersModule,
     ClassesModule,
+    StudentsModule,
     SubjectsModule,
     SchoolScheduleModule,
     AttendanceModule,

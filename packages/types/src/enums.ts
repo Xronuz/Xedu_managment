@@ -173,3 +173,32 @@ export enum Language {
   UZ = 'uz',
   RU = 'ru',
 }
+
+// ─── Phase 5A: Teaching Load enums ──────────────────────────────────────────
+
+export enum TeachingLoadStatus {
+  DRAFT = 'draft',
+  APPROVED = 'approved',
+  ARCHIVED = 'archived',
+}
+
+export enum GroupType {
+  CLASS = 'class',
+  GROUP = 'group',
+  ELECTIVE = 'elective',
+  CLUB = 'club',
+}
+
+export enum Semester {
+  FIRST = 'first',
+  SECOND = 'second',
+  FULL_YEAR = 'full_year',
+}
+
+export enum LeaveType {
+  SICK = 'sick',
+  PERSONAL = 'personal',
+  FAMILY = 'family',
+  OTHER = 'other',
+  PROFESSIONAL = 'professional',
+}

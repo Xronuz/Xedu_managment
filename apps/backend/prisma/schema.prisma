@@ -229,6 +229,35 @@ enum WeekType {
   denominator
 }
 
+// ─── Phase 5A: Teaching Load enums ──────────────────────────────────────────
+
+enum TeachingLoadStatus {
+  draft
+  approved
+  archived
+}
+
+enum GroupType {
+  class
+  group
+  elective
+  club
+}
+
+enum Semester {
+  first
+  second
+  full_year
+}
+
+enum LeaveType {
+  sick
+  personal
+  family
+  other
+  professional
+}
+
 enum AuditAction {
   create
   update
@@ -341,6 +370,7 @@ model School {
   users               User[]
   classes             Class[]
   subjects            Subject[]
+  teachingLoads       TeachingLoad[]
   schedules           Schedule[]
   attendance          Attendance[]
   grades              Grade[]
@@ -411,6 +441,7 @@ model Branch {
   school              School                 @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   users               User[]
   classes             Class[]
+  teachingLoads       TeachingLoad[]
   attendance          Attendance[]
   grades              Grade[]
   payments            Payment[]
@@ -580,6 +611,7 @@ model User {
   taughtSubjects Subject[]  @relation("TeacherSubjects")
   classTeacherOf Class[]    @relation("ClassTeacher")
   scheduleSlots  Schedule[] @relation("ScheduleTeacher")
+  teachingLoads  TeachingLoad[] @relation("TeacherLoads")
 
   // Student relations
   studentClasses    ClassStudent[]
@@ -728,6 +760,7 @@ model Class {
   classTeacher User?          @relation("ClassTeacher", fields: [classTeacherId], references: [id])
   students     ClassStudent[]
   subjects     Subject[]
+  teachingLoads TeachingLoad[]
   schedules    Schedule[]
   attendance   Attendance[]
   grades       Grade[]
@@ -764,19 +797,58 @@ model Subject {
   hoursPerWeek Int      @default(2)
   createdAt    DateTime @default(now())
 
-  school    School     @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch    Branch     @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  class     Class      @relation(fields: [classId], references: [id], onDelete: Cascade)
-  teacher   User       @relation("TeacherSubjects", fields: [teacherId], references: [id])
-  clubs     Club[]
-  schedules Schedule[]
-  grades    Grade[]
-  exams     Exam[]
-  homeworks Homework[]
+  school        School         @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch        Branch         @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  class         Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
+  teacher       User           @relation("TeacherSubjects", fields: [teacherId], references: [id])
+  teachingLoads TeachingLoad[]
+  clubs         Club[]
+  schedules     Schedule[]
+  grades        Grade[]
+  exams         Exam[]
+  homeworks     Homework[]
 
   @@index([schoolId, branchId])
   @@index([branchId])
   @@map("subjects")
+}
+
+// ─── Teaching Load (Phase 5A: Tarifikatsiya) ──────────────────────────────
+
+model TeachingLoad {
+  id            String            @id @default(uuid())
+  schoolId      String
+  branchId      String
+  teacherId     String
+  subjectId     String
+  classId       String
+
+  hoursPerWeek  Int               @default(2)
+  hoursPerYear  Int?
+  semester      Semester?         @default(full_year)
+  groupType     GroupType?        @default(class)
+  isSplitClass  Boolean           @default(false)
+  coefficient   Float             @default(1.0)
+
+  status        TeachingLoadStatus @default(draft)
+  notes         String?
+
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  school    School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch    Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  teacher   User      @relation("TeacherLoads", fields: [teacherId], references: [id], onDelete: Cascade)
+  subject   Subject   @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  class     Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, branchId])
+  @@index([teacherId])
+  @@index([classId])
+  @@index([subjectId])
+  @@index([status])
+  @@unique([teacherId, subjectId, classId, semester, status], name: "unique_active_teaching_load")
+  @@map("teaching_loads")
 }
 
 // ─── Schedule ─────────────────────────────────────────────────────────────
@@ -1322,6 +1394,7 @@ model LeaveRequest {
   startDate   DateTime    @db.Date
   endDate     DateTime    @db.Date
   status      LeaveStatus @default(pending)
+  type        LeaveType?
   createdById String?
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt

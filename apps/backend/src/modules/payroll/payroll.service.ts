@@ -8,7 +8,8 @@ import {
 import { Type } from 'class-transformer';
 import PDFDocument from 'pdfkit';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { JwtPayload, UserRole } from '@eduplatform/types';
+import { JwtPayload, UserRole, ScheduleStatus, WeekType } from '@eduplatform/types';
+import { getISOWeek } from '@/common/utils/week-type.util';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 import { TariffCalculatorService, LanguageCert } from './tariff-calculator.service';
 import { SystemConfigService } from '@/modules/system-config/system-config.service';
@@ -92,6 +93,11 @@ export class UpdatePayrollItemDto {
   @IsOptional() @IsNumber() @Min(0) bonuses?: number;
   @IsOptional() @IsNumber() @Min(0) deductions?: number;
   @IsOptional() @IsString() @MaxLength(300) note?: string;
+}
+
+export class RecalculateScheduledHoursDto {
+  @IsOptional() @IsBoolean() force?: boolean;
+  @IsOptional() @IsString() @MaxLength(300) reason?: string;
 }
 
 // ─── Service ─────────────────────────────────────────────────────────────────
@@ -436,6 +442,62 @@ export class PayrollService {
     });
   }
 
+  // ── Schedule → Hours bridge (Phase 5A.3) ──────────────────────────────────
+
+  /**
+   * Bir o'qituvchi uchun berilgan oyda nechta published dars sloti borligini
+   * weekType (all/numerator/denominator) inobatida hisoblaydi.
+   * Har bir slot 1 soat sifatida hisoblanadi.
+   */
+  private async countScheduledHoursFromSchedule(
+    teacherId: string,
+    schoolId: string,
+    year: number,
+    month: number,
+    branchId?: string | null,
+  ): Promise<number> {
+    // Faqat published statusdagi schedulelarni olish
+    const schedules = await this.prisma.schedule.findMany({
+      where: {
+        schoolId,
+        teacherId,
+        status: ScheduleStatus.PUBLISHED,
+        ...(branchId ? { branchId } : {}),
+      },
+      select: {
+        dayOfWeek: true,
+        weekType: true,
+      },
+    });
+
+    if (schedules.length === 0) return 0;
+
+    // Oydagi barcha kunlarni yaratish
+    const daysInMonth = new Date(year, month, 0).getDate();
+    let totalSlots = 0;
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month - 1, day);
+      const isoWeek = getISOWeek(date);
+      const isNumeratorWeek = isoWeek % 2 === 1;
+
+      for (const s of schedules) {
+        const scheduleDayIndex = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'].indexOf(s.dayOfWeek as string);
+        if (scheduleDayIndex !== date.getDay()) continue;
+
+        if (s.weekType === WeekType.ALL) {
+          totalSlots++;
+        } else if (s.weekType === WeekType.NUMERATOR && isNumeratorWeek) {
+          totalSlots++;
+        } else if (s.weekType === WeekType.DENOMINATOR && !isNumeratorWeek) {
+          totalSlots++;
+        }
+      }
+    }
+
+    return totalSlots;
+  }
+
   // ── Monthly Payroll ────────────────────────────────────────────────────────
 
   async getAllPayrolls(currentUser: JwtPayload) {
@@ -507,35 +569,48 @@ export class PayrollService {
       },
     });
 
-    // Build payroll items
-    const items = salaryConfigs.map((config) => {
-      const staffAdvances = advances
-        .filter((a) => a.staffSalaryId === config.id)
-        .reduce((sum, a) => sum + a.amount, 0);
+    // Build payroll items — auto-fill scheduledHours from published schedule
+    const items = await Promise.all(
+      salaryConfigs.map(async (config) => {
+        const staffAdvances = advances
+          .filter((a) => a.staffSalaryId === config.id)
+          .reduce((sum, a) => sum + a.amount, 0);
 
-      // Snapshot allowances into item; gross starts with base + allowances
-      const grossTotal = config.baseSalary + config.degreeAllowance + config.certificateAllowance;
-      const netTotal = Math.max(0, grossTotal - staffAdvances);
+        // Snapshot allowances into item; gross starts with base + allowances
+        const grossTotal = config.baseSalary + config.degreeAllowance + config.certificateAllowance;
+        const netTotal = Math.max(0, grossTotal - staffAdvances);
 
-      return {
-        schoolId,
-        staffSalaryId: config.id,
-        userId: config.userId,
-        baseSalary: config.baseSalary,
-        degreeAllowance: config.degreeAllowance,
-        certificateAllowance: config.certificateAllowance,
-        scheduledHours: 0,
-        completedHours: 0,
-        hourlyAmount: 0,
-        extraCurricularHours: 0,
-        extraCurricularAmount: 0,
-        bonuses: 0,
-        deductions: 0,
-        grossTotal,
-        advancePaid: staffAdvances,
-        netTotal,
-      };
-    });
+        // Count published schedule slots for this teacher/month
+        const scheduledHours = await this.countScheduledHoursFromSchedule(
+          config.userId,
+          schoolId,
+          dto.year,
+          dto.month,
+          currentUser.branchId,
+        );
+
+        return {
+          schoolId,
+          staffSalaryId: config.id,
+          userId: config.userId,
+          baseSalary: config.baseSalary,
+          degreeAllowance: config.degreeAllowance,
+          certificateAllowance: config.certificateAllowance,
+          scheduledHours,
+          scheduledHoursSource: scheduledHours > 0 ? 'schedule' : null,
+          scheduledHoursCalculatedAt: scheduledHours > 0 ? new Date() : null,
+          completedHours: 0,
+          hourlyAmount: 0,
+          extraCurricularHours: 0,
+          extraCurricularAmount: 0,
+          bonuses: 0,
+          deductions: 0,
+          grossTotal,
+          advancePaid: staffAdvances,
+          netTotal,
+        };
+      }),
+    );
 
     const totalGross = items.reduce((s, i) => s + i.grossTotal, 0);
     const totalNet = items.reduce((s, i) => s + i.netTotal, 0);
@@ -586,6 +661,9 @@ export class PayrollService {
     const hourlyRate = item.staffSalary.hourlyRate;
     const extraCurricularRate = item.staffSalary.extraCurricularRate;
 
+    // Detect manual override of scheduledHours
+    const isManualOverride = dto.scheduledHours !== undefined && dto.scheduledHours !== item.scheduledHours;
+
     // Recalculate with all components
     const hourlyAmount = completedHours * hourlyRate;
     const extraCurricularAmount = extraCurricularHours * extraCurricularRate;
@@ -605,6 +683,7 @@ export class PayrollService {
       where: { id: itemId },
       data: {
         scheduledHours,
+        scheduledHoursSource: isManualOverride ? 'manual' : item.scheduledHoursSource,
         completedHours,
         hourlyAmount,
         extraCurricularHours,
@@ -683,7 +762,74 @@ export class PayrollService {
       throw new BadRequestException("To'langan hisob-kitobni o'chirish mumkin emas");
     }
     await this.prisma.monthlyPayroll.delete({ where: { id } });
-    return { message: "Hisob-kitob o'chirildi" };
+    return { message: "Hisob-kitab o'chirildi" };
+  }
+
+  // ── Recalculate scheduledHours from published schedules ────────────────────
+
+  async recalculateScheduledHours(
+    payrollId: string,
+    dto: RecalculateScheduledHoursDto,
+    currentUser: JwtPayload,
+  ) {
+    const payroll = await this.prisma.monthlyPayroll.findFirst({
+      where: { id: payrollId, schoolId: currentUser.schoolId! },
+      include: { items: { include: { staffSalary: true } } },
+    });
+    if (!payroll) throw new NotFoundException('Hisob-kitob topilmadi');
+    if (payroll.status === 'paid') {
+      throw new BadRequestException("To'langan hisob-kitobni qayta hisoblash mumkin emas");
+    }
+
+    const schoolId = currentUser.schoolId!;
+    const branchId = currentUser.branchId;
+    const updatedItems: string[] = [];
+    const skippedItems: string[] = [];
+
+    for (const item of payroll.items) {
+      // Manual override protection: unless force=true, skip items with source='manual'
+      if (!dto.force && item.scheduledHoursSource === 'manual') {
+        skippedItems.push(item.id);
+        continue;
+      }
+
+      // Branch scope: Branch Admin can only affect their branch
+      if (
+        currentUser.role === UserRole.BRANCH_ADMIN &&
+        item.staffSalary.branchId !== currentUser.branchId
+      ) {
+        skippedItems.push(item.id);
+        continue;
+      }
+
+      const scheduledHours = await this.countScheduledHoursFromSchedule(
+        item.userId,
+        schoolId,
+        payroll.year,
+        payroll.month,
+        branchId,
+      );
+
+      await this.prisma.payrollItem.update({
+        where: { id: item.id },
+        data: {
+          scheduledHours,
+          scheduledHoursSource: dto.force && item.scheduledHoursSource === 'manual' ? 'schedule' : (scheduledHours > 0 ? 'schedule' : item.scheduledHoursSource),
+          scheduledHoursCalculatedAt: new Date(),
+          scheduledHoursOverrideReason: dto.force ? dto.reason ?? 'Qayta hisoblash (force)' : null,
+        },
+      });
+
+      updatedItems.push(item.id);
+    }
+
+    return {
+      payrollId,
+      updatedCount: updatedItems.length,
+      skippedCount: skippedItems.length,
+      updatedItems,
+      skippedItems,
+    };
   }
 
   // ── Salary Slip PDF ────────────────────────────────────────────────────────

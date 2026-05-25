@@ -147,6 +147,11 @@ export const payrollApi = {
     return data;
   },
 
+  recalculateScheduledHours: async (payrollId: string, payload?: { force?: boolean; reason?: string }) => {
+    const { data } = await apiClient.post(`/payroll/monthly/${payrollId}/recalculate-scheduled-hours`, payload ?? {});
+    return data as { payrollId: string; updatedCount: number; skippedCount: number; updatedItems: string[]; skippedItems: string[] };
+  },
+
   approvePayroll: async (id: string) => {
     const { data } = await apiClient.put(`/payroll/monthly/${id}/approve`);
     return data;

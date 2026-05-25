@@ -6,6 +6,7 @@ import {
   Banknote, Plus, Edit2, Trash2, CheckCircle2, XCircle, Clock,
   Loader2, TrendingUp, Users, AlertCircle, CalendarDays, ChevronDown,
   ChevronUp, Save, RefreshCw, Eye, Calculator, Download, Mail,
+  CalculatorIcon, ShieldAlert,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -206,6 +207,23 @@ export default function PayrollPage() {
       queryClient.invalidateQueries({ queryKey: ['payroll-detail', detailId] });
       queryClient.invalidateQueries({ queryKey: ['payroll-monthly'] });
       setEditingItemId(null);
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+    },
+  });
+
+  const recalculateMutation = useMutation({
+    mutationFn: ({ id, force }: { id: string; force?: boolean }) =>
+      payrollApi.recalculateScheduledHours(id, { force }),
+    onSuccess: (res) => {
+      toast({
+        title: ' Qayta hisoblandi',
+        description: `${res.updatedCount} ta yangilandi${res.skippedCount > 0 ? `, ${res.skippedCount} ta o'tkazib yuborildi` : ''}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['payroll-detail', detailId] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-monthly'] });
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message;
@@ -1137,6 +1155,30 @@ export default function PayrollPage() {
                         </div>
                       </div>
 
+                      {/* Source badge & warning */}
+                      <div className="mt-2 flex items-center gap-2 flex-wrap">
+                        {item.scheduledHoursSource === 'schedule' && (
+                          <Badge variant="outline" className="text-[10px] h-5 border-blue-200 text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400">
+                            <CalculatorIcon className="h-3 w-3 mr-1" />Jadvaldan
+                          </Badge>
+                        )}
+                        {item.scheduledHoursSource === 'manual' && (
+                          <Badge variant="outline" className="text-[10px] h-5 border-amber-200 text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400">
+                            Qo'lda kiritilgan
+                          </Badge>
+                        )}
+                        {item.scheduledHours === 0 && item.scheduledHoursSource !== 'manual' && (
+                          <Badge variant="outline" className="text-[10px] h-5 border-red-200 text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400">
+                            <ShieldAlert className="h-3 w-3 mr-1" />Jadval mavjud emas
+                          </Badge>
+                        )}
+                        {item.scheduledHoursCalculatedAt && (
+                          <span className="text-[10px] text-xedu-slate-400">
+                            Hisoblangan: {new Date(item.scheduledHoursCalculatedAt).toLocaleDateString('uz-UZ')}
+                          </span>
+                        )}
+                      </div>
+
                       {/* Summary row */}
                       <div className="mt-3 grid grid-cols-4 sm:grid-cols-8 gap-2 text-xs">
                         <SumCell label="Asosiy" value={formatCurrency(item.baseSalary)} />
@@ -1269,6 +1311,19 @@ export default function PayrollPage() {
               {/* Actions */}
               {isManager && (
                 <div className="flex gap-2 justify-end pt-2 flex-wrap">
+                  {/* Recalculate scheduledHours from published schedules */}
+                  {payrollDetail.status === 'draft' && (
+                    <Button
+                      variant="outline"
+                      onClick={() => recalculateMutation.mutate({ id: payrollDetail.id, force: false })}
+                      disabled={recalculateMutation.isPending}
+                    >
+                      {recalculateMutation.isPending
+                        ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Hisoblanmoqda…</>
+                        : <><RefreshCw className="mr-2 h-4 w-4" />Jadvaldan qayta hisoblash</>
+                      }
+                    </Button>
+                  )}
                   {/* Send salary slips via email */}
                   <Button
                     variant="outline"

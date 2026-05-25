@@ -15,6 +15,7 @@ import {
   ReviewAdvanceDto,
   CreatePayrollDto,
   UpdatePayrollItemDto,
+  RecalculateScheduledHoursDto,
 } from './payroll.service';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -188,6 +189,18 @@ export class PayrollController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.service.updatePayrollItem(itemId, dto, user);
+  }
+
+  @Post('monthly/:id/recalculate-scheduled-hours')
+  @Roles(...MANAGERS)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Jadvaldan scheduledHours ni qayta hisoblash" })
+  recalculateScheduledHours(
+    @Param('id') id: string,
+    @Body() dto: RecalculateScheduledHoursDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.recalculateScheduledHours(id, dto, user);
   }
 
   @Put('monthly/:id/approve')

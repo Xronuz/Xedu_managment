@@ -314,7 +314,7 @@ export class ScheduleService {
       schoolId, branchId, teacherId: dto.teacherId, roomId: dto.roomId,
       classId: dto.classId, dayOfWeek: dto.dayOfWeek,
       startTime: dto.startTime, endTime: dto.endTime, timezone,
-      weekType: (dto as any).weekType ?? WeekType.ALL,
+      weekType: dto.weekType ?? WeekType.ALL,
     });
 
     const result = await this.prisma.schedule.create({
@@ -340,7 +340,7 @@ export class ScheduleService {
       },
     });
 
-    await this.audit('create', currentUser, result.id, undefined, { status: ScheduleStatus.DRAFT, weekType: result.weekType });
+    await this.audit('create', currentUser, result.id, undefined, { status: result.status, weekType: result.weekType });
     await this.invalidateSchoolCache(schoolId);
     this.eventsGateway?.emitToSchool(schoolId, 'schedule:updated', { action: 'create', scheduleId: result.id });
     return result;
@@ -402,7 +402,7 @@ export class ScheduleService {
       endTime:   newEnd,
       timezone,
       excludeId: id,
-      weekType:  (dto as any).weekType ?? slot.weekType,
+      weekType:  (dto.weekType ?? slot.weekType as WeekType),
     });
 
     const oldData = { status: slot.status, weekType: slot.weekType };

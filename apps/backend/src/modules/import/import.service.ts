@@ -668,6 +668,9 @@ export class ImportService {
         };
 
         if (publishAfterImport) {
+          if (currentUser.role === UserRole.BRANCH_ADMIN) {
+            throw new ForbiddenException('Filial admin importdan so\'ng darhol nashr qilishi mumkin emas');
+          }
           slotData.status = ScheduleStatus.PUBLISHED;
           slotData.publishedAt = new Date();
           slotData.publishedBy = currentUser.sub;

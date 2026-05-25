@@ -541,7 +541,7 @@ export function StudentScheduleView() {
 
   const { data: weekData, isLoading: schedLoading } = useQuery({
     queryKey: ['schedule', 'week', classId, activeBranchId],
-    queryFn: () => scheduleApi.getWeek(classId),
+    queryFn: () => scheduleApi.getWeek({ classId }),
     enabled: !!classId,
     select: (data: any) => (Array.isArray(data) ? data : []),
   });

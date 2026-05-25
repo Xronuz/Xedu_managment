@@ -7,9 +7,11 @@ import { RolesGuard } from '@/common/guards/roles.guard';
 import { ScheduleService } from './schedule.service';
 import { ScheduleExportService } from './schedule-export.service';
 import { ScheduleGeneratorService } from './schedule-generator.service';
+import { AdvancedSolverService } from './advanced-solver.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { MoveScheduleDto } from './dto/move-schedule.dto';
 import { GenerateScheduleDto } from './dto/generate-schedule.dto';
+import { AdvancedGenerateScheduleDto } from './dto/advanced-generate-schedule.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Response } from 'express';
@@ -24,6 +26,7 @@ export class ScheduleController {
     private readonly scheduleService: ScheduleService,
     private readonly exportService: ScheduleExportService,
     private readonly generatorService: ScheduleGeneratorService,
+    private readonly advancedSolver: AdvancedSolverService,
   ) {}
 
   @Get('check-conflict')
@@ -201,6 +204,35 @@ export class ScheduleController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.generatorService.commitProposed(body.slots, user, body.overwriteExisting);
+  }
+
+  @Post('advanced-generate')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: 'Ilg‘or jadval generatsiyasi (hybrid solver)' })
+  async advancedGenerate(
+    @Body() dto: AdvancedGenerateScheduleDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.advancedSolver.run(dto, user);
+  }
+
+  @Get('solver-runs')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: 'Solver ishga tushirilish tarixini ko‘rish' })
+  @ApiQuery({ name: 'branchId', required: false })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'offset', required: false, type: Number })
+  async listSolverRuns(
+    @CurrentUser() user: JwtPayload,
+    @Query('branchId') branchId?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    return this.advancedSolver.listRuns(user, {
+      branchId,
+      limit: limit ? parseInt(limit, 10) : undefined,
+      offset: offset ? parseInt(offset, 10) : undefined,
+    });
   }
 
   // ── Lifecycle endpoints ───────────────────────────────────────────────────

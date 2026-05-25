@@ -225,3 +225,10 @@ export enum SubstitutionStatus {
   APPLIED = 'applied',
   CANCELLED = 'cancelled',
 }
+
+export enum SolverRunStatus {
+  RUNNING = 'running',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  CANCELLED = 'cancelled',
+}

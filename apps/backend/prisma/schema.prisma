@@ -415,6 +415,7 @@ model School {
   treasuries          Treasury[] // G'azna kassalari
   invitations         Invitation[]
   financialShifts     FinancialShift[] // Smena jurnali
+  solverRuns          SolverRun[]
   rooms               Room[] // Xonalar (filial bo'yicha)
   periods             Period[] // Dars soatlari (bell schedule)
   courseMaterials     CourseMaterial[] // Markaziy o'quv materiallari
@@ -2504,4 +2505,39 @@ model UserEntitlement {
 
   @@index([userId])
   @@map("user_entitlements")
+}
+
+// ─── SolverRun (Phase 5B.1: Advanced Solver audit trail) ──────────────────
+
+enum SolverRunStatus {
+  running
+  completed
+  failed
+  cancelled
+}
+
+model SolverRun {
+  id          String          @id @default(uuid())
+  schoolId    String
+  branchId    String?
+  weekType    WeekType        @default(all)
+  strategy    String          @default("hybrid") // greedy | hybrid | backtrack_only
+  status      SolverRunStatus @default(running)
+
+  demandsCount Int
+  placedCount  Int             @default(0)
+  failureCount Int             @default(0)
+  score        Float?
+
+  metadata     Json?           // full failure report, timing, config
+
+  createdById  String
+  createdAt    DateTime        @default(now())
+  completedAt  DateTime?
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, status])
+  @@index([schoolId, createdAt])
+  @@map("solver_runs")
 }

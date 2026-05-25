@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ScheduleController } from './schedule.controller';
 import { ScheduleService } from './schedule.service';
 import { ScheduleGeneratorService } from './schedule-generator.service';
+import { AdvancedSolverService } from './advanced-solver.service';
 import { ScheduleExportService } from './schedule-export.service';
 import { EventsModule } from '@/modules/gateway/events.module';
 import { ConflictDetectorService } from '@/common/utils/conflict-detector';
@@ -11,7 +12,7 @@ import { PeriodsModule } from '@/modules/periods/periods.module';
 @Module({
   imports: [PrismaModule, EventsModule, PeriodsModule],
   controllers: [ScheduleController],
-  providers: [ScheduleService, ScheduleGeneratorService, ScheduleExportService, ConflictDetectorService],
-  exports: [ScheduleService, ScheduleGeneratorService, ScheduleExportService, ConflictDetectorService],
+  providers: [ScheduleService, ScheduleGeneratorService, AdvancedSolverService, ScheduleExportService, ConflictDetectorService],
+  exports: [ScheduleService, ScheduleGeneratorService, AdvancedSolverService, ScheduleExportService, ConflictDetectorService],
 })
 export class ScheduleModule {}

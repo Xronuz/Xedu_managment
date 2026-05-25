@@ -7,6 +7,7 @@ import { RolesGuard } from '@/common/guards/roles.guard';
 import { ScheduleService } from './schedule.service';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
+import { MoveScheduleDto } from './dto/move-schedule.dto';
 import { GenerateScheduleDto } from './dto/generate-schedule.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -133,6 +134,36 @@ export class ScheduleController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.scheduleService.remove(id, user);
+  }
+
+  @Post(':id/move')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: "Darsni boshqa kun/soatga ko'chirish" })
+  move(
+    @Param('id') id: string,
+    @Body() dto: MoveScheduleDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.scheduleService.move(id, dto, user);
+  }
+
+  @Get('availability-preview')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: "O'qituvchi/sinf/xona bandligini birgalikda ko'rish" })
+  @ApiQuery({ name: 'teacherId', required: false })
+  @ApiQuery({ name: 'classId', required: false })
+  @ApiQuery({ name: 'roomId', required: false })
+  @ApiQuery({ name: 'weekType', required: false, enum: WeekType })
+  @ApiQuery({ name: 'branchId', required: false })
+  availabilityPreview(
+    @CurrentUser() user: JwtPayload,
+    @Query('teacherId') teacherId?: string,
+    @Query('classId') classId?: string,
+    @Query('roomId') roomId?: string,
+    @Query('weekType') weekType?: WeekType,
+    @Query('branchId') branchId?: string,
+  ) {
+    return this.scheduleService.availabilityPreview(user, { teacherId, classId, roomId, weekType, branchId });
   }
 
   @Get('teacher/:teacherId/cross-branch')

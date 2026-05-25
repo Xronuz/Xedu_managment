@@ -1,7 +1,7 @@
-import { Injectable, Optional } from '@nestjs/common';
+import { Injectable, Optional, ConflictException } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
-import { JwtPayload } from '@eduplatform/types';
+import { JwtPayload, ScheduleStatus } from '@eduplatform/types';
 import { MarkAttendanceDto } from './dto/mark-attendance.dto';
 import { NotificationQueueService } from '@/modules/notifications/notification-queue.service';
 import { AuditService } from '@/common/audit/audit.service';
@@ -35,6 +35,17 @@ export class AttendanceService {
   async markAttendance(dto: MarkAttendanceDto, currentUser: JwtPayload) {
     const schoolId = currentUser.schoolId!;
     const date = new Date(dto.date);
+
+    // Guard: attendance can only be marked against published schedules
+    if (dto.scheduleId) {
+      const schedule = await this.prisma.schedule.findFirst({
+        where: { id: dto.scheduleId, schoolId, status: ScheduleStatus.PUBLISHED },
+        select: { id: true },
+      });
+      if (!schedule) {
+        throw new ConflictException('Davomat faqat chop etilgan jadvalga qarshi belgilashi mumkin');
+      }
+    }
 
     // Support legacy 'records' alias: resolve entries from either field
     const entries = (dto.entries?.length ? dto.entries : null) ?? dto.records ?? [];

@@ -25,6 +25,7 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { ScheduleStatus, WeekType } from '@eduplatform/types';
+import { PrismaClient } from '@prisma/client';
 
 export interface ClashParams {
   schoolId:    string;
@@ -39,6 +40,7 @@ export interface ClashParams {
   excludeId?:  string;
   weekType?:   WeekType;
   status?:     ScheduleStatus[];
+  tx?:         PrismaClient;
 }
 
 export interface ConflictDetail {
@@ -140,8 +142,9 @@ export class ConflictDetectorService {
     const {
       schoolId, branchId, teacherId, roomId, classId,
       dayOfWeek, startTime, endTime, timezone, excludeId,
-      weekType, status,
+      weekType, status, tx,
     } = params;
+    const prismaClient = tx ?? this.prisma;
 
     const effectiveWeekType = weekType ?? WeekType.ALL;
     const effectiveStatus = status ?? [ScheduleStatus.PUBLISHED, ScheduleStatus.VALIDATED];
@@ -169,7 +172,7 @@ export class ConflictDetectorService {
 
     // ── 1. O'QITUVCHI to'qnashuvi — SCHOOL-WIDE ─────────────────────────────
     if (teacherId) {
-      const teacherSlots = await this.prisma.schedule.findMany({
+      const teacherSlots = await prismaClient.schedule.findMany({
         where: {
           schoolId,
           teacherId,
@@ -213,7 +216,7 @@ export class ConflictDetectorService {
 
     // ── 2. XONA to'qnashuvi ──────────────────────────────────────────────────
     if (roomId) {
-      const roomSlots = await this.prisma.schedule.findMany({
+      const roomSlots = await prismaClient.schedule.findMany({
         where: {
           schoolId,
           ...(branchId ? { branchId } : {}),
@@ -252,7 +255,7 @@ export class ConflictDetectorService {
 
     // ── 3. SINF to'qnashuvi ───────────────────────────────────────────────────
     if (classId) {
-      const classSlots = await this.prisma.schedule.findMany({
+      const classSlots = await prismaClient.schedule.findMany({
         where: {
           schoolId,
           classId,

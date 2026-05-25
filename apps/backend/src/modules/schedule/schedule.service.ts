@@ -446,6 +446,103 @@ export class ScheduleService {
     return { message: 'Jadval sloti o\'chirildi' };
   }
 
+  // ── Move ──────────────────────────────────────────────────────────────────
+
+  async move(
+    id: string,
+    dto: { dayOfWeek: DayOfWeek; timeSlot: number; roomId?: string; roomNumber?: string },
+    currentUser: JwtPayload,
+  ) {
+    const schoolId = currentUser.schoolId!;
+
+    return this.prisma.$transaction(async (tx) => {
+      const slot = await tx.schedule.findFirst({
+        where: { id, ...buildTenantWhere(currentUser) },
+        include: { class: { select: { branchId: true } } },
+      });
+      if (!slot) throw new NotFoundException('Jadval sloti topilmadi');
+      this.assertCanModify(slot);
+
+      // Same position → no-op
+      if (slot.dayOfWeek === dto.dayOfWeek && slot.timeSlot === dto.timeSlot) {
+        const roomChanged = (dto.roomId !== undefined && dto.roomId !== slot.roomId) ||
+                            (dto.roomNumber !== undefined && dto.roomNumber !== slot.roomNumber);
+        if (!roomChanged) {
+          return { message: 'O\'zgarish yo\'q', slot };
+        }
+      }
+
+      const branchId = (slot as any).class?.branchId ?? slot.branchId;
+      const period = await this.periodsService.resolvePeriod(schoolId, branchId, dto.timeSlot);
+      if (!period) {
+        throw new ConflictException(`${dto.timeSlot}-dars soati uchun sozlangan vaqt topilmadi.`);
+      }
+
+      const timezone = await this.getSchoolTimezone(schoolId);
+      const startDayMinUtc = toWeeklyUtcMin(dto.dayOfWeek, period.startTime, timezone);
+      const endDayMinUtc   = toWeeklyUtcMin(dto.dayOfWeek, period.endTime, timezone);
+
+      // Room validation
+      if (dto.roomId) {
+        const room = await tx.room.findFirst({ where: { id: dto.roomId, schoolId, branchId } });
+        if (!room) throw new NotFoundException('Xona topilmadi yoki bu filialga tegishli emas');
+      }
+
+      await this.conflictDetector.assertNoClash({
+        schoolId,
+        branchId,
+        teacherId: slot.teacherId,
+        roomId:    dto.roomId ?? slot.roomId ?? undefined,
+        classId:   slot.classId,
+        dayOfWeek: dto.dayOfWeek,
+        startTime: period.startTime,
+        endTime:   period.endTime,
+        timezone,
+        excludeId: id,
+        weekType:  slot.weekType as WeekType,
+        status:    [ScheduleStatus.PUBLISHED, ScheduleStatus.VALIDATED],
+        tx:        tx as any,
+      });
+
+      const oldData = {
+        dayOfWeek: slot.dayOfWeek,
+        timeSlot:  slot.timeSlot,
+        startTime: slot.startTime,
+        endTime:   slot.endTime,
+        roomId:    slot.roomId,
+        roomNumber: slot.roomNumber,
+      };
+
+      const result = await tx.schedule.update({
+        where: { id },
+        data: {
+          dayOfWeek:  dto.dayOfWeek as any,
+          timeSlot:   dto.timeSlot,
+          startTime:  period.startTime,
+          endTime:    period.endTime,
+          roomId:     dto.roomId ?? slot.roomId,
+          roomNumber: dto.roomNumber ?? slot.roomNumber,
+          startDayMinUtc,
+          endDayMinUtc,
+        },
+      });
+
+      await this.audit('update', currentUser, id, oldData, {
+        dayOfWeek: result.dayOfWeek,
+        timeSlot:  result.timeSlot,
+        startTime: result.startTime,
+        endTime:   result.endTime,
+        roomId:    result.roomId,
+        roomNumber: result.roomNumber,
+      });
+
+      return result;
+    }).finally(async () => {
+      await this.invalidateSchoolCache(schoolId);
+      this.eventsGateway?.emitToSchool(schoolId, 'schedule:updated', { action: 'move', scheduleId: id });
+    });
+  }
+
   // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   async validate(id: string, currentUser: JwtPayload) {
@@ -627,6 +724,70 @@ export class ScheduleService {
     }
     await this.invalidateSchoolCache(schoolId);
     return { published: result.count };
+  }
+
+  // ── Availability preview (aggregated) ────────────────────────────────────
+
+  async availabilityPreview(
+    currentUser: JwtPayload,
+    params: {
+      teacherId?: string;
+      classId?: string;
+      roomId?: string;
+      weekType?: WeekType;
+      branchId?: string;
+    },
+  ) {
+    const schoolId = currentUser.schoolId!;
+    const status = this.defaultReadStatus(true, false); // include drafts for managers
+    const weekTypeFilter = params.weekType
+      ? { in: [WeekType.ALL, params.weekType] }
+      : undefined;
+
+    const baseWhere: any = {
+      schoolId,
+      status: { in: status },
+      ...(weekTypeFilter ? { weekType: weekTypeFilter } : {}),
+      ...(params.branchId ? { branchId: params.branchId } : {}),
+    };
+
+    const [teacher, cls, room] = await Promise.all([
+      params.teacherId
+        ? this.prisma.schedule.findMany({
+            where: { ...baseWhere, teacherId: params.teacherId },
+            include: {
+              class:   { select: { id: true, name: true } },
+              subject: { select: { id: true, name: true } },
+              room:    { select: { id: true, name: true } },
+            },
+            orderBy: [{ dayOfWeek: 'asc' }, { timeSlot: 'asc' }],
+          })
+        : Promise.resolve([]),
+      params.classId
+        ? this.prisma.schedule.findMany({
+            where: { ...baseWhere, classId: params.classId },
+            include: {
+              subject: { select: { id: true, name: true } },
+              teacher: { select: { id: true, firstName: true, lastName: true } },
+              room:    { select: { id: true, name: true } },
+            },
+            orderBy: [{ dayOfWeek: 'asc' }, { timeSlot: 'asc' }],
+          })
+        : Promise.resolve([]),
+      params.roomId
+        ? this.prisma.schedule.findMany({
+            where: { ...baseWhere, roomId: params.roomId },
+            include: {
+              class:   { select: { id: true, name: true } },
+              subject: { select: { id: true, name: true } },
+              teacher: { select: { id: true, firstName: true, lastName: true } },
+            },
+            orderBy: [{ dayOfWeek: 'asc' }, { timeSlot: 'asc' }],
+          })
+        : Promise.resolve([]),
+    ]);
+
+    return { teacher, class: cls, room };
   }
 
   // ── Cross-branch teacher schedule ─────────────────────────────────────────

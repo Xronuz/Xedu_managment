@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import { scheduleGeneratorApi, GeneratorConflictReport, ProposedSlot } from '@/lib/api/schedule-generator';
+import { ConflictModal, ConflictDetail } from './conflict-modal';
 import { Calendar, Loader2, CheckCircle2, XCircle, AlertTriangle, Save, Trash2 } from 'lucide-react';
 
 interface GeneratorDialogProps {
@@ -27,6 +28,8 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
   const [overwriteExisting, setOverwriteExisting] = useState(false);
   const [weekType, setWeekType] = useState<string>('all');
   const [report, setReport] = useState<GeneratorConflictReport | null>(null);
+  const [conflicts, setConflicts] = useState<ConflictDetail[]>([]);
+  const [conflictOpen, setConflictOpen] = useState(false);
 
   const generateMutation = useMutation({
     mutationFn: () => scheduleGeneratorApi.generate({
@@ -55,6 +58,15 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
       handleClose(false);
     },
     onError: (err: any) => {
+      if (err?.response?.status === 409) {
+        const data = err.response.data;
+        const list: ConflictDetail[] = data?.conflicts ?? [];
+        if (list.length > 0) {
+          setConflicts(list);
+          setConflictOpen(true);
+          return;
+        }
+      }
       toast({ variant: 'destructive', title: 'Saqlashda xato', description: err?.response?.data?.message ?? 'Xatolik' });
     },
   });
@@ -281,6 +293,12 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
           )}
         </DialogFooter>
       </DialogContent>
+
+      <ConflictModal
+        open={conflictOpen}
+        onClose={() => setConflictOpen(false)}
+        conflicts={conflicts}
+      />
     </Dialog>
   );
 }

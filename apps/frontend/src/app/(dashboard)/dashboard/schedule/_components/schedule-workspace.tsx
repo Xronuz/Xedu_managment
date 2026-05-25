@@ -38,6 +38,9 @@ import {
 
 import { ImportDialog } from '@/components/import/import-dialog';
 import { GeneratorDialog } from './generator-dialog';
+import { WeeklyGrid } from './weekly-grid';
+import { ConflictModal, ConflictDetail } from './conflict-modal';
+import { AvailabilityPreview } from './availability-preview';
 
 import {
   WorkspaceShell, WorkspaceHeader, WorkspaceToolbar, WorkspaceMain, WorkspaceSidebar, WorkspaceSection,
@@ -86,7 +89,7 @@ const SUBJECT_COLORS = [
   'bg-cyan-100 border-cyan-300 text-cyan-800 dark:bg-cyan-900/40 dark:border-cyan-700 dark:text-cyan-200',
 ];
 
-interface ScheduleSlot {
+export interface ScheduleSlot {
   id: string;
   classId: string;
   subjectId: string;
@@ -232,168 +235,6 @@ function LessonPanel({ slot, open, onClose, canManage, onEdit, onDelete, onValid
 
 
 
-
-// ── Weekly Grid ───────────────────────────────────────────────────────────────
-
-function WeeklyGrid({
-  schedule, canManage, onDelete, onAdd, onSelect,
-}: {
-  schedule: ScheduleSlot[];
-  canManage: boolean;
-  onDelete: (id: string) => void;
-  onAdd: (day: DayOfWeek, slot: number) => void;
-  onSelect: (slot: ScheduleSlot) => void;
-}) {
-  const subjectColorMap = useMemo(() => {
-    const map = new Map<string, number>();
-    let idx = 0;
-    for (const s of schedule) {
-      if (s.subjectId && !map.has(s.subjectId)) {
-        map.set(s.subjectId, idx++ % SUBJECT_COLORS.length);
-      }
-    }
-    return map;
-  }, [schedule]);
-
-  const getSlot = (day: DayOfWeek, slot: number) =>
-    schedule.filter((s) => s.dayOfWeek === day && s.timeSlot === slot);
-
-  const todayKey = jsDayToTimetableDay(new Date().getDay());
-
-  return (
-    <div className="overflow-x-auto">
-      <div className="min-w-[700px]">
-        <div className="grid grid-cols-7 gap-1 mb-1">
-          <div className="flex items-center justify-center text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 py-2">
-            Soat
-          </div>
-          {DAYS.map(({ key, label, short }) => (
-            <div
-              key={key}
-              className={`text-center py-2 rounded-lg text-sm font-semibold ${
-                key === todayKey ? 'bg-primary text-primary-foreground' : 'bg-xedu-slate-50 dark:bg-xedu-slate-800/60 text-xedu-slate-500 dark:text-xedu-slate-400'
-              }`}
-            >
-              <span className="hidden sm:block">{label}</span>
-              <span className="sm:hidden">{short}</span>
-            </div>
-          ))}
-        </div>
-
-        {[1, 2, 3, 4, 5, 6, 7].map((slot) => (
-          <div key={slot} className="grid grid-cols-7 gap-1 mb-1">
-            <div className="flex flex-col items-center justify-center py-2 px-1">
-              <span className="text-xs font-bold text-xedu-slate-500 dark:text-xedu-slate-400">{slot}</span>
-              <span className="text-2xs text-xedu-slate-500 dark:text-xedu-slate-400">{SLOT_TIMES[slot].start}</span>
-            </div>
-
-            {DAYS.map(({ key: day }) => {
-              const cells = getSlot(day, slot);
-              const isToday = day === todayKey;
-
-              if (cells.length === 0) {
-                return (
-                  <div
-                    key={day}
-                    onClick={() => canManage && onAdd(day, slot)}
-                    className={`min-h-[72px] rounded-lg border-2 border-dashed flex items-center justify-center transition-colors group
-                      ${isToday ? 'border-primary/20 bg-primary/5' : 'border-muted hover:border-primary/30 hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30'}
-                      ${canManage ? 'cursor-pointer' : 'cursor-default'}
-                    `}
-                  >
-                    {canManage && (
-                      <Plus className="h-3 w-3 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                    )}
-                  </div>
-                );
-              }
-
-              const hasConflict = cells.length > 1;
-              const teacherIds = cells.map((c) => c.teacherId).filter(Boolean);
-              const roomNums = cells.map((c) => c.roomNumber).filter(Boolean);
-              const teacherConflict = new Set(teacherIds).size < teacherIds.length;
-              const roomConflict = new Set(roomNums).size < roomNums.length;
-
-              return (
-                <div key={day} className="space-y-1">
-                  {hasConflict && (
-                    <div className="flex items-center gap-1 rounded px-1 py-0.5 bg-xedu-ruby-100 dark:bg-xedu-ruby-900/30 border border-xedu-ruby-300 dark:border-xedu-ruby-700">
-                      <AlertTriangle className="h-2.5 w-2.5 text-xedu-ruby-500 shrink-0" />
-                      <span className="text-2xs text-xedu-ruby-600 dark:text-xedu-ruby-400 font-medium leading-tight">
-                        {teacherConflict ? "O'qituvchi ziddiyati" : roomConflict ? 'Xona ziddiyati' : 'Ziddiyat'}
-                      </span>
-                    </div>
-                  )}
-                  {cells.map((cell) => {
-                    const cIdx = subjectColorMap.get(cell.subjectId) ?? 0;
-                    const isCross = cell.isCrossBranch === true;
-                    const colorCls = isCross
-                      ? 'bg-muted/40 border-muted-foreground/20 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-60'
-                      : SUBJECT_COLORS[cIdx];
-
-                    return (
-                      <div
-                        key={cell.id}
-                        onClick={() => !isCross && onSelect(cell)}
-                        title={isCross ? `Boshqa filial: ${cell.branch?.name ?? ''}` : undefined}
-                        className={`relative rounded-lg border p-2 text-xs group transition-shadow cursor-pointer
-                          ${isCross ? 'cursor-not-allowed' : 'hover:shadow-sm'}
-                          ${colorCls}
-                          ${hasConflict && !isCross ? 'ring-1 ring-xedu-ruby-400 dark:ring-xedu-ruby-600' : ''}`}
-                      >
-                        {isCross && (
-                          <span className="absolute top-0.5 right-0.5 rounded text-[8px] px-1 bg-muted-foreground/20 text-xedu-slate-500 dark:text-xedu-slate-400">
-                            {cell.branch?.code ?? 'boshqa'}
-                          </span>
-                        )}
-                        {canManage && cell.status && cell.status !== 'published' && (
-                          <span className={`absolute top-0.5 ${isCross ? 'right-8' : 'right-0.5'} rounded text-[8px] px-1 ${
-                            cell.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
-                            cell.status === 'validated' ? 'bg-blue-100 text-blue-700' :
-                            'bg-gray-100 text-gray-500'
-                          }`}>
-                            {cell.status === 'draft' ? 'Q' : cell.status === 'validated' ? 'T' : 'A'}
-                          </span>
-                        )}
-                        <p className="font-semibold truncate pr-5">{cell.subject?.name}</p>
-                        <p className="opacity-70 truncate">{cell.class?.name}</p>
-                        {(cell.roomNumber || cell.room?.name) && (
-                          <p className="opacity-60 text-2xs">Xona: {cell.room?.name ?? cell.roomNumber}</p>
-                        )}
-                        {canManage && !isCross && (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); onDelete(cell.id); }}
-                            className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity rounded p-0.5 hover:bg-black/10"
-                          >
-                            <Trash2 className="h-3 w-3" />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        ))}
-
-        {subjectColorMap.size > 0 && (
-          <div className="mt-4 flex flex-wrap gap-2 border-t pt-3">
-            {Array.from(subjectColorMap.entries()).map(([subjectId, idx]) => {
-              const s = schedule.find((x) => x.subjectId === subjectId);
-              if (!s) return null;
-              return (
-                <div key={subjectId} className={`flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs ${SUBJECT_COLORS[idx]}`}>
-                  <span className="font-medium">{s.subject?.name}</span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
 // ── List View ─────────────────────────────────────────────────────────────────
 
@@ -671,6 +512,8 @@ export function ScheduleWorkspace() {
   const [activeWeekType, setActiveWeekType] = useState<string>('all');
   const [showDrafts, setShowDrafts] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [conflicts, setConflicts] = useState<ConflictDetail[]>([]);
+  const [conflictOpen, setConflictOpen] = useState(false);
 
   // ── Filters ──────────────────────────────────────────────────────────────────
   const [filterClass, setFilterClass] = useState('');
@@ -827,6 +670,32 @@ export function ScheduleWorkspace() {
     enabled: modalOpen,
   });
 
+  const { data: previewData, isLoading: previewLoading } = useQuery({
+    queryKey: ['schedule', 'preview', form.teacherId, form.classId, form.roomId, activeWeekType, activeBranchId],
+    queryFn: () => scheduleApi.availabilityPreview({
+      teacherId: form.teacherId || undefined,
+      classId: form.classId || undefined,
+      roomId: form.roomId || undefined,
+      weekType: activeWeekType,
+    }),
+    enabled: modalOpen && !!(form.teacherId || form.classId || form.roomId),
+    staleTime: 30_000,
+  });
+
+  const handleConflictError = (err: any) => {
+    if (err?.response?.status === 409) {
+      const data = err.response.data;
+      const list: ConflictDetail[] = data?.conflicts ?? [];
+      if (list.length > 0) {
+        setConflicts(list);
+        setConflictOpen(true);
+        return;
+      }
+    }
+    const msg = err?.response?.data?.message;
+    toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+  };
+
   const createMutation = useMutation({
     mutationFn: scheduleApi.create,
     onSuccess: () => {
@@ -834,10 +703,7 @@ export function ScheduleWorkspace() {
       queryClient.invalidateQueries({ queryKey: ['schedule'] });
       closeModal();
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message;
-      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
-    },
+    onError: handleConflictError,
   });
 
   const updateMutation = useMutation({
@@ -848,10 +714,18 @@ export function ScheduleWorkspace() {
       queryClient.invalidateQueries({ queryKey: ['schedule'] });
       closeModal();
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message;
-      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+    onError: handleConflictError,
+  });
+
+  const moveMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof scheduleApi.move>[1] }) =>
+      scheduleApi.move(id, payload),
+    onSuccess: () => {
+      toast({ title: "Dars ko'chirildi" });
+      queryClient.invalidateQueries({ queryKey: ['schedule'] });
+      setPanelSlot(null);
     },
+    onError: handleConflictError,
   });
 
   const handleSubmit = () => {
@@ -1184,6 +1058,7 @@ export function ScheduleWorkspace() {
                   onDelete={handleDelete}
                   onAdd={openForDaySlot}
                   onSelect={(s) => setPanelSlot(s)}
+                  onMove={(id, dayOfWeek, timeSlot) => moveMutation.mutate({ id, payload: { dayOfWeek, timeSlot } })}
                 />
               ) : (
                 <ListView
@@ -1282,6 +1157,12 @@ export function ScheduleWorkspace() {
         onArchive={canManage ? (id) => archiveMutation.mutate(id) : undefined}
       />
 
+      <ConflictModal
+        open={conflictOpen}
+        onClose={() => setConflictOpen(false)}
+        conflicts={conflicts}
+      />
+
       {/* Create / Edit modal */}
       <Dialog open={modalOpen} onOpenChange={(v) => { if (!v) closeModal(); }}>
         <DialogContent className="max-w-md">
@@ -1360,6 +1241,21 @@ export function ScheduleWorkspace() {
               </div>
             </div>
           </div>
+
+          {modalOpen && (
+            <div className="border rounded-lg p-3 bg-xedu-slate-50/50 dark:bg-xedu-slate-900/30">
+              <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 mb-2">Bandlik ko‘rinishi</p>
+              <AvailabilityPreview
+                teacherSlots={previewData?.teacher}
+                classSlots={previewData?.class}
+                roomSlots={previewData?.room}
+                targetDay={form.dayOfWeek as DayOfWeek}
+                targetSlot={Number(form.timeSlot) || undefined}
+                isLoading={previewLoading}
+              />
+            </div>
+          )}
+
           {conflictData?.hasConflict && (
             <div className="rounded-lg border border-xedu-amber-300 bg-xedu-amber-50 dark:bg-xedu-amber-950/30 dark:border-xedu-amber-700 px-3 py-2 space-y-1">
               <div className="flex items-center gap-1.5 text-sm font-medium text-xedu-amber-700 dark:text-xedu-amber-400">

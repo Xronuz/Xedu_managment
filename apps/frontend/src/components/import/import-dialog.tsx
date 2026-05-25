@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import {
   importApi, ImportType, ImportResult, ImportRow, CommitResult,
 } from '@/lib/api/import';
+import { ConflictModal, ConflictDetail } from '@/app/(dashboard)/dashboard/schedule/_components/conflict-modal';
 import { branchesApi } from '@/lib/api/branches';
 import { useAuthStore } from '@/store/auth.store';
 import { useQuery } from '@tanstack/react-query';
@@ -96,6 +97,8 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
   const [branchId, setBranchId] = useState('');
   const [overwriteExisting, setOverwriteExisting] = useState(false);
   const [publishAfterImport, setPublishAfterImport] = useState(false);
+  const [conflicts, setConflicts] = useState<ConflictDetail[]>([]);
+  const [conflictOpen, setConflictOpen] = useState(false);
 
   const { data: branchesData } = useQuery({
     queryKey: ['branches', user?.schoolId],
@@ -151,6 +154,15 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
       }
     },
     onError: (err: any) => {
+      if (err?.response?.status === 409) {
+        const data = err.response.data;
+        const list: ConflictDetail[] = data?.conflicts ?? [];
+        if (list.length > 0) {
+          setConflicts(list);
+          setConflictOpen(true);
+          return;
+        }
+      }
       toast({ variant: 'destructive', title: 'Saqlashda xato', description: err?.response?.data?.message ?? 'Xatolik' });
     },
   });
@@ -433,6 +445,12 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
           )}
         </DialogFooter>
       </DialogContent>
+
+      <ConflictModal
+        open={conflictOpen}
+        onClose={() => setConflictOpen(false)}
+        conflicts={conflicts}
+      />
     </Dialog>
   );
 }

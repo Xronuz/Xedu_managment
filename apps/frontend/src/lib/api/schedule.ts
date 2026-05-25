@@ -24,6 +24,31 @@ export const scheduleApi = {
     return data;
   },
 
+  move: async (id: string, payload: {
+    dayOfWeek: DayOfWeek;
+    timeSlot: number;
+    roomId?: string;
+    roomNumber?: string;
+  }) => {
+    const { data } = await apiClient.post(`/schedule/${id}/move`, payload);
+    return data;
+  },
+
+  availabilityPreview: async (params: {
+    teacherId?: string;
+    classId?: string;
+    roomId?: string;
+    weekType?: string;
+    branchId?: string;
+  }) => {
+    const { data } = await apiClient.get('/schedule/availability-preview', { params });
+    return data as {
+      teacher: any[];
+      class: any[];
+      room: any[];
+    };
+  },
+
   create: async (payload: {
     classId: string;
     subjectId: string;

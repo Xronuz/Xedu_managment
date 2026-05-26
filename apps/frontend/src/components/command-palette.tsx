@@ -54,6 +54,7 @@ function pushRecentPage(href: string, label: string) {
 // ── Navigation items (from ROUTE_PERMISSIONS) ─────────────────────────────────
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ROUTE_PERMISSIONS['/dashboard'] },
+  { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
   { label: 'Maktablar', href: '/dashboard/schools', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/schools'] },
   { label: 'Filiallar', href: '/dashboard/branches', icon: Building2, roles: ROUTE_PERMISSIONS['/dashboard/branches'] },
   { label: 'Foydalanuvchilar', href: '/dashboard/users', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/users'] },

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { DirectorDashboard } from './_components/director-dashboard';
 import { StudentRedirect } from './_components/student-redirect';
@@ -16,7 +17,10 @@ import { X } from 'lucide-react';
 
 const WELCOME_DISMISSED_KEY = 'xedu_welcome_dismissed';
 
+const OPS_REDIRECT_ROLES = ['director', 'vice_principal', 'branch_admin', 'accountant'];
+
 export default function DashboardPage() {
+  const router = useRouter();
   const { user, _hasHydrated } = useAuthStore();
   const [showWelcome, setShowWelcome] = useState(false);
 
@@ -26,6 +30,13 @@ export default function DashboardPage() {
       setShowWelcome(!dismissed);
     }
   }, []);
+
+  // Redirect manager roles to Ops Command Center for a unified cockpit experience
+  useEffect(() => {
+    if (_hasHydrated && user && OPS_REDIRECT_ROLES.includes(user.role)) {
+      router.replace('/dashboard/ops');
+    }
+  }, [_hasHydrated, user, router]);
 
   const dismissWelcome = () => {
     setShowWelcome(false);

@@ -19,3 +19,4 @@ export { superAdminApi } from './super-admin';
 export { parentApi } from './parent';
 export { learningCenterApi } from './learning-center';
 export { invitationsApi } from './invitations';
+export { opsCommandCenterApi } from './ops-command-center';

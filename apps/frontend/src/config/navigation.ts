@@ -46,6 +46,7 @@ export const DIRECTOR_NAV: NavGroup[] = [
   {
     title: 'Umumiy ko‘rinish',
     items: [
+      { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
       { label: 'Filiallar', href: '/dashboard/branches', icon: Building2, roles: ROUTE_PERMISSIONS['/dashboard/branches'] },
       { label: 'Tasdiqlash inbox', href: '/dashboard/approvals', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/approvals'] },
@@ -118,6 +119,7 @@ export const BRANCH_ADMIN_NAV: NavGroup[] = [
   {
     title: 'Umumiy ko‘rinish',
     items: [
+      { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
     ],
   },

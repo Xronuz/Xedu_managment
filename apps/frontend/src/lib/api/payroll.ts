@@ -152,6 +152,26 @@ export const payrollApi = {
     return data as { payrollId: string; updatedCount: number; skippedCount: number; updatedItems: string[]; skippedItems: string[] };
   },
 
+  recalculateCompletedHours: async (payrollId: string, payload?: { force?: boolean; reason?: string }) => {
+    const { data } = await apiClient.post(`/payroll/monthly/${payrollId}/recalculate-completed-hours`, payload ?? {});
+    return data as { payrollId: string; updatedCount: number; skippedCount: number; updatedItems: string[]; skippedItems: string[] };
+  },
+
+  getCompletedHoursPreview: async (payrollId: string) => {
+    const { data } = await apiClient.get(`/payroll/monthly/${payrollId}/completed-hours-preview`);
+    return data as Array<{
+      itemId: string;
+      teacherId: string;
+      teacherName: string;
+      scheduledHours: number;
+      currentCompletedHours: number;
+      calculatedCompletedHours: number;
+      currentSource: string | null;
+      missingAttendanceCount: number;
+      missingAttendanceWarnings: { date: string; dayOfWeek: string }[];
+    }>;
+  },
+
   approvePayroll: async (id: string) => {
     const { data } = await apiClient.put(`/payroll/monthly/${id}/approve`);
     return data;

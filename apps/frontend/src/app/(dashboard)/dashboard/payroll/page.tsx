@@ -6,7 +6,7 @@ import {
   Banknote, Plus, Edit2, Trash2, CheckCircle2, XCircle, Clock,
   Loader2, TrendingUp, Users, AlertCircle, CalendarDays, ChevronDown,
   ChevronUp, Save, RefreshCw, Eye, Calculator, Download, Mail,
-  CalculatorIcon, ShieldAlert,
+  CalculatorIcon, ShieldAlert, ClipboardList, UserCheck,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -229,6 +229,31 @@ export default function PayrollPage() {
       const msg = err?.response?.data?.message;
       toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
     },
+  });
+
+  const recalculateCompletedMutation = useMutation({
+    mutationFn: ({ id, force }: { id: string; force?: boolean }) =>
+      payrollApi.recalculateCompletedHours(id, { force }),
+    onSuccess: (res) => {
+      toast({
+        title: ' Davomatdan qayta hisoblandi',
+        description: `${res.updatedCount} ta yangilandi${res.skippedCount > 0 ? `, ${res.skippedCount} ta o'tkazib yuborildi` : ''}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['payroll-detail', detailId] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-monthly'] });
+      queryClient.invalidateQueries({ queryKey: ['payroll-completed-preview', detailId] });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+    },
+  });
+
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const { data: completedPreview, isLoading: previewLoading } = useQuery({
+    queryKey: ['payroll-completed-preview', detailId],
+    queryFn: () => payrollApi.getCompletedHoursPreview(detailId),
+    enabled: previewOpen && !!detailId,
   });
 
   const approveMutation = useMutation({
@@ -1177,6 +1202,28 @@ export default function PayrollPage() {
                             Hisoblangan: {new Date(item.scheduledHoursCalculatedAt).toLocaleDateString('uz-UZ')}
                           </span>
                         )}
+                        {/* CompletedHours source */}
+                        {item.completedHoursSource === 'attendance' && (
+                          <Badge variant="outline" className="text-[10px] h-5 border-green-200 text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400">
+                            <UserCheck className="h-3 w-3 mr-1" />Davomatdan
+                          </Badge>
+                        )}
+                        {item.completedHoursSource === 'manual' && (
+                          <Badge variant="outline" className="text-[10px] h-5 border-amber-200 text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400">
+                            Qo'lda kiritilgan (soat)
+                          </Badge>
+                        )}
+                        {item.completedHoursCalculatedAt && (
+                          <span className="text-[10px] text-xedu-slate-400">
+                            Hisoblangan: {new Date(item.completedHoursCalculatedAt).toLocaleDateString('uz-UZ')}
+                          </span>
+                        )}
+                        {/* Substitution credit indicator */}
+                        {item.completedHours > item.scheduledHours && (
+                          <Badge variant="outline" className="text-[10px] h-5 border-purple-200 text-purple-600 bg-purple-50 dark:bg-purple-900/20 dark:text-purple-400">
+                            Almashtirishdan +{item.completedHours - item.scheduledHours} soat
+                          </Badge>
+                        )}
                       </div>
 
                       {/* Summary row */}
@@ -1324,6 +1371,26 @@ export default function PayrollPage() {
                       }
                     </Button>
                   )}
+                  {/* Recalculate completedHours from attendance */}
+                  {payrollDetail.status === 'draft' && (
+                    <Button
+                      variant="outline"
+                      onClick={() => recalculateCompletedMutation.mutate({ id: payrollDetail.id, force: false })}
+                      disabled={recalculateCompletedMutation.isPending}
+                    >
+                      {recalculateCompletedMutation.isPending
+                        ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Hisoblanmoqda…</>
+                        : <><UserCheck className="mr-2 h-4 w-4" />Davomatdan qayta hisoblash</>
+                      }
+                    </Button>
+                  )}
+                  {/* Preview completed hours */}
+                  <Button
+                    variant="outline"
+                    onClick={() => setPreviewOpen(true)}
+                  >
+                    <ClipboardList className="mr-2 h-4 w-4" /> Soatlar preview
+                  </Button>
                   {/* Send salary slips via email */}
                   <Button
                     variant="outline"
@@ -1358,6 +1425,68 @@ export default function PayrollPage() {
               )}
             </div>
           ) : null}
+        </DialogContent>
+      </Dialog>
+
+      {/* Completed hours preview dialog */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Davomat asosida soatlar preview</DialogTitle>
+            <DialogDescription>
+              {payrollDetail && <MonthLabel month={payrollDetail.month} year={payrollDetail.year} />}
+            </DialogDescription>
+          </DialogHeader>
+          {previewLoading ? (
+            <div className="space-y-2 py-4">
+              {[...Array(4)].map((_, i) => <Skeleton key={i} className="h-16 rounded-lg" />)}
+            </div>
+          ) : (
+            <div className="space-y-2 mt-2">
+              {completedPreview?.map((row: any) => (
+                <Card key={row.itemId}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="font-medium text-sm">{row.teacherName}</p>
+                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <span className="text-xs text-xedu-slate-500">Rejada: {row.scheduledHours} soat</span>
+                          <span className="text-xs text-green-600 font-medium">Bajarilgan: {row.calculatedCompletedHours} soat</span>
+                          {row.currentSource === 'manual' && (
+                            <Badge variant="outline" className="text-[10px] h-5 border-amber-200 text-amber-600">
+                              Qo'lda kiritilgan
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      {row.missingAttendanceCount > 0 && (
+                        <Badge variant="outline" className="text-[10px] h-5 border-red-200 text-red-600 bg-red-50 dark:bg-red-900/20 dark:text-red-400 shrink-0">
+                          <AlertCircle className="h-3 w-3 mr-1" />{row.missingAttendanceCount} ta davomat yo'q
+                        </Badge>
+                      )}
+                    </div>
+                    {row.missingAttendanceWarnings.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {row.missingAttendanceWarnings.slice(0, 8).map((w: any, idx: number) => (
+                          <span key={idx} className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-xedu-slate-500">
+                            {w.date}
+                          </span>
+                        ))}
+                        {row.missingAttendanceWarnings.length > 8 && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-muted text-xedu-slate-500">
+                            +{row.missingAttendanceWarnings.length - 8} ta
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+              {(!completedPreview || completedPreview.length === 0) && (
+                <p className="text-center text-xedu-slate-500 py-6">Ma'lumot yo'q</p>
+              )}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 

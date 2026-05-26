@@ -77,6 +77,9 @@ describe('PayrollService — Schedule Bridge (Phase 5A.3)', () => {
         update: jest.fn().mockResolvedValue({}),
         count: jest.fn().mockResolvedValue(0),
       },
+      teacherAttendance: {
+        findMany: jest.fn().mockResolvedValue([]),
+      },
       user: {
         findMany: jest.fn().mockResolvedValue([]),
         findFirst: jest.fn().mockResolvedValue(null),
@@ -373,6 +376,285 @@ describe('PayrollService — Schedule Bridge (Phase 5A.3)', () => {
           scheduledHoursSource: undefined, // Prisma won't update undefined fields
         }),
       }));
+    });
+
+    it('should mark completedHours source as manual when changed', async () => {
+      prisma.payrollItem.findFirst.mockResolvedValue({
+        id: 'item-1',
+        schoolId: 'school-1',
+        payrollId: 'payroll-1',
+        scheduledHours: 5,
+        completedHours: 0,
+        completedHoursSource: 'attendance',
+        extraCurricularHours: 0,
+        bonuses: 0,
+        deductions: 0,
+        hourlyAmount: 0,
+        extraCurricularAmount: 0,
+        advancePaid: 0,
+        baseSalary: 5000000,
+        degreeAllowance: 0,
+        certificateAllowance: 0,
+        grossTotal: 5000000,
+        netTotal: 5000000,
+        staffSalary: { hourlyRate: 50000, extraCurricularRate: 0 },
+        payroll: { status: 'draft' },
+      });
+      prisma.payrollItem.findMany.mockResolvedValue([]);
+
+      await service.updatePayrollItem('item-1', { completedHours: 4 }, mockDirector);
+
+      expect(prisma.payrollItem.update).toHaveBeenCalledWith(expect.objectContaining({
+        data: expect.objectContaining({
+          completedHours: 4,
+          completedHoursSource: 'manual',
+        }),
+      }));
+    });
+  });
+
+  describe('countCompletedHoursFromAttendance', () => {
+    it('should count present attendance as completed hours', async () => {
+      // May 2026 has 4 Mondays; teacher attended all 4
+      prisma.teacherAttendance.findMany.mockResolvedValue([
+        { date: new Date('2026-05-04'), scheduleId: 'sched-1' }, // Monday week 19 (numerator)
+        { date: new Date('2026-05-11'), scheduleId: 'sched-1' }, // Monday week 20 (denominator)
+        { date: new Date('2026-05-18'), scheduleId: 'sched-1' }, // Monday week 21 (numerator)
+        { date: new Date('2026-05-25'), scheduleId: 'sched-1' }, // Monday week 22 (denominator)
+      ]);
+      prisma.schedule.findMany.mockResolvedValue([
+        { id: 'sched-1', weekType: WeekType.ALL, dayOfWeek: 'monday' },
+      ]);
+
+      const result = await (service as any).countCompletedHoursFromAttendance(
+        'teacher-1', 'school-1', 2026, 5,
+      );
+
+      expect(result).toBe(4);
+    });
+
+    it('should not count absent attendance', async () => {
+      prisma.teacherAttendance.findMany.mockResolvedValue([]);
+
+      const result = await (service as any).countCompletedHoursFromAttendance(
+        'teacher-1', 'school-1', 2026, 5,
+      );
+
+      expect(result).toBe(0);
+    });
+
+    it('should count substituted status for substitute teacher', async () => {
+      prisma.teacherAttendance.findMany.mockResolvedValue([
+        { date: new Date('2026-05-04'), scheduleId: 'sched-1' },
+        { date: new Date('2026-05-11'), scheduleId: 'sched-1' },
+      ]);
+      prisma.schedule.findMany.mockResolvedValue([
+        { id: 'sched-1', weekType: WeekType.ALL, dayOfWeek: 'monday' },
+      ]);
+
+      const result = await (service as any).countCompletedHoursFromAttendance(
+        'substitute-teacher', 'school-1', 2026, 5,
+      );
+
+      expect(result).toBe(2);
+    });
+
+    it('should ignore draft schedules', async () => {
+      prisma.teacherAttendance.findMany.mockResolvedValue([
+        { date: new Date('2026-05-04'), scheduleId: 'sched-1' },
+      ]);
+      prisma.schedule.findMany.mockResolvedValue([]); // schedule is draft → not returned
+
+      const result = await (service as any).countCompletedHoursFromAttendance(
+        'teacher-1', 'school-1', 2026, 5,
+      );
+
+      expect(result).toBe(0);
+    });
+
+    it('should respect weekType for numerator schedules', async () => {
+      // May 2026 numerator weeks on Monday: 19, 21 → 2 days
+      prisma.teacherAttendance.findMany.mockResolvedValue([
+        { date: new Date('2026-05-04'), scheduleId: 'sched-1' }, // week 19 numerator
+        { date: new Date('2026-05-11'), scheduleId: 'sched-1' }, // week 20 denominator
+        { date: new Date('2026-05-18'), scheduleId: 'sched-1' }, // week 21 numerator
+        { date: new Date('2026-05-25'), scheduleId: 'sched-1' }, // week 22 denominator
+      ]);
+      prisma.schedule.findMany.mockResolvedValue([
+        { id: 'sched-1', weekType: WeekType.NUMERATOR, dayOfWeek: 'monday' },
+      ]);
+
+      const result = await (service as any).countCompletedHoursFromAttendance(
+        'teacher-1', 'school-1', 2026, 5,
+      );
+
+      expect(result).toBe(2);
+    });
+  });
+
+  describe('recalculateCompletedHours', () => {
+    it('should recalculate completedHours from attendance for draft payroll', async () => {
+      prisma.monthlyPayroll.findFirst.mockResolvedValue({
+        id: 'payroll-1',
+        schoolId: 'school-1',
+        month: 5,
+        year: 2026,
+        status: 'draft',
+        items: [
+          {
+            id: 'item-1', userId: 'teacher-1', staffSalaryId: 'salary-1',
+            scheduledHours: 4, completedHours: 0, completedHoursSource: null,
+            baseSalary: 5000000, degreeAllowance: 0, certificateAllowance: 0,
+            hourlyAmount: 0, extraCurricularAmount: 0, bonuses: 0, deductions: 0,
+            advancePaid: 0, grossTotal: 5000000, netTotal: 5000000,
+            staffSalary: { branchId: 'branch-1', hourlyRate: 50000 },
+          },
+        ],
+      });
+      prisma.teacherAttendance.findMany.mockResolvedValue([
+        { date: new Date('2026-05-04'), scheduleId: 'sched-1' },
+        { date: new Date('2026-05-11'), scheduleId: 'sched-1' },
+        { date: new Date('2026-05-18'), scheduleId: 'sched-1' },
+      ]);
+      prisma.schedule.findMany.mockResolvedValue([
+        { id: 'sched-1', weekType: WeekType.ALL, dayOfWeek: 'monday' },
+      ]);
+      prisma.payrollItem.findMany.mockResolvedValue([]);
+
+      const result = await service.recalculateCompletedHours('payroll-1', { force: false }, mockDirector);
+
+      expect(result.updatedCount).toBe(1);
+      expect(prisma.payrollItem.update).toHaveBeenCalledWith(expect.objectContaining({
+        where: { id: 'item-1' },
+        data: expect.objectContaining({
+          completedHours: 3,
+          completedHoursSource: 'attendance',
+          completedHoursCalculatedAt: expect.any(Date),
+        }),
+      }));
+    });
+
+    it('should skip manual override items unless force=true', async () => {
+      prisma.monthlyPayroll.findFirst.mockResolvedValue({
+        id: 'payroll-1',
+        schoolId: 'school-1',
+        month: 5,
+        year: 2026,
+        status: 'draft',
+        items: [
+          {
+            id: 'item-1', userId: 'teacher-1', staffSalaryId: 'salary-1',
+            scheduledHours: 4, completedHours: 4, completedHoursSource: 'manual',
+            baseSalary: 5000000, degreeAllowance: 0, certificateAllowance: 0,
+            hourlyAmount: 200000, extraCurricularAmount: 0, bonuses: 0, deductions: 0,
+            advancePaid: 0, grossTotal: 5200000, netTotal: 5200000,
+            staffSalary: { branchId: 'branch-1', hourlyRate: 50000 },
+          },
+        ],
+      });
+
+      const result = await service.recalculateCompletedHours('payroll-1', { force: false }, mockDirector);
+
+      expect(result.skippedCount).toBe(1);
+      expect(prisma.payrollItem.update).not.toHaveBeenCalled();
+    });
+
+    it('should reject recalculation for paid payroll', async () => {
+      prisma.monthlyPayroll.findFirst.mockResolvedValue({
+        id: 'payroll-1',
+        schoolId: 'school-1',
+        month: 5,
+        year: 2026,
+        status: 'paid',
+        items: [],
+      });
+
+      await expect(
+        service.recalculateCompletedHours('payroll-1', { force: false }, mockDirector),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should scope Branch Admin to own branch', async () => {
+      prisma.monthlyPayroll.findFirst.mockResolvedValue({
+        id: 'payroll-1',
+        schoolId: 'school-1',
+        month: 5,
+        year: 2026,
+        status: 'draft',
+        items: [
+          {
+            id: 'item-1', userId: 'teacher-1', staffSalaryId: 'salary-1',
+            scheduledHours: 4, completedHours: 0, completedHoursSource: null,
+            baseSalary: 5000000, degreeAllowance: 0, certificateAllowance: 0,
+            hourlyAmount: 0, extraCurricularAmount: 0, bonuses: 0, deductions: 0,
+            advancePaid: 0, grossTotal: 5000000, netTotal: 5000000,
+            staffSalary: { branchId: 'branch-1', hourlyRate: 50000 },
+          },
+          {
+            id: 'item-2', userId: 'teacher-2', staffSalaryId: 'salary-2',
+            scheduledHours: 4, completedHours: 0, completedHoursSource: null,
+            baseSalary: 5000000, degreeAllowance: 0, certificateAllowance: 0,
+            hourlyAmount: 0, extraCurricularAmount: 0, bonuses: 0, deductions: 0,
+            advancePaid: 0, grossTotal: 5000000, netTotal: 5000000,
+            staffSalary: { branchId: 'branch-2', hourlyRate: 50000 },
+          },
+        ],
+      });
+      prisma.teacherAttendance.findMany.mockResolvedValue([
+        { date: new Date('2026-05-04'), scheduleId: 'sched-1' },
+      ]);
+      prisma.schedule.findMany.mockResolvedValue([
+        { id: 'sched-1', weekType: WeekType.ALL, dayOfWeek: 'monday' },
+      ]);
+      prisma.payrollItem.findMany.mockResolvedValue([]);
+
+      const result = await service.recalculateCompletedHours('payroll-1', { force: false }, mockBranchAdmin);
+
+      expect(result.updatedCount).toBe(1);
+      expect(result.skippedCount).toBe(1);
+      const updateCalls = prisma.payrollItem.update.mock.calls;
+      expect(updateCalls).toHaveLength(1);
+      expect(updateCalls[0][0].where.id).toBe('item-1');
+    });
+  });
+
+  describe('getCompletedHoursPreview', () => {
+    it('should return preview with missing attendance warnings', async () => {
+      prisma.monthlyPayroll.findFirst.mockResolvedValue({
+        id: 'payroll-1',
+        schoolId: 'school-1',
+        month: 5,
+        year: 2026,
+        status: 'draft',
+        items: [
+          {
+            id: 'item-1', userId: 'teacher-1', staffSalaryId: 'salary-1',
+            scheduledHours: 4, completedHours: 0, completedHoursSource: null,
+            staffSalary: { branchId: 'branch-1' },
+            user: { firstName: 'Ali', lastName: 'Valiyev' },
+          },
+        ],
+      });
+      prisma.teacherAttendance.findMany.mockResolvedValue([
+        { date: new Date('2026-05-04'), scheduleId: 'sched-1' },
+      ]);
+      prisma.schedule.findMany.mockImplementation((args: any) => {
+        if (args.where?.teacherId && args.where?.status === ScheduleStatus.PUBLISHED) {
+          return Promise.resolve([{ id: 'sched-1', weekType: WeekType.ALL, dayOfWeek: 'monday' }]);
+        }
+        if (args.where?.id?.in) {
+          return Promise.resolve([{ id: 'sched-1', weekType: WeekType.ALL, dayOfWeek: 'monday' }]);
+        }
+        return Promise.resolve([]);
+      });
+
+      const result = await service.getCompletedHoursPreview('payroll-1', mockDirector);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]!.teacherName).toBe('Ali Valiyev');
+      expect(result[0]!.scheduledHours).toBe(4);
+      expect(result[0]!.calculatedCompletedHours).toBe(1);
+      expect(result[0]!.missingAttendanceCount).toBeGreaterThan(0);
     });
   });
 });

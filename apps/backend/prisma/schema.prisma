@@ -1680,6 +1680,9 @@ model PayrollItem {
   scheduledHoursCalculatedAt   DateTime?
   scheduledHoursOverrideReason String?
   completedHours               Int      @default(0)
+  completedHoursSource         String? // manual | attendance
+  completedHoursCalculatedAt   DateTime?
+  completedHoursOverrideReason String?
   hourlyAmount                 Float    @default(0)
   extraCurricularHours         Int      @default(0)
   extraCurricularAmount        Float    @default(0)

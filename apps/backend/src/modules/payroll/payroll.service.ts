@@ -100,6 +100,11 @@ export class RecalculateScheduledHoursDto {
   @IsOptional() @IsString() @MaxLength(300) reason?: string;
 }
 
+export class RecalculateCompletedHoursDto {
+  @IsOptional() @IsBoolean() force?: boolean;
+  @IsOptional() @IsString() @MaxLength(300) reason?: string;
+}
+
 // ─── Service ─────────────────────────────────────────────────────────────────
 
 const STAFF_ROLES = [
@@ -661,8 +666,9 @@ export class PayrollService {
     const hourlyRate = item.staffSalary.hourlyRate;
     const extraCurricularRate = item.staffSalary.extraCurricularRate;
 
-    // Detect manual override of scheduledHours
-    const isManualOverride = dto.scheduledHours !== undefined && dto.scheduledHours !== item.scheduledHours;
+    // Detect manual override of scheduledHours / completedHours
+    const isScheduledHoursManual = dto.scheduledHours !== undefined && dto.scheduledHours !== item.scheduledHours;
+    const isCompletedHoursManual = dto.completedHours !== undefined && dto.completedHours !== item.completedHours;
 
     // Recalculate with all components
     const hourlyAmount = completedHours * hourlyRate;
@@ -683,8 +689,9 @@ export class PayrollService {
       where: { id: itemId },
       data: {
         scheduledHours,
-        scheduledHoursSource: isManualOverride ? 'manual' : item.scheduledHoursSource,
+        scheduledHoursSource: isScheduledHoursManual ? 'manual' : item.scheduledHoursSource,
         completedHours,
+        completedHoursSource: isCompletedHoursManual ? 'manual' : item.completedHoursSource,
         hourlyAmount,
         extraCurricularHours,
         extraCurricularAmount,
@@ -830,6 +837,290 @@ export class PayrollService {
       updatedItems,
       skippedItems,
     };
+  }
+
+  // ── Attendance → CompletedHours bridge (Phase 5B.3) ────────────────────────
+
+  /**
+   * Bir o'qituvchi uchun berilgan oyda nechta darsga present/substituted
+   * sifatida qatnashganligini hisoblaydi. Faqat published schedulelarga
+   * mos keladigan attendance yozuvlari hisoblanadi; weekType inobatga olinadi.
+   */
+  private async countCompletedHoursFromAttendance(
+    teacherId: string,
+    schoolId: string,
+    year: number,
+    month: number,
+    branchId?: string | null,
+  ): Promise<number> {
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+
+    const attendances = await this.prisma.teacherAttendance.findMany({
+      where: {
+        teacherId,
+        schoolId,
+        date: { gte: startDate, lte: endDate },
+        status: { in: ['present', 'substituted'] },
+        ...(branchId ? { branchId } : {}),
+      },
+      select: { date: true, scheduleId: true },
+    });
+
+    if (attendances.length === 0) return 0;
+
+    const scheduleIds = attendances.map(a => a.scheduleId).filter(Boolean) as string[];
+    if (scheduleIds.length === 0) return 0;
+
+    const schedules = await this.prisma.schedule.findMany({
+      where: {
+        id: { in: scheduleIds },
+        status: ScheduleStatus.PUBLISHED,
+      },
+      select: { id: true, weekType: true, dayOfWeek: true },
+    });
+    const scheduleMap = new Map(schedules.map(s => [s.id, s]));
+
+    let count = 0;
+    for (const att of attendances) {
+      if (!att.scheduleId) continue;
+      const schedule = scheduleMap.get(att.scheduleId);
+      if (!schedule) continue;
+
+      const isoWeek = getISOWeek(att.date);
+      const isNumeratorWeek = isoWeek % 2 === 1;
+
+      if (schedule.weekType === WeekType.ALL) {
+        count++;
+      } else if (schedule.weekType === WeekType.NUMERATOR && isNumeratorWeek) {
+        count++;
+      } else if (schedule.weekType === WeekType.DENOMINATOR && !isNumeratorWeek) {
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  /**
+   * Jadvalda bor lekin attendance yozuvi yo'q kunlarni topish.
+   */
+  private async getMissingAttendanceWarnings(
+    teacherId: string,
+    schoolId: string,
+    year: number,
+    month: number,
+    branchId?: string | null,
+  ): Promise<{ date: string; dayOfWeek: string }[]> {
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    const daysInMonth = endDate.getDate();
+
+    const schedules = await this.prisma.schedule.findMany({
+      where: {
+        schoolId,
+        teacherId,
+        status: ScheduleStatus.PUBLISHED,
+        ...(branchId ? { branchId } : {}),
+      },
+      select: { id: true, dayOfWeek: true, weekType: true },
+    });
+
+    if (schedules.length === 0) return [];
+
+    const attendanceDates = new Set<string>();
+    const attendances = await this.prisma.teacherAttendance.findMany({
+      where: {
+        teacherId,
+        schoolId,
+        date: { gte: startDate, lte: endDate },
+        ...(branchId ? { branchId } : {}),
+      },
+      select: { date: true },
+    });
+    for (const a of attendances) {
+      attendanceDates.add(a.date.toISOString().split('T')[0]);
+    }
+
+    const missing: { date: string; dayOfWeek: string }[] = [];
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month - 1, day);
+      const isoWeek = getISOWeek(date);
+      const isNumeratorWeek = isoWeek % 2 === 1;
+      const dayIndex = date.getDay();
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayOfWeek = dayNames[dayIndex];
+      const dateStr = date.toISOString().split('T')[0];
+
+      for (const s of schedules) {
+        if (s.dayOfWeek !== dayOfWeek) continue;
+
+        if (s.weekType === WeekType.ALL) {
+          // expected attendance
+        } else if (s.weekType === WeekType.NUMERATOR && isNumeratorWeek) {
+          // expected attendance
+        } else if (s.weekType === WeekType.DENOMINATOR && !isNumeratorWeek) {
+          // expected attendance
+        } else {
+          continue;
+        }
+
+        if (!attendanceDates.has(dateStr)) {
+          missing.push({ date: dateStr, dayOfWeek: s.dayOfWeek });
+        }
+      }
+    }
+
+    return missing;
+  }
+
+  async recalculateCompletedHours(
+    payrollId: string,
+    dto: RecalculateCompletedHoursDto,
+    currentUser: JwtPayload,
+  ) {
+    const payroll = await this.prisma.monthlyPayroll.findFirst({
+      where: { id: payrollId, schoolId: currentUser.schoolId! },
+      include: { items: { include: { staffSalary: true } } },
+    });
+    if (!payroll) throw new NotFoundException('Hisob-kitob topilmadi');
+    if (payroll.status === 'paid') {
+      throw new BadRequestException("To'langan hisob-kitobni qayta hisoblash mumkin emas");
+    }
+
+    const schoolId = currentUser.schoolId!;
+    const branchId = currentUser.branchId;
+    const updatedItems: string[] = [];
+    const skippedItems: string[] = [];
+
+    for (const item of payroll.items) {
+      // Manual override protection
+      if (!dto.force && item.completedHoursSource === 'manual') {
+        skippedItems.push(item.id);
+        continue;
+      }
+
+      // Branch scope
+      if (
+        currentUser.role === UserRole.BRANCH_ADMIN &&
+        item.staffSalary.branchId !== currentUser.branchId
+      ) {
+        skippedItems.push(item.id);
+        continue;
+      }
+
+      const completedHours = await this.countCompletedHoursFromAttendance(
+        item.userId,
+        schoolId,
+        payroll.year,
+        payroll.month,
+        branchId,
+      );
+
+      const hourlyRate = item.staffSalary.hourlyRate;
+      const hourlyAmount = completedHours * hourlyRate;
+      const uncompletedPenalty = Math.max(0, item.scheduledHours - completedHours) * hourlyRate;
+      const totalDeductions = item.deductions + uncompletedPenalty;
+      const grossTotal =
+        item.baseSalary +
+        (item as any).degreeAllowance +
+        (item as any).certificateAllowance +
+        hourlyAmount +
+        item.extraCurricularAmount +
+        item.bonuses -
+        totalDeductions;
+      const netTotal = Math.max(0, grossTotal - item.advancePaid);
+
+      await this.prisma.payrollItem.update({
+        where: { id: item.id },
+        data: {
+          completedHours,
+          completedHoursSource: dto.force && item.completedHoursSource === 'manual' ? 'attendance' : (completedHours > 0 ? 'attendance' : item.completedHoursSource ?? 'attendance'),
+          completedHoursCalculatedAt: new Date(),
+          completedHoursOverrideReason: dto.force ? dto.reason ?? 'Qayta hisoblash (force)' : null,
+          hourlyAmount,
+          deductions: totalDeductions,
+          grossTotal: Math.max(0, grossTotal),
+          netTotal,
+        },
+      });
+
+      updatedItems.push(item.id);
+    }
+
+    // Refresh payroll totals
+    const allItems = await this.prisma.payrollItem.findMany({
+      where: { payrollId },
+    });
+    const totalGross = allItems.reduce((s, i) => s + i.grossTotal, 0);
+    const totalNet = allItems.reduce((s, i) => s + i.netTotal, 0);
+    await this.prisma.monthlyPayroll.update({
+      where: { id: payrollId },
+      data: { totalGross, totalNet },
+    });
+
+    return {
+      payrollId,
+      updatedCount: updatedItems.length,
+      skippedCount: skippedItems.length,
+      updatedItems,
+      skippedItems,
+    };
+  }
+
+  async getCompletedHoursPreview(
+    payrollId: string,
+    currentUser: JwtPayload,
+  ) {
+    const payroll = await this.prisma.monthlyPayroll.findFirst({
+      where: { id: payrollId, schoolId: currentUser.schoolId! },
+      include: {
+        items: {
+          include: {
+            staffSalary: true,
+            user: { select: { firstName: true, lastName: true } },
+          },
+        },
+      },
+    });
+    if (!payroll) throw new NotFoundException('Hisob-kitob topilmadi');
+
+    const schoolId = currentUser.schoolId!;
+    const branchId = currentUser.branchId;
+    const { year, month } = payroll;
+
+    const previews = await Promise.all(
+      payroll.items.map(async (item) => {
+        if (
+          currentUser.role === UserRole.BRANCH_ADMIN &&
+          item.staffSalary.branchId !== branchId
+        ) {
+          return null;
+        }
+
+        const completedHours = await this.countCompletedHoursFromAttendance(
+          item.userId, schoolId, year, month, branchId,
+        );
+        const missingWarnings = await this.getMissingAttendanceWarnings(
+          item.userId, schoolId, year, month, branchId,
+        );
+
+        return {
+          itemId: item.id,
+          teacherId: item.userId,
+          teacherName: `${item.user.firstName} ${item.user.lastName}`,
+          scheduledHours: item.scheduledHours,
+          currentCompletedHours: item.completedHours,
+          calculatedCompletedHours: completedHours,
+          currentSource: item.completedHoursSource,
+          missingAttendanceCount: missingWarnings.length,
+          missingAttendanceWarnings: missingWarnings,
+        };
+      }),
+    );
+
+    return previews.filter(Boolean);
   }
 
   // ── Salary Slip PDF ────────────────────────────────────────────────────────

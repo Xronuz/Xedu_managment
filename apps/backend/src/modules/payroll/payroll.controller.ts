@@ -16,6 +16,7 @@ import {
   CreatePayrollDto,
   UpdatePayrollItemDto,
   RecalculateScheduledHoursDto,
+  RecalculateCompletedHoursDto,
 } from './payroll.service';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -201,6 +202,28 @@ export class PayrollController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.service.recalculateScheduledHours(id, dto, user);
+  }
+
+  @Post('monthly/:id/recalculate-completed-hours')
+  @Roles(...MANAGERS)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Davomatdan completedHours ni qayta hisoblash" })
+  recalculateCompletedHours(
+    @Param('id') id: string,
+    @Body() dto: RecalculateCompletedHoursDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.recalculateCompletedHours(id, dto, user);
+  }
+
+  @Get('monthly/:id/completed-hours-preview')
+  @Roles(...MANAGERS)
+  @ApiOperation({ summary: "Davomat asosida completedHours preview" })
+  getCompletedHoursPreview(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.service.getCompletedHoursPreview(id, user);
   }
 
   @Put('monthly/:id/approve')

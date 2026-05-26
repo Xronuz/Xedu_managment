@@ -9,6 +9,7 @@ import { ScheduleExportService } from './schedule-export.service';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { AdvancedSolverService } from './advanced-solver.service';
 import { ScheduleRepairService, AnalyzeRepairInput, ApplyRepairInput } from './schedule-repair.service';
+import { TimetableAnalyticsService, AnalyticsQuery } from './timetable-analytics.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { MoveScheduleDto } from './dto/move-schedule.dto';
 import { GenerateScheduleDto } from './dto/generate-schedule.dto';
@@ -29,6 +30,7 @@ export class ScheduleController {
     private readonly generatorService: ScheduleGeneratorService,
     private readonly advancedSolver: AdvancedSolverService,
     private readonly repairService: ScheduleRepairService,
+    private readonly analyticsService: TimetableAnalyticsService,
   ) {}
 
   @Get('check-conflict')
@@ -329,5 +331,77 @@ export class ScheduleController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.repairService.apply(input, user);
+  }
+
+  // ── Timetable Analytics (Phase 5B.5) ───────────────────────────────────────
+
+  @Get('analytics/timetable/overview')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT)
+  @ApiOperation({ summary: 'Jadval analitikasi — umumiy ko\'rsatkichlar' })
+  getAnalyticsOverview(
+    @CurrentUser() user: JwtPayload,
+    @Query() query: AnalyticsQuery,
+  ) {
+    return this.analyticsService.getOverview(user, query);
+  }
+
+  @Get('analytics/timetable/teacher-utilization')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT)
+  @ApiOperation({ summary: "O'qituvchi yuklamasi (utilization)" })
+  getTeacherUtilization(
+    @CurrentUser() user: JwtPayload,
+    @Query() query: AnalyticsQuery,
+  ) {
+    return this.analyticsService.getTeacherUtilization(user, query);
+  }
+
+  @Get('analytics/timetable/room-utilization')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT)
+  @ApiOperation({ summary: 'Xona bandligi' })
+  getRoomUtilization(
+    @CurrentUser() user: JwtPayload,
+    @Query() query: AnalyticsQuery,
+  ) {
+    return this.analyticsService.getRoomUtilization(user, query);
+  }
+
+  @Get('analytics/timetable/schedule-density')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT)
+  @ApiOperation({ summary: 'Jadval zichligi' })
+  getScheduleDensity(
+    @CurrentUser() user: JwtPayload,
+    @Query() query: AnalyticsQuery,
+  ) {
+    return this.analyticsService.getScheduleDensity(user, query);
+  }
+
+  @Get('analytics/timetable/absence-substitution')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT)
+  @ApiOperation({ summary: 'Davomat va almashtirish analitikasi' })
+  getAbsenceSubstitution(
+    @CurrentUser() user: JwtPayload,
+    @Query() query: AnalyticsQuery,
+  ) {
+    return this.analyticsService.getAbsenceSubstitution(user, query);
+  }
+
+  @Get('analytics/timetable/solver-quality')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT)
+  @ApiOperation({ summary: 'Jadval yaratuvchi sifat ko\'rsatkichlari' })
+  getSolverQuality(
+    @CurrentUser() user: JwtPayload,
+    @Query() query: AnalyticsQuery,
+  ) {
+    return this.analyticsService.getSolverQuality(user, query);
+  }
+
+  @Get('analytics/timetable/payroll-variance')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.ACCOUNTANT)
+  @ApiOperation({ summary: 'Maosh variyatsiyasi (soatlar)' })
+  getPayrollVariance(
+    @CurrentUser() user: JwtPayload,
+    @Query() query: AnalyticsQuery,
+  ) {
+    return this.analyticsService.getPayrollVariance(user, query);
   }
 }

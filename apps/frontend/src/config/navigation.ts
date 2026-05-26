@@ -17,7 +17,7 @@ import {
   Brain, Megaphone, MessageSquare, Bell, Settings,
   Building2, Package, Library, Bus, School,
   ShoppingBag, Coins, Heart, ClipboardCheck,
-  BarChart2, UserCheck,
+  BarChart2, UserCheck, Activity,
 } from 'lucide-react';
 import { ROUTE_PERMISSIONS } from './permissions';
 
@@ -102,6 +102,7 @@ export const DIRECTOR_NAV: NavGroup[] = [
     title: 'Analitika',
     items: [
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
+      { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
     ],
   },
   {

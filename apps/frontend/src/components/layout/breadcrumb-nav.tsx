@@ -40,6 +40,8 @@ const SEGMENT_LABELS: Record<string, string> = {
   'fee-structures': 'To‘lov tartiblari',
   'audit-log': 'Audit Log',
   workload: 'Ish yuklamasi',
+  analytics: 'Analitika',
+  timetable: 'Jadval analitikasi',
   new: 'Yangi',
   edit: 'Tahrirlash',
 };

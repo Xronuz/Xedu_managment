@@ -134,6 +134,7 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   '/dashboard/kpi/metrics':    ['director', 'vice_principal', 'branch_admin'],
   '/dashboard/insights':       ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher'],
   '/dashboard/marketing':      ['director', 'vice_principal', 'branch_admin'],
+  '/dashboard/analytics/timetable': ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher', 'accountant'],
 };
 
 /** Sidebar nav elementlari uchun ruxsat etilgan rollar

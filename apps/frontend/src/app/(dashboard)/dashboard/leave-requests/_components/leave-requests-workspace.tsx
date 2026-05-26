@@ -8,6 +8,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/ui/use-toast';
 import { useConfirm } from '@/store/confirm.store';
 import { leaveRequestsApi } from '@/lib/api/leave-requests';
+import { ScheduleRepairPanel } from '@/components/schedule/schedule-repair-panel';
 import { formatDate, getInitials, getRoleLabel, cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -15,7 +16,7 @@ import {
   CalendarOff, Plus, CheckCircle2, XCircle, Clock, Loader2,
   Calendar, MessageSquare, User, Search, X, Filter, Eye,
   ArrowRight, BarChart3, TrendingUp, AlertTriangle, Users,
-  School, MonitorPlay, Check, Trash2,
+  School, MonitorPlay, Check, Trash2, Wrench,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -729,6 +730,17 @@ export function LeaveRequestsWorkspace() {
                 </button>
               ))}
             </div>
+          </WorkspaceSection>
+        )}
+
+        {/* Schedule repair for approved leave requests affecting schedule */}
+        {canReview && requests.some(r => r.status === 'approved') && (
+          <WorkspaceSection title="Jadval ta'miri" icon={<Wrench className="h-4 w-4 text-primary" />}>
+            <ScheduleRepairPanel
+              input={{
+                leaveRequestId: requests.find(r => r.status === 'approved')?.id,
+              }}
+            />
           </WorkspaceSection>
         )}
 

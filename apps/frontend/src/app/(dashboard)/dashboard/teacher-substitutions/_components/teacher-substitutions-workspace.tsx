@@ -6,12 +6,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/ui/use-toast';
 import { teacherSubstitutionsApi, type SubstitutionItem } from '@/lib/api/teacher-substitutions';
+import { ScheduleRepairPanel } from '@/components/schedule/schedule-repair-panel';
 import { formatDate, getInitials, cn } from '@/lib/utils';
 
 import {
   Users, Plus, CheckCircle2, XCircle, Clock, Loader2,
   Calendar, Search, X, Filter, Eye, AlertTriangle,
-  UserCheck, UserX, MonitorPlay, Check, Ban, ArrowRight,
+  UserCheck, UserX, MonitorPlay, Check, Ban, ArrowRight, Wrench,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -519,6 +520,18 @@ export function TeacherSubstitutionsWorkspace() {
                 </button>
               ))}
             </div>
+          </WorkspaceSection>
+        )}
+
+        {/* Schedule Repair Panel for first proposed substitution with leave request */}
+        {isManager && pendingManagerAction.some(s => s.leaveRequest?.id) && (
+          <WorkspaceSection title="Jadval ta'miri" icon={<Wrench className="h-4 w-4 text-primary" />}>
+            <ScheduleRepairPanel
+              input={{
+                leaveRequestId: pendingManagerAction.find(s => s.leaveRequest?.id)?.leaveRequest?.id,
+              }}
+              onApplied={() => queryClient.invalidateQueries({ queryKey: ['teacher-substitutions'] })}
+            />
           </WorkspaceSection>
         )}
 

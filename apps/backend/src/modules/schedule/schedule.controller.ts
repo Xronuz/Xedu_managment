@@ -8,6 +8,7 @@ import { ScheduleService } from './schedule.service';
 import { ScheduleExportService } from './schedule-export.service';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { AdvancedSolverService } from './advanced-solver.service';
+import { ScheduleRepairService, AnalyzeRepairInput, ApplyRepairInput } from './schedule-repair.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
 import { MoveScheduleDto } from './dto/move-schedule.dto';
 import { GenerateScheduleDto } from './dto/generate-schedule.dto';
@@ -27,6 +28,7 @@ export class ScheduleController {
     private readonly exportService: ScheduleExportService,
     private readonly generatorService: ScheduleGeneratorService,
     private readonly advancedSolver: AdvancedSolverService,
+    private readonly repairService: ScheduleRepairService,
   ) {}
 
   @Get('check-conflict')
@@ -305,5 +307,27 @@ export class ScheduleController {
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="jadval_${Date.now()}.xlsx"`);
     res.send(buffer);
+  }
+
+  // ── Schedule Repair (Phase 5B.4) ───────────────────────────────────────────
+
+  @Post('repair/analyze')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: 'Jadval buzilishini tahlil qilish va ta\'mir variantlarini taklif qilish' })
+  analyzeRepair(
+    @Body() input: AnalyzeRepairInput,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.repairService.analyze(input, user);
+  }
+
+  @Post('repair/apply')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: 'Tanlangan ta\'mir variantini qo\'llash (faqat almashtirish)' })
+  applyRepair(
+    @Body() input: ApplyRepairInput,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.repairService.apply(input, user);
   }
 }

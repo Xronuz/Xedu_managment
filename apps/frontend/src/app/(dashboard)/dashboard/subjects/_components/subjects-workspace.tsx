@@ -245,7 +245,7 @@ export function SubjectsWorkspace() {
 
   const { data: catalog = [] } = useQuery({
     queryKey: ['subjects', 'catalog', activeBranchId],
-    queryFn: () => subjectsApi.getCatalog(),
+    queryFn: () => subjectsApi.getCatalog(activeBranchId ?? undefined),
   });
 
   const { data: classesData } = useQuery({

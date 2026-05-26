@@ -2,6 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { GradesService, BulkGradesDto } from './grades.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { RedisService } from '@/common/redis/redis.service';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
+import { AuditService } from '@/common/audit/audit.service';
+import { EventsGateway } from '@/modules/gateway/events.gateway';
+import { CoinsService } from '@/modules/coins/coins.service';
+import { NOTIFICATION_QUEUE } from '@/common/queue/queue.constants';
 import { GradeType, JwtPayload, UserRole } from '@eduplatform/types';
 
 const SCHOOL_ID = 'school-1';
@@ -29,20 +35,22 @@ const mockGrade = {
 
 describe('GradesService', () => {
   let service: GradesService;
-  let prisma: { grade: any; classStudent: any; $transaction: jest.Mock };
+  let prisma: { grade: any; classStudent: any; coinTransaction: any; $transaction: jest.Mock };
 
   beforeEach(async () => {
     prisma = {
       grade: {
-        findMany:   jest.fn(),
+        findMany:   jest.fn().mockResolvedValue([]),
         findFirst:  jest.fn(),
         create:     jest.fn(),
         createMany: jest.fn(),
         update:     jest.fn(),
         delete:     jest.fn(),
+        deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
         count:      jest.fn(),
       },
       classStudent:  { findMany: jest.fn() },
+      coinTransaction: { findFirst: jest.fn().mockResolvedValue(null) },
       $transaction:  jest.fn(),
     };
 
@@ -50,6 +58,12 @@ describe('GradesService', () => {
       providers: [
         GradesService,
         { provide: PrismaService, useValue: prisma },
+        { provide: RedisService, useValue: { get: jest.fn(), set: jest.fn(), del: jest.fn(), keys: jest.fn().mockResolvedValue([]), getJson: jest.fn().mockResolvedValue(null), setJson: jest.fn().mockResolvedValue(undefined) } },
+        { provide: NotificationsService, useValue: { create: jest.fn() } },
+        { provide: NOTIFICATION_QUEUE, useValue: { add: jest.fn() } },
+        { provide: AuditService, useValue: { log: jest.fn() } },
+        { provide: EventsGateway, useValue: { emitToUser: jest.fn(), emitToRoom: jest.fn(), emitToSchool: jest.fn() } },
+        { provide: CoinsService, useValue: { award: jest.fn(), earnCoins: jest.fn().mockResolvedValue(undefined) } },
       ],
     }).compile();
 
@@ -108,9 +122,10 @@ describe('GradesService', () => {
         { studentId: 'st-2', student: { firstName: 'Vali', lastName: 'Rahimov' } },
       ]);
       // st-1 gets 60%, st-2 gets 90%
-      prisma.grade.findMany
-        .mockResolvedValueOnce([{ score: 60, maxScore: 100 }])
-        .mockResolvedValueOnce([{ score: 90, maxScore: 100 }]);
+      prisma.grade.findMany.mockResolvedValueOnce([
+        { studentId: 'st-1', score: 60, maxScore: 100 },
+        { studentId: 'st-2', score: 90, maxScore: 100 },
+      ]);
 
       const result = await service.getClassGpa('class-1', mockUser);
 
@@ -217,7 +232,11 @@ describe('GradesService', () => {
       const result = await service.remove('grade-1', mockUser);
 
       expect(result).toBeDefined();
-      expect(prisma.grade.delete).toHaveBeenCalledWith({ where: { id: 'grade-1' } });
+      expect(prisma.grade.deleteMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ id: 'grade-1' }),
+        }),
+      );
     });
 
     it('throws NotFoundException when not found', async () => {

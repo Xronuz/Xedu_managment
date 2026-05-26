@@ -31,8 +31,8 @@ export class SubjectsController {
     UserRole.STUDENT,
   )
   @ApiOperation({ summary: 'Fanlar ro‘yxati' })
-  findAll(@CurrentUser() user: JwtPayload, @Query('classId') classId?: string) {
-    return this.subjectsService.findAll(user, classId);
+  findAll(@CurrentUser() user: JwtPayload, @Query('classId') classId?: string, @Query('branchId') branchId?: string) {
+    return this.subjectsService.findAll(user, classId, branchId);
   }
 
   @Get('catalog')
@@ -43,8 +43,8 @@ export class SubjectsController {
     UserRole.CLASS_TEACHER,
   )
   @ApiOperation({ summary: 'Fanlar katalogi (takrorlanishlarsiz, sinf qamrovi bilan)' })
-  catalog(@CurrentUser() user: JwtPayload) {
-    return this.subjectsService.catalog(user);
+  catalog(@CurrentUser() user: JwtPayload, @Query('branchId') branchId?: string) {
+    return this.subjectsService.catalog(user, branchId);
   }
 
   @Post()

@@ -11,9 +11,10 @@ function normalizeSubjectName(name: string): string {
 export class SubjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(currentUser: JwtPayload, classId?: string) {
+  async findAll(currentUser: JwtPayload, classId?: string, branchId?: string) {
     const where: any = { schoolId: currentUser.schoolId! };
     if (classId) where.classId = classId;
+    if (branchId) where.branchId = branchId;
     return this.prisma.subject.findMany({
       where,
       include: {
@@ -24,9 +25,11 @@ export class SubjectsService {
   }
 
   /** Fanlarni normalized nom bo'yicha guruhlab, takrorlanishlarni oldini oladi */
-  async catalog(currentUser: JwtPayload) {
+  async catalog(currentUser: JwtPayload, branchId?: string) {
+    const where: any = { schoolId: currentUser.schoolId! };
+    if (branchId) where.branchId = branchId;
     const subjects = await this.prisma.subject.findMany({
-      where: { schoolId: currentUser.schoolId! },
+      where,
       include: {
         teacher: { select: { id: true, firstName: true, lastName: true } },
         class: { select: { id: true, name: true } },

@@ -12,12 +12,12 @@ export interface SubjectCatalogItem {
 
 export const subjectsApi = {
   /** Barcha fanlar — admin/vice_principal */
-  getAll: (classId?: string) =>
-    apiClient.get('/subjects', { params: classId ? { classId } : undefined }).then(r => r.data),
+  getAll: (classId?: string, branchId?: string) =>
+    apiClient.get('/subjects', { params: { ...(classId ? { classId } : {}), ...(branchId ? { branchId } : {}) } }).then(r => r.data),
 
   /** Fanlar katalogi — takrorlanishlarsiz, sinf qamrovi bilan */
-  getCatalog: () =>
-    apiClient.get<SubjectCatalogItem[]>('/subjects/catalog').then(r => r.data),
+  getCatalog: (branchId?: string) =>
+    apiClient.get<SubjectCatalogItem[]>('/subjects/catalog', { params: branchId ? { branchId } : undefined }).then(r => r.data),
 
   /** Faqat menga biriktirilgan fanlar — teacher/class_teacher */
   getMine: () =>

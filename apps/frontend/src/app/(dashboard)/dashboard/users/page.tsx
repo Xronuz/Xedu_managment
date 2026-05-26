@@ -189,7 +189,7 @@ export default function UsersPage() {
   // Load existing subjects catalog when teacher role selected (deduplicated)
   const { data: existingCatalogData } = useQuery({
     queryKey: ['subjects', 'catalog', activeBranchId],
-    queryFn: () => subjectsApi.getCatalog(),
+    queryFn: () => subjectsApi.getCatalog(activeBranchId ?? undefined),
     enabled: open && watchedRole === 'teacher',
   });
   const existingCatalog = Array.isArray(existingCatalogData) ? existingCatalogData : (existingCatalogData as any)?.data ?? [];

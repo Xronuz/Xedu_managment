@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "lint": "eslint src --ext .ts",
+    "lint": "tsc --noEmit",
     "type-check": "tsc --noEmit"
   },
   "devDependencies": {

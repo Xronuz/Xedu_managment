@@ -911,7 +911,7 @@ export function ExamsWorkspace() {
             >
               <option value="">Barcha fanlar</option>
               {subjects.map((s: any) => (
-                <option key={s.id} value={s.id}>{s.name}</option>
+                <option key={s.id} value={s.id}>{s.name}{s.class?.name ? ` (${s.class.name})` : ''}</option>
               ))}
             </select>
 
@@ -1188,7 +1188,7 @@ export function ExamsWorkspace() {
                 <Label>Fan <span className="text-xedu-ruby">*</span></Label>
                 <Select value={sForm.subjectId} onValueChange={sel(setSForm)('subjectId')}>
                   <SelectTrigger><SelectValue placeholder="Fan..." /></SelectTrigger>
-                  <SelectContent>{(modalSubjects as any[]).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                  <SelectContent>{(modalSubjects as any[]).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}{s.class?.name ? ` (${s.class.name})` : ''}</SelectItem>)}</SelectContent>
                 </Select>
                 {sErrors.subjectId && <p className="text-xs text-xedu-ruby">{sErrors.subjectId}</p>}
               </div>

@@ -35,6 +35,18 @@ export class SubjectsController {
     return this.subjectsService.findAll(user, classId);
   }
 
+  @Get('catalog')
+  @Roles(
+    UserRole.DIRECTOR, UserRole.BRANCH_ADMIN,
+    UserRole.VICE_PRINCIPAL,
+    UserRole.TEACHER,
+    UserRole.CLASS_TEACHER,
+  )
+  @ApiOperation({ summary: 'Fanlar katalogi (takrorlanishlarsiz, sinf qamrovi bilan)' })
+  catalog(@CurrentUser() user: JwtPayload) {
+    return this.subjectsService.catalog(user);
+  }
+
   @Post()
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
   @ApiOperation({ summary: 'Fan qo‘shish' })

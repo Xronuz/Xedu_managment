@@ -3,6 +3,10 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload } from '@eduplatform/types';
 import { CreateSubjectDto, UpdateSubjectDto } from './dto/create-subject.dto';
 
+function normalizeSubjectName(name: string): string {
+  return name.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
 @Injectable()
 export class SubjectsService {
   constructor(private readonly prisma: PrismaService) {}
@@ -17,6 +21,56 @@ export class SubjectsService {
         class: { select: { id: true, name: true } },
       },
     });
+  }
+
+  /** Fanlarni normalized nom bo'yicha guruhlab, takrorlanishlarni oldini oladi */
+  async catalog(currentUser: JwtPayload) {
+    const subjects = await this.prisma.subject.findMany({
+      where: { schoolId: currentUser.schoolId! },
+      include: {
+        teacher: { select: { id: true, firstName: true, lastName: true } },
+        class: { select: { id: true, name: true } },
+      },
+      orderBy: { name: 'asc' },
+    });
+
+    const map = new Map<string, {
+      name: string;
+      normalizedName: string;
+      count: number;
+      classes: { id: string; name: string }[];
+      teachers: { id: string; firstName: string; lastName: string }[];
+      subjectIds: string[];
+      totalHoursPerWeek: number;
+    }>();
+
+    for (const s of subjects) {
+      const key = normalizeSubjectName(s.name);
+      const existing = map.get(key);
+      if (existing) {
+        existing.count++;
+        existing.subjectIds.push(s.id);
+        existing.totalHoursPerWeek += s.hoursPerWeek ?? 2;
+        if (s.class && !existing.classes.find((c) => c.id === s.class.id)) {
+          existing.classes.push({ id: s.class.id, name: s.class.name });
+        }
+        if (s.teacher && !existing.teachers.find((t) => t.id === s.teacher.id)) {
+          existing.teachers.push({ id: s.teacher.id, firstName: s.teacher.firstName, lastName: s.teacher.lastName });
+        }
+      } else {
+        map.set(key, {
+          name: s.name,
+          normalizedName: key,
+          count: 1,
+          classes: s.class ? [{ id: s.class.id, name: s.class.name }] : [],
+          teachers: s.teacher ? [{ id: s.teacher.id, firstName: s.teacher.firstName, lastName: s.teacher.lastName }] : [],
+          subjectIds: [s.id],
+          totalHoursPerWeek: s.hoursPerWeek ?? 2,
+        });
+      }
+    }
+
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
   }
 
   /** Teacher yoki class_teacher faqat o'ziga biriktirilgan fanlarni oladi */

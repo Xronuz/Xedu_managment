@@ -648,7 +648,7 @@ export default function HomeworkPage() {
                 <Label>Fan <span className="text-xedu-ruby">*</span></Label>
                 <Select value={form.subjectId} onValueChange={sel('subjectId')}>
                   <SelectTrigger><SelectValue placeholder="Fan..." /></SelectTrigger>
-                  <SelectContent>{(subjects as any[]).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                  <SelectContent>{(subjects as any[]).map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}{s.class?.name ? ` (${s.class.name})` : ''}</SelectItem>)}</SelectContent>
                 </Select>
                 {errors.subjectId && <p className="text-xs text-xedu-ruby">{errors.subjectId}</p>}
               </div>

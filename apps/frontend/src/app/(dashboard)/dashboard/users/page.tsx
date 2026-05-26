@@ -186,13 +186,13 @@ export default function UsersPage() {
   });
   const studentsList = (allStudentsData?.data ?? []).filter((u: any) => u.role === 'student');
 
-  // Load existing subjects when teacher role selected
-  const { data: existingSubjectsData } = useQuery({
-    queryKey: ['subjects', activeBranchId],
-    queryFn: () => subjectsApi.getAll(),
+  // Load existing subjects catalog when teacher role selected (deduplicated)
+  const { data: existingCatalogData } = useQuery({
+    queryKey: ['subjects', 'catalog', activeBranchId],
+    queryFn: () => subjectsApi.getCatalog(),
     enabled: open && watchedRole === 'teacher',
   });
-  const existingSubjects = Array.isArray(existingSubjectsData) ? existingSubjectsData : (existingSubjectsData as any)?.data ?? [];
+  const existingCatalog = Array.isArray(existingCatalogData) ? existingCatalogData : (existingCatalogData as any)?.data ?? [];
 
   const deleteMutation = useMutation({
     mutationFn: ({ id, restore }: { id: string; restore?: boolean }) =>
@@ -932,15 +932,15 @@ export default function UsersPage() {
                   <BookOpen className="h-4 w-4" /> O'qituvchi fanlari
                 </div>
 
-                {/* Mavjud fanlar ro'yxati */}
-                {existingSubjects.length > 0 && (
+                {/* Mavjud fanlar ro'yxati (takrorlanishlarsiz) */}
+                {existingCatalog.length > 0 && (
                   <div>
                     <p className="text-xs text-violet-600 dark:text-violet-400 mb-1.5 font-medium">Mavjud fanlar:</p>
                     <div className="flex flex-wrap gap-1.5">
-                      {existingSubjects.map((s: any) => (
-                        <span key={s.id} className="inline-flex items-center gap-1 rounded-md bg-white dark:bg-white dark:bg-xedu-slate-950 border px-2 py-0.5 text-xs">
+                      {existingCatalog.map((s: any) => (
+                        <span key={s.normalizedName} className="inline-flex items-center gap-1 rounded-md bg-white dark:bg-xedu-slate-950 border px-2 py-0.5 text-xs" title={s.classes.map((c: any) => c.name).join(', ')}>
                           <span className="font-medium">{s.name}</span>
-                          <span className="text-xedu-slate-500 dark:text-xedu-slate-400">({s.class?.name})</span>
+                          <span className="text-xedu-slate-500 dark:text-xedu-slate-400">{s.count > 1 ? `(${s.count} ta sinf)` : `(${s.classes[0]?.name ?? ''})`}</span>
                         </span>
                       ))}
                     </div>
@@ -984,9 +984,10 @@ export default function UsersPage() {
                       onChange={(e) => {
                         const name = e.target.value.trim();
                         if (!name) { setSubjectWarning(''); return; }
-                        const dup = existingSubjects.find((s: any) => s.name.toLowerCase() === name.toLowerCase());
+                        const dup = existingCatalog.find((s: any) => s.normalizedName === name.toLowerCase());
                         if (dup) {
-                          setSubjectWarning(`"${dup.name}" fani allaqachon mavjud (${dup.class?.name})`);
+                          const classHint = dup.count > 1 ? `${dup.count} ta sinf` : (dup.classes[0]?.name ?? '');
+                          setSubjectWarning(`"${dup.name}" fani allaqachon mavjud (${classHint})`);
                         } else {
                           setSubjectWarning('');
                         }

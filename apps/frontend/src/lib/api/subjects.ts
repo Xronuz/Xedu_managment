@@ -1,9 +1,23 @@
 import { apiClient } from './client';
 
+export interface SubjectCatalogItem {
+  name: string;
+  normalizedName: string;
+  count: number;
+  classes: { id: string; name: string }[];
+  teachers: { id: string; firstName: string; lastName: string }[];
+  subjectIds: string[];
+  totalHoursPerWeek: number;
+}
+
 export const subjectsApi = {
   /** Barcha fanlar — admin/vice_principal */
   getAll: (classId?: string) =>
     apiClient.get('/subjects', { params: classId ? { classId } : undefined }).then(r => r.data),
+
+  /** Fanlar katalogi — takrorlanishlarsiz, sinf qamrovi bilan */
+  getCatalog: () =>
+    apiClient.get<SubjectCatalogItem[]>('/subjects/catalog').then(r => r.data),
 
   /** Faqat menga biriktirilgan fanlar — teacher/class_teacher */
   getMine: () =>

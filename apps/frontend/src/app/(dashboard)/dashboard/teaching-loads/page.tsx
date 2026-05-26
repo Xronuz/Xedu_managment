@@ -531,7 +531,7 @@ export default function TeachingLoadsPage() {
                 <SelectTrigger><SelectValue placeholder="Tanlang" /></SelectTrigger>
                 <SelectContent>
                   {subjectOptions.map((s: any) => (
-                    <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                    <SelectItem key={s.id} value={s.id}>{s.name}{s.class?.name ? ` (${s.class.name})` : ''}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>

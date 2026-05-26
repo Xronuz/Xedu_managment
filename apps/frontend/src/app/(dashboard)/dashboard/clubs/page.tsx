@@ -192,7 +192,7 @@ function ClubFormDialog({ open, onClose, editData }: { open: boolean; onClose: (
               <SelectTrigger><SelectValue placeholder="Fan tanlang..." /></SelectTrigger>
               <SelectContent>
                 {subjects.map((s: any) => (
-                  <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                  <SelectItem key={s.id} value={s.id}>{s.name}{s.class?.name ? ` (${s.class.name})` : ''}</SelectItem>
                 ))}
               </SelectContent>
             </Select>

@@ -243,6 +243,11 @@ export function SubjectsWorkspace() {
     queryFn: () => subjectsApi.getAll(),
   });
 
+  const { data: catalog = [] } = useQuery({
+    queryKey: ['subjects', 'catalog', activeBranchId],
+    queryFn: () => subjectsApi.getCatalog(),
+  });
+
   const { data: classesData } = useQuery({
     queryKey: ['classes', activeBranchId],
     queryFn: classesApi.getAll,
@@ -416,6 +421,7 @@ export function SubjectsWorkspace() {
 
   // ── Intelligence ─────────────────────────────────────────────────────────────
   const totalSubjects = subjects.length;
+  const uniqueSubjects = catalog.length;
   const subjectsWithoutTeacher = subjects.filter((s) => !s.teacherId).length;
 
   const teacherBreakdown = useMemo(() => {
@@ -670,7 +676,7 @@ export function SubjectsWorkspace() {
         <WorkspaceSection title="Umumiy ko'rsatkichlar" icon={<BarChart3 className="h-4 w-4" />}>
           <div className="grid grid-cols-2 gap-2">
             <StatPill label="Jami" value={totalSubjects} />
-            <StatPill label="Sinflar" value={new Set(subjects.map(s => s.classId)).size} />
+            <StatPill label="Noyob fanlar" value={uniqueSubjects} />
             <StatPill label="O'qituvchilar" value={new Set(subjects.map(s => s.teacherId).filter(Boolean)).size} />
             <StatPill label="Biiktirilmagan" value={subjectsWithoutTeacher} tone={subjectsWithoutTeacher > 0 ? 'urgent' : 'calm'} />
           </div>

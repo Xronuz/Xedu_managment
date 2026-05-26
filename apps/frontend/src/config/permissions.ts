@@ -139,6 +139,7 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   '/dashboard/analytics/timetable': ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher', 'accountant'],
   '/dashboard/teaching-loads':    ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher'],
   '/dashboard/reports/workload':  ['director', 'vice_principal', 'accountant', 'teacher', 'class_teacher'],
+  '/dashboard/export-center':     ['director', 'vice_principal', 'branch_admin', 'accountant', 'teacher', 'class_teacher'],
   '/dashboard':                   ['super_admin', 'director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher', 'accountant', 'librarian', 'student', 'parent'],
 };
 

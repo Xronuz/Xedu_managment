@@ -1,0 +1,8 @@
+{
+  "articles": [],
+  "shortcuts": [
+    { "keys": ["Cmd", "K"], "description": "Командная палитра" },
+    { "keys": ["Cmd", "Shift", "?"], "description": "Открыть панель помощи" },
+    { "keys": ["Esc"], "description": "Закрыть панель" }
+  ]
+}

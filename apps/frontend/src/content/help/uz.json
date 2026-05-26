@@ -1,0 +1,97 @@
+{
+  "articles": [
+    {
+      "id": "ops-command-center",
+      "title": "Operatsion markaz",
+      "category": "overview",
+      "content": "Operatsion markaz maktabingizning kunlik holatini bir qarashda ko'rish imkonini beradi. Bu yerda siz dars jadvallari, o'qituvchilar davomati, o'quv yuklamalari va moliyaviy ko'rsatkichlarni kuzatishingiz mumkin.",
+      "faq": [
+        { "q": "Readiness score nima?", "a": "Bu maktabingizning tayyorlik darajasini 0-100 oralig'ida ko'rsatadi. 8 ta kriteriya bo'yicha baholanadi: dars soatlari, xonalar, sinflar, o'qituvchilar, dars jadvali, o'quv yuklamalari, davomat va moliya." },
+        { "q": "Alertlarni qanday o'chirish mumkin?", "a": "Har bir alert yonidagi 'O'qib chiqdim' tugmasini bosing. Ogohlantirish 7 kun davomida ko'rsatilmaydi." },
+        { "q": "Bugunlik umumiy ko'rinish qanday yangilanadi?", "a": "Ma'lumotlar real vaqtda avtomatik yangilanadi. Sahifani yangilash orqali so'nggi ma'lumotlarni olishingiz mumkin." }
+      ]
+    },
+    {
+      "id": "setup-wizard",
+      "title": "Maktab sozlash ustasi",
+      "category": "onboarding",
+      "content": "Maktab sozlash ustasi yangi maktabni tez va oson sozlash uchun mo'ljallangan. 7 bosqichdan iborat: maktab ma'lumotlari, dars soatlari, xonalar, sinflar, o'quv yuklamalari, jadval yaratish va nashr etish.",
+      "faq": [
+        { "q": "Sozlashni qoldirsa bo'ladimi?", "a": "Ha, har bir bosqichni saqlab, keyin davom ettirish mumkin. Progress avtomatik saqlanadi." },
+        { "q": "Bosqichlarni qayta o'tish mumkinmi?", "a": "Ha, chap paneldagi bosqichlarni bosib, oldingi bosqichlarga qaytishingiz mumkin." },
+        { "q": "Nima uchun 'Nashr etish' bosqichi muhim?", "a": "Bu bosqich dars jadvalini o'quvchilar va o'qituvchilar uchun ko'rinadigan qiladi. Nashr etilmagan jadval faqat administratorlar ko'radi." }
+      ]
+    },
+    {
+      "id": "timetable",
+      "title": "Dars jadvali",
+      "category": "education",
+      "content": "Dars jadvali moduli sinflar, o'qituvchilar va xonalar o'rtasida to'qnashuvsiz dars jadvali tuzish imkonini beradi. Jadvalni qo'lda yoki avtomatik generator yordamida yaratishingiz mumkin.",
+      "faq": [
+        { "q": "Jadvalni qandol nashr etish mumkin?", "a": "Jadvalni tahrirlash tugallangach, 'Nashr etish' tugmasini bosing. Nashr etilgan jadval barcha foydalanuvchilarga ko'rinadi." },
+        { "q": "2 haftalik jadval qanday ishlaydi?", "a": "Siz har bir slot uchun 'Juft' yoki 'Toq' hafta turini tanlashingiz mumkin. 'Barcha' tanlovida jadval har hafta takrorlanadi." },
+        { "q": "Xona to'qnashuvi nima?", "a": "Bir xil vaqtda bir xonada ikkita dars qo'yilganda xona to'qnashuvi yuzaga keladi. Tizim bunday holatlarni avtomatik aniqlaydi." }
+      ]
+    },
+    {
+      "id": "teaching-loads",
+      "title": "O'quv yuklamalari",
+      "category": "education",
+      "content": "O'quv yuklamalari (tarifikatsiya) har bir o'qituvchining o'quv yuklamasini hisoblash va nazorat qilish uchun ishlatiladi. Soatlar, koeffitsientlar va bonuslar asosida to'liq hisobot yaratiladi.",
+      "faq": [
+        { "q": "Koeffitsient nima?", "a": "Koeffitsient o'qituvchining ish haqi hisoblanishida qo'llaniladigan ko'paytirgich. Masalan, sinf rahbarligi yoki ilmiy daraja uchun koeffitsient oshirilishi mumkin." },
+        { "q": "Bo'linish sinfi nima?", "a": "Bu bir sinfning ikki guruhga bo'linishi. Masalan, ingliz tili yoki sport darslari guruhb o'qitilganda." },
+        { "q": "Yuklamani qandol tasdiqlash mumkin?", "a": "Yuklamani ko'rib chiqib, 'Tasdiqlash' tugmasini bosing. Tasdiqlangan yuklamalar ish haqi hisoblashda ishlatiladi." }
+      ]
+    },
+    {
+      "id": "payroll",
+      "title": "Ish haqi",
+      "category": "finance",
+      "content": "Ish haqi moduli xodimlarning oylik maoshini hisoblash, avans berish va hisobotlarni yaratish uchun ishlatiladi. BHM, daraja va sertifikat ustamalari avtomatik hisoblanadi.",
+      "faq": [
+        { "q": "Ish haqi qanday hisoblanadi?", "a": "Ish haqi = asosiy oylik + daraja ustamasi + sertifikat ustamasi + qo'shimcha darslar + bonus - jarima - avans" },
+        { "q": "Avans qandol beriladi?", "a": "'Avans berish' bo'limida xodimni tanlang, summa va sanani kiriting. Avans ish haqidan avtomatik ayiriladi." },
+        { "q": "Ish haqi qachon tasdiqlanadi?", "a": "Oy oxirida ish haqi hisobotini yaratib, direktor tasdiqlashi kerak. Tasdiqlanganidan so'ng to'lov amalga oshiriladi." }
+      ]
+    },
+    {
+      "id": "attendance",
+      "title": "Davomat",
+      "category": "education",
+      "content": "Davomat moduli o'quvchilar va o'qituvchilarning darsga kelishini kuzatish uchun ishlatiladi. Real vaqt davomati, statistika va hisobotlar mavjud.",
+      "faq": [
+        { "q": "Davomatni qandol qo'shish mumkin?", "a": "Sinfni tanlang, sanani belgilang va har bir o'quvchi uchun 'Keldi', 'Kelmadi', 'Kechikdi' yoki 'Sababli' statusini tanlang." },
+        { "q": "O'qituvchi davomati ham kuzatiladimi?", "a": "Ha, 'O'qituvchi davomati' bo'limida o'qituvchilarning darsga kelishini kuzatishingiz mumkin." },
+        { "q": "Davomat hisobotlarini qandol olish mumkin?", "a": "'Hisobotlar' bo'limida davomat statistikasi va oylik/timillik jadvallarni ko'rishingiz mumkin." }
+      ]
+    },
+    {
+      "id": "substitutions",
+      "title": "O'qituvchi almashtirish",
+      "category": "operations",
+      "content": "O'qituvchi almashtirish moduli kasal yoki ta'tildagi o'qituvchilar o'rniga boshqa o'qituvchini tayinlash imkonini beradi. Tasdiqlash jarayoni orqali almashtirishlar nazorat qilinadi.",
+      "faq": [
+        { "q": "Almashtirishni qandol so'rash mumkin?", "a": "Asosiy o'qituvchini, almashtiruvchi o'qituvchini va sanani tanlang. So'rov avtomatik ravishda tasdiqlovchiga yuboriladi." },
+        { "q": "Kim almashtirishni tasdiqlaydi?", "a": "Direktor, mudir o'rinbosari yoki filial boshqaruvchisi almashtirishni tasdiqlashi mumkin." },
+        { "q": "Almashtirish haqi haqida xabar qilinadimi?", "a": "Ha, tasdiqlangan almashtirishlar o'qituvchiga, sinf rahbariga va aloqador o'qituvchilarga bildirishnoma yuboriladi." }
+      ]
+    },
+    {
+      "id": "analytics",
+      "title": "Analytics va hisobotlar",
+      "category": "analytics",
+      "content": "Analytics moduli maktabingizning akademik, moliyaviy va operatsion ko'rsatkichlarini tahlil qilish imkonini beradi. Filial solishtirish, xavf ostidagi o'quvchilar va marketing ROI kabi hisobotlar mavjud.",
+      "faq": [
+        { "q": "Pulse nima?", "a": "Pulse — maktabingizning joriy holatini bir qarashda ko'rsatadigan real vaqt ko'rsatkichlari to'plami." },
+        { "q": "Filial solishtirish qandol ishlaydi?", "a": "Barcha filiallaringizning akademik ko'rsatkichlari bir jadvalda ko'rsatiladi, eng yuqori va eng past natijalar ajratib ko'rsatiladi." },
+        { "q": "Xavf ostidagi o'quvchilar qandol aniqlanadi?", "a": "Davomat 75% dan kam yoki o'rtacha ball 60% dan past bo'lgan o'quvchilar avtomatik ravishda 'xavf ostida' deb belgilanadi." }
+      ]
+    }
+  ],
+  "shortcuts": [
+    { "keys": ["Cmd", "K"], "description": "Command palette (tezkor qidiruv)" },
+    { "keys": ["Cmd", "Shift", "?"], "description": "Yordam panelini ochish" },
+    { "keys": ["Esc"], "description": "Joriy panelni yopish" }
+  ]
+}

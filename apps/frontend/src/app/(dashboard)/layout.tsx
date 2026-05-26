@@ -14,6 +14,7 @@ import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { HeaderActionsProvider } from '@/lib/header-actions-context';
 import { useRoleGuard } from '@/components/auth/role-guard';
 import { WorkspaceProvider } from '@/components/workspace-system';
+import { HelpProvider, HelpDrawer, HelpButton } from '@/components/help';
 import { authApi } from '@/lib/api/auth';
 import { PageTransition } from '@/components/layout/page-transition';
 
@@ -116,31 +117,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   return (
     <HeaderActionsProvider>
       <WorkspaceProvider>
-        {/* White sidebar + header, gray content with rounded-tl-2xl inner corner */}
-        <div className="flex h-screen bg-xedu-bg-canvas dark:bg-xedu-bg-canvas overflow-hidden">
-          <RealtimeProvider />
+        <HelpProvider>
+          {/* White sidebar + header, gray content with rounded-tl-2xl inner corner */}
+          <div className="flex h-screen bg-xedu-bg-canvas dark:bg-xedu-bg-canvas overflow-hidden">
+            <RealtimeProvider />
 
-          <div className="hidden md:flex shrink-0">
-            <Sidebar />
+            <div className="hidden md:flex shrink-0">
+              <Sidebar />
+            </div>
+
+            <div className="flex flex-1 min-w-0 flex-col overflow-hidden">
+              <Header />
+              <main
+                className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg-canvas dark:bg-xedu-bg-canvas rounded-tl-2xl p-6"
+                style={{ isolation: 'isolate' }}
+              >
+                <BreadcrumbNav />
+                <PageErrorBoundary>
+                  <PageTransition>{children}</PageTransition>
+                </PageErrorBoundary>
+              </main>
+            </div>
+
+            <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
+            <ConfirmDialog />
+            <MobileFab />
+            <HelpDrawer />
+            <HelpButton pages={['/dashboard/ops', '/dashboard/setup', '/dashboard/schedule']} />
           </div>
-
-          <div className="flex flex-1 min-w-0 flex-col overflow-hidden">
-            <Header />
-            <main
-              className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg-canvas dark:bg-xedu-bg-canvas rounded-tl-2xl p-6"
-              style={{ isolation: 'isolate' }}
-            >
-              <BreadcrumbNav />
-              <PageErrorBoundary>
-                <PageTransition>{children}</PageTransition>
-              </PageErrorBoundary>
-            </main>
-          </div>
-
-          <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />
-          <ConfirmDialog />
-          <MobileFab />
-        </div>
+        </HelpProvider>
       </WorkspaceProvider>
     </HeaderActionsProvider>
   );

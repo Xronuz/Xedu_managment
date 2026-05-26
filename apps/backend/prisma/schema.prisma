@@ -278,6 +278,30 @@ enum AuditAction {
   school_deleted
 }
 
+// ─── Phase 6B: Export Jobs ────────────────────────────────────────────────
+
+enum ExportEntity {
+  schedules
+  teaching_loads
+  payroll
+  users
+  analytics_summary
+}
+
+enum ExportFormat {
+  csv
+  xlsx
+  json
+}
+
+enum ExportJobStatus {
+  queued
+  processing
+  completed
+  failed
+  cancelled
+}
+
 // ─── Phase 23: New enums for previously String fields ──────────────────────
 
 enum CourseEnrollmentStatus {
@@ -433,6 +457,7 @@ model School {
   kpiMetrics          KpiMetric[]
   groupMessages       GroupMessage[]
   announcements       Announcement[]
+  exportJobs          ExportJob[]
 
   @@map("schools")
 }
@@ -731,6 +756,9 @@ model User {
 
   // KPI
   kpiRecords KpiRecord[]
+
+  // Export jobs
+  exportJobs ExportJob[]
 
   @@index([schoolId, branchId])
   @@index([branchId])
@@ -2558,4 +2586,30 @@ model SolverRun {
   @@index([schoolId, status])
   @@index([schoolId, createdAt])
   @@map("solver_runs")
+}
+
+// ─── ExportJob (Phase 6B: Async data export) ──────────────────────────────
+
+model ExportJob {
+  id          String          @id @default(uuid())
+  schoolId    String
+  branchId    String?
+  createdBy   String
+  entity      ExportEntity
+  format      ExportFormat
+  status      ExportJobStatus @default(queued)
+  progress    Int             @default(0) // 0-100
+  fileUrl     String?
+  error       String?
+  startedAt   DateTime?
+  completedAt DateTime?
+  createdAt   DateTime        @default(now())
+
+  school School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [createdBy], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, status])
+  @@index([schoolId, createdAt])
+  @@index([createdBy])
+  @@map("export_jobs")
 }

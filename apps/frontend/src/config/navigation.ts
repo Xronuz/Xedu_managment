@@ -18,6 +18,7 @@ import {
   Building2, Package, Library, School,
   ShoppingBag, Coins, Heart,
   BarChart2, UserCheck, Activity, Rocket, Clock,
+  Download,
 } from 'lucide-react';
 import { ROUTE_PERMISSIONS } from './permissions';
 
@@ -179,6 +180,7 @@ export const BRANCH_ADMIN_NAV: NavGroup[] = [
     items: [
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
       { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
+      { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
     ],
   },
   {
@@ -245,6 +247,7 @@ export const VICE_PRINCIPAL_NAV: NavGroup[] = [
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
       { label: 'KPI Dashboard', href: '/dashboard/kpi', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/kpi'] },
       { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
+      { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
     ],
   },
   {
@@ -290,6 +293,7 @@ export const TEACHER_NAV: NavGroup[] = [
     title: 'Analitika',
     items: [
       { label: 'Insights', href: '/dashboard/insights', icon: Brain, roles: ROUTE_PERMISSIONS['/dashboard/insights'] },
+      { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
     ],
   },
 ];
@@ -317,6 +321,7 @@ export const ACCOUNTANT_NAV: NavGroup[] = [
     items: [
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
       { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
+      { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
     ],
   },
   {

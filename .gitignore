@@ -54,3 +54,6 @@ redis-data/
 
 # TypeScript incremental build cache — never commit
 *.tsbuildinfo
+
+# Export files
+apps/backend/uploads/exports/

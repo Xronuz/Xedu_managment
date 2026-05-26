@@ -21,6 +21,7 @@ import {
   ShieldAlert, Bus, CalendarCheck, Shield,
   Building2, Award, Wallet, Package, Coins, ShoppingBag,
   Brain, Megaphone, UserCheck, Activity, Rocket,
+  Download,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { usersApi } from '@/lib/api/users';
@@ -74,6 +75,7 @@ const NAV_ITEMS = [
   { label: 'Ish haqi', href: '/dashboard/payroll', icon: Award, roles: ROUTE_PERMISSIONS['/dashboard/payroll'] },
   { label: 'Hisobotlar', href: '/dashboard/reports', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
   { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
+  { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
   { label: 'Intizom', href: '/dashboard/discipline', icon: ShieldAlert, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
   { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: Clock, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
   { label: "O'qituvchi almashtirish", href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },

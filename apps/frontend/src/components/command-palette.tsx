@@ -20,7 +20,7 @@ import {
   CheckSquare, Briefcase, Clock, Search, History,
   ShieldAlert, Bus, CalendarCheck, Shield, Banknote,
   Building2, Award, Wallet, Package, Coins, ShoppingBag,
-  Brain, Megaphone, UserCheck, Activity,
+  Brain, Megaphone, UserCheck, Activity, Rocket,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 import { usersApi } from '@/lib/api/users';
@@ -55,6 +55,7 @@ function pushRecentPage(href: string, label: string) {
 const NAV_ITEMS = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ROUTE_PERMISSIONS['/dashboard'] },
   { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
+  { label: 'Maktab sozlash', href: '/dashboard/setup', icon: Rocket, roles: ROUTE_PERMISSIONS['/dashboard/setup'] },
   { label: 'Maktablar', href: '/dashboard/schools', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/schools'] },
   { label: 'Filiallar', href: '/dashboard/branches', icon: Building2, roles: ROUTE_PERMISSIONS['/dashboard/branches'] },
   { label: 'Foydalanuvchilar', href: '/dashboard/users', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/users'] },

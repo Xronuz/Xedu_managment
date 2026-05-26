@@ -89,13 +89,13 @@ export function middleware(request: NextRequest) {
     }
 
     // First-login enforcement: must complete password change before accessing dashboard
-    if (payload?.isFirstLogin === true && pathname !== '/dashboard/onboarding') {
+    if (payload?.isFirstLogin === true && pathname !== '/dashboard/setup') {
       return NextResponse.redirect(new URL('/first-login', request.url));
     }
 
     // Branch guard: every authenticated non-super_admin/director must have a branchId
-    if (!['super_admin', 'director'].includes(role) && !branchId && pathname !== '/dashboard/onboarding') {
-      return NextResponse.redirect(new URL('/dashboard/onboarding', request.url));
+    if (!['super_admin', 'director'].includes(role) && !branchId && pathname !== '/dashboard/setup') {
+      return NextResponse.redirect(new URL('/dashboard/setup', request.url));
     }
 
     // Role-specific route guards (from ROUTE_PERMISSIONS)

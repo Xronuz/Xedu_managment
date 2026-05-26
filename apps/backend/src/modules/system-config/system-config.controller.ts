@@ -33,7 +33,7 @@ class UpdateConfigDto implements Partial<SystemConfigMap> {
 }
 
 class UpdateOnboardingDto {
-  @IsOptional() @IsNumber() @Min(0) @Max(6) @Type(() => Number)
+  @IsOptional() @IsNumber() @Min(0) @Max(7) @Type(() => Number)
   onboardingStep?: number;
 
   @IsOptional() @IsBoolean()
@@ -113,11 +113,12 @@ export class SystemConfigController {
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT, UserRole.LIBRARIAN, UserRole.STUDENT, UserRole.PARENT)
   async getOnboardingComputed(@CurrentUser() user: JwtPayload) {
     const schoolId = user.schoolId!;
+    const branchId = user.branchId;
 
     // 1. School profile
     const school = await this.prisma.school.findUnique({
       where: { id: schoolId },
-      select: { name: true, phone: true, address: true },
+      select: { name: true, phone: true, address: true, readinessScore: true },
     });
     const schoolProfileMissing: string[] = [];
     if (!school?.name) schoolProfileMissing.push('name');
@@ -157,17 +158,52 @@ export class SystemConfigController {
     if (subjectCount === 0) educationMissing.push('subjects');
     if (teacherCount === 0) educationMissing.push('teachers');
 
+    // 5. Periods
+    const periodFilter = branchId ? { schoolId, branchId } : { schoolId };
+    const periodCount = await this.prisma.period.count({ where: periodFilter });
+    const periodsMissing: string[] = [];
+    if (periodCount === 0) periodsMissing.push('periods');
+
+    // 6. Rooms
+    const roomCount = await this.prisma.room.count({ where: periodFilter });
+    const roomsMissing: string[] = [];
+    if (roomCount === 0) roomsMissing.push('rooms');
+
+    // 7. Teaching loads
+    const teachingLoadCount = await this.prisma.teachingLoad.count({
+      where: { schoolId, status: 'approved' },
+    });
+    const teachingLoadsMissing: string[] = [];
+    if (teachingLoadCount === 0) teachingLoadsMissing.push('teachingLoads');
+
+    // 8. Timetable (published)
+    const publishedScheduleCount = await this.prisma.schedule.count({
+      where: { schoolId, status: 'published' },
+    });
+    const timetableMissing: string[] = [];
+    if (publishedScheduleCount === 0) timetableMissing.push('timetable');
+
     const schoolProfileCompleted = schoolProfileMissing.length === 0;
     const branchesCompleted = branchesMissing.length === 0;
     const staffCompleted = staffMissing.length === 0;
     const educationCompleted = educationMissing.length === 0;
+    const periodsCompleted = periodsMissing.length === 0;
+    const roomsCompleted = roomsMissing.length === 0;
+    const teachingLoadsCompleted = teachingLoadsMissing.length === 0;
+    const timetableCompleted = timetableMissing.length === 0;
 
     return {
       schoolProfile: { completed: schoolProfileCompleted, missing: schoolProfileMissing },
       branches: { completed: branchesCompleted, missing: branchesMissing },
       staff: { completed: staffCompleted, missing: staffMissing },
       education: { completed: educationCompleted, missing: educationMissing },
-      overallCompleted: schoolProfileCompleted && branchesCompleted && staffCompleted && educationCompleted,
+      periods: { completed: periodsCompleted, missing: periodsMissing },
+      rooms: { completed: roomsCompleted, missing: roomsMissing },
+      teachingLoads: { completed: teachingLoadsCompleted, missing: teachingLoadsMissing },
+      timetable: { completed: timetableCompleted, missing: timetableMissing },
+      overallCompleted: schoolProfileCompleted && branchesCompleted && staffCompleted && educationCompleted
+        && periodsCompleted && roomsCompleted && teachingLoadsCompleted && timetableCompleted,
+      readinessScore: school?.readinessScore ?? 0,
     };
   }
 }

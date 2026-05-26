@@ -36,6 +36,18 @@ const mockPrisma = {
   systemConfig: {
     findUnique: jest.fn(),
   },
+  period: {
+    count: jest.fn(),
+  },
+  room: {
+    count: jest.fn(),
+  },
+  teachingLoad: {
+    count: jest.fn(),
+  },
+  schedule: {
+    count: jest.fn(),
+  },
 };
 
 // ── Test Suite ─────────────────────────────────────────────────────────────
@@ -125,12 +137,17 @@ describe('SystemConfigController', () => {
         name: 'Test Maktab',
         phone: '+998901112233',
         address: 'Toshkent',
+        readinessScore: 80,
       });
       mockPrisma.systemConfig.findUnique.mockResolvedValue({ value: '2025-2026' });
       mockPrisma.branch.findMany.mockResolvedValue([{ id: 'b1', name: 'Asosiy' }]);
       mockPrisma.user.count.mockResolvedValue(5);
       mockPrisma.class.count.mockResolvedValue(3);
       mockPrisma.subject.count.mockResolvedValue(5);
+      mockPrisma.period.count.mockResolvedValue(6);
+      mockPrisma.room.count.mockResolvedValue(5);
+      mockPrisma.teachingLoad.count.mockResolvedValue(10);
+      mockPrisma.schedule.count.mockResolvedValue(20);
 
       const result = await controller.getOnboardingComputed(directorUser as any);
 
@@ -138,7 +155,12 @@ describe('SystemConfigController', () => {
       expect(result.branches.completed).toBe(true);
       expect(result.staff.completed).toBe(true);
       expect(result.education.completed).toBe(true);
+      expect(result.periods.completed).toBe(true);
+      expect(result.rooms.completed).toBe(true);
+      expect(result.teachingLoads.completed).toBe(true);
+      expect(result.timetable.completed).toBe(true);
       expect(result.overallCompleted).toBe(true);
+      expect(result.readinessScore).toBe(80);
     });
 
     it('returns missing fields when data is incomplete', async () => {
@@ -146,12 +168,17 @@ describe('SystemConfigController', () => {
         name: '',
         phone: null,
         address: null,
+        readinessScore: 0,
       });
       mockPrisma.systemConfig.findUnique.mockResolvedValue(null);
       mockPrisma.branch.findMany.mockResolvedValue([]);
       mockPrisma.user.count.mockResolvedValue(0);
       mockPrisma.class.count.mockResolvedValue(0);
       mockPrisma.subject.count.mockResolvedValue(0);
+      mockPrisma.period.count.mockResolvedValue(0);
+      mockPrisma.room.count.mockResolvedValue(0);
+      mockPrisma.teachingLoad.count.mockResolvedValue(0);
+      mockPrisma.schedule.count.mockResolvedValue(0);
 
       const result = await controller.getOnboardingComputed(directorUser as any);
 
@@ -163,6 +190,10 @@ describe('SystemConfigController', () => {
       expect(result.branches.completed).toBe(false);
       expect(result.staff.completed).toBe(false);
       expect(result.education.completed).toBe(false);
+      expect(result.periods.completed).toBe(false);
+      expect(result.rooms.completed).toBe(false);
+      expect(result.teachingLoads.completed).toBe(false);
+      expect(result.timetable.completed).toBe(false);
       expect(result.overallCompleted).toBe(false);
     });
   });

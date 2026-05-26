@@ -367,7 +367,7 @@ model School {
   subscriptionTier   SubscriptionPlan @default(free)
   financeType        FinanceType      @default(CENTRALIZED) // Moliya rejimi
   timezone           String           @default("Asia/Tashkent") // IANA timezone — UTC saqlash uchun
-  onboardingStep     Int              @default(0) // 0=not started, 1-5=steps, 6=completed
+  onboardingStep     Int              @default(0) // 0=not started, 1-7=steps, 8=completed
   onboardingCompleted Boolean         @default(false)
   onboardingCompletedAt DateTime?
   readinessScore     Int              @default(0)

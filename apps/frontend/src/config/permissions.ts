@@ -46,6 +46,7 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   // ONBOARDING
   // ═══════════════════════════════════════════════════════════════════════════════
   '/dashboard/onboarding':     ['director', 'vice_principal'],
+  '/dashboard/setup':          ['director', 'vice_principal', 'branch_admin'],
   '/dashboard/ops':            ['director', 'vice_principal', 'branch_admin', 'accountant', 'teacher', 'class_teacher'],
 
   // ═══════════════════════════════════════════════════════════════════════════════

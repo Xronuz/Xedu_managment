@@ -64,7 +64,7 @@ const ACTIONS: QuickAction[] = [
     id: 'readiness',
     label: 'Tayyorlikni tekshirish',
     icon: ShieldCheck,
-    href: '/dashboard/onboarding',
+    href: '/dashboard/setup',
     roles: [UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN],
     color: 'bg-emerald-50 text-emerald-600',
   },

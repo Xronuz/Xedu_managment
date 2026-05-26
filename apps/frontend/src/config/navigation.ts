@@ -17,7 +17,7 @@ import {
   Brain, Megaphone, MessageSquare, Bell, Settings,
   Building2, Package, Library, Bus, School,
   ShoppingBag, Coins, Heart, ClipboardCheck,
-  BarChart2, UserCheck, Activity,
+  BarChart2, UserCheck, Activity, Rocket,
 } from 'lucide-react';
 import { ROUTE_PERMISSIONS } from './permissions';
 
@@ -48,6 +48,7 @@ export const DIRECTOR_NAV: NavGroup[] = [
     items: [
       { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
+      { label: 'Maktab sozlash', href: '/dashboard/setup', icon: Rocket, roles: ROUTE_PERMISSIONS['/dashboard/setup'] },
       { label: 'Filiallar', href: '/dashboard/branches', icon: Building2, roles: ROUTE_PERMISSIONS['/dashboard/branches'] },
       { label: 'Tasdiqlash inbox', href: '/dashboard/approvals', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/approvals'] },
       { label: 'Ogohlantirishlar', href: '/dashboard/alerts', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/alerts'] },

@@ -62,7 +62,7 @@ export function VicePrincipalWelcome() {
           <Settings className="mr-1.5 h-4 w-4" />
           Sozlamalar
         </Button>
-        <Button size="sm" onClick={() => router.push('/dashboard/onboarding')}>
+        <Button size="sm" onClick={() => router.push('/dashboard/setup')}>
           <Building2 className="mr-1.5 h-4 w-4" />
           Maktabni sozlash
         </Button>

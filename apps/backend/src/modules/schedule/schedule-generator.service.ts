@@ -1,5 +1,6 @@
 import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { RedisService } from '@/common/redis/redis.service';
 import { ConflictDetectorService, toWeeklyUtcMin } from '@/common/utils/conflict-detector';
 import { JwtPayload, DayOfWeek, UserRole, WeekType, ScheduleStatus } from '@eduplatform/types';
 
@@ -60,6 +61,7 @@ export class ScheduleGeneratorService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly conflictDetector: ConflictDetectorService,
+    private readonly redis: RedisService,
   ) {}
 
   async generate(
@@ -409,7 +411,34 @@ export class ScheduleGeneratorService {
       }
     }
 
+    if (created > 0) {
+      await this.invalidateSchoolCache(schoolId);
+    }
+
     return { created, errors };
+  }
+
+  // ─── Cache helpers ─────────────────────────────────────────────────────────
+
+  /**
+   * SCAN-based cache invalidation — production-safe, no blocking KEYS.
+   * Batched cursor iteration (100 keys per batch) to maintain low latency.
+   */
+  private async invalidateSchoolCache(schoolId: string) {
+    const pattern = `schedule:${schoolId}:*`;
+    let cursor = '0';
+    let totalDeleted = 0;
+
+    do {
+      const [nextCursor, keys] = await this.redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+      cursor = nextCursor;
+      if (keys.length > 0) {
+        await this.redis.del(...keys);
+        totalDeleted += keys.length;
+      }
+    } while (cursor !== '0');
+
+    return totalDeleted;
   }
 
   // ─── Helpers ───────────────────────────────────────────────────────────────

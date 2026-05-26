@@ -226,9 +226,35 @@ export class AdvancedSolverService {
     ]);
 
     if (periods.length === 0) {
+      await this.persistRun({
+        schoolId,
+        branchId: targetBranchId,
+        weekType,
+        strategy: strategyUsed,
+        status: SolverRunStatus.CANCELLED,
+        demandsCount: 0,
+        placedCount: 0,
+        failureCount: 0,
+        score: 0,
+        metadata: { reason: 'Dars soatlari sozlanmagan', timeoutMs },
+        createdById: currentUser.sub,
+      });
       return this.emptyResult('Dars soatlari sozlanmagan', startedAt, strategyUsed);
     }
     if (subjects.length === 0) {
+      await this.persistRun({
+        schoolId,
+        branchId: targetBranchId,
+        weekType,
+        strategy: strategyUsed,
+        status: SolverRunStatus.CANCELLED,
+        demandsCount: 0,
+        placedCount: 0,
+        failureCount: 0,
+        score: 0,
+        metadata: { reason: 'Fanlar topilmadi', timeoutMs },
+        createdById: currentUser.sub,
+      });
       return this.emptyResult('Fanlar topilmadi', startedAt, strategyUsed);
     }
 
@@ -294,7 +320,7 @@ export class AdvancedSolverService {
     for (const demand of sortedDemands) {
       if (Date.now() > timeoutAt) break;
 
-      const result = this.tryPlaceDemand(demand, candidates, roomCandidates, index, existingSchedules, dto.overwriteExisting ?? false);
+      const result = this.tryPlaceDemand(demand, candidates, roomCandidates, index, existingSchedules, dto.overwriteExisting ?? false, weekType);
       if (result.slot) {
         placed.push(result.slot);
         index.place(result.slot.teacherId, result.slot.classId, result.slot.roomId, result.slot.dayOfWeek, result.slot.timeSlot);
@@ -332,6 +358,7 @@ export class AdvancedSolverService {
           dto.overwriteExisting ?? false,
           maxDepth,
           timeoutAt,
+          weekType,
         );
 
         if (recovered) {
@@ -432,6 +459,7 @@ export class AdvancedSolverService {
     index: ConflictIndex,
     existingSchedules: Array<{ classId: string; teacherId: string; roomId: string | null; dayOfWeek: string; timeSlot: number }>,
     overwriteExisting: boolean,
+    weekType: WeekType,
   ): { slot: ProposedSlot | null; failure: PlacementFailure } {
     const attempted: PlacementFailure['attemptedSlots'] = [];
 
@@ -476,7 +504,7 @@ export class AdvancedSolverService {
           timeSlot: candidate.timeSlot,
           startTime: candidate.startTime,
           endTime: candidate.endTime,
-          weekType: WeekType.ALL, // will be overridden by caller
+          weekType,
         };
 
         return { slot, failure: null as any };
@@ -505,6 +533,7 @@ export class AdvancedSolverService {
     overwriteExisting: boolean,
     maxDepth: number,
     timeoutAt: number,
+    weekType: WeekType,
   ): boolean {
     if (maxDepth <= 0 || Date.now() > timeoutAt) return false;
 
@@ -559,7 +588,7 @@ export class AdvancedSolverService {
           timeSlot: candidate.timeSlot,
           startTime: candidate.startTime,
           endTime: candidate.endTime,
-          weekType: WeekType.ALL,
+          weekType,
         };
         placed.push(slot);
         index.place(slot.teacherId, slot.classId, slot.roomId, slot.dayOfWeek, slot.timeSlot);
@@ -591,6 +620,7 @@ export class AdvancedSolverService {
           index,
           existingSchedules,
           overwriteExisting,
+          weekType,
         );
 
         if (rePlaceResult.slot) {
@@ -608,7 +638,7 @@ export class AdvancedSolverService {
             timeSlot: candidate.timeSlot,
             startTime: candidate.startTime,
             endTime: candidate.endTime,
-            weekType: WeekType.ALL,
+            weekType,
           };
           placed.push(slot);
           index.place(slot.teacherId, slot.classId, slot.roomId, slot.dayOfWeek, slot.timeSlot);

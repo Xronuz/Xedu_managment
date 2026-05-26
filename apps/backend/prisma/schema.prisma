@@ -369,6 +369,9 @@ model School {
   timezone           String           @default("Asia/Tashkent") // IANA timezone — UTC saqlash uchun
   onboardingStep     Int              @default(0) // 0=not started, 1-5=steps, 6=completed
   onboardingCompleted Boolean         @default(false)
+  onboardingCompletedAt DateTime?
+  readinessScore     Int              @default(0)
+  lastTimetablePublishAt DateTime?
   deletedAt          DateTime?
   deletedById        String?
   createdAt          DateTime         @default(now())

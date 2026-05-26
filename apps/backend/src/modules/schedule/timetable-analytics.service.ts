@@ -565,13 +565,18 @@ export class TimetableAnalyticsService {
   async getOverview(currentUser: JwtPayload, query: AnalyticsQuery): Promise<TimetableOverview> {
     this.assertCanView(currentUser);
 
-    const [teacherUtil, roomUtil, density, absenceSub, solverQuality, payrollVar] = await Promise.all([
+    const [teacherUtil, roomUtil, density, absenceSub, solverQuality, payrollVar, classCount] = await Promise.all([
       this.getTeacherUtilization(currentUser, query),
       this.getRoomUtilization(currentUser, query),
       this.getScheduleDensity(currentUser, query),
       this.getAbsenceSubstitution(currentUser, query),
       this.getSolverQuality(currentUser, query),
       this.getPayrollVariance(currentUser, query),
+      this.prisma.schedule.groupBy({
+        by: ['classId'],
+        where: this.buildScheduleWhere(currentUser, query),
+        _count: { classId: true },
+      }),
     ]);
 
     const avgTeacherUtil = teacherUtil.length > 0
@@ -592,7 +597,7 @@ export class TimetableAnalyticsService {
       roomCount: roomUtil.length,
       avgRoomUtilizationPct: avgRoomUtil,
       totalPublishedSlots: density.reduce((s, d) => s + d.scheduleCount, 0),
-      totalClasses: new Set(density.flatMap(d => [])).size, // approximate from schedules
+      totalClasses: classCount.length,
       absenceRatePct: absenceSub.absenceRatePct,
       substitutionFillRatePct: absenceSub.substitutionFillRatePct,
       solverSuccessRatePct: solverQuality.successRatePct,

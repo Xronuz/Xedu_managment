@@ -35,6 +35,7 @@ describe('TimetableAnalyticsService', () => {
       },
       schedule: {
         findMany: jest.fn().mockResolvedValue([]),
+        groupBy: jest.fn().mockResolvedValue([]),
       },
       staffSalary: {
         findMany: jest.fn().mockResolvedValue([]),

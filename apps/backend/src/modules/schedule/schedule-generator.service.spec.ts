@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { RedisService } from '@/common/redis/redis.service';
 import { ConflictDetectorService } from '@/common/utils/conflict-detector';
 import { JwtPayload, UserRole, DayOfWeek } from '@eduplatform/types';
 
@@ -17,6 +18,11 @@ const mockBranchAdmin: JwtPayload = {
 
 const mockConflictDetector = {
   checkClash: jest.fn().mockResolvedValue([]),
+};
+
+const mockRedisService = {
+  scan: jest.fn().mockResolvedValue(['0', []]),
+  del: jest.fn().mockResolvedValue(0),
 };
 
 describe('ScheduleGeneratorService', () => {
@@ -38,6 +44,7 @@ describe('ScheduleGeneratorService', () => {
         ScheduleGeneratorService,
         { provide: PrismaService, useValue: prisma },
         { provide: ConflictDetectorService, useValue: mockConflictDetector },
+        { provide: RedisService, useValue: mockRedisService },
       ],
     }).compile();
 

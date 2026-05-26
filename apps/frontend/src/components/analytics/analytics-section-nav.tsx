@@ -5,10 +5,11 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 const ANALYTICS_TABS = [
-  { label: 'Hisobotlar',    href: '/dashboard/reports' },
-  { label: 'KPI Dashboard', href: '/dashboard/kpi' },
-  { label: 'Insights',      href: '/dashboard/insights' },
-  { label: 'Marketing',     href: '/dashboard/marketing' },
+  { label: 'Hisobotlar',       href: '/dashboard/reports' },
+  { label: 'KPI Dashboard',    href: '/dashboard/kpi' },
+  { label: 'Insights',         href: '/dashboard/insights' },
+  { label: 'Marketing',        href: '/dashboard/marketing' },
+  { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable' },
 ];
 
 export function AnalyticsSectionNav() {

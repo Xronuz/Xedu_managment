@@ -47,7 +47,7 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   // ═══════════════════════════════════════════════════════════════════════════════
   '/dashboard/onboarding':     ['director', 'vice_principal'],
   '/dashboard/setup':          ['director', 'vice_principal', 'branch_admin'],
-  '/dashboard/ops':            ['director', 'vice_principal', 'branch_admin', 'accountant', 'teacher', 'class_teacher'],
+  '/dashboard/ops':            ['director', 'vice_principal', 'branch_admin', 'accountant'],
 
   // ═══════════════════════════════════════════════════════════════════════════════
   // DIRECTOR — Maktab boshqaruvi (bird's eye view, CRUD faqat strategic narsalarda)
@@ -137,6 +137,9 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   '/dashboard/insights':       ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher'],
   '/dashboard/marketing':      ['director', 'vice_principal', 'branch_admin'],
   '/dashboard/analytics/timetable': ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher', 'accountant'],
+  '/dashboard/teaching-loads':    ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher'],
+  '/dashboard/reports/workload':  ['director', 'vice_principal', 'accountant', 'teacher', 'class_teacher'],
+  '/dashboard':                   ['super_admin', 'director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher', 'accountant', 'librarian', 'student', 'parent'],
 };
 
 /** Sidebar nav elementlari uchun ruxsat etilgan rollar

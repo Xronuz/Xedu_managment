@@ -72,8 +72,9 @@ export function middleware(request: NextRequest) {
   }
 
   // ── 1.5. Legacy route redirects ─────────────────────────────────────────
-  if (pathname === '/dashboard/classes') {
-    return NextResponse.redirect(new URL('/dashboard/education', request.url));
+  // /dashboard/education hub redirected to canonical schedule page
+  if (pathname === '/dashboard/education') {
+    return NextResponse.redirect(new URL('/dashboard/schedule', request.url));
   }
   // /dashboard/ai-analytics was renamed to /dashboard/insights
   if (pathname === '/dashboard/ai-analytics' || pathname.startsWith('/dashboard/ai-analytics/')) {

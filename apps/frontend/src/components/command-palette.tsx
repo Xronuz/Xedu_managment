@@ -90,7 +90,15 @@ const NAV_ITEMS = [
   { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
   { label: 'Audit Log', href: '/dashboard/audit-log', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/audit-log'] },
   { label: 'KPI Dashboard', href: '/dashboard/kpi', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/kpi'] },
-  { label: 'AI Analytics', href: '/dashboard/insights', icon: Brain, roles: ROUTE_PERMISSIONS['/dashboard/insights'] },
+  { label: 'Insights', href: '/dashboard/insights', icon: Brain, roles: ROUTE_PERMISSIONS['/dashboard/insights'] },
+  { label: "O'quv yuklamalari", href: '/dashboard/teaching-loads', icon: BookOpen, roles: ROUTE_PERMISSIONS['/dashboard/teaching-loads'] },
+  { label: 'Ogohlantirishlar', href: '/dashboard/alerts', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/alerts'] },
+  { label: 'Tasdiqlash inbox', href: '/dashboard/approvals', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/approvals'] },
+  { label: 'Akademik kalendar', href: '/dashboard/academic-calendar', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/academic-calendar'] },
+  { label: 'Profil', href: '/dashboard/profile', icon: UserCircle, roles: ROUTE_PERMISSIONS['/dashboard/profile'] },
+  { label: 'Uchrashuvlar', href: '/dashboard/meetings', icon: CalendarCheck, roles: ROUTE_PERMISSIONS['/dashboard/meetings'] },
+  { label: 'E\'lonlar', href: '/dashboard/announcements', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/announcements'] },
+  { label: 'Xabarlar', href: '/dashboard/messages', icon: MessageSquare, roles: ROUTE_PERMISSIONS['/dashboard/messages'] },
   { label: 'Marketing', href: '/dashboard/marketing', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/marketing'] },
 ];
 

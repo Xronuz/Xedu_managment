@@ -17,8 +17,10 @@ import { useConfirm } from '@/store/confirm.store';
 import { cn } from '@/lib/utils';
 import {
   BookOpen, Plus, Search, Upload, Trash2, Edit3, Loader2, AlertTriangle,
-  CheckCircle2, XCircle, Filter,
+  CheckCircle2, XCircle, Filter, GraduationCap, Users, School,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { StandardEmptyState } from '@/components/ui/standard-empty-state';
 
 import { teachingLoadApi, type TeachingLoad, type ImportPreviewRow } from '@/lib/api/teaching-load';
 import { usersApi } from '@/lib/api/users';
@@ -228,6 +230,36 @@ export default function TeachingLoadsPage() {
   const teacherOptions = teachers?.data ?? [];
   const classOptions = classes ?? [];
   const subjectOptions = subjects ?? [];
+  const router = useRouter();
+
+  const prerequisitesLoaded = !isLoading && classes !== undefined && subjects !== undefined && teachers !== undefined;
+  const missingPrerequisites = prerequisitesLoaded && (classOptions.length === 0 || subjectOptions.length === 0 || teacherOptions.length === 0);
+
+  if (missingPrerequisites) {
+    const missingItems = [
+      classOptions.length === 0 && 'sinflar',
+      subjectOptions.length === 0 && 'fanlar',
+      teacherOptions.length === 0 && "o'qituvchilar",
+    ].filter(Boolean);
+    return (
+      <div className="max-w-2xl mx-auto pt-10">
+        <h1 className="text-xl font-bold text-foreground mb-1">O'quv yuklamalari</h1>
+        <StandardEmptyState
+          icon={GraduationCap}
+          title="Ma'lumotlar yetishmayapti"
+          description={`O'qituvchi yuklamasi qo'shish uchun avval ${missingItems.join(', ')} kerak. Maktab sozlash orqali tezda barcha ma'lumotlarni qo'shishingiz mumkin.`}
+          primaryAction={{
+            label: 'Maktabni sozlash',
+            onClick: () => router.push('/dashboard/setup'),
+          }}
+          secondaryAction={{
+            label: 'Sinflarni ko\'rish',
+            onClick: () => router.push('/dashboard/classes'),
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -329,7 +361,19 @@ export default function TeachingLoadsPage() {
               {isLoading ? (
                 <tr><td colSpan={isManager ? 8 : 7} className="px-4 py-8 text-center text-muted-foreground">Yuklanmoqda...</td></tr>
               ) : filteredLoads.length === 0 ? (
-                <tr><td colSpan={isManager ? 8 : 7} className="px-4 py-8 text-center text-muted-foreground">Ma'lumot yo'q</td></tr>
+                <tr>
+                  <td colSpan={isManager ? 8 : 7} className="px-4 py-4">
+                    <StandardEmptyState
+                      icon={BookOpen}
+                      title="O'quv yuklamalari yo'q"
+                      description="Yangi o'quv yuklamasi qo'shish uchun yuqoridagi tugmani bosing."
+                      primaryAction={isManager ? {
+                        label: "Yuklama qo'shish",
+                        onClick: () => { resetForm(); setCreateOpen(true); },
+                      } : undefined}
+                    />
+                  </td>
+                </tr>
               ) : (
                 filteredLoads.map((load: TeachingLoad) => {
                   const statusMeta = STATUS_LABELS[load.status] ?? { label: load.status, variant: 'outline' as const };

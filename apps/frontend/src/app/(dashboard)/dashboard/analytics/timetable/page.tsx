@@ -13,9 +13,12 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useRouter } from 'next/navigation';
+import { BarChart2 } from 'lucide-react';
 import { timetableAnalyticsApi } from '@/lib/api/timetable-analytics';
 import { AnalyticsSectionNav } from '@/components/analytics/analytics-section-nav';
 import { chartColorSequence } from '@/components/workspace-system/chart-palette';
+import { StandardEmptyState } from '@/components/ui/standard-empty-state';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -62,6 +65,7 @@ function ExecCard({ icon, label, value, sub, tone = 'calm' }: {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function TimetableAnalyticsPage() {
+  const router = useRouter();
   const { data: overview, isLoading: ovLoading } = useQuery({
     queryKey: ['timetable-analytics-overview'],
     queryFn: timetableAnalyticsApi.getOverview,
@@ -127,6 +131,30 @@ export default function TimetableAnalyticsPage() {
       Almashtirish: w.substitutions,
     }));
   }, [absenceSub]);
+
+  const allLoaded = !ovLoading && !tuLoading && !ruLoading && !dLoading && !asLoading && !sqLoading && !pvLoading;
+  const hasData = !!overview && (overview.totalPublishedSlots ?? 0) > 0;
+
+  if (allLoaded && !hasData) {
+    return (
+      <div className="max-w-2xl mx-auto pt-10">
+        <AnalyticsSectionNav />
+        <StandardEmptyState
+          icon={BarChart2}
+          title="Jadval ma'lumotlari yetarli emas"
+          description="Analitik hisobotlarni ko'rish uchun kamida bitta nashr etilgan dars jadvali kerak. Avval jadvalni tuzib, nashr eting."
+          primaryAction={{
+            label: 'Jadvalga o\'tish',
+            onClick: () => router.push('/dashboard/schedule'),
+          }}
+          secondaryAction={{
+            label: 'Maktabni sozlash',
+            onClick: () => router.push('/dashboard/setup'),
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 p-4 max-w-7xl mx-auto">

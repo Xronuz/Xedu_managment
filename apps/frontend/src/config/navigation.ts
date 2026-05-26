@@ -17,7 +17,7 @@ import {
   Brain, Megaphone, MessageSquare, Bell, Settings,
   Building2, Package, Library, Bus, School,
   ShoppingBag, Coins, Heart, ClipboardCheck,
-  BarChart2, UserCheck, Activity, Rocket,
+  BarChart2, UserCheck, Activity, Rocket, Clock,
 } from 'lucide-react';
 import { ROUTE_PERMISSIONS } from './permissions';
 
@@ -55,19 +55,20 @@ export const DIRECTOR_NAV: NavGroup[] = [
     ],
   },
   {
-    // Sinflar, Dars jadvali, Fanlar — Ta'lim markazi tablarida mavjud
     title: "Ta'lim",
     items: [
-      { label: "Ta'lim markazi", href: '/dashboard/education', icon: BookOpen, roles: ROUTE_PERMISSIONS['/dashboard/education'] },
+      { label: 'Dars jadvali', href: '/dashboard/schedule', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/schedule'] },
+      { label: 'Sinflar', href: '/dashboard/classes', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/classes'] },
+      { label: 'Fanlar', href: '/dashboard/subjects', icon: BookMarked, roles: ROUTE_PERMISSIONS['/dashboard/subjects'] },
       { label: 'Baholar', href: '/dashboard/grades', icon: GraduationCap, roles: ROUTE_PERMISSIONS['/dashboard/grades'] },
       { label: 'Imtihonlar', href: '/dashboard/exams', icon: ClipboardList, roles: ROUTE_PERMISSIONS['/dashboard/exams'] },
       { label: 'Davomat', href: '/dashboard/attendance', icon: CalendarCheck, roles: ROUTE_PERMISSIONS['/dashboard/attendance'] },
     ],
   },
   {
-    // Ta'til so'rovlar — Tasdiqlash inbox (Ta'til tab) orqali boshqariladi
     title: 'Operatsiyalar',
     items: [
+      { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: Clock, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
       { label: 'Intizom', href: '/dashboard/discipline', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
       { label: "O'qituvchi almashtirish", href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
     ],
@@ -96,6 +97,7 @@ export const DIRECTOR_NAV: NavGroup[] = [
   {
     title: 'Aloqa',
     items: [
+      { label: 'Kommunikatsiya', href: '/dashboard/comms', icon: MessageSquare, roles: ROUTE_PERMISSIONS['/dashboard/comms'] },
       { label: 'Bildirishnomalar', href: '/dashboard/notifications', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/notifications'] },
     ],
   },
@@ -122,6 +124,8 @@ export const BRANCH_ADMIN_NAV: NavGroup[] = [
     items: [
       { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
+      { label: 'Maktab sozlash', href: '/dashboard/setup', icon: Rocket, roles: ROUTE_PERMISSIONS['/dashboard/setup'] },
+      { label: 'Ogohlantirishlar', href: '/dashboard/alerts', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/alerts'] },
     ],
   },
   {
@@ -173,6 +177,13 @@ export const BRANCH_ADMIN_NAV: NavGroup[] = [
     ],
   },
   {
+    title: 'Analitika',
+    items: [
+      { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
+      { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
+    ],
+  },
+  {
     title: 'Tizim',
     items: [
       { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
@@ -185,15 +196,18 @@ export const VICE_PRINCIPAL_NAV: NavGroup[] = [
   {
     title: 'Umumiy ko‘rinish',
     items: [
+      { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
+      { label: 'Maktab sozlash', href: '/dashboard/setup', icon: Rocket, roles: ROUTE_PERMISSIONS['/dashboard/setup'] },
+      { label: 'Ogohlantirishlar', href: '/dashboard/alerts', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/alerts'] },
     ],
   },
   {
     title: "Ta'lim",
     items: [
-      { label: "Ta'lim markazi", href: '/dashboard/education', icon: BookOpen, roles: ROUTE_PERMISSIONS['/dashboard/education'] },
       { label: 'Dars jadvali', href: '/dashboard/schedule', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/schedule'] },
       { label: 'Sinflar', href: '/dashboard/classes', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/classes'] },
+      { label: 'Fanlar', href: '/dashboard/subjects', icon: BookMarked, roles: ROUTE_PERMISSIONS['/dashboard/subjects'] },
       { label: 'Baholar', href: '/dashboard/grades', icon: GraduationCap, roles: ROUTE_PERMISSIONS['/dashboard/grades'] },
       { label: 'Imtihonlar', href: '/dashboard/exams', icon: ClipboardList, roles: ROUTE_PERMISSIONS['/dashboard/exams'] },
       { label: 'Davomat', href: '/dashboard/attendance', icon: CalendarCheck, roles: ROUTE_PERMISSIONS['/dashboard/attendance'] },
@@ -221,10 +235,18 @@ export const VICE_PRINCIPAL_NAV: NavGroup[] = [
     ],
   },
   {
+    title: 'Aloqa',
+    items: [
+      { label: 'Kommunikatsiya', href: '/dashboard/comms', icon: MessageSquare, roles: ROUTE_PERMISSIONS['/dashboard/comms'] },
+      { label: 'Bildirishnomalar', href: '/dashboard/notifications', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/notifications'] },
+    ],
+  },
+  {
     title: 'Analitika',
     items: [
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
       { label: 'KPI Dashboard', href: '/dashboard/kpi', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/kpi'] },
+      { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
     ],
   },
   {
@@ -279,6 +301,7 @@ export const ACCOUNTANT_NAV: NavGroup[] = [
   {
     title: 'Umumiy ko‘rinish',
     items: [
+      { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
     ],
   },
@@ -295,6 +318,7 @@ export const ACCOUNTANT_NAV: NavGroup[] = [
     title: 'Analitika',
     items: [
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
+      { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
     ],
   },
   {

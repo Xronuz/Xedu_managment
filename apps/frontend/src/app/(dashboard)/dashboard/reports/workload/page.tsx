@@ -5,7 +5,10 @@ import { useQuery } from '@tanstack/react-query';
 import {
   BarChart2, BookOpen, AlertTriangle, AlertCircle, Users,
   TrendingUp, Activity, ArrowUpRight, ArrowDownRight, Minus,
+  Plus,
 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { StandardEmptyState } from '@/components/ui/standard-empty-state';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -51,6 +54,26 @@ export default function WorkloadPage() {
   });
 
   const isLoading = summaryLoading || workloadsLoading;
+  const router = useRouter();
+
+  if (!isLoading && (!workloads || workloads.length === 0)) {
+    return (
+      <div className="max-w-2xl mx-auto pt-10">
+        <h1 className="text-2xl font-bold flex items-center gap-2 mb-2">
+          <BarChart2 className="h-6 w-6 text-primary" /> O&apos;qituvchi ish yuklamasi
+        </h1>
+        <StandardEmptyState
+          icon={Users}
+          title="O'qituvchi yuklamalari yo'q"
+          description="Ish yuklamasi hisobotini ko'rish uchun avval o'qituvchi yuklamalarini qo'shing."
+          primaryAction={{
+            label: "Yuklamalarni qo'shish",
+            onClick: () => router.push('/dashboard/teaching-loads'),
+          }}
+        />
+      </div>
+    );
+  }
 
   const chartData = (workloads ?? [])
     .filter(t => t.plannedWeeklyHours > 0)
@@ -216,10 +239,15 @@ export default function WorkloadPage() {
               {[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14" />)}
             </div>
           ) : !workloads || workloads.length === 0 ? (
-            <div className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
-              <Users className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p className="text-sm">O&apos;qituvchilar topilmadi</p>
-            </div>
+            <StandardEmptyState
+              icon={Users}
+              title="O'qituvchilar topilmadi"
+              description="Jadvalda ko'rsatish uchun ma'lumot mavjud emas."
+              primaryAction={{
+                label: "Yuklamalarni qo'shish",
+                onClick: () => router.push('/dashboard/teaching-loads'),
+              }}
+            />
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">

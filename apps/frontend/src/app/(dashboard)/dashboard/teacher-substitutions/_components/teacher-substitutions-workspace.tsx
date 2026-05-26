@@ -13,7 +13,9 @@ import {
   Users, Plus, CheckCircle2, XCircle, Clock, Loader2,
   Calendar, Search, X, Filter, Eye, AlertTriangle,
   UserCheck, UserX, MonitorPlay, Check, Ban, ArrowRight, Wrench,
+  Trash2,
 } from 'lucide-react';
+import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -171,6 +173,11 @@ export function TeacherSubstitutionsWorkspace() {
 
   // ── Selection + Panel ────────────────────────────────────────────────────────
   const [panelSub, setPanelSub] = useState<SubstitutionItem | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
 
   // ── Mutations ────────────────────────────────────────────────────────────────
   const approveMutation = useMutation({
@@ -418,6 +425,66 @@ export function TeacherSubstitutionsWorkspace() {
 
       {/* Main: Substitutions table */}
       <WorkspaceMain>
+        {isManager && (
+          <BulkActionBar
+            selected={selectedIds}
+            itemLabel="ta almashtirish"
+            onClearSelection={() => setSelectedIds([])}
+            actions={[
+              {
+                label: 'Tasdiqlash',
+                icon: CheckCircle2,
+                variant: 'default',
+                onClick: async (ids) => {
+                  for (const id of ids) {
+                    await teacherSubstitutionsApi.approve(id);
+                  }
+                  toast({ title: `${ids.length} ta almashtirish tasdiqlandi` });
+                  queryClient.invalidateQueries({ queryKey: ['teacher-substitutions'] });
+                  setSelectedIds([]);
+                },
+                disabled: (ids) => !ids.every(id => {
+                  const item = filteredItems.find(i => i.id === id);
+                  return item?.status === 'proposed';
+                }),
+              },
+              {
+                label: "Qo'llash",
+                icon: Check,
+                variant: 'default',
+                onClick: async (ids) => {
+                  for (const id of ids) {
+                    await teacherSubstitutionsApi.apply(id);
+                  }
+                  toast({ title: `${ids.length} ta almashtirish qo'llandi` });
+                  queryClient.invalidateQueries({ queryKey: ['teacher-substitutions'] });
+                  setSelectedIds([]);
+                },
+                disabled: (ids) => !ids.every(id => {
+                  const item = filteredItems.find(i => i.id === id);
+                  return item?.status === 'approved';
+                }),
+              },
+              {
+                label: 'Bekor qilish',
+                icon: Ban,
+                variant: 'destructive',
+                onClick: async (ids) => {
+                  for (const id of ids) {
+                    await teacherSubstitutionsApi.cancel(id);
+                  }
+                  toast({ title: `${ids.length} ta almashtirish bekor qilindi` });
+                  queryClient.invalidateQueries({ queryKey: ['teacher-substitutions'] });
+                  setSelectedIds([]);
+                },
+                disabled: (ids) => !ids.every(id => {
+                  const item = filteredItems.find(i => i.id === id);
+                  return item?.status === 'proposed' || item?.status === 'approved';
+                }),
+              },
+            ]}
+          />
+        )}
         <OpTable
           columns={columns}
           rows={filteredItems}
@@ -433,6 +500,15 @@ export function TeacherSubstitutionsWorkspace() {
             const canAct = isManager;
             return (
               <>
+                {isManager && (
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(r.id)}
+                    onChange={() => toggleSelect(r.id)}
+                    className="h-3.5 w-3.5 rounded border-gray-300 mr-1"
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                )}
                 <IconAction
                   icon={<Eye className="h-3.5 w-3.5" />}
                   title="Ko'rish"

@@ -1,6 +1,21 @@
 import { apiClient } from './client';
 
-export type ExportEntity = 'schedules' | 'teaching_loads' | 'payroll' | 'users' | 'analytics_summary';
+export type ExportEntity =
+  | 'schedules'
+  | 'teaching_loads'
+  | 'payroll'
+  | 'users'
+  | 'analytics_summary'
+  | 'classes'
+  | 'subjects'
+  | 'rooms'
+  | 'attendance'
+  | 'teacher_attendance'
+  | 'substitutions'
+  | 'leave_requests'
+  | 'workload_report'
+  | 'timetable_analytics';
+
 export type ExportFormat = 'csv' | 'xlsx' | 'json';
 export type ExportJobStatus = 'queued' | 'processing' | 'completed' | 'failed' | 'cancelled';
 
@@ -23,8 +38,16 @@ export interface ExportJobListResponse {
   total: number;
 }
 
+export interface ExportFilters {
+  branchId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  status?: string;
+  weekType?: string;
+}
+
 export const exportCenterApi = {
-  createExport: async (dto: { entity: ExportEntity; format: ExportFormat; branchId?: string }): Promise<ExportJob> => {
+  createExport: async (dto: { entity: ExportEntity; format: ExportFormat } & ExportFilters): Promise<ExportJob> => {
     const { data } = await apiClient.post('/exports', dto);
     return data;
   },

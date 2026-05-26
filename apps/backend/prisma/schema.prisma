@@ -286,6 +286,15 @@ enum ExportEntity {
   payroll
   users
   analytics_summary
+  classes
+  subjects
+  rooms
+  attendance
+  teacher_attendance
+  substitutions
+  leave_requests
+  workload_report
+  timetable_analytics
 }
 
 enum ExportFormat {

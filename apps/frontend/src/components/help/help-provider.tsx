@@ -61,7 +61,11 @@ const PAGE_ARTICLES: Record<string, string> = {
   '/dashboard/attendance': 'attendance',
   '/dashboard/teacher-substitutions': 'substitutions',
   '/dashboard/reports': 'analytics',
-  '/dashboard/analytics/timetable': 'analytics',
+  '/dashboard/analytics/timetable': 'timetable-analytics',
+  '/dashboard/export-center': 'export-center',
+  '/dashboard/reports/workload': 'workload-dashboard',
+  '/dashboard/leave-requests': 'leave-requests',
+  '/dashboard/users': 'user-rbac',
 };
 
 export function HelpProvider({ children }: { children: ReactNode }) {

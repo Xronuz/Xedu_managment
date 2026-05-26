@@ -72,7 +72,7 @@
       "category": "operations",
       "content": "O'qituvchi almashtirish moduli kasal yoki ta'tildagi o'qituvchilar o'rniga boshqa o'qituvchini tayinlash imkonini beradi. Tasdiqlash jarayoni orqali almashtirishlar nazorat qilinadi.",
       "faq": [
-        { "q": "Almashtirishni qandol so'rash mumkin?", "a": "Asosiy o'qituvchini, almashtiruvchi o'qituvchini va sanani tanlang. So'rov avtomatik ravishda tasdiqlovchiga yuboriladi." },
+        { "q": "Almashtirishni qandol so'rash mumkin?", "a": "Asosiy o'qituvchini, almashtiruvchi o'qituvchini va sanani tanlang. So'rov avtomatik ravishida tasdiqlovchiga yuboriladi." },
         { "q": "Kim almashtirishni tasdiqlaydi?", "a": "Direktor, mudir o'rinbosari yoki filial boshqaruvchisi almashtirishni tasdiqlashi mumkin." },
         { "q": "Almashtirish haqi haqida xabar qilinadimi?", "a": "Ha, tasdiqlangan almashtirishlar o'qituvchiga, sinf rahbariga va aloqador o'qituvchilarga bildirishnoma yuboriladi." }
       ]
@@ -86,6 +86,149 @@
         { "q": "Pulse nima?", "a": "Pulse — maktabingizning joriy holatini bir qarashda ko'rsatadigan real vaqt ko'rsatkichlari to'plami." },
         { "q": "Filial solishtirish qandol ishlaydi?", "a": "Barcha filiallaringizning akademik ko'rsatkichlari bir jadvalda ko'rsatiladi, eng yuqori va eng past natijalar ajratib ko'rsatiladi." },
         { "q": "Xavf ostidagi o'quvchilar qandol aniqlanadi?", "a": "Davomat 75% dan kam yoki o'rtacha ball 60% dan past bo'lgan o'quvchilar avtomatik ravishda 'xavf ostida' deb belgilanadi." }
+      ]
+    },
+    {
+      "id": "export-center",
+      "title": "Eksport markazi",
+      "category": "operations",
+      "content": "Eksport markazi orqali maktabingizning barcha ma'lumotlarini turli formatlarda (Excel, CSV, JSON) eksport qilishingiz mumkin. Jadval, o'quvchilar, davomat, ish haqi va boshqa ko'plab ma'lumotlar eksport qilinadi.",
+      "faq": [
+        { "q": "Qanday formatlarda eksport qilish mumkin?", "a": "Excel (.xlsx), CSV (.csv) va JSON (.json) formatlarida eksport qilish mumkin." },
+        { "q": "Eksport qachon tayyor bo'ladi?", "a": "Kichik ma'lumotlar uchun darhol, katta ma'lumotlar uchun esa bir necha soniya kutish kerak. Statusni 'Eksport tarixi' bo'limidan kuzatishingiz mumkin." },
+        { "q": "Filial bo'yicha eksport qilish mumkinmi?", "a": "Ha, filtrlar orqali ma'lum filial ma'lumotlarini eksport qilishingiz mumkin." }
+      ]
+    },
+    {
+      "id": "ops-alerts",
+      "title": "Operatsion ogohlantirishlar",
+      "category": "overview",
+      "content": "Ogohlantirishlar maktabingizda e'tibor talab qiluvchi muammolarni avtomatik aniqlaydi. Davomat pastligi, to'lov kechikishi, jadval to'qnashuvlari va boshqa muhim hodisalar haqida xabar beradi.",
+      "faq": [
+        { "q": "Alertlarni qandol o'chirish mumkin?", "a": "Alert yonidagi 'O'qib chiqdim' tugmasini bosing. 7 kun davomida ko'rsatilmaydi, lekin muammo davom etsa qaytib ko'rsatiladi." },
+        { "q": "Yangi alertlar qachon keladi?", "a": "Alertlar har kuni avtomatik yangilanadi. Muhim ogohlantirishlar darhol ko'rsatiladi." },
+        { "q": "Kim alertlarni ko'radi?", "a": "Direktor, mudir o'rinbosari, filial boshqaruvchisi va moliyachi alertlarni ko'rish huquqiga ega." }
+      ]
+    },
+    {
+      "id": "readiness-score",
+      "title": "Tayyorlik balli",
+      "category": "overview",
+      "content": "Tayyorlik balli maktabingizning ma'muriy va o'quv jarayonlariga tayyorligini 0-100 oralig'ida baholaydi. 8 ta asosiy kriteriya: dars soatlari, xonalar, sinflar, o'qituvchilar, jadval, yuklamalar, davomat va moliya.",
+      "faq": [
+        { "q": "Ball qanday hisoblanadi?", "a": "Har bir kriteriya 12.5 ballga teng. Barcha kriteriyalar to'liq bo'lsa 100 ball chiqadi." },
+        { "q": "Ballni qayta hisoblash mumkinmi?", "a": "Ha, 'Qayta hisoblash' tugmasini bosish orqali so'nggi ma'lumotlar asosida ballni yangilashingiz mumkin." },
+        { "q": "100 ball nima anglatadi?", "a": "Maktab barcha sozlash bosqichlarini to'liq yakunlagan va barcha tizimlar ishlashga tayyor." }
+      ]
+    },
+    {
+      "id": "schedule-generator",
+      "title": "Jadval generatori",
+      "category": "education",
+      "content": "Jadval generatori o'qituvchilar, sinflar va xonalar o'rtasida to'qnashuvsiz dars jadvali avtomatik yaratadi. Greedy, hybrid va backtrack algoritmlarini qo'llaydi.",
+      "faq": [
+        { "q": "Generator qanday ishlaydi?", "a": "Avval o'quv yuklamalarini tanlang, keyin 'Yaratish' tugmasini bosing. Tizim barcha cheklamalarni hisobga olib optimal jadval tuzadi." },
+        { "q": "To'qnashuvlar bo'lsa nima bo'ladi?", "a": "Generator to'qnashuvlarni avtomatik oldini oladi. Agar to'qnashuv bo'lsa, sizga xabar beriladi va qo'lda tuzatish imkoniyati beriladi." },
+        { "q": "Yaratilgan jadvalni qayta tahrirlash mumkinmi?", "a": "Ha, har bir slotni qo'lda ko'chirish, o'chirish yoki yangi slot qo'shish mumkin." }
+      ]
+    },
+    {
+      "id": "drag-drop-editor",
+      "title": "Drag-and-drop tahrirlagich",
+      "category": "education",
+      "content": "Drag-and-drop tahrirlagich orqali dars jadvalini vizual tarzda o'zgartirishingiz mumkin. Slotlarni bir kundan boshqasiga yoki bir vaqtdan boshqasiga sudrab o'tkazish mumkin.",
+      "faq": [
+        { "q": "Slotni qandol ko'chirish mumkin?", "a": "Slotni bosib turing va kerakli kun/vaqtga sudrab o'tkazing. Tizim avtomatik to'qnashuvni tekshiradi." },
+        { "q": "Ko'chirish mumkin emas degan xatolik nima?", "a": "Bu xona yoki o'qituvchi boshqa darsda band bo'lganida yuzaga keladi. Boshqa vaqt yoki xona tanlang." },
+        { "q": "O'zgarishlarni qandol saqlash mumkin?", "a": "O'zgarishlar avtomatik saqlanadi. Nashr etishdan avval ko'rib chiqishni tavsiya etamiz." }
+      ]
+    },
+    {
+      "id": "conflict-modal",
+      "title": "To'qnashuvlar oynasi",
+      "category": "education",
+      "content": "To'qnashuvlar oynasi jadvaldagi muammolarni aniqlash va tuzatish uchun ishlatiladi. O'qituvchi, xona va sinf to'qnashuvlari ko'rsatiladi va taklif etilgan yechimlar beriladi.",
+      "faq": [
+        { "q": "To'qnashuvlar qandol aniqlanadi?", "a": "Bir xil o'qituvchi, xona yoki sinf bir vaqtda ikkita joyda bo'lsa to'qnashuv aniqlanadi." },
+        { "q": "Taklif etilgan yechimlar qanday ishlaydi?", "a": "Tizim bo'sh xonalar va o'qituvchilarni topib, eng optimal almashtirishni taklif qiladi." },
+        { "q": "Barcha to'qnashuvlarni birdaniga tuzatish mumkinmi?", "a": "Ha, 'Barchasini tuzatish' funksiyasi avtomatik ravishda barcha to'qnashuvlarni hal qiladi." }
+      ]
+    },
+    {
+      "id": "payroll-recalculation",
+      "title": "Ish haqini qayta hisoblash",
+      "category": "finance",
+      "content": "Ish haqini qayta hisoblash funksiyasi davomat va o'quv yuklamalaridagi o'zgarishlarni hisobga olib, xodimlarning ish haqini yangilaydi.",
+      "faq": [
+        { "q": "Qachon qayta hisoblash kerak?", "a": "Davomat o'zgarganda, o'quv yuklamalari yangilanganda yoki avans berilganda qayta hisoblash tavsiya etiladi." },
+        { "q": "Qayta hisoblash avvalgi ma'lumotlarni o'chiradimi?", "a": "Yo'q, har bir hisobot versiyasi saqlanadi. Oldingi versiyalarni ko'rish mumkin." },
+        { "q": "Qayta hisoblashni kim amalga oshiradi?", "a": "Direktor, mudir o'rinbosari yoki moliyachi qayta hisoblashni amalga oshirishi mumkin." }
+      ]
+    },
+    {
+      "id": "teacher-substitution",
+      "title": "O'qituvchi almashtirish jarayoni",
+      "category": "operations",
+      "content": "O'qituvchi almashtirish jarayoni kasallik, ta'til yoki boshqa sabablarga ko'ra darsni boshqa o'qituvchiga topshirishni tashkil etadi.",
+      "faq": [
+        { "q": "Almashtirish qandol yaratiladi?", "a": "Dars jadvalida almashtirish kerak bo'lgan slotni tanlang, almashtiruvchi o'qituvchini tanlang va sababni kiriting." },
+        { "q": "Almashtirish avtomatik tasdiqlanadimi?", "a": "Yo'q, direktor yoki mudir o'rinbosari tasdiqlashi kerak. Tasdiqlanmaguncha almashtirish amalga oshirilmaydi." },
+        { "q": "Almashtirish haqi o'qituvchiga to'lanadimi?", "a": "Ha, almashtirish haqi almashtiruvchi o'qituvchining ish haqiga qo'shiladi." }
+      ]
+    },
+    {
+      "id": "repair-suggestions",
+      "title": "Tuzatish takliflari",
+      "category": "education",
+      "content": "Tuzatish takliflari jadvaldagi muammolarni avtomatik aniqlab, eng optimal yechimlarni taklif qiladi. Bo'sh slotlar, noto'g'ri taqsimlangan yuklamalar va boshqa muammolar ko'rsatiladi.",
+      "faq": [
+        { "q": "Takliflar qanday ishlaydi?", "a": "Tizim jadvalni tahlil qilib, eng samarali taqsimotni hisoblaydi va qadam-baqadam takliflar beradi." },
+        { "q": "Barcha takliflarni qabul qilish majburiyatmi?", "a": "Yo'q, har bir taklifni alohida ko'rib chiqib, qabul qilish yoki rad etish mumkin." },
+        { "q": "Takliflar qachon yangilanadi?", "a": "O'quv yuklamalari yoki xonalar o'zgarganda takliflar avtomatik yangilanadi." }
+      ]
+    },
+    {
+      "id": "workload-dashboard",
+      "title": "Ish yuklamalari dashboardi",
+      "category": "analytics",
+      "content": "Ish yuklamalari dashboardi har bir o'qituvchining yuklamasini vizual ko'rinishda taqdim etadi. Underloaded, balanced va overloaded statuslari bilan ranglangan.",
+      "faq": [
+        { "q": "Underloaded nima degani?", "a": "O'qituvchining rejalashtirilgan soatlari shartnoma soatlarining 80% dan kam. Yana dars yuklash mumkin." },
+        { "q": "Overloaded nima degani?", "a": "O'qituvchining rejalashtirilgan soatlari shartnoma soatlarining 110% dan ko'p. Yuklamani kamaytirish tavsiya etiladi." },
+        { "q": "Dashboard qanday yangilanadi?", "a": "O'quv yuklamalari yoki shartnomalar o'zgarganda avtomatik yangilanadi." }
+      ]
+    },
+    {
+      "id": "timetable-analytics",
+      "title": "Jadval analitikasi",
+      "category": "analytics",
+      "content": "Jadval analitikasi dars jadvalining samaradorligini tahlil qiladi. O'qituvchi va xona yuklamasi, kunlik slot taqsimoti va boshqa ko'rsatkichlar mavjud.",
+      "faq": [
+        { "q": "O'qituvchi yuklamasi qanday hisoblanadi?", "a": "Rejalashtirilgan slotlar soni shartnoma soatlariga bo'linib, foizda ifodalanadi." },
+        { "q": "Xona yuklamasi nima?", "a": "Xonada o'tkaziladigan dars slotlari umumiy mumkin bo'lgan slotlarga nisbati." },
+        { "q": "Analitika qachon yangilanadi?", "a": "Jadval nashr etilganda yoki o'zgartirilganda avtomatik yangilanadi." }
+      ]
+    },
+    {
+      "id": "leave-requests",
+      "title": "Ta'til so'rovlari",
+      "category": "operations",
+      "content": "Ta'til so'rovlari moduli xodimlarning ta'til, kasallik va boshqa sabablar bilan darsga kela olmasligini ro'yxatdan o'tkazish va tasdiqlash imkonini beradi.",
+      "faq": [
+        { "q": "So'rovni qandol yuborish mumkin?", "a": "Boshlanish va tugash sanalarini, sababni va ta'til turini tanlang. So'rov avtomatik ravishida tasdiqlovchiga yuboriladi." },
+        { "q": "So'rov qachon tasdiqlanadi?", "a": "Direktor yoki mudir o'rinbosari ko'rib chiqib, tasdiqlashi yoki rad etishi mumkin." },
+        { "q": "Ta'til ish haqiga ta'sir qiladimi?", "a": "Ha, to'langan ta'til ish haqiga ta'sir qilmaydi, lekin to'lanmagan ta'til ayiriladi." }
+      ]
+    },
+    {
+      "id": "user-rbac",
+      "title": "Foydalanuvchilar va huquqlar",
+      "category": "system",
+      "content": "Xedu platformasida har bir foydalanuvchi ma'lum rolga ega. Rollar: direktor, mudir o'rinbosari, filial boshqaruvchisi, o'qituvchi, sinf rahbari, moliyachi, kutubxonachi, o'quvchi va ota-ona.",
+      "faq": [
+        { "q": "Rolni qandol o'zgartirish mumkin?", "a": "Faqat direktor yoki super admin foydalanuvchi rolini o'zgartirishi mumkin." },
+        { "q": "Bitta foydalanuvchi bir necha rolda bo'lishi mumkinmi?", "a": "Yo'q, har bir foydalanuvchi faqat bitta asosiy rolga ega. Biroq, bir necha filialga biriktirilishi mumkin." },
+        { "q": "Huquqlarni qayerdan ko'rish mumkin?", "a": "'Sozlamalar' bo'limida har bir rolla ruxsat etilgan amallar ro'yxati ko'rsatiladi." }
       ]
     }
   ],

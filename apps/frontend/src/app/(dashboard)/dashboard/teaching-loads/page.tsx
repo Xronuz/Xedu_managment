@@ -17,8 +17,9 @@ import { useConfirm } from '@/store/confirm.store';
 import { cn } from '@/lib/utils';
 import {
   BookOpen, Plus, Search, Upload, Trash2, Edit3, Loader2, AlertTriangle,
-  CheckCircle2, XCircle, Filter, GraduationCap, Users,
+  CheckCircle2, XCircle, Filter, GraduationCap, Users, CheckSquare,
 } from 'lucide-react';
+import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { useRouter } from 'next/navigation';
 import { StandardEmptyState } from '@/components/ui/standard-empty-state';
 
@@ -65,6 +66,7 @@ export default function TeachingLoadsPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [importOpen, setImportOpen] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [importPreview, setImportPreview] = useState<ImportPreviewRow[] | null>(null);
   const [importFile, setImportFile] = useState<File | null>(null);
 
@@ -219,6 +221,18 @@ export default function TeachingLoadsPage() {
     return filteredLoads.reduce((sum: number, l: TeachingLoad) => sum + (l.hoursPerWeek ?? 0), 0);
   }, [filteredLoads]);
 
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredLoads.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredLoads.map((l: TeachingLoad) => l.id));
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -341,12 +355,67 @@ export default function TeachingLoadsPage() {
         )}
       </div>
 
+      {/* Bulk Action Bar */}
+      {isManager && (
+        <BulkActionBar
+          selected={selectedIds}
+          itemLabel="ta yuklama"
+          onClearSelection={() => setSelectedIds([])}
+          actions={[
+            {
+              label: 'Tasdiqlash',
+              icon: CheckSquare,
+              variant: 'default',
+              onClick: async (ids) => {
+                for (const id of ids) {
+                  await teachingLoadApi.update(id, { status: 'approved' });
+                }
+                toast({ title: `${ids.length} ta yuklama tasdiqlandi` });
+                queryClient.invalidateQueries({ queryKey: ['teaching-loads'] });
+                setSelectedIds([]);
+              },
+            },
+            {
+              label: 'Arxivlash',
+              icon: Trash2,
+              variant: 'destructive',
+              onClick: async (ids) => {
+                const ok = await ask({
+                  title: 'Arxivlashni tasdiqlang',
+                  description: `${ids.length} ta yuklamani arxivlashni xohlaysizmi?`,
+                  confirmText: 'Arxivlash',
+                  variant: 'destructive',
+                });
+                if (ok) {
+                  for (const id of ids) {
+                    await teachingLoadApi.remove(id);
+                  }
+                  toast({ title: `${ids.length} ta yuklama arxivlandi` });
+                  queryClient.invalidateQueries({ queryKey: ['teaching-loads'] });
+                  setSelectedIds([]);
+                }
+              },
+            },
+          ]}
+        />
+      )}
+
       {/* Table */}
       <div className="rounded-xl border bg-card overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
+                {isManager && (
+                  <th className="px-4 py-3 text-center w-10">
+                    <input
+                      type="checkbox"
+                      checked={selectedIds.length > 0 && selectedIds.length === filteredLoads.length}
+                      onChange={toggleSelectAll}
+                      className="h-4 w-4 rounded border-gray-300"
+                    />
+                  </th>
+                )}
                 <th className="px-4 py-3 text-left font-medium">O'qituvchi</th>
                 <th className="px-4 py-3 text-left font-medium">Fan</th>
                 <th className="px-4 py-3 text-left font-medium">Sinf</th>
@@ -359,10 +428,10 @@ export default function TeachingLoadsPage() {
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={isManager ? 8 : 7} className="px-4 py-8 text-center text-muted-foreground">Yuklanmoqda...</td></tr>
+                <tr><td colSpan={isManager ? 9 : 8} className="px-4 py-8 text-center text-muted-foreground">Yuklanmoqda...</td></tr>
               ) : filteredLoads.length === 0 ? (
                 <tr>
-                  <td colSpan={isManager ? 8 : 7} className="px-4 py-4">
+                  <td colSpan={isManager ? 9 : 8} className="px-4 py-4">
                     <StandardEmptyState
                       icon={BookOpen}
                       title="O'quv yuklamalari yo'q"
@@ -379,6 +448,16 @@ export default function TeachingLoadsPage() {
                   const statusMeta = STATUS_LABELS[load.status] ?? { label: load.status, variant: 'outline' as const };
                   return (
                     <tr key={load.id} className="border-b hover:bg-muted/30 transition-colors">
+                      {isManager && (
+                        <td className="px-4 py-3 text-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(load.id)}
+                            onChange={() => toggleSelect(load.id)}
+                            className="h-4 w-4 rounded border-gray-300"
+                          />
+                        </td>
+                      )}
                       <td className="px-4 py-3">{load.teacher?.firstName} {load.teacher?.lastName}</td>
                       <td className="px-4 py-3">{load.subject?.name}</td>
                       <td className="px-4 py-3">{load.class?.name}</td>

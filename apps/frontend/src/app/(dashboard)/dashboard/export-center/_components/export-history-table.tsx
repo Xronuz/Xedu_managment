@@ -29,7 +29,9 @@ import {
   FileSpreadsheet,
   FileJson,
   FileText,
+  Copy,
 } from 'lucide-react';
+import { CopyButton } from '@/components/ui/copy-button';
 import type { ExportJob, ExportJobStatus, ExportFormat } from '@/lib/api/export-center';
 import { exportCenterApi } from '@/lib/api/export-center';
 import { useToast } from '@/components/ui/use-toast';
@@ -55,6 +57,15 @@ const ENTITY_LABELS: Record<string, string> = {
   payroll: 'Ish haqi',
   users: 'Foydalanuvchilar',
   analytics_summary: 'Analytics xulosasi',
+  classes: 'Sinflar',
+  subjects: 'Fanlar',
+  rooms: 'Xonalar',
+  attendance: 'Davomat',
+  teacher_attendance: "O'qituvchi davomati",
+  substitutions: "O'qituvchi almashtirish",
+  leave_requests: "Ta'til so'rovlari",
+  workload_report: 'Ish yuklamalari hisoboti',
+  timetable_analytics: 'Jadval analitikasi',
 };
 
 interface ExportHistoryTableProps {
@@ -132,7 +143,10 @@ export function ExportHistoryTable({ jobs, isLoading, onRefresh }: ExportHistory
             return (
               <TableRow key={job.id}>
                 <TableCell className="font-medium">
-                  {ENTITY_LABELS[job.entity] || job.entity}
+                  <div className="flex items-center gap-1.5">
+                    {ENTITY_LABELS[job.entity] || job.entity}
+                    <CopyButton value={job.id} label="Eksport ID" size="icon" />
+                  </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1.5">

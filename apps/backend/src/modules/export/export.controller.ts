@@ -31,7 +31,13 @@ export class ExportController {
     @CurrentUser() user: JwtPayload,
     @Body() dto: CreateExportJobDto,
   ): Promise<ExportJobResponseDto> {
-    const job = await this.exportService.createAndProcess(user, dto.entity, dto.format, dto.branchId);
+    const job = await this.exportService.createAndProcess(user, dto.entity, dto.format, {
+      branchId: dto.branchId,
+      dateFrom: dto.dateFrom,
+      dateTo: dto.dateTo,
+      status: dto.status,
+      weekType: dto.weekType,
+    });
     return this.mapJob(job);
   }
 

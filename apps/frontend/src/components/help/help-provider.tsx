@@ -24,6 +24,11 @@ interface HelpContextValue {
   setCurrentArticle: (id: string | null) => void;
   content: HelpContent;
   currentPageArticle: HelpArticle | null;
+  recentArticleIds: string[];
+  searchQuery: string;
+  setSearchQuery: (q: string) => void;
+  activeCategory: string | null;
+  setActiveCategory: (c: string | null) => void;
 }
 
 const HelpContext = createContext<HelpContextValue | null>(null);
@@ -68,16 +73,28 @@ const PAGE_ARTICLES: Record<string, string> = {
   '/dashboard/users': 'user-rbac',
 };
 
+const RECENT_KEY = 'xedu-help-recent';
+const MAX_RECENT = 5;
+
 export function HelpProvider({ children }: { children: ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentArticleId, setCurrentArticleId] = useState<string | null>(null);
   const [content, setContent] = useState<HelpContent>({ articles: [], shortcuts: [] });
+  const [recentArticleIds, setRecentArticleIds] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
-  // Load help content
+  // Load help content and recent articles
   useEffect(() => {
     import('@/content/help/uz.json').then((mod) => {
       setContent(mod.default as HelpContent);
     });
+    try {
+      const saved = localStorage.getItem(RECENT_KEY);
+      if (saved) setRecentArticleIds(JSON.parse(saved));
+    } catch {
+      // ignore
+    }
   }, []);
 
   const openHelp = useCallback((articleId?: string) => {
@@ -91,6 +108,13 @@ export function HelpProvider({ children }: { children: ReactNode }) {
 
   const setCurrentArticle = useCallback((id: string | null) => {
     setCurrentArticleId(id);
+    if (id) {
+      setRecentArticleIds((prev) => {
+        const next = [id, ...prev.filter((x) => x !== id)].slice(0, MAX_RECENT);
+        try { localStorage.setItem(RECENT_KEY, JSON.stringify(next)); } catch {}
+        return next;
+      });
+    }
   }, []);
 
   // Detect current page article
@@ -111,6 +135,11 @@ export function HelpProvider({ children }: { children: ReactNode }) {
         setCurrentArticle,
         content,
         currentPageArticle,
+        recentArticleIds,
+        searchQuery,
+        setSearchQuery,
+        activeCategory,
+        setActiveCategory,
       }}
     >
       {children}

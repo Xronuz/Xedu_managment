@@ -31,6 +31,7 @@ export interface ExportJob {
   startedAt: string | null;
   completedAt: string | null;
   createdBy: string;
+  branchId?: string;
 }
 
 export interface ExportJobListResponse {
@@ -69,5 +70,14 @@ export const exportCenterApi = {
 
   downloadExport: (id: string): string => {
     return `${process.env.NEXT_PUBLIC_API_URL}/v1/exports/${id}/download`;
+  },
+
+  retryExport: async (job: ExportJob): Promise<ExportJob> => {
+    const { data } = await apiClient.post('/exports', {
+      entity: job.entity,
+      format: job.format,
+      branchId: job.branchId,
+    });
+    return data;
   },
 };

@@ -30,6 +30,7 @@ import { StepPublish } from '@/components/setup-wizard/steps/step-publish';
 import { validateStep, type SetupState } from '@/lib/setup-validator';
 import { ROUTE_PERMISSIONS } from '@/config/permissions';
 import { cn } from '@/lib/utils';
+import { PageSkeleton } from '@/components/ui/loading-skeletons';
 
 export default function SetupWizardPage() {
   const { user, _hasHydrated } = useAuthStore();
@@ -170,11 +171,7 @@ export default function SetupWizardPage() {
   }, [canAccess, queryClient]);
 
   if (!_hasHydrated || statusLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-6 w-6 animate-spin text-xedu-slate-400" />
-      </div>
-    );
+    return <PageSkeleton statsCount={3} />;
   }
 
   if (!canAccess) {

@@ -18,6 +18,7 @@ import {
   ArrowRight, BarChart3, TrendingUp, AlertTriangle, Users,
   School, MonitorPlay, Check, Trash2, Wrench,
 } from 'lucide-react';
+import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -621,6 +622,49 @@ export function LeaveRequestsWorkspace() {
           </div>
         )}
       </div>
+
+      {/* Bulk Action Bar */}
+      {canReview && selectedIds.length > 0 && (
+        <div className="w-full lg:col-span-2">
+          <BulkActionBar
+            selected={filteredRequests.filter((r) => selectedIds.includes(r.id))}
+            itemLabel="ta so'rov"
+            onClearSelection={clearSelection}
+            actions={[
+              {
+                label: 'Tasdiqlash',
+                icon: CheckCircle2,
+                variant: 'default',
+                onClick: async (items) => {
+                  const pending = items.filter((r) => r.status === 'pending');
+                  for (const r of pending) {
+                    await leaveRequestsApi.review(r.id, { action: 'approve' });
+                  }
+                  toast({ title: `${pending.length} ta so'rov tasdiqlandi` });
+                  queryClient.invalidateQueries({ queryKey: ['leave-requests'] });
+                  clearSelection();
+                },
+                disabled: (items) => !items.some((r) => r.status === 'pending'),
+              },
+              {
+                label: 'Rad etish',
+                icon: XCircle,
+                variant: 'destructive',
+                onClick: async (items) => {
+                  const pending = items.filter((r) => r.status === 'pending');
+                  for (const r of pending) {
+                    await leaveRequestsApi.review(r.id, { action: 'reject' });
+                  }
+                  toast({ title: `${pending.length} ta so'rov rad etildi` });
+                  queryClient.invalidateQueries({ queryKey: ['leave-requests'] });
+                  clearSelection();
+                },
+                disabled: (items) => !items.some((r) => r.status === 'pending'),
+              },
+            ]}
+          />
+        </div>
+      )}
 
       {/* Main: Leave requests table */}
       <WorkspaceMain>

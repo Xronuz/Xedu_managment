@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Activity } from 'lucide-react';
+import { PageSkeleton } from '@/components/ui/loading-skeletons';
 import { useAuthStore } from '@/store/auth.store';
 import {
   ReadinessScoreCard,
@@ -26,11 +27,7 @@ export default function OpsCommandCenterPage() {
   }, [_hasHydrated, user, router]);
 
   if (!_hasHydrated || !user) {
-    return (
-      <div className="flex h-96 items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-t-transparent border-xedu-primary" />
-      </div>
-    );
+    return <PageSkeleton statsCount={4} />;
   }
 
   const allowed = ROUTE_PERMISSIONS['/dashboard/ops'];

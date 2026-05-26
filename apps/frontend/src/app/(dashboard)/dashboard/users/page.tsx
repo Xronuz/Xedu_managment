@@ -25,6 +25,7 @@ import { getInitials, getRoleLabel, cn } from '@/lib/utils';
 import { ImportDialog } from '@/components/import/import-dialog';
 import { AssignBranchDialog } from '@/components/users/assign-branch-dialog';
 import { InviteUserDialog } from '@/components/invitation/invite-user-dialog';
+import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 
 // ── Zod schema ────────────────────────────────────────────────────────────────
 const userSchema = z.object({
@@ -106,6 +107,7 @@ export default function UsersPage() {
   const filterRef = useRef<HTMLDivElement>(null);
   const [checkEmailResult, setCheckEmailResult] = useState<any>(null);
   const [checkingEmail, setCheckingEmail] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 
   // ── React Hook Form ──────────────────────────────────────────────────────────
   const {
@@ -518,8 +520,63 @@ export default function UsersPage() {
       ) : filtered.length === 0 ? (
         <EmptyCard icon={<Users className="h-6 w-6" />} title="Foydalanuvchilar topilmadi" description="Qidiruv natijasida hech narsa topilmadi" />
       ) : (
+        <>
+        {selectedUserIds.length > 0 && (
+          <BulkActionBar
+            selected={filtered.filter((u: any) => selectedUserIds.includes(u.id))}
+            itemLabel="ta foydalanuvchi"
+            onClearSelection={() => setSelectedUserIds([])}
+            actions={[
+              {
+                label: 'Faollashtirish',
+                icon: RotateCcw,
+                variant: 'default',
+                onClick: async (items) => {
+                  const inactive = items.filter((u: any) => !u.isActive);
+                  for (const u of inactive) {
+                    await usersApi.restore(u.id);
+                  }
+                  toast({ title: `${inactive.length} ta foydalanuvchi faollashtirildi` });
+                  queryClient.invalidateQueries({ queryKey: ['users'] });
+                  setSelectedUserIds([]);
+                },
+                disabled: (items) => !items.some((u: any) => !u.isActive),
+              },
+              {
+                label: 'Bloklash',
+                icon: Ban,
+                variant: 'destructive',
+                onClick: async (items) => {
+                  const active = items.filter((u: any) => u.isActive);
+                  for (const u of active) {
+                    await usersApi.remove(u.id);
+                  }
+                  toast({ title: `${active.length} ta foydalanuvchi bloklandi` });
+                  queryClient.invalidateQueries({ queryKey: ['users'] });
+                  setSelectedUserIds([]);
+                },
+                disabled: (items) => !items.some((u: any) => u.isActive),
+              },
+            ]}
+          />
+        )}
+
         <TableShell>
           <THead>
+            <TH>
+              <input
+                type="checkbox"
+                checked={selectedUserIds.length > 0 && selectedUserIds.length === filtered.length}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    setSelectedUserIds(filtered.map((u: any) => u.id));
+                  } else {
+                    setSelectedUserIds([]);
+                  }
+                }}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+            </TH>
             <TH>Foydalanuvchi</TH>
             <TH>Rol</TH>
             <TH>Telefon</TH>
@@ -533,6 +590,20 @@ export default function UsersPage() {
               const isUntouchable = u.role === 'super_admin' || u.role === 'director' || isSelf;
               return (
               <TR key={u.id}>
+                <TD>
+                  <input
+                    type="checkbox"
+                    checked={selectedUserIds.includes(u.id)}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedUserIds((prev) => [...prev, u.id]);
+                      } else {
+                        setSelectedUserIds((prev) => prev.filter((id) => id !== u.id));
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-gray-300"
+                  />
+                </TD>
                 <TD><AvatarCell name={`${u.firstName} ${u.lastName}`} subtitle={u.email} /></TD>
                 <TD><span className="text-[12px] font-semibold" style={{ color: DS.muted }}>{getRoleLabel(u.role)}</span></TD>
                 <TD><span className="text-[13px]" style={{ color: DS.muted }}>{u.phone || '—'}</span></TD>
@@ -604,6 +675,7 @@ export default function UsersPage() {
             <Pagination page={page} total={meta.total} perPage={20} onPage={setPage} />
           )}
         </TableShell>
+        </>
       )}
 
       {/* Delete/Block confirm dialog */}

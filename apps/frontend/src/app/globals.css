@@ -1159,3 +1159,80 @@
   }
 
 }
+
+/* ── Print Styles ───────────────────────────────────────────────────────────── */
+@media print {
+  @page {
+    margin: 1.5cm;
+    size: auto;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+    font-size: 12pt;
+  }
+
+  /* Hide interactive chrome */
+  nav[aria-label="Sidebar"],
+  [data-sidebar],
+  .xedu-material-sidebar,
+  .xedu-material-header,
+  .xedu-sticky-executive,
+  .workspace-header-sticky,
+  button:not([data-print-include]),
+  .no-print,
+  .BulkActionBar,
+  [role="dialog"],
+  [role="tooltip"],
+  .animate-in,
+  .slide-in-from-bottom-2 {
+    display: none !important;
+  }
+
+  /* Expand collapsed layouts */
+  main, .workspace-main, [class*="col-span"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Cards become flat bordered boxes */
+  .card, [class*="rounded-xl"], [class*="rounded-lg"], [class*="rounded-md"] {
+    border: 1px solid #ccc !important;
+    box-shadow: none !important;
+    background: white !important;
+    break-inside: avoid;
+  }
+
+  /* Tables print cleanly */
+  table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+  }
+  th, td {
+    border: 1px solid #ccc !important;
+    padding: 6px 8px !important;
+  }
+  th {
+    background: #f5f5f5 !important;
+  }
+
+  /* Links show URL */
+  a[href]::after {
+    content: " (" attr(href) ")";
+    font-size: 0.85em;
+    color: #666;
+  }
+
+  /* Avoid breaking inside important elements */
+  tr, img, svg, .card, .surface-base, .surface-elevated {
+    break-inside: avoid;
+  }
+
+  /* Page breaks for major sections */
+  h1, h2 {
+    break-after: avoid;
+  }
+}

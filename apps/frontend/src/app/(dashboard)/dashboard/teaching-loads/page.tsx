@@ -22,6 +22,7 @@ import {
 import { BulkActionBar } from '@/components/ui/bulk-action-bar';
 import { useRouter } from 'next/navigation';
 import { StandardEmptyState } from '@/components/ui/standard-empty-state';
+import { TableSkeleton } from '@/components/ui/loading-skeletons';
 
 import { teachingLoadApi, type TeachingLoad, type ImportPreviewRow } from '@/lib/api/teaching-load';
 import { usersApi } from '@/lib/api/users';
@@ -428,7 +429,7 @@ export default function TeachingLoadsPage() {
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={isManager ? 9 : 8} className="px-4 py-8 text-center text-muted-foreground">Yuklanmoqda...</td></tr>
+                <tr><td colSpan={isManager ? 9 : 8} className="px-4 py-4"><TableSkeleton rows={5} /></td></tr>
               ) : filteredLoads.length === 0 ? (
                 <tr>
                   <td colSpan={isManager ? 9 : 8} className="px-4 py-4">

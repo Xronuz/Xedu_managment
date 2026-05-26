@@ -8,9 +8,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { exportCenterApi } from '@/lib/api/export-center';
 import { ExportCreateModal } from './_components/export-create-modal';
 import { ExportHistoryTable } from './_components/export-history-table';
+import { ExportJobDetail } from './_components/export-job-detail';
+import type { ExportJob } from '@/lib/api/export-center';
 
 export default function ExportCenterPage() {
   const [createOpen, setCreateOpen] = useState(false);
+  const [detailJob, setDetailJob] = useState<ExportJob | null>(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['exports'],
     queryFn: () => exportCenterApi.listExports(),
@@ -42,9 +46,9 @@ export default function ExportCenterPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: 'Jami eksportlar', value: data?.total ?? 0 },
-          { label: 'Tayyor', value: data?.data.filter(j => j.status === 'completed').length ?? 0 },
-          { label: 'Jarayonda', value: data?.data.filter(j => j.status === 'processing').length ?? 0 },
-          { label: 'Xatolik', value: data?.data.filter(j => j.status === 'failed').length ?? 0 },
+          { label: 'Tayyor', value: (data?.data ?? []).filter(j => j.status === 'completed').length },
+          { label: 'Jarayonda', value: (data?.data ?? []).filter(j => j.status === 'processing').length },
+          { label: 'Xatolik', value: (data?.data ?? []).filter(j => j.status === 'failed').length },
         ].map((stat) => (
           <Card key={stat.label}>
             <CardContent className="p-4">
@@ -68,6 +72,7 @@ export default function ExportCenterPage() {
             jobs={data?.data ?? []}
             isLoading={isLoading}
             onRefresh={refetch}
+            onViewDetail={(job) => { setDetailJob(job); setDetailOpen(true); }}
           />
         </CardContent>
       </Card>
@@ -76,6 +81,13 @@ export default function ExportCenterPage() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={refetch}
+      />
+
+      <ExportJobDetail
+        job={detailJob}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onRetry={refetch}
       />
     </div>
   );

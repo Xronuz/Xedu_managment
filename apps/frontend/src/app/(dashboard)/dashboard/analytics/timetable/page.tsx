@@ -8,7 +8,7 @@ import {
 } from 'recharts';
 import {
   Users, Building2, CalendarDays, UserCheck, DoorOpen,
-  TrendingUp, Activity, BrainCircuit, Banknote, Loader2,
+  Activity, BrainCircuit, Banknote,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';

@@ -96,7 +96,12 @@ export function middleware(request: NextRequest) {
 
     // Branch guard: every authenticated non-super_admin/director must have a branchId
     if (!['super_admin', 'director'].includes(role) && !branchId && pathname !== '/dashboard/setup') {
-      return NextResponse.redirect(new URL('/dashboard/setup', request.url));
+      const canAccessSetup = ROUTE_PERMISSIONS['/dashboard/setup']?.includes(role as UserRole);
+      if (canAccessSetup) {
+        return NextResponse.redirect(new URL('/dashboard/setup', request.url));
+      }
+      // Role cannot access setup — break potential redirect loop by letting them
+      // land on their ROLE_HOME. The home page will show appropriate guidance.
     }
 
     // Role-specific route guards (from ROUTE_PERMISSIONS)

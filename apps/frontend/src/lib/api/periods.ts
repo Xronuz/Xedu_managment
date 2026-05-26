@@ -19,6 +19,7 @@ export interface CreatePeriodPayload {
   endTime: string;
   dayType?: string;
   isActive?: boolean;
+  branchId?: string;
 }
 
 export interface UpdatePeriodPayload {

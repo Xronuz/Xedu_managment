@@ -38,7 +38,7 @@ export function StepTeachingLoads({ onDone }: StepTeachingLoadsProps) {
 
   const { data: teachersData } = useQuery({
     queryKey: ['users', 'teachers'],
-    queryFn: () => usersApi.getAll({ role: 'teacher', limit: 100 }),
+    queryFn: () => usersApi.getAll({ limit: 100 }),
   });
 
   const { data: subjects = [] } = useQuery({
@@ -155,7 +155,7 @@ export function StepTeachingLoads({ onDone }: StepTeachingLoadsProps) {
             <li>Ma&apos;lumotlarni to&apos;ldiring va faylni yuklang</li>
             <li>Tekshiruvdan o&apos;tkazib, saqlang</li>
           </ol>
-          <Button size="sm" variant="link" className="h-auto p-0 text-xs" onClick={() => { window.open('/dashboard/education?tab=teaching-loads', '_blank'); }}>
+          <Button size="sm" variant="link" className="h-auto p-0 text-xs" onClick={() => { window.open('/dashboard/teaching-loads', '_blank'); }}>
             Import sahifasiga o&apos;tish →
           </Button>
         </div>

@@ -18,7 +18,7 @@ import {
   ClipboardList, TrendingUp, FileText, CreditCard, Bell,
   MessageSquare, Library, Settings, UserCircle, School,
   CheckSquare, Briefcase, Clock, Search, History,
-  ShieldAlert, Bus, CalendarCheck, Shield, Banknote,
+  ShieldAlert, Bus, CalendarCheck, Shield,
   Building2, Award, Wallet, Package, Coins, ShoppingBag,
   Brain, Megaphone, UserCheck, Activity, Rocket,
 } from 'lucide-react';
@@ -217,7 +217,7 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
           </CommandGroup>
         )}
 
-        {usersData?.data && usersData.data.length > 0 && (
+        {usersData?.data && usersData.data.length > 0 && ['director', 'vice_principal', 'branch_admin'].includes(user?.role ?? '') && (
           <>
             <CommandSeparator />
             <CommandGroup heading="Foydalanuvchilar">

@@ -15,8 +15,8 @@ import {
   Users, Briefcase, UserCog, Shield, FileText,
   TrendingUp, CreditCard, Award, Wallet, BarChart3,
   Brain, Megaphone, MessageSquare, Bell, Settings,
-  Building2, Package, Library, Bus, School,
-  ShoppingBag, Coins, Heart, ClipboardCheck,
+  Building2, Package, Library, School,
+  ShoppingBag, Coins, Heart,
   BarChart2, UserCheck, Activity, Rocket, Clock,
 } from 'lucide-react';
 import { ROUTE_PERMISSIONS } from './permissions';
@@ -38,8 +38,6 @@ export interface NavGroup {
 /* ═══════════════════════════════════════════════════════════════════════════════
    ROLE-BASED NAVIGATION GROUPS
    ═══════════════════════════════════════════════════════════════════════════════ */
-
-const ALL_STAFF = ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher', 'accountant', 'librarian'];
 
 // ── DIRECTOR ──────────────────────────────────────────────────────────────────
 export const DIRECTOR_NAV: NavGroup[] = [

@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   BarChart2, BookOpen, AlertTriangle, AlertCircle, Users,
-  TrendingUp, Activity, ArrowUpRight, ArrowDownRight, Minus,
-  Plus,
+  Activity, ArrowUpRight, ArrowDownRight, Minus,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { StandardEmptyState } from '@/components/ui/standard-empty-state';

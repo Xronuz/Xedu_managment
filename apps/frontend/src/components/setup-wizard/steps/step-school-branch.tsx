@@ -2,10 +2,10 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { School, Building2, Users, CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
+import { CheckCircle2, AlertCircle, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { EmptyState } from '@/components/ui/empty-state';
+
 import { systemConfigApi } from '@/lib/api/system-config';
 import { branchesApi } from '@/lib/api/branches';
 import { useAuthStore } from '@/store/auth.store';

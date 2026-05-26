@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
-  Rocket, CheckCircle2, AlertCircle, ArrowRight, Loader2,
+  Rocket, CheckCircle2, AlertCircle, Loader2,
   ShieldAlert, Eye, Lock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -93,11 +93,17 @@ export function StepPublish({ onDone }: StepPublishProps) {
   });
 
   const handleFinish = () => {
-    if (canPublish && draftCount > 0 && conflicts.length === 0) {
+    if (conflicts.length > 0) {
+      toast({ variant: 'destructive', title: 'Ziddiyatlar topildi', description: 'Nashr etishdan oldin ziddiyatlarni tuzating.' });
+      return;
+    }
+    if (canPublish && draftCount > 0) {
       publishMut.mutate();
-    } else {
+    } else if (!canPublish) {
       setValidationDone(true);
       onDone();
+    } else {
+      toast({ variant: 'destructive', title: 'Nashr etish uchun ma\'lumot yetarli emas' });
     }
   };
 

@@ -143,7 +143,6 @@ export default function SetupWizardPage() {
     setCompleted(nextCompleted);
     const nextStep = s < WIZARD_STEPS.length ? s + 1 : s;
     setStep(nextStep);
-    updateOnboarding.mutate({ onboardingStep: nextStep });
     if (s >= WIZARD_STEPS.length) {
       setDone(true);
       updateOnboarding.mutate({
@@ -151,6 +150,8 @@ export default function SetupWizardPage() {
         onboardingCompleted: true,
       });
       toast({ title: 'Maktab sozlash yakunlandi!' });
+    } else {
+      updateOnboarding.mutate({ onboardingStep: nextStep });
     }
   };
 
@@ -299,6 +300,7 @@ export default function SetupWizardPage() {
                   variant="ghost"
                   size="sm"
                   onClick={() => setStep((s) => s + 1)}
+                  disabled={!currentValidation.valid}
                 >
                   <SkipForward className="mr-1.5 h-4 w-4" /> O'tkazib yuborish
                 </Button>

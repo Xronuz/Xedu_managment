@@ -17,7 +17,7 @@ import { useConfirm } from '@/store/confirm.store';
 import { cn } from '@/lib/utils';
 import {
   BookOpen, Plus, Search, Upload, Trash2, Edit3, Loader2, AlertTriangle,
-  CheckCircle2, XCircle, Filter, GraduationCap, Users, School,
+  CheckCircle2, XCircle, Filter, GraduationCap, Users,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { StandardEmptyState } from '@/components/ui/standard-empty-state';
@@ -87,7 +87,7 @@ export default function TeachingLoadsPage() {
 
   const { data: teachers } = useQuery({
     queryKey: ['users', 'teachers'],
-    queryFn: () => usersApi.getAll({ role: 'teacher', limit: 500 }),
+    queryFn: () => usersApi.getAll({ limit: 500 }),
     enabled: isManager,
   });
 

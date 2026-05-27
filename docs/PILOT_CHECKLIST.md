@@ -54,6 +54,19 @@
 - [ ] Send announcement → appears on recipient dashboards
 - [ ] Realtime: open two browsers, send message → appears without refresh
 
+### Phase 7A — Academic Core Flows
+- [ ] **Homework → Grade bridge**: Teacher creates homework → student submits → teacher grades → grade appears in gradebook with `source: 'homework'`
+- [ ] **Exam → Grade bridge**: Teacher creates exam → student takes online exam → auto-graded → grade appears in gradebook with `source: 'exam'`
+- [ ] **Draft/Publish grades**: Teacher creates grade as draft → only teacher sees it → publish → student/parent sees it
+- [ ] **Student published-only visibility**: Student cannot see unpublished exams, unpublished grades, or draft homework
+- [ ] **Parent published-only visibility**: Parent cannot see unpublished exams or unpublished grades
+- [ ] **Grade ownership**: Teacher A cannot edit/delete/publish grades created by Teacher B
+- [ ] **Soft-delete grades**: Deleting a grade sets `deletedAt` — it disappears from all views but remains in DB
+- [ ] **Exam bulk results**: Teacher uploads bulk exam results → old grades soft-deleted → new grades created atomically in `$transaction`
+- [ ] **Online exam session**: Student starts exam → answers saved → submits within time window → auto-graded → grade bridge upserts
+- [ ] **Payroll scheduled hours**: Generate monthly payroll → scheduled hours auto-calculated from published timetable
+- [ ] **Payroll completed hours**: Mark teacher attendance → recalculate completed hours → payroll updated with actual vs scheduled variance
+
 ## Post-Launch (Week 1)
 
 ### Daily
@@ -77,8 +90,10 @@
 
 ## Known Limitations (Pilot Phase)
 
-1. **Soft delete**: Not implemented. Deleted records are permanently removed. Mitigation: confirmation dialogs on all destructive actions.
-2. **AI features**: Stubs only. No real LLM integration yet.
-3. **Mobile app**: Web-only. PWA installable but not native.
-4. **Multi-school analytics**: Super-admin sees school list but no cross-school dashboards yet.
-5. **SMS gateway**: Not integrated. Notifications are in-app + email only.
+1. **AI features**: Stubs only. No real LLM integration yet.
+2. **Mobile app**: Web-only. PWA installable but not native.
+3. **Multi-school analytics**: Super-admin sees school list but no cross-school dashboards yet.
+4. **SMS gateway**: Not integrated. Notifications are in-app + email only.
+5. **Export sync processing**: Large exports run in the request thread — may timeout for very large datasets.
+6. **Timetable greedy generator N+1**: Basic generator hits DB for every candidate slot — use advanced solver for medium+ schools.
+7. **Student/Parent shared routes**: `/dashboard/attendance` and `/dashboard/exams` show teacher-oriented UI when accessed directly by students/parents. Students/parents should use `/dashboard/student` and `/dashboard/parent` portals.

@@ -49,7 +49,7 @@ export interface ValidateTokenResult {
 
 export const invitationsApi = {
   create: async (payload: CreateInvitationPayload): Promise<Invitation> => {
-    const { data } = await apiClient.post<Invitation>('/v1/invitations', payload);
+    const { data } = await apiClient.post<Invitation>('/invitations', payload);
     return data;
   },
 
@@ -60,31 +60,31 @@ export const invitationsApi = {
     role?: string;
     search?: string;
   }): Promise<{ data: Invitation[]; meta: { total: number; page: number; limit: number; totalPages: number } }> => {
-    const { data } = await apiClient.get('/v1/invitations', { params });
+    const { data } = await apiClient.get('/invitations', { params });
     return data;
   },
 
   getOne: async (id: string): Promise<Invitation> => {
-    const { data } = await apiClient.get<Invitation>(`/v1/invitations/${id}`);
+    const { data } = await apiClient.get<Invitation>(`/invitations/${id}`);
     return data;
   },
 
   resend: async (id: string): Promise<Invitation> => {
-    const { data } = await apiClient.post<Invitation>(`/v1/invitations/${id}/resend`);
+    const { data } = await apiClient.post<Invitation>(`/invitations/${id}/resend`);
     return data;
   },
 
   revoke: async (id: string): Promise<void> => {
-    await apiClient.delete(`/v1/invitations/${id}`);
+    await apiClient.delete(`/invitations/${id}`);
   },
 
   validateToken: async (token: string): Promise<ValidateTokenResult> => {
-    const { data } = await apiClient.get<ValidateTokenResult>('/v1/invitations/validate', { params: { token } });
+    const { data } = await apiClient.get<ValidateTokenResult>('/invitations/validate', { params: { token } });
     return data;
   },
 
   accept: async (payload: AcceptInvitationPayload): Promise<{ userId: string }> => {
-    const { data } = await apiClient.post<{ userId: string }>('/v1/invitations/accept', payload);
+    const { data } = await apiClient.post<{ userId: string }>('/invitations/accept', payload);
     return data;
   },
 };

@@ -69,7 +69,7 @@ export const exportCenterApi = {
   },
 
   downloadExport: (id: string): string => {
-    return `${process.env.NEXT_PUBLIC_API_URL}/v1/exports/${id}/download`;
+    return `${process.env.NEXT_PUBLIC_API_URL}/exports/${id}/download`;
   },
 
   retryExport: async (job: ExportJob): Promise<ExportJob> => {

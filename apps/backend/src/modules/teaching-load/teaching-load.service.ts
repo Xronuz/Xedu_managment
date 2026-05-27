@@ -23,7 +23,7 @@ export interface TeacherWorkloadItem {
   plannedWeeklyHours: number;
   contractualWeeklyHours: number;
   utilizationPercent: number;
-  status: 'underloaded' | 'balanced' | 'overloaded';
+  status: 'underloaded' | 'balanced' | 'overloaded' | 'missing_contract';
   classCount: number;
   subjectCount: number;
   branchCount: number;
@@ -461,8 +461,10 @@ export class TeachingLoadService {
       const branchIds = new Set(teacherLoads.map(l => l.branchId));
       const splitCount = teacherLoads.filter(l => l.isSplitClass).length;
 
-      let status: 'underloaded' | 'balanced' | 'overloaded' = 'balanced';
-      if (contractualHours > 0) {
+      let status: 'underloaded' | 'balanced' | 'overloaded' | 'missing_contract' = 'balanced';
+      if (contractualHours === 0) {
+        status = 'missing_contract';
+      } else if (contractualHours > 0) {
         const ratio = plannedHours / contractualHours;
         if (ratio < 0.8) status = 'underloaded';
         else if (ratio > 1.1) status = 'overloaded';

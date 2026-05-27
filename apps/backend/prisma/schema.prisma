@@ -1033,12 +1033,22 @@ model Grade {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  school    School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch    Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  class     Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
-  student   User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  createdBy User?   @relation("GradeCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  // ── Assessment bridge fields ───────────────────────────────────────────────
+  homeworkId  String?   // Link to HomeworkSubmission source
+  examId      String?   // Link to ExamSession source
+  source      String    @default("manual") // manual | homework | exam | import
+  isPublished Boolean   @default(true)
+  weight      Float     @default(1)
+  deletedAt   DateTime?
+
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch    Branch   @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  subject   Subject  @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  createdBy User?    @relation("GradeCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  homework  Homework? @relation(fields: [homeworkId], references: [id], onDelete: SetNull)
+  exam      Exam?    @relation(fields: [examId], references: [id], onDelete: SetNull)
 
   @@index([schoolId, branchId])
   @@index([studentId, subjectId])
@@ -1046,6 +1056,13 @@ model Grade {
   @@index([classId, date])
   @@index([studentId, date])
   @@index([schoolId, date]) // D-3: chorak/sana filtr O(1)
+  @@index([homeworkId])
+  @@index([examId])
+  @@index([source])
+  @@index([isPublished])
+  @@index([createdById])
+  @@index([studentId, isPublished])
+  @@index([classId, subjectId, type, date])
   @@map("grades")
 }
 
@@ -1072,11 +1089,14 @@ model Exam {
   subject   Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   questions ExamQuestion[]
   sessions  ExamSession[]
+  grades    Grade[]
 
   @@index([schoolId, branchId])
   @@index([branchId])
   @@index([classId])
   @@index([subjectId])
+  @@index([classId, scheduledAt])
+  @@index([scheduledAt, isPublished])
   @@map("exams")
 }
 
@@ -1097,6 +1117,7 @@ model Homework {
   class       Class                @relation(fields: [classId], references: [id], onDelete: Cascade)
   subject     Subject              @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   submissions HomeworkSubmission[]
+  grades      Grade[]
 
   @@index([schoolId, branchId])
   @@index([branchId])
@@ -1118,6 +1139,8 @@ model HomeworkSubmission {
   student  User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([homeworkId, studentId])
+  @@index([studentId])
+  @@index([homeworkId])
   @@map("homework_submissions")
 }
 
@@ -1819,6 +1842,7 @@ model ExamSession {
   @@index([studentId, status])
   @@index([schoolId, status])
   @@index([examId, studentId, status])
+  @@index([examId, status, submittedAt])
   @@map("exam_sessions")
 }
 
@@ -2357,6 +2381,7 @@ model CoinTransaction {
   @@index([userId])
   @@index([schoolId])
   @@index([userId, schoolId])
+  @@index([metadata(ops: JsonbPathOps)], type: Gin)
   @@map("coin_transactions")
 }
 

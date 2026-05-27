@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsNumber, IsOptional, IsDateString, Min, Max } from 'class-validator';
+import { IsString, IsEnum, IsNumber, IsOptional, IsDateString, IsBoolean, Min, Max } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { GradeType } from '@eduplatform/types';
 
@@ -39,4 +39,16 @@ export class CreateGradeDto {
   @IsOptional()
   @IsString()
   comment?: string;
+
+  @ApiPropertyOptional({ example: true })
+  @IsOptional()
+  @IsBoolean()
+  isPublished?: boolean;
+
+  @ApiPropertyOptional({ example: 1 })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(10)
+  weight?: number;
 }

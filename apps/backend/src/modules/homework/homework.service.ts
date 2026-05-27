@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException, Optional } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { JwtPayload } from '@eduplatform/types';
+import { JwtPayload, UserRole } from '@eduplatform/types';
 import { CreateHomeworkDto, UpdateHomeworkDto, SubmitHomeworkDto, GradeSubmissionDto } from './dto/homework.dto';
 import { AuditService } from '@/common/audit/audit.service';
 import { NotificationsService } from '@/modules/notifications/notifications.service';
@@ -19,6 +19,54 @@ export class HomeworkService {
     const where: any = { ...buildTenantWhere(currentUser) };
     if (classId) where.classId = classId;
     if (subjectId) where.subjectId = subjectId;
+
+    // ── Role-based scope isolation ────────────────────────────────────────────
+    if (currentUser.role === UserRole.STUDENT) {
+      const enrollments = await this.prisma.classStudent.findMany({
+        where: { studentId: currentUser.sub },
+        select: { classId: true },
+      });
+      const classIds = enrollments.map(e => e.classId);
+      if (classId && !classIds.includes(classId)) {
+        return [];
+      }
+      where.classId = classId ?? { in: classIds };
+    } else if (currentUser.role === UserRole.PARENT) {
+      const links = await this.prisma.parentStudent.findMany({
+        where: { parentId: currentUser.sub },
+        select: { studentId: true },
+      });
+      const studentIds = links.map(l => l.studentId);
+      const enrollments = await this.prisma.classStudent.findMany({
+        where: { studentId: { in: studentIds } },
+        select: { classId: true },
+      });
+      const classIds = [...new Set(enrollments.map(e => e.classId))];
+      if (classId && !classIds.includes(classId)) {
+        return [];
+      }
+      where.classId = classId ?? { in: classIds };
+    } else if (currentUser.role === UserRole.TEACHER || currentUser.role === UserRole.CLASS_TEACHER) {
+      // Teachers see homework for classes they teach (via Subject.teacherId)
+      const taughtClasses = await this.prisma.subject.findMany({
+        where: {
+          schoolId: currentUser.schoolId!,
+          teacherId: currentUser.sub,
+          ...(currentUser.branchId ? { branchId: currentUser.branchId } : {}),
+        },
+        select: { classId: true },
+      });
+      const classIds = [...new Set(taughtClasses.map(s => s.classId).filter(Boolean))];
+      if (classIds.length > 0) {
+        if (classId) {
+          if (!classIds.includes(classId)) {
+            return [];
+          }
+        } else {
+          where.classId = { in: classIds };
+        }
+      }
+    }
 
     return this.prisma.homework.findMany({
       where,
@@ -44,6 +92,20 @@ export class HomeworkService {
       },
     });
     if (!homework) throw new NotFoundException('Uyga vazifa topilmadi');
+
+    // ── Submission privacy isolation ──────────────────────────────────────────
+    if (currentUser.role === UserRole.STUDENT) {
+      homework.submissions = homework.submissions.filter(s => s.studentId === currentUser.sub);
+    } else if (currentUser.role === UserRole.PARENT) {
+      const links = await this.prisma.parentStudent.findMany({
+        where: { parentId: currentUser.sub },
+        select: { studentId: true },
+      });
+      const childIds = new Set(links.map(l => l.studentId));
+      homework.submissions = homework.submissions.filter(s => childIds.has(s.studentId));
+    }
+    // TEACHER / DIRECTOR / VP / BRANCH_ADMIN see all submissions
+
     return homework;
   }
 
@@ -52,12 +114,13 @@ export class HomeworkService {
       where: { id: dto.classId, schoolId: currentUser.schoolId! },
       select: { branchId: true },
     });
+    if (!cls) throw new NotFoundException('Sinf topilmadi');
     const homework = await this.prisma.homework.create({
       data: {
         ...dto,
         dueDate: new Date(dto.dueDate),
         schoolId: currentUser.schoolId!,
-        branchId: cls!.branchId,
+        branchId: cls.branchId,
       },
       include: {
         class: { select: { id: true, name: true } },
@@ -154,6 +217,14 @@ export class HomeworkService {
     const homework = await this.prisma.homework.findFirst({ where: { id, ...buildTenantWhere(currentUser) } });
     if (!homework) throw new NotFoundException('Uyga vazifa topilmadi');
 
+    // ── Verify student is enrolled in the homework's class ────────────────────
+    const enrollment = await this.prisma.classStudent.findFirst({
+      where: { classId: homework.classId, studentId: currentUser.sub },
+    });
+    if (!enrollment) {
+      throw new ForbiddenException('Siz bu sinfning o‘quvchisi emassiz');
+    }
+
     // Upsert: update if already submitted, create otherwise
     const existing = await this.prisma.homeworkSubmission.findFirst({
       where: { homeworkId: id, studentId: currentUser.sub },
@@ -195,13 +266,53 @@ export class HomeworkService {
     });
     if (!submission) throw new NotFoundException('Topshiriq topilmadi');
 
-    const updated = await this.prisma.homeworkSubmission.update({
-      where: { id: submissionId },
-      data: { score: dto.score },
-      include: {
-        student: { select: { id: true, firstName: true, lastName: true } },
-      },
-    });
+    // ── Atomic transaction: submission + grade bridge ─────────────────────────
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.homeworkSubmission.update({
+        where: { id: submissionId },
+        data: { score: dto.score },
+        include: {
+          student: { select: { id: true, firstName: true, lastName: true } },
+        },
+      }),
+    ]);
+
+    // ── Grade bridge: upsert linked Grade record (outside tx for idempotency) ─
+    if (dto.score !== null && dto.score !== undefined) {
+      const existingGrade = await this.prisma.grade.findFirst({
+        where: { homeworkId, studentId: submission.studentId, deletedAt: null },
+      });
+      const gradePayload = {
+        schoolId: homework.schoolId,
+        branchId: homework.branchId,
+        classId: homework.classId,
+        studentId: submission.studentId,
+        subjectId: homework.subjectId,
+        type: 'homework' as any,
+        score: dto.score,
+        maxScore: 100,
+        date: new Date(homework.dueDate),
+        comment: `Homework: ${homework.title}`,
+        homeworkId,
+        source: 'homework',
+        isPublished: true,
+        createdById: currentUser.sub,
+      };
+      if (existingGrade) {
+        await this.prisma.grade.update({
+          where: { id: existingGrade.id },
+          data: {
+            score: dto.score,
+            maxScore: 100,
+            date: new Date(homework.dueDate),
+            comment: `Homework: ${homework.title}`,
+            createdById: currentUser.sub,
+          },
+        });
+      } else {
+        await this.prisma.grade.create({ data: gradePayload });
+      }
+    }
 
     // ── O'quvchiga baho haqida bildirishnoma ──────────────────────────────────
     if (this.notificationsService && dto.score !== null && dto.score !== undefined) {

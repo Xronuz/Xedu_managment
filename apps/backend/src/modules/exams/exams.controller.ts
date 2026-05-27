@@ -18,7 +18,7 @@ export class ExamsController {
   @Get('upcoming')
   @Roles(
     UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN,
-    UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT,
+    UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT,
   )
   @ApiOperation({ summary: 'Yaqin imtihonlar (dashboard widget)' })
   getUpcoming(
@@ -94,6 +94,13 @@ export class ExamsController {
   @ApiOperation({ summary: 'Imtihonni nashr etish' })
   publish(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
     return this.examsService.publish(id, user);
+  }
+
+  @Put(':id/unpublish')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER)
+  @ApiOperation({ summary: 'Imtihonni qoralama holatiga qaytarish' })
+  unpublish(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.examsService.unpublish(id, user);
   }
 
   @Post(':id/results/bulk')

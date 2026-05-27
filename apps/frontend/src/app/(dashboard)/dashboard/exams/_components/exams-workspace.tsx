@@ -18,8 +18,10 @@ import {
   FileText, Plus, Calendar, CheckCircle, Clock, Loader2,
   Layers, Check, BarChart2, BookOpen, Trash2, HelpCircle,
   Users, Star, ChevronDown, ChevronUp, Search, X, Filter,
+  AlertCircle,
   Eye, ArrowRight, School, Trophy, BarChart3, TrendingUp,
   MonitorPlay, AlertTriangle, GraduationCap, FileQuestion,
+  Pencil,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -28,6 +30,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
+import { EmptyState } from '@/components/ui/empty-state';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
@@ -94,6 +97,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
   const queryClient = useQueryClient();
   const [expandedQ, setExpandedQ] = useState<string | null>(null);
   const [addingQ, setAddingQ] = useState(false);
+  const [editingQ, setEditingQ] = useState<string | null>(null);
   const [qForm, setQForm] = useState({
     type: 'multiple_choice',
     text: '',
@@ -105,6 +109,11 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
       { text: '', isCorrect: false },
       { text: '', isCorrect: false },
     ],
+  });
+  const [editQForm, setEditQForm] = useState({
+    text: '',
+    points: '1',
+    explanation: '',
   });
 
   const { data: questions = [], isLoading: qLoading } = useQuery({
@@ -139,6 +148,20 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
     onSuccess: () => {
       toast({ title: "Savol o'chirildi" });
       queryClient.invalidateQueries({ queryKey: ['online-exam', exam.id, 'questions'] });
+    },
+  });
+
+  const updateQuestionMutation = useMutation({
+    mutationFn: ({ qId, payload }: { qId: string; payload: any }) =>
+      onlineExamApi.updateQuestion(exam.id, qId, payload),
+    onSuccess: () => {
+      toast({ title: 'Savol yangilandi' });
+      queryClient.invalidateQueries({ queryKey: ['online-exam', exam.id, 'questions'] });
+      setEditingQ(null);
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
     },
   });
 
@@ -202,42 +225,94 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
               <div className="space-y-2">
                 {(questions as ExamQuestion[]).map((q, i) => (
                   <div key={q.id} className="rounded-lg border bg-xedu-bg-elevated">
-                    <div className="flex items-start gap-3 p-3">
-                      <span className="bg-primary/10 text-primary rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
-                        {i + 1}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium line-clamp-2">{q.text}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <Badge variant="outline" className="text-2xs px-1.5 py-0">{QTYPE_LABELS[q.type]}</Badge>
-                          <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{q.points} ball</span>
+                    {editingQ === q.id ? (
+                      <div className="p-3 space-y-3">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Savol matni</Label>
+                          <Textarea rows={2} value={editQForm.text}
+                            onChange={e => setEditQForm(f => ({ ...f, text: e.target.value }))}
+                            className="text-sm resize-none" />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Ball</Label>
+                            <Input type="number" min="0.5" step="0.5" value={editQForm.points}
+                              onChange={e => setEditQForm(f => ({ ...f, points: e.target.value }))}
+                              className="h-8 text-xs" />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Izoh (ixtiyoriy)</Label>
+                          <Input value={editQForm.explanation}
+                            onChange={e => setEditQForm(f => ({ ...f, explanation: e.target.value }))}
+                            className="h-8 text-xs" />
+                        </div>
+                        <div className="flex gap-2">
+                          <Button size="sm" onClick={() => {
+                            updateQuestionMutation.mutate({
+                              qId: q.id,
+                              payload: {
+                                text: editQForm.text.trim(),
+                                points: Number(editQForm.points) || 1,
+                                explanation: editQForm.explanation || undefined,
+                              },
+                            });
+                          }} disabled={updateQuestionMutation.isPending}>
+                            {updateQuestionMutation.isPending && <Loader2 className="mr-1 h-3.5 w-3.5 animate-spin" />}
+                            Saqlash
+                          </Button>
+                          <Button size="sm" variant="ghost" onClick={() => setEditingQ(null)}>Bekor</Button>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 shrink-0">
-                        <Button size="icon" variant="ghost" className="h-7 w-7"
-                          onClick={() => setExpandedQ(expandedQ === q.id ? null : q.id)}>
-                          {expandedQ === q.id ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
-                        </Button>
-                        {canManage && (
-                          <Button size="icon" variant="ghost" className="h-7 w-7 hover:text-xedu-ruby"
-                            onClick={async () => { if (await ask({ title: "Savolni o'chirasizmi?", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(q.id); }}
-                            disabled={deleteMutation.isPending}>
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                    {expandedQ === q.id && q.options.length > 0 && (
-                      <div className="px-3 pb-3 pt-0 space-y-1 border-t mt-1">
-                        {q.options.map((opt, oi) => (
-                          <div key={opt.id} className={`flex items-center gap-2 text-xs rounded px-2 py-1 ${opt.isCorrect ? 'bg-xedu-emerald-50 dark:bg-xedu-emerald-950/30 text-xedu-emerald-700 dark:text-xedu-emerald-400' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
-                            <span className="font-bold">{String.fromCharCode(65 + oi)}.</span>
-                            <span>{opt.text}</span>
-                            {opt.isCorrect && <CheckCircle className="ml-auto h-3.5 w-3.5 text-xedu-emerald-600 shrink-0" />}
+                    ) : (
+                      <>
+                        <div className="flex items-start gap-3 p-3">
+                          <span className="bg-primary/10 text-primary rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">
+                            {i + 1}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium line-clamp-2">{q.text}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <Badge variant="outline" className="text-2xs px-1.5 py-0">{QTYPE_LABELS[q.type]}</Badge>
+                              <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">{q.points} ball</span>
+                            </div>
                           </div>
-                        ))}
-                        {q.explanation && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 italic mt-2 px-2">Izoh: {q.explanation}</p>}
-                      </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Button size="icon" variant="ghost" className="h-7 w-7"
+                              onClick={() => setExpandedQ(expandedQ === q.id ? null : q.id)}>
+                              {expandedQ === q.id ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
+                            </Button>
+                            {canManage && (
+                              <Button size="icon" variant="ghost" className="h-7 w-7"
+                                onClick={() => {
+                                  setEditingQ(q.id);
+                                  setEditQForm({ text: q.text, points: String(q.points), explanation: q.explanation ?? '' });
+                                }}>
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                            {canManage && (
+                              <Button size="icon" variant="ghost" className="h-7 w-7 hover:text-xedu-ruby"
+                                onClick={async () => { if (await ask({ title: "Savolni o'chirasizmi?", variant: 'destructive', confirmText: "O'chirish" }).catch(() => false)) deleteMutation.mutate(q.id); }}
+                                disabled={deleteMutation.isPending}>
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                        {expandedQ === q.id && q.options.length > 0 && (
+                          <div className="px-3 pb-3 pt-0 space-y-1 border-t mt-1">
+                            {q.options.map((opt, oi) => (
+                              <div key={opt.id} className={`flex items-center gap-2 text-xs rounded px-2 py-1 ${opt.isCorrect ? 'bg-xedu-emerald-50 dark:bg-xedu-emerald-950/30 text-xedu-emerald-700 dark:text-xedu-emerald-400' : 'text-xedu-slate-500 dark:text-xedu-slate-400'}`}>
+                                <span className="font-bold">{String.fromCharCode(65 + oi)}.</span>
+                                <span>{opt.text}</span>
+                                {opt.isCorrect && <CheckCircle className="ml-auto h-3.5 w-3.5 text-xedu-emerald-600 shrink-0" />}
+                              </div>
+                            ))}
+                            {q.explanation && <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 italic mt-2 px-2">Izoh: {q.explanation}</p>}
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 ))}
@@ -465,7 +540,7 @@ export function ExamsWorkspace() {
 
 
   // ── Data fetching ────────────────────────────────────────────────────────────
-  const { data: exams = [], isLoading } = useQuery<Exam[]>({
+  const { data: exams = [], isLoading, isError } = useQuery<Exam[]>({
     queryKey: ['exams', filterClass, filterSubject],
     queryFn: () => examsApi.getAll({
       classId: filterClass || undefined,
@@ -529,12 +604,16 @@ export function ExamsWorkspace() {
   // ── Create modals ────────────────────────────────────────────────────────────
   const [singleOpen, setSingleOpen] = useState(false);
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [editingExam, setEditingExam] = useState<Exam | null>(null);
   const [sForm, setSForm] = useState(SINGLE_EMPTY);
   const [sErrors, setSErrors] = useState<Record<string, string>>({});
   const [bForm, setBForm] = useState(BULK_EMPTY);
   const [bErrors, setBErrors] = useState<Record<string, string>>({});
+  const [eForm, setEForm] = useState(SINGLE_EMPTY);
+  const [eErrors, setEErrors] = useState<Record<string, string>>({});
 
-  const anyOpen = singleOpen || bulkOpen;
+  const anyOpen = singleOpen || bulkOpen || editOpen;
 
   const { data: modalClasses = [] } = useQuery({
     queryKey: ['classes'],
@@ -635,6 +714,32 @@ export function ExamsWorkspace() {
     onSuccess: () => {
       toast({ title: "E'lon qilindi" });
       queryClient.invalidateQueries({ queryKey: ['exams'] });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+    },
+  });
+
+  const unpublishMutation = useMutation({
+    mutationFn: (id: string) => examsApi.unpublish(id),
+    onSuccess: () => {
+      toast({ title: 'Qoralama holatiga qaytarildi' });
+      queryClient.invalidateQueries({ queryKey: ['exams'] });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: any }) => examsApi.update(id, payload),
+    onSuccess: () => {
+      toast({ title: 'Imtihon yangilandi' });
+      queryClient.invalidateQueries({ queryKey: ['exams'] });
+      setEditOpen(false);
+      setEditingExam(null);
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message;
@@ -951,7 +1056,14 @@ export function ExamsWorkspace() {
 
       {/* Main: Exams table */}
       <WorkspaceMain>
-        <OpTable
+        {isError && (
+          <div className="flex flex-col items-center justify-center py-16 gap-3">
+            <AlertCircle className="h-10 w-10 text-xedu-ruby opacity-60" />
+            <p className="text-sm font-medium text-xedu-slate-600 dark:text-xedu-slate-300">Ma&apos;lumotlar yuklanmadi</p>
+            <p className="text-xs text-xedu-slate-400">Server bilan bog&apos;lanishda xatolik. Sahifani yangilang.</p>
+          </div>
+        )}
+        {!isError && <OpTable
           columns={columns}
           rows={filteredExams}
           rowKey={(e) => e.id}
@@ -978,8 +1090,36 @@ export function ExamsWorkspace() {
                 <IconAction
                   icon={<CheckCircle className="h-3.5 w-3.5" />}
                   title="E'lon qilish"
-                  onClick={async () => { if (await ask({ title: "Imtihon natijalarini e'lon qilishni tasdiqlang", description: "Imtihon natijalari e'lon qilinadi. Keyin o'zgartirib bo'lmaydi.", variant: 'destructive', confirmText: "E'lon qilish" })) publishMutation.mutate(e.id); }}
+                  onClick={async () => { if (await ask({ title: "Imtihonni e'lon qilishni tasdiqlang", description: "Imtihon o'quvchilarga ko'rinadigan bo'ladi.", variant: 'destructive', confirmText: "E'lon qilish" }).catch(() => false)) publishMutation.mutate(e.id); }}
                   tone="primary"
+                />
+              )}
+              {canManage && e.isPublished && (
+                <IconAction
+                  icon={<Clock className="h-3.5 w-3.5" />}
+                  title="Qoralama qilish"
+                  onClick={async () => { if (await ask({ title: "Imtihonni qoralama qilishni tasdiqlang", description: "Imtihon o'quvchilarga ko'rinmaydi.", variant: 'destructive', confirmText: 'Qoralama' }).catch(() => false)) unpublishMutation.mutate(e.id); }}
+                  tone="neutral"
+                />
+              )}
+              {canManage && (
+                <IconAction
+                  icon={<Pencil className="h-3.5 w-3.5" />}
+                  title="Tahrirlash"
+                  onClick={() => {
+                    setEditingExam(e);
+                    setEForm({
+                      classId: e.classId,
+                      subjectId: e.subjectId,
+                      title: e.title,
+                      frequency: e.frequency,
+                      maxScore: String(e.maxScore),
+                      scheduledAt: e.scheduledAt ? new Date(e.scheduledAt).toISOString().slice(0, 16) : '',
+                      duration: e.duration ? String(e.duration) : '',
+                    });
+                    setEErrors({});
+                    setEditOpen(true);
+                  }}
                 />
               )}
               {canManage && (
@@ -1009,7 +1149,7 @@ export function ExamsWorkspace() {
                   icon={<Trash2 className="h-3.5 w-3.5" />}
                   title="O'chirish"
                   tone="danger"
-                  onClick={async () => { if (await ask({ title: "Imtihonni o'chirishni tasdiqlang", description: "Imtihon o'chiriladi. Barcha savollar va natijalar bekor bo'ladi.", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(e.id); }}
+                  onClick={async () => { if (await ask({ title: "Imtihonni o'chirishni tasdiqlang", description: "Imtihon o'chiriladi. Barcha savollar va natijalar bekor bo'ladi.", variant: 'destructive', confirmText: "O'chirish" }).catch(() => false)) deleteMutation.mutate(e.id); }}
                 />
               )}
             </>
@@ -1017,15 +1157,13 @@ export function ExamsWorkspace() {
           isLoading={isLoading}
           skeletonRows={6}
           emptyState={
-            <div className="flex flex-col items-center justify-center py-12 gap-2">
-              <FileText className="h-8 w-8 text-xedu-slate-300" />
-              <p className="text-sm font-medium text-xedu-slate-500">Imtihonlar yo&apos;q</p>
-              <p className="text-xs text-xedu-slate-400">
-                {canManage ? "Yuqoridagi '+ Yangi imtihon' tugmasini bosib qo'shing" : "E'lon qilingan imtihonlar bu yerda ko'rinadi"}
-              </p>
-            </div>
+            <EmptyState
+              icon={FileText}
+              title="Imtihonlar yo'q"
+              description={canManage ? "Yuqoridagi '+ Yangi imtihon' tugmasini bosib qo'shing" : "E'lon qilingan imtihonlar bu yerda ko'rinadi"}
+            />
           }
-        />
+        />}
       </WorkspaceMain>
 
       {/* Right sidebar: Assessment intelligence */}
@@ -1121,7 +1259,7 @@ export function ExamsWorkspace() {
         open={!!panelExam}
         onClose={() => setPanelExam(null)}
         canManage={canManage}
-        onPublish={canManage ? async (id) => { if (await ask({ title: "Imtihon natijalarini e'lon qilishni tasdiqlang", description: "Imtihon natijalari e'lon qilinadi. Keyin o'zgartirib bo'lmaydi.", variant: 'destructive', confirmText: "E'lon qilish" })) publishMutation.mutate(id); } : undefined}
+        onPublish={canManage ? async (id) => { if (await ask({ title: "Imtihon natijalarini e'lon qilishni tasdiqlang", description: "Imtihon natijalari e'lon qilinadi. Keyin o'zgartirib bo'lmaydi.", variant: 'destructive', confirmText: "E'lon qilish" }).catch(() => false)) publishMutation.mutate(id); } : undefined}
       />
 
       {/* Exam Detail Dialog (Questions + Sessions) */}
@@ -1145,7 +1283,7 @@ export function ExamsWorkspace() {
             icon: CheckCircle,
             tone: 'primary',
             onClick: async (ids: string[]) => {
-              if (await ask({ title: `${ids.length} ta imtihon natijalarini e'lon qilishni tasdiqlang`, description: "Imtihon natijalari e'lon qilinadi. Keyin o'zgartirib bo'lmaydi.", variant: 'destructive', confirmText: "E'lon qilish" })) {
+              if (await ask({ title: `${ids.length} ta imtihon natijalarini e'lon qilishni tasdiqlang`, description: "Imtihon natijalari e'lon qilinadi. Keyin o'zgartirib bo'lmaydi.", variant: 'destructive', confirmText: "E'lon qilish" }).catch(() => false)) {
                 ids.forEach((id) => publishMutation.mutate(id));
               }
               clearSelection();
@@ -1224,6 +1362,76 @@ export function ExamsWorkspace() {
             <Button onClick={handleSingleSubmit} disabled={createMutation.isPending}>
               {createMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Qo&apos;shish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ── Edit exam dialog ── */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Imtihonni tahrirlash</DialogTitle>
+            <DialogDescription>{editingExam?.title}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Sarlavha <span className="text-xedu-ruby">*</span></Label>
+              <Input placeholder="Masalan: 1-chorak imtihoni" value={eForm.title} onChange={inp(setEForm)('title')} />
+              {eErrors.title && <p className="text-xs text-xedu-ruby">{eErrors.title}</p>}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Tur <span className="text-xedu-ruby">*</span></Label>
+                <Select value={eForm.frequency} onValueChange={sel(setEForm)('frequency')}>
+                  <SelectTrigger><SelectValue placeholder="Tur..." /></SelectTrigger>
+                  <SelectContent>{Object.entries(FREQUENCY_LABELS).map(([v, l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}</SelectContent>
+                </Select>
+                {eErrors.frequency && <p className="text-xs text-xedu-ruby">{eErrors.frequency}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Max ball</Label>
+                <Input type="number" min="1" value={eForm.maxScore} onChange={inp(setEForm)('maxScore')} />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>Sana va vaqt <span className="text-xedu-ruby">*</span></Label>
+                <Input type="datetime-local" value={eForm.scheduledAt} onChange={inp(setEForm)('scheduledAt')} />
+                {eErrors.scheduledAt && <p className="text-xs text-xedu-ruby">{eErrors.scheduledAt}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label>Davomiyligi (daq.)</Label>
+                <Input type="number" placeholder="90" min="1" value={eForm.duration} onChange={inp(setEForm)('duration')} />
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setEditOpen(false)}>Bekor qilish</Button>
+            <Button
+              onClick={() => {
+                const errs: Record<string, string> = {};
+                if (!eForm.title.trim()) errs.title = 'Sarlavha kiriting';
+                if (!eForm.frequency) errs.frequency = 'Tur tanlang';
+                if (!eForm.scheduledAt) errs.scheduledAt = 'Sana kiriting';
+                setEErrors(errs);
+                if (Object.keys(errs).length) return;
+                if (!editingExam) return;
+                updateMutation.mutate({
+                  id: editingExam.id,
+                  payload: {
+                    title: eForm.title.trim(),
+                    frequency: eForm.frequency,
+                    maxScore: Number(eForm.maxScore) || 100,
+                    scheduledAt: new Date(eForm.scheduledAt).toISOString(),
+                    duration: eForm.duration ? Number(eForm.duration) : undefined,
+                  },
+                });
+              }}
+              disabled={updateMutation.isPending}
+            >
+              {updateMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Saqlash
             </Button>
           </DialogFooter>
         </DialogContent>

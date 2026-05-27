@@ -302,6 +302,21 @@ export class OnlineExamService {
     if (!exam) throw new NotFoundException('Imtihon topilmadi yoki nashr qilinmagan');
     if (!exam.questions.length) throw new BadRequestException('Imtihonda savollar yo‘q');
 
+    // ── Time-window enforcement ───────────────────────────────────────────────
+    const now = new Date();
+    if (exam.scheduledAt) {
+      const startTime = new Date(exam.scheduledAt);
+      if (now < startTime) {
+        throw new ForbiddenException('Imtihon hali boshlanmagan');
+      }
+      if (exam.duration) {
+        const endTime = new Date(startTime.getTime() + exam.duration * 60000);
+        if (now > endTime) {
+          throw new ForbiddenException('Imtihon muddati tugagan');
+        }
+      }
+    }
+
     // Avvalgi session bor?
     const existing = await this.prisma.examSession.findUnique({
       where: { examId_studentId: { examId, studentId: currentUser.sub } },
@@ -364,6 +379,16 @@ export class OnlineExamService {
       throw new BadRequestException('Imtihon topshirilgan, javob o‘zgartirish mumkin emas');
     }
 
+    // ── Validate selectedOptionId belongs to the question ─────────────────────
+    if (dto.selectedOptionId) {
+      const option = await this.prisma.examOption.findFirst({
+        where: { id: dto.selectedOptionId, questionId: dto.questionId },
+      });
+      if (!option) {
+        throw new BadRequestException('Variant bu savolga tegishli emas');
+      }
+    }
+
     return this.prisma.studentAnswer.upsert({
       where: { sessionId_questionId: { sessionId, questionId: dto.questionId } },
       create: {
@@ -398,6 +423,7 @@ export class OnlineExamService {
     // Auto-grading: multiple_choice va true_false
     let totalScore = 0;
     let totalPossible = 0;
+    const answerUpdates: { id: string; isCorrect: boolean; pointsEarned: number }[] = [];
 
     for (const q of session.exam.questions) {
       totalPossible += q.points;
@@ -409,11 +435,7 @@ export class OnlineExamService {
         const isCorrect = correctOption?.id === answer.selectedOptionId;
         const earned = isCorrect ? q.points : 0;
         totalScore += earned;
-
-        await this.prisma.studentAnswer.update({
-          where: { id: answer.id },
-          data: { isCorrect, pointsEarned: earned },
-        });
+        answerUpdates.push({ id: answer.id, isCorrect, pointsEarned: earned });
       }
       // short_answer va essay → teacher qo'lda tekshiradi
     }
@@ -422,15 +444,59 @@ export class OnlineExamService {
       ? Math.round((totalScore / totalPossible) * 100 * 10) / 10
       : 0;
 
-    const updated = await this.prisma.examSession.update({
-      where: { id: sessionId },
-      data: {
-        status:      'submitted',
-        submittedAt: new Date(),
-        score:       totalScore,
-        percentage,
-      },
+    // ── Atomic transaction: answers + session + grade bridge ──────────────────
+    const exam = session.exam;
+    const [updated] = await this.prisma.$transaction([
+      this.prisma.examSession.update({
+        where: { id: sessionId },
+        data: {
+          status:      'submitted',
+          submittedAt: new Date(),
+          score:       totalScore,
+          percentage,
+        },
+      }),
+      ...answerUpdates.map(u =>
+        this.prisma.studentAnswer.update({
+          where: { id: u.id },
+          data: { isCorrect: u.isCorrect, pointsEarned: u.pointsEarned },
+        }),
+      ),
+    ]);
+
+    // ── Grade bridge: upsert linked Grade record (outside tx for idempotency) ─
+    const existingGrade = await this.prisma.grade.findFirst({
+      where: { examId: exam.id, studentId: currentUser.sub, deletedAt: null },
     });
+    const gradePayload = {
+      schoolId: exam.schoolId,
+      branchId: exam.branchId,
+      classId: exam.classId,
+      studentId: currentUser.sub,
+      subjectId: exam.subjectId,
+      type: 'exam' as any,
+      score: totalScore,
+      maxScore: exam.maxScore ?? 100,
+      date: new Date(exam.scheduledAt ?? new Date()),
+      comment: `Online exam: ${exam.title}`,
+      examId: exam.id,
+      source: 'exam',
+      isPublished: true,
+      createdById: currentUser.sub,
+    };
+    if (existingGrade) {
+      await this.prisma.grade.update({
+        where: { id: existingGrade.id },
+        data: {
+          score: totalScore,
+          maxScore: exam.maxScore ?? 100,
+          date: new Date(exam.scheduledAt ?? new Date()),
+          comment: `Online exam: ${exam.title}`,
+        },
+      });
+    } else {
+      await this.prisma.grade.create({ data: gradePayload });
+    }
 
     // Real-time: teacher dashboard
     this.eventsGateway?.emitToSchool(session.schoolId, 'exam:session:submitted', {
@@ -470,6 +536,25 @@ export class OnlineExamService {
       },
     });
     if (!session) throw new NotFoundException('Natija topilmadi');
+
+    // ── Strip correct answers for non-teachers ────────────────────────────────
+    if (!isTeacher) {
+      return {
+        ...session,
+        answers: session.answers.map(a => ({
+          ...a,
+          question: {
+            ...a.question,
+            options: a.question.options.map(o => ({
+              id: o.id,
+              text: o.text,
+              order: o.order,
+              // isCorrect intentionally omitted
+            })),
+          },
+        })),
+      } as any;
+    }
 
     return session;
   }

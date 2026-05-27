@@ -173,7 +173,11 @@ export class PayrollService {
     const existing = await this.prisma.staffSalary.findUnique({ where: { userId: dto.userId } });
     if (existing) throw new ConflictException('Bu xodim uchun maosh konfiguratsiyasi allaqachon mavjud');
 
-    // Tarif rejimdagi auto-hisoblash
+    // Tarif rejimdagi auto-hisoblash (BHM DB dan olinadi)
+    let customBhm: number | undefined;
+    if (schoolId && this.systemConfig) {
+      customBhm = await this.systemConfig.getBhm(schoolId);
+    }
     const tariffResult = dto.calculationType === 'tariff_based' && this.tariffCalculator
       ? this.tariffCalculator.calculate({
           qualificationGrade:  dto.qualificationGrade  ?? 'none',
@@ -183,6 +187,7 @@ export class PayrollService {
           honorificTitle:      dto.honorificTitle,
           languageCerts:       (dto.languageCerts ?? []) as LanguageCert[],
           weeklyLessonHours:   dto.weeklyLessonHours,
+          customBhm,
         })
       : null;
 
@@ -223,7 +228,11 @@ export class PayrollService {
     });
     if (!config) throw new NotFoundException('Maosh konfiguratsiyasi topilmadi');
 
-    // Tarif rejimdagi auto-hisoblash
+    // Tarif rejimdagi auto-hisoblash (BHM DB dan olinadi)
+    let customBhm: number | undefined;
+    if (currentUser.schoolId && this.systemConfig) {
+      customBhm = await this.systemConfig.getBhm(currentUser.schoolId);
+    }
     const calcType = dto.calculationType ?? config.calculationType;
     const tariffResult = calcType === 'tariff_based' && this.tariffCalculator
       ? this.tariffCalculator.calculate({
@@ -234,6 +243,7 @@ export class PayrollService {
           honorificTitle:      dto.honorificTitle      ?? (config.honorificTitle as string),
           languageCerts:       (dto.languageCerts ?? (config.languageCerts as any) ?? []) as LanguageCert[],
           weeklyLessonHours:   dto.weeklyLessonHours   ?? config.weeklyLessonHours,
+          customBhm,
         })
       : null;
 

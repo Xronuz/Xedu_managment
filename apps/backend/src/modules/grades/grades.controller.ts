@@ -85,7 +85,7 @@ export class GradesController {
   }
 
   @Get('class/:id/report')
-  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN)
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN, UserRole.PARENT)
   @ApiOperation({ summary: 'Sinf jurnali (sahifalanadi)' })
   getClassReport(
     @Param('id') classId: string,
@@ -106,6 +106,16 @@ export class GradesController {
     @CurrentUser() user: JwtPayload,
   ) {
     return this.gradesService.update(id, dto, user);
+  }
+
+  @Post(':id/publish')
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
+  @ApiOperation({ summary: 'Bahoni nashr qilish' })
+  publish(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.gradesService.publish(id, user);
   }
 
   @Delete(':id')

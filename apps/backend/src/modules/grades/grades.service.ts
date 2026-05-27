@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, Optional, Inject } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Optional, Inject } from '@nestjs/common';
 import { IsArray, IsDateString, IsEnum, IsNumber, IsOptional, IsString, IsUUID, Max, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Queue } from 'bullmq';
@@ -74,6 +74,8 @@ export class GradesService {
         schoolId: currentUser.schoolId!,
         branchId: currentUser.branchId!,
         createdById: currentUser.sub,
+        isPublished: dto.isPublished ?? false,
+        weight: dto.weight ?? 1,
       },
       include: {
         student: { select: { id: true, firstName: true, lastName: true } },
@@ -193,6 +195,9 @@ export class GradesService {
         comment: item.comment,
         date,
         createdById: currentUser.sub,
+        source: 'manual',
+        isPublished: false,
+        weight: 1,
       })),
     });
 
@@ -222,8 +227,13 @@ export class GradesService {
     const cached = await this.redis.getJson<any>(key);
     if (cached) return cached;
 
-    const where: any = { studentId: resolvedStudentId, ...buildTenantWhere(currentUser) };
+    const where: any = { studentId: resolvedStudentId, ...buildTenantWhere(currentUser), deletedAt: null };
     if (subjectId) where.subjectId = subjectId;
+
+    // Students and parents only see published grades
+    if (currentUser.role === UserRole.STUDENT || currentUser.role === UserRole.PARENT) {
+      where.isPublished = true;
+    }
 
     const grades = await this.prisma.grade.findMany({
       where,
@@ -249,8 +259,14 @@ export class GradesService {
     const cached = await this.redis.getJson<any>(key);
     if (cached) return cached;
 
-    const where: any = { classId, ...buildTenantWhere(currentUser) };
+    const where: any = { classId, ...buildTenantWhere(currentUser), deletedAt: null };
     if (subjectId) where.subjectId = subjectId;
+
+    // Students and parents only see published grades
+    if (currentUser.role === UserRole.STUDENT || currentUser.role === UserRole.PARENT) {
+      where.isPublished = true;
+    }
+
     const skip = (page - 1) * limit;
 
     const [grades, total] = await this.prisma.$transaction([
@@ -276,8 +292,16 @@ export class GradesService {
   }
 
   async update(id: string, dto: Partial<CreateGradeDto>, currentUser: JwtPayload) {
-    const grade = await this.prisma.grade.findFirst({ where: { id, ...buildTenantWhere(currentUser) } });
+    const grade = await this.prisma.grade.findFirst({ where: { id, ...buildTenantWhere(currentUser), deletedAt: null } });
     if (!grade) throw new NotFoundException('Baho topilmadi');
+
+    // Teachers can only update their own grades (or bridge grades they created)
+    if (
+      (currentUser.role === UserRole.TEACHER || currentUser.role === UserRole.CLASS_TEACHER) &&
+      grade.createdById !== currentUser.sub
+    ) {
+      throw new ForbiddenException('Boshqa o‘qituvchi bahosini tahrirlashga ruxsat yo‘q');
+    }
 
     const updated = await this.prisma.grade.update({
       where: { id },
@@ -330,11 +354,18 @@ export class GradesService {
   }
 
   async remove(id: string, currentUser: JwtPayload) {
-    const grade = await this.prisma.grade.findFirst({ where: { id, ...buildTenantWhere(currentUser) } });
+    const grade = await this.prisma.grade.findFirst({ where: { id, ...buildTenantWhere(currentUser), deletedAt: null } });
     if (!grade) throw new NotFoundException('Baho topilmadi');
 
+    // Teachers can only delete their own grades
+    if (
+      (currentUser.role === UserRole.TEACHER || currentUser.role === UserRole.CLASS_TEACHER) &&
+      grade.createdById !== currentUser.sub
+    ) {
+      throw new ForbiddenException('Boshqa o‘qituvchi bahosini o‘chirishga ruxsat yo‘q');
+    }
+
     // ── Coin rollback on grade delete (idempotency) ───────────────────────────
-    // O'quvchi bahosini o'chirib, qayta yuqori baho yozsa coin ikki marta berilmasin.
     if (this.coinsService) {
       const earnedTx = await this.prisma.coinTransaction.findFirst({
         where: { metadata: { path: ['gradeId'], equals: id }, type: 'earn', reason: 'grade_excellent' },
@@ -347,13 +378,11 @@ export class GradesService {
       }
     }
 
-    // Defense-in-depth: tenant scope ham WHERE da bo'lsin
-    const result = await this.prisma.grade.deleteMany({
-      where: { id, ...buildTenantWhere(currentUser) },
+    // Soft delete — grades are audit-sensitive
+    await this.prisma.grade.update({
+      where: { id },
+      data: { deletedAt: new Date() },
     });
-    if (result.count === 0) {
-      throw new NotFoundException('Baho topilmadi yoki sizga tegishli emas');
-    }
 
     // ── Audit log ────────────────────────────────────────────────────────────
     this.auditService?.log({
@@ -371,11 +400,48 @@ export class GradesService {
     return { message: 'Baho o‘chirildi' };
   }
 
+  async publish(id: string, currentUser: JwtPayload) {
+    const grade = await this.prisma.grade.findFirst({
+      where: { id, ...buildTenantWhere(currentUser), deletedAt: null },
+    });
+    if (!grade) throw new NotFoundException('Baho topilmadi');
+
+    // Teachers can only publish their own grades
+    if (
+      (currentUser.role === UserRole.TEACHER || currentUser.role === UserRole.CLASS_TEACHER) &&
+      grade.createdById !== currentUser.sub
+    ) {
+      throw new ForbiddenException('Boshqa o‘qituvchi bahosini nashr qilishga ruxsat yo‘q');
+    }
+
+    const updated = await this.prisma.grade.update({
+      where: { id },
+      data: { isPublished: true },
+    });
+
+    this.auditService?.log({
+      userId: currentUser.sub ?? undefined,
+      schoolId: currentUser.schoolId ?? undefined,
+      action: 'update',
+      entity: 'Grade',
+      entityId: id,
+      newData: { isPublished: true },
+    });
+
+    await this.invalidate(currentUser.schoolId!);
+    return updated;
+  }
+
   /** Returns just the GPA number for a student */
   async getStudentGpa(studentId: string, currentUser: JwtPayload) {
     await assertParentOfChild(this.prisma, currentUser, studentId);
+    const where: any = { studentId, ...buildTenantWhere(currentUser), deletedAt: null };
+    // Students and parents only count published grades
+    if (currentUser.role === UserRole.STUDENT || currentUser.role === UserRole.PARENT) {
+      where.isPublished = true;
+    }
     const grades = await this.prisma.grade.findMany({
-      where: { studentId, ...buildTenantWhere(currentUser) },
+      where,
       select: { score: true, maxScore: true },
     });
     const gpa = this.calculateGpa(grades);
@@ -396,8 +462,12 @@ export class GradesService {
     });
 
     // Batch: fetch all grades for all students in one query (avoids N+1)
+    const gradeWhere: any = { classId, ...filter, studentId: { in: members.map(m => m.studentId) }, deletedAt: null };
+    if (currentUser.role === UserRole.STUDENT || currentUser.role === UserRole.PARENT) {
+      gradeWhere.isPublished = true;
+    }
     const allGrades = await this.prisma.grade.findMany({
-      where: { classId, ...filter, studentId: { in: members.map(m => m.studentId) } },
+      where: gradeWhere,
       select: { studentId: true, score: true, maxScore: true },
     });
     const gradesByStudent = new Map<string, { score: number; maxScore: number }[]>();
@@ -443,14 +513,18 @@ export class GradesService {
     const limit = Math.min(query?.limit ?? 50, 200);
     const skip  = (page - 1) * limit;
 
-    const where: any = { ...buildTenantWhere(currentUser) };
+    const where: any = { ...buildTenantWhere(currentUser), deletedAt: null };
 
     if (query?.classId)   where.classId   = query.classId;
     if (query?.subjectId) where.subjectId = query.subjectId;
 
-    // Student can only see their own grades
+    // Student can only see their own grades, and only published ones
     if (currentUser.role === UserRole.STUDENT) {
       where.studentId = currentUser.sub;
+      where.isPublished = true;
+    } else if (currentUser.role === UserRole.PARENT) {
+      where.isPublished = true;
+      if (query?.studentId) where.studentId = query.studentId;
     } else if (query?.studentId) {
       where.studentId = query.studentId;
     }

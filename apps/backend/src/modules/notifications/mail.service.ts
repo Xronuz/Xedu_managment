@@ -23,7 +23,7 @@ export class MailService {
         port,
         secure: port === 465,
         auth: { user, pass },
-        tls: { rejectUnauthorized: false },
+        tls: { rejectUnauthorized: process.env.NODE_ENV === 'production' },
       });
       this.enabled = true;
       this.logger.log(`Email xizmati sozlandi: ${host}:${port}`);

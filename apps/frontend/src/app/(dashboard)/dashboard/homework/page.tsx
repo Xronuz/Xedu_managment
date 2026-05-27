@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   BookMarked, Plus, Calendar, CheckCircle2, Clock, Send, Loader2,
   FileX, FileCheck, Users, Star, ChevronRight, Paperclip, X, ExternalLink,
+  Pencil, Trash2, Save, AlertCircle,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,6 +22,7 @@ import { classesApi } from '@/lib/api/classes';
 import { subjectsApi } from '@/lib/api/subjects';
 import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/ui/use-toast';
+import { useConfirm } from '@/store/confirm.store';
 import { EmptyState } from '@/components/ui/empty-state';
 
 // ── Types (H-10) ─────────────────────────────────────────────────────────────
@@ -70,7 +72,7 @@ function MySubmissionDialog({ homeworkId, homeworkTitle, open, onClose }: {
   open: boolean;
   onClose: () => void;
 }) {
-  const { data: submission, isLoading } = useQuery({
+  const { data: submission, isLoading, isError } = useQuery({
     queryKey: ['homework', homeworkId, 'my-submission'],
     queryFn: () => homeworkApi.getMySubmission(homeworkId),
     enabled: open,
@@ -89,6 +91,12 @@ function MySubmissionDialog({ homeworkId, homeworkTitle, open, onClose }: {
 
         {isLoading ? (
           <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-10" />)}</div>
+        ) : isError ? (
+          <div className="py-10 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
+            <AlertCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
+            <p>Ma&apos;lumot yuklanmadi</p>
+            <p className="text-xs mt-1">Server bilan bog&apos;lanishda xatolik</p>
+          </div>
         ) : !submission ? (
           <div className="py-10 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
             <FileX className="h-10 w-10 mx-auto mb-3 opacity-30" />
@@ -172,7 +180,7 @@ function SubmissionsDialog({ homework, open, onClose }: {
     return init;
   });
 
-  const { data: detail, isLoading } = useQuery({
+  const { data: detail, isLoading, isError } = useQuery({
     queryKey: ['homework', homework.id],
     queryFn: () => homeworkApi.getOne(homework.id),
     enabled: open,
@@ -195,6 +203,21 @@ function SubmissionsDialog({ homework, open, onClose }: {
     },
   });
 
+  const bulkGradeMutation = useMutation({
+    mutationFn: async (items: { submissionId: string; score: number }[]) => {
+      await Promise.all(items.map(item => homeworkApi.grade(homework.id, item.submissionId, item.score)));
+    },
+    onSuccess: () => {
+      toast({ title: 'Barcha ballar saqlandi' });
+      queryClient.invalidateQueries({ queryKey: ['homework', homework.id] });
+      queryClient.invalidateQueries({ queryKey: ['homework'] });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+    },
+  });
+
   const handleGrade = (submissionId: string) => {
     const score = Number(scores[submissionId]);
     if (isNaN(score) || score < 0) {
@@ -202,6 +225,18 @@ function SubmissionsDialog({ homework, open, onClose }: {
       return;
     }
     gradeMutation.mutate({ submissionId, score });
+  };
+
+  const handleBulkGrade = () => {
+    const items = submissions
+      .filter((sub: any) => scores[sub.id] !== undefined && scores[sub.id] !== '' && scores[sub.id] !== String(sub.score ?? ''))
+      .map((sub: any) => ({ submissionId: sub.id, score: Number(scores[sub.id]) }))
+      .filter((item: any) => !isNaN(item.score) && item.score >= 0);
+    if (items.length === 0) {
+      toast({ title: 'O‘zgarish yo‘q' });
+      return;
+    }
+    bulkGradeMutation.mutate(items);
   };
 
   const submitted = submissions.length;
@@ -223,6 +258,12 @@ function SubmissionsDialog({ homework, open, onClose }: {
 
         {isLoading ? (
           <div className="space-y-2">{[...Array(3)].map((_, i) => <Skeleton key={i} className="h-16" />)}</div>
+        ) : isError ? (
+          <div className="py-10 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
+            <AlertCircle className="h-10 w-10 mx-auto mb-3 opacity-30" />
+            <p>Ma&apos;lumot yuklanmadi</p>
+            <p className="text-xs mt-1">Server bilan bog&apos;lanishda xatolik</p>
+          </div>
         ) : submissions.length === 0 ? (
           <div className="py-10 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
             <FileX className="h-10 w-10 mx-auto mb-3 opacity-30" />
@@ -293,6 +334,66 @@ function SubmissionsDialog({ homework, open, onClose }: {
   );
 }
 
+// ── Edit Homework Form (controlled, no direct state mutation) ────────────────
+function EditHomeworkForm({ homework, onSave, isSaving, onCancel }: {
+  homework: any;
+  onSave: (payload: { title: string; dueDate?: string; description?: string }) => void;
+  isSaving: boolean;
+  onCancel: () => void;
+}) {
+  const [localTitle, setLocalTitle] = useState(homework?.title ?? '');
+  const [localDueDate, setLocalDueDate] = useState(
+    homework?.dueDate ? new Date(homework.dueDate).toISOString().slice(0, 16) : '',
+  );
+  const [localDescription, setLocalDescription] = useState(homework?.description ?? '');
+  const [localErrors, setLocalErrors] = useState<Record<string, string>>({});
+
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!localTitle.trim()) e.title = 'Sarlavha kiriting';
+    if (!localDueDate) e.dueDate = 'Topshirish muddati';
+    setLocalErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSave = () => {
+    if (!validate()) return;
+    onSave({
+      title: localTitle.trim(),
+      dueDate: localDueDate ? new Date(localDueDate).toISOString() : undefined,
+      description: localDescription || undefined,
+    });
+  };
+
+  return (
+    <>
+      <div className="space-y-4 py-2">
+        <div className="space-y-1.5">
+          <Label>Sarlavha</Label>
+          <Input value={localTitle} onChange={e => { setLocalTitle(e.target.value); setLocalErrors(prev => { const n = { ...prev }; delete n.title; return n; }); }} />
+          {localErrors.title && <p className="text-xs text-xedu-ruby">{localErrors.title}</p>}
+        </div>
+        <div className="space-y-1.5">
+          <Label>Topshirish muddati</Label>
+          <Input type="datetime-local" value={localDueDate} onChange={e => { setLocalDueDate(e.target.value); setLocalErrors(prev => { const n = { ...prev }; delete n.dueDate; return n; }); }} />
+          {localErrors.dueDate && <p className="text-xs text-xedu-ruby">{localErrors.dueDate}</p>}
+        </div>
+        <div className="space-y-1.5">
+          <Label>Tavsif / Topshiriq matni</Label>
+          <Textarea value={localDescription} onChange={e => setLocalDescription(e.target.value)} className="min-h-[80px]" />
+        </div>
+      </div>
+      <DialogFooter className="gap-2">
+        <Button variant="outline" onClick={onCancel}>Bekor qilish</Button>
+        <Button onClick={handleSave} disabled={isSaving}>
+          {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          Saqlash
+        </Button>
+      </DialogFooter>
+    </>
+  );
+}
+
 // ── Main Page ─────────────────────────────────────────────────────────────────
 export default function HomeworkPage() {
   const { user } = useAuthStore();
@@ -314,10 +415,19 @@ export default function HomeworkPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [gradingHw, setGradingHw] = useState<any | null>(null);
   const [viewSubmissionHw, setViewSubmissionHw] = useState<any | null>(null);
+  const [editingHw, setEditingHw] = useState<any | null>(null);
+  const [filterClass, setFilterClass] = useState('');
+  const [filterSubject, setFilterSubject] = useState('');
+  const [filterDateFrom, setFilterDateFrom] = useState('');
+  const [filterDateTo, setFilterDateTo] = useState('');
+  const ask = useConfirm();
 
-  const { data: homeworks = [], isLoading, isError } = useQuery<Homework[]>({ queryKey: ['homework'], queryFn: () => homeworkApi.getAll() });
-  const { data: classes = [] } = useQuery({ queryKey: ['classes'], queryFn: () => classesApi.getAll(), enabled: open });
-  const { data: subjects = [] } = useQuery({ queryKey: ['subjects'], queryFn: () => subjectsApi.getAll(), enabled: open });
+  const { data: homeworks = [], isLoading, isError } = useQuery<Homework[]>({
+    queryKey: ['homework', { classId: filterClass, subjectId: filterSubject }],
+    queryFn: () => homeworkApi.getAll({ classId: filterClass || undefined, subjectId: filterSubject || undefined }),
+  });
+  const { data: classes = [] } = useQuery({ queryKey: ['classes'], queryFn: () => classesApi.getAll(), enabled: open || !!editingHw });
+  const { data: subjects = [] } = useQuery({ queryKey: ['subjects'], queryFn: () => subjectsApi.getAll(), enabled: open || !!editingHw });
 
   const createMutation = useMutation({
     mutationFn: homeworkApi.create,
@@ -326,6 +436,31 @@ export default function HomeworkPage() {
       queryClient.invalidateQueries({ queryKey: ['homework'] });
       setOpen(false);
       setForm(EMPTY);
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: any }) => homeworkApi.update(id, payload),
+    onSuccess: () => {
+      toast({ title: ' Uy vazifasi yangilandi' });
+      queryClient.invalidateQueries({ queryKey: ['homework'] });
+      setEditingHw(null);
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+    },
+  });
+
+  const removeMutation = useMutation({
+    mutationFn: homeworkApi.remove,
+    onSuccess: () => {
+      toast({ title: " Uy vazifasi o'chirildi" });
+      queryClient.invalidateQueries({ queryKey: ['homework'] });
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message;
@@ -410,8 +545,19 @@ export default function HomeworkPage() {
 
   const now = new Date();
   const hw = homeworks as any[];
-  const active = hw.filter(h => new Date(h.dueDate) >= now);
-  const expired = hw.filter(h => new Date(h.dueDate) < now);
+  let active = hw.filter(h => new Date(h.dueDate) >= now);
+  let expired = hw.filter(h => new Date(h.dueDate) < now);
+  if (filterDateFrom) {
+    const from = new Date(filterDateFrom);
+    active = active.filter(h => new Date(h.dueDate) >= from);
+    expired = expired.filter(h => new Date(h.dueDate) >= from);
+  }
+  if (filterDateTo) {
+    const to = new Date(filterDateTo);
+    to.setHours(23, 59, 59, 999);
+    active = active.filter(h => new Date(h.dueDate) <= to);
+    expired = expired.filter(h => new Date(h.dueDate) <= to);
+  }
 
   return (
     <div className="space-y-6">
@@ -451,6 +597,45 @@ export default function HomeworkPage() {
           ))}
         </div>
       )}
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-2">
+        <select
+          value={filterClass}
+          onChange={e => setFilterClass(e.target.value)}
+          className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
+        >
+          <option value="">Barcha sinflar</option>
+          {(classes as any[]).map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
+        </select>
+        <select
+          value={filterSubject}
+          onChange={e => setFilterSubject(e.target.value)}
+          className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
+        >
+          <option value="">Barcha fanlar</option>
+          {(subjects as any[]).map((s: any) => <option key={s.id} value={s.id}>{s.name}{s.class?.name ? ` (${s.class.name})` : ''}</option>)}
+        </select>
+        <input
+          type="date"
+          value={filterDateFrom}
+          onChange={e => setFilterDateFrom(e.target.value)}
+          className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
+          placeholder="Dan"
+        />
+        <input
+          type="date"
+          value={filterDateTo}
+          onChange={e => setFilterDateTo(e.target.value)}
+          className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
+          placeholder="Gacha"
+        />
+        {(filterClass || filterSubject || filterDateFrom || filterDateTo) && (
+          <Button size="sm" variant="ghost" className="h-8 text-xs" onClick={() => { setFilterClass(''); setFilterSubject(''); setFilterDateFrom(''); setFilterDateTo(''); }}>
+            <X className="mr-1 h-3 w-3" /> Tozalash
+          </Button>
+        )}
+      </div>
 
       {isLoading ? (
         <div className="space-y-3">{Array(3).fill(0).map((_, i) => <Skeleton key={i} className="h-24 w-full rounded-xl" />)}</div>
@@ -565,15 +750,29 @@ export default function HomeworkPage() {
                               );
                             })()}
                             {(isTeacher || isAdmin) && (
-                              <Button size="sm" variant="outline" onClick={() => setGradingHw(hw)}>
-                                <FileCheck className="mr-1 h-3.5 w-3.5" /> Topshiriqlar
-                                {submissionCount > 0 && (
-                                  <Badge variant="secondary" className="ml-1.5 h-4 px-1.5 text-[10px]">
-                                    {submissionCount}
-                                  </Badge>
-                                )}
-                                <ChevronRight className="ml-1 h-3.5 w-3.5" />
-                              </Button>
+                              <>
+                                <Button size="sm" variant="outline" onClick={() => setGradingHw(hw)}>
+                                  <FileCheck className="mr-1 h-3.5 w-3.5" /> Topshiriqlar
+                                  {submissionCount > 0 && (
+                                    <Badge variant="secondary" className="ml-1.5 h-4 px-1.5 text-[10px]">
+                                      {submissionCount}
+                                    </Badge>
+                                  )}
+                                  <ChevronRight className="ml-1 h-3.5 w-3.5" />
+                                </Button>
+                                <div className="flex gap-1">
+                                  <Button size="sm" variant="ghost" className="h-7 text-xs px-2" onClick={() => setEditingHw(hw)}>
+                                    <Pencil className="mr-1 h-3 w-3" /> Tahrirlash
+                                  </Button>
+                                  <Button size="sm" variant="ghost" className="h-7 text-xs px-2 text-red-500 hover:text-red-600" onClick={async () => {
+                                    if (await ask({ title: "Vazifani o'chirishni tasdiqlang", description: "Bu vazifa va barcha topshiriqlar o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" }).catch(() => false)) {
+                                      removeMutation.mutate(hw.id);
+                                    }
+                                  }}>
+                                    <Trash2 className="mr-1 h-3 w-3" /> O'chirish
+                                  </Button>
+                                </div>
+                              </>
                             )}
                           </div>
                         </div>
@@ -670,6 +869,25 @@ export default function HomeworkPage() {
               Qo'shish
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit homework modal */}
+      <Dialog open={!!editingHw} onOpenChange={() => setEditingHw(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Uy vazifasini tahrirlash</DialogTitle>
+            <DialogDescription>{editingHw?.title}</DialogDescription>
+          </DialogHeader>
+          <EditHomeworkForm
+            homework={editingHw}
+            onSave={(payload) => {
+              if (!editingHw) return;
+              updateMutation.mutate({ id: editingHw.id, payload });
+            }}
+            isSaving={updateMutation.isPending}
+            onCancel={() => setEditingHw(null)}
+          />
         </DialogContent>
       </Dialog>
 

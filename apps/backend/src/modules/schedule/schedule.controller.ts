@@ -34,6 +34,7 @@ export class ScheduleController {
   ) {}
 
   @Get('check-conflict')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT)
   @ApiOperation({ summary: 'Jadval ziddiyatini tekshirish' })
   @ApiQuery({ name: 'dayOfWeek', required: true })
   @ApiQuery({ name: 'timeSlot', required: true, type: Number })
@@ -62,6 +63,7 @@ export class ScheduleController {
   }
 
   @Get('today')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT)
   @ApiOperation({ summary: 'Bugungi darslar' })
   @ApiQuery({ name: 'weekType', required: false, enum: WeekType })
   @ApiQuery({ name: 'includeDrafts', required: false, type: Boolean })
@@ -80,6 +82,7 @@ export class ScheduleController {
   }
 
   @Get('week')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT)
   @ApiOperation({ summary: 'Haftalik jadval' })
   @ApiQuery({ name: 'classId', required: false })
   @ApiQuery({ name: 'weekType', required: false, enum: WeekType })
@@ -100,6 +103,7 @@ export class ScheduleController {
   }
 
   @Get('class/:classId')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT)
   @ApiOperation({ summary: 'Sinf jadvali' })
   @ApiQuery({ name: 'weekType', required: false, enum: WeekType })
   @ApiQuery({ name: 'includeDrafts', required: false, type: Boolean })

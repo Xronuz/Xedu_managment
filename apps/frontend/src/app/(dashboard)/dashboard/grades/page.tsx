@@ -91,14 +91,18 @@ function InlineScoreEdit({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(score));
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(false);
 
   const save = async () => {
     const n = Number(draft);
     if (isNaN(n) || n < 0 || n > maxScore) {
       toast({ variant: 'destructive', title: `Ball 0–${maxScore} oralig'ida bo'lishi kerak` });
+      setError(true);
+      setTimeout(() => setError(false), 2000);
       return;
     }
     setSaving(true);
+    setError(false);
     try {
       await gradesApi.update(gradeId, { score: n });
       queryClient.invalidateQueries({ queryKey: ['grades'] });
@@ -106,6 +110,8 @@ function InlineScoreEdit({
       setEditing(false);
     } catch {
       toast({ variant: 'destructive', title: 'Xato', description: 'Saqlashda xato yuz berdi' });
+      setError(true);
+      setTimeout(() => setError(false), 2000);
     } finally {
       setSaving(false);
     }
@@ -126,10 +132,10 @@ function InlineScoreEdit({
           min={0}
           max={maxScore}
           value={draft}
-          onChange={e => setDraft(e.target.value)}
+          onChange={e => { setDraft(e.target.value); setError(false); }}
           onKeyDown={e => { if (e.key === 'Enter') save(); if (e.key === 'Escape') cancel(); }}
           autoFocus
-          className="w-14 rounded border border-primary px-1.5 py-0.5 text-xs font-bold text-center bg-white dark:bg-xedu-slate-950 focus:outline-none focus:ring-1 focus:ring-primary"
+          className={`w-14 rounded border px-1.5 py-0.5 text-xs font-bold text-center bg-white dark:bg-xedu-slate-950 focus:outline-none focus:ring-1 ${error ? 'border-xedu-ruby focus:ring-xedu-ruby' : 'border-primary focus:ring-primary'}`}
         />
         <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">/{maxScore}</span>
         <button
@@ -161,6 +167,18 @@ function InlineScoreEdit({
       <Pencil className="h-3 w-3 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-0 group-hover/score:opacity-60 transition-opacity" />
     </button>
   );
+}
+
+// ── Source badge ──────────────────────────────────────────────────────────────
+function SourceBadge({ source }: { source?: string }) {
+  const map: Record<string, { label: string; color: string }> = {
+    manual:   { label: 'Qo\'lda', color: 'bg-gray-100 text-gray-700 border-gray-200 dark:bg-gray-900/40 dark:text-gray-300 dark:border-gray-700' },
+    homework: { label: 'Uy vazifasi', color: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:border-purple-700' },
+    exam:     { label: 'Imtihon', color: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/40 dark:text-red-300 dark:border-red-700' },
+    import:   { label: 'Import', color: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:border-blue-700' },
+  };
+  const cfg = map[source ?? 'manual'] ?? map.manual;
+  return <span className={`text-xs px-2 py-0.5 rounded-full border ${cfg.color}`}>{cfg.label}</span>;
 }
 
 // ── GPA indicator ─────────────────────────────────────────────────────────────
@@ -509,6 +527,18 @@ export default function GradesPage() {
     },
   });
 
+  const publishMutation = useMutation({
+    mutationFn: gradesApi.publish,
+    onSuccess: () => {
+      toast({ title: 'Baho nashr qilindi' });
+      queryClient.invalidateQueries({ queryKey: ['grades'] });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+    },
+  });
+
   // ── Validation & submit ───────────────────────────────────────────────────────
   const validate = () => {
     const e: Record<string, string> = {};
@@ -714,12 +744,11 @@ export default function GradesPage() {
               );
             })}
             {!myGrades.length && (
-              <Card>
-                <CardContent className="py-12 text-center text-xedu-slate-500 dark:text-xedu-slate-400">
-                  <BarChart2 className="h-10 w-10 mx-auto mb-3 opacity-30" />
-                  <p>Baholar yo'q</p>
-                </CardContent>
-              </Card>
+              <EmptyState
+                icon={BarChart2}
+                title="Baholar yo'q"
+                description="Hali baho qo'yilmagan"
+              />
             )}
           </div>
         )}
@@ -802,13 +831,11 @@ export default function GradesPage() {
           )}
 
           {!selectedClass ? (
-            <Card>
-              <CardContent className="py-16 text-center">
-                <BarChart2 className="h-12 w-12 mx-auto mb-4 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-30" />
-                <p className="text-lg font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Sinf tanlang</p>
-                <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">Baholarni ko'rish uchun yuqoridan sinf tanlang</p>
-              </CardContent>
-            </Card>
+            <EmptyState
+              icon={BarChart2}
+              title="Sinf tanlang"
+              description="Baholarni ko'rish uchun yuqoridan sinf tanlang"
+            />
           ) : classLoading ? (
             <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-14 rounded-xl" />)}</div>
           ) : classReportError ? (
@@ -897,15 +924,15 @@ export default function GradesPage() {
                 </CardHeader>
                 <CardContent>
                   {filteredGrades.length === 0 ? (
-                    <div className="text-center py-10 text-xedu-slate-500 dark:text-xedu-slate-400">
-                      <BarChart2 className="h-8 w-8 mx-auto mb-2 opacity-30" />
-                      <p>Bu sinf uchun baholar yo'q</p>
-                      {canManage && (
-                        <Button variant="outline" size="sm" className="mt-3" onClick={() => { setActiveTab('entry'); setForm({ ...EMPTY, classId: selectedClass }); setOpen(true); }}>
-                          <Plus className="mr-2 h-3.5 w-3.5" /> Birinchi bahoni kiriting
-                        </Button>
-                      )}
-                    </div>
+                    <EmptyState
+                      icon={BarChart2}
+                      title="Bu sinf uchun baholar yo'q"
+                      description={canManage ? "Yuqoridagi 'Baho kirish' sahifasiga o'tib baho qo'shing" : "Hali baho qo'yilmagan"}
+                      action={canManage ? {
+                        label: "Birinchi bahoni kiriting",
+                        onClick: () => { setActiveTab('entry'); setForm({ ...EMPTY, classId: selectedClass }); setOpen(true); }
+                      } : undefined}
+                    />
                   ) : (
                     <div className="overflow-x-auto -mx-6 px-6">
                       <table className="w-full text-sm">
@@ -914,7 +941,9 @@ export default function GradesPage() {
                             <th className="text-left py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 pr-4">O'quvchi</th>
                             <th className="text-left py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Fan</th>
                             <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Tur</th>
+                            <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Manba</th>
                             <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Sana</th>
+                            <th className="text-center py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Holat</th>
                             <th className="text-right py-2.5 font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Ball</th>
                             {canManage && <th className="w-8" />}
                           </tr>
@@ -931,8 +960,18 @@ export default function GradesPage() {
                                   {GRADE_TYPES.find(t => t.value === g.type)?.label ?? g.type}
                                 </span>
                               </td>
+                              <td className="py-2.5 text-center">
+                                <SourceBadge source={g.source} />
+                              </td>
                               <td className="py-2.5 text-center text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">
                                 {formatDate(g.date)}
+                              </td>
+                              <td className="py-2.5 text-center">
+                                {g.isPublished ? (
+                                  <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200 dark:bg-green-950/30 dark:text-green-400 dark:border-green-800">Nashr qilingan</Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-xs bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-400 dark:border-amber-800">Qoralama</Badge>
+                                )}
                               </td>
                               <td className="py-2.5 text-right">
                                 <InlineScoreEdit
@@ -944,14 +983,28 @@ export default function GradesPage() {
                               </td>
                               {canManage && (
                                 <td className="py-2.5">
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
-                                    onClick={async () => { if (await ask({ title: "Bahoni o'chirishni tasdiqlang", description: "Baho o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" })) deleteMutation.mutate(g.id); }}
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5" />
-                                  </Button>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    {!g.isPublished && (
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-7 w-7 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-green-600"
+                                        onClick={() => publishMutation.mutate(g.id)}
+                                        disabled={publishMutation.isPending}
+                                        title="Nashr qilish"
+                                      >
+                                        <Check className="h-3.5 w-3.5" />
+                                      </Button>
+                                    )}
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-7 w-7 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-ruby"
+                                      onClick={async () => { if (await ask({ title: "Bahoni o'chirishni tasdiqlang", description: "Baho o'chiriladi.", variant: 'destructive', confirmText: "O'chirish" }).catch(() => false)) deleteMutation.mutate(g.id); }}
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                  </div>
                                 </td>
                               )}
                             </tr>

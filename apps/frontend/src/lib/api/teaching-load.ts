@@ -167,7 +167,7 @@ export interface TeacherWorkload {
   coefficientWeightedHours: number;
   contractualWeeklyHours: number;
   utilizationPercent: number;
-  status: 'underloaded' | 'balanced' | 'overloaded';
+  status: 'underloaded' | 'balanced' | 'overloaded' | 'missing_contract';
   classCount: number;
   subjectCount: number;
   splitClassCount: number;

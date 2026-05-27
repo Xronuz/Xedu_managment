@@ -19,6 +19,9 @@ export const examsApi = {
   publish: (id: string) =>
     apiClient.put(`/exams/${id}/publish`).then(r => r.data),
 
+  unpublish: (id: string) =>
+    apiClient.put(`/exams/${id}/unpublish`).then(r => r.data),
+
   getResults: (id: string) =>
     apiClient.get(`/exams/${id}/results`).then(r => r.data),
 

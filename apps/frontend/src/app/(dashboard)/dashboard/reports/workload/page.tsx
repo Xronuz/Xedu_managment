@@ -20,9 +20,10 @@ import {
 
 // ── Status helpers ────────────────────────────────────────────────────────────
 const STATUS_CONFIG = {
-  underloaded: { label: 'Kam yuk', color: 'text-blue-500', bg: 'bg-blue-500/10', bar: '#3b82f6' },
-  balanced:    { label: 'Muvozanat', color: 'text-green-500', bg: 'bg-green-500/10', bar: '#22c55e' },
-  overloaded:  { label: 'Oshiqcha', color: 'text-red-500', bg: 'bg-red-500/10', bar: '#ef4444' },
+  underloaded:     { label: 'Kam yuk', color: 'text-blue-500', bg: 'bg-blue-500/10', bar: '#3b82f6' },
+  balanced:        { label: 'Muvozanat', color: 'text-green-500', bg: 'bg-green-500/10', bar: '#22c55e' },
+  overloaded:      { label: 'Oshiqcha', color: 'text-red-500', bg: 'bg-red-500/10', bar: '#ef4444' },
+  missing_contract: { label: 'Shartnoma yo\'q', color: 'text-gray-500', bg: 'bg-gray-500/10', bar: '#6b7280' },
 };
 
 function StatusBadge({ status, percent }: { status: string; percent: number }) {
@@ -37,6 +38,7 @@ function StatusBadge({ status, percent }: { status: string; percent: number }) {
 function UtilizationIcon({ status }: { status: string }) {
   if (status === 'overloaded') return <ArrowUpRight className="h-4 w-4 text-red-500" />;
   if (status === 'underloaded') return <ArrowDownRight className="h-4 w-4 text-blue-500" />;
+  if (status === 'missing_contract') return <Minus className="h-4 w-4 text-gray-500" />;
   return <Minus className="h-4 w-4 text-green-500" />;
 }
 

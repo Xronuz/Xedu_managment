@@ -121,6 +121,7 @@ export class OnlineExamController {
    */
   @Post(':examId/sessions/start')
   @HttpCode(HttpStatus.CREATED)
+  @Roles(UserRole.STUDENT)
   startSession(
     @Param('examId') examId: string,
     @CurrentUser() user: JwtPayload,
@@ -133,6 +134,7 @@ export class OnlineExamController {
    */
   @Post('sessions/:sessionId/answer')
   @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.STUDENT)
   saveAnswer(
     @Param('sessionId') sessionId: string,
     @Body() dto: SubmitAnswerDto,
@@ -146,6 +148,7 @@ export class OnlineExamController {
    */
   @Post('sessions/:sessionId/submit')
   @HttpCode(HttpStatus.OK)
+  @Roles(UserRole.STUDENT)
   submitSession(
     @Param('sessionId') sessionId: string,
     @CurrentUser() user: JwtPayload,
@@ -157,6 +160,7 @@ export class OnlineExamController {
    * GET /online-exam/sessions/:sessionId/result — natija
    */
   @Get('sessions/:sessionId/result')
+  @Roles(UserRole.STUDENT, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
   getSessionResult(
     @Param('sessionId') sessionId: string,
     @CurrentUser() user: JwtPayload,

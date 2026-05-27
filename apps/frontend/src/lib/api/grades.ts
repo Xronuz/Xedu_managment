@@ -59,6 +59,11 @@ export const gradesApi = {
     return data;
   },
 
+  publish: async (id: string) => {
+    const { data } = await apiClient.post(`/grades/${id}/publish`);
+    return data;
+  },
+
   getStudentGpa: async (studentId: string) => {
     const { data } = await apiClient.get(`/grades/student/${studentId}/gpa`);
     return data as { studentId: string; gpa: number; gradeCount: number };

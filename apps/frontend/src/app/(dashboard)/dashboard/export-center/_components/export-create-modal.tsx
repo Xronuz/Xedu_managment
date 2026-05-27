@@ -240,7 +240,7 @@ export function ExportCreateModal({ open, onOpenChange, onCreated }: ExportCreat
                   <SelectValue placeholder="Status tanlang" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="_all">Barcha</SelectItem>
+                  <SelectItem value="">Barcha</SelectItem>
                   {STATUS_OPTIONS[entity].map((s) => (
                     <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
                   ))}

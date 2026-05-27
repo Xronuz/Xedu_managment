@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException } from '@nestjs/common';
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
 import { GradesService, BulkGradesDto } from './grades.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
@@ -29,13 +29,14 @@ const mockGrade = {
   studentId: 'student-1', type: GradeType.TEST,
   score: 85, maxScore: 100, comment: 'Yaxshi',
   date: new Date('2026-04-01'),
+  createdById: 'user-1',
   student: { id: 'student-1', firstName: 'Bobur', lastName: 'Toshmatov' },
   subject: { id: SUBJ_ID, name: 'Matematika' },
 };
 
 describe('GradesService', () => {
   let service: GradesService;
-  let prisma: { grade: any; classStudent: any; coinTransaction: any; $transaction: jest.Mock };
+  let prisma: { grade: any; classStudent: any; coinTransaction: any; subject: any; $transaction: jest.Mock };
 
   beforeEach(async () => {
     prisma = {
@@ -48,6 +49,9 @@ describe('GradesService', () => {
         delete:     jest.fn(),
         deleteMany: jest.fn().mockResolvedValue({ count: 1 }),
         count:      jest.fn(),
+      },
+      subject: {
+        findMany: jest.fn().mockResolvedValue([]),
       },
       classStudent:  { findMany: jest.fn() },
       coinTransaction: { findFirst: jest.fn().mockResolvedValue(null) },
@@ -225,16 +229,16 @@ describe('GradesService', () => {
   // ── remove ────────────────────────────────────────────────────────────────
 
   describe('remove()', () => {
-    it('deletes the grade', async () => {
+    it('soft-deletes the grade', async () => {
       prisma.grade.findFirst.mockResolvedValueOnce(mockGrade);
-      prisma.grade.delete.mockResolvedValueOnce(mockGrade);
 
       const result = await service.remove('grade-1', mockUser);
 
       expect(result).toBeDefined();
-      expect(prisma.grade.deleteMany).toHaveBeenCalledWith(
+      expect(prisma.grade.update).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: expect.objectContaining({ id: 'grade-1' }),
+          where: { id: 'grade-1' },
+          data: expect.objectContaining({ deletedAt: expect.any(Date) }),
         }),
       );
     });
@@ -245,6 +249,78 @@ describe('GradesService', () => {
       await expect(
         service.remove('nonexistent', mockUser),
       ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should forbid teacher from deleting another teacher grade', async () => {
+      prisma.grade.findFirst.mockResolvedValueOnce({ ...mockGrade, createdById: 'other-teacher' });
+
+      await expect(
+        service.remove('grade-1', mockUser),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  // ── publish ────────────────────────────────────────────────────────────────
+
+  describe('publish()', () => {
+    it('publishes a draft grade', async () => {
+      prisma.grade.findFirst.mockResolvedValueOnce({ ...mockGrade, isPublished: false });
+      prisma.grade.update.mockResolvedValueOnce({ ...mockGrade, isPublished: true });
+
+      const result = await service.publish('grade-1', mockUser);
+
+      expect(result.isPublished).toBe(true);
+    });
+
+    it('should forbid teacher from publishing another teacher grade', async () => {
+      prisma.grade.findFirst.mockResolvedValueOnce({ ...mockGrade, createdById: 'other-teacher', isPublished: false });
+
+      await expect(
+        service.publish('grade-1', mockUser),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  // ── update ownership ───────────────────────────────────────────────────────
+
+  describe('update() ownership', () => {
+    it('should forbid teacher from updating another teacher grade', async () => {
+      prisma.grade.findFirst.mockResolvedValueOnce({ ...mockGrade, createdById: 'other-teacher' });
+
+      await expect(
+        service.update('grade-1', { score: 95 }, mockUser),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  // ── findAll visibility ─────────────────────────────────────────────────────
+
+  describe('findAll() visibility', () => {
+    it('STUDENT: should only see published grades', async () => {
+      prisma.grade.findMany.mockResolvedValueOnce([]);
+      prisma.grade.count.mockResolvedValueOnce(0);
+      prisma.$transaction.mockImplementation((ops: any[]) => Promise.all(ops.map((op: any) => op)));
+
+      const studentUser = { ...mockUser, role: UserRole.STUDENT, sub: 'student-1' };
+      await service.findAll(studentUser);
+
+      expect(prisma.grade.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ isPublished: true, deletedAt: null }),
+        }),
+      );
+    });
+
+    it('TEACHER: should see all grades including drafts', async () => {
+      prisma.grade.findMany.mockResolvedValueOnce([]);
+      prisma.grade.count.mockResolvedValueOnce(0);
+      prisma.$transaction.mockImplementation((ops: any[]) => Promise.all(ops.map((op: any) => op)));
+
+      await service.findAll(mockUser);
+
+      const callArg = prisma.grade.findMany.mock.calls[0][0];
+      expect(callArg.where).not.toHaveProperty('isPublished');
+      expect(callArg.where).toHaveProperty('deletedAt', null);
     });
   });
 });

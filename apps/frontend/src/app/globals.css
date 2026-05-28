@@ -824,12 +824,18 @@
 
   /* ── Material sidebar — darker structural rail ── */
   .xedu-material-sidebar {
-    background: var(--xedu-bg-panel);
-    border-right: 1px solid var(--xedu-border-strong);
+    background: linear-gradient(160deg, rgba(255,255,255,0.82) 0%, rgba(242,247,244,0.72) 100%);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border-right: 1px solid rgba(255,255,255,0.7);
+    box-shadow: inset -1px 0 0 rgba(15,123,83,0.06), 2px 0 16px -4px rgba(15,123,83,0.08);
   }
   .dark .xedu-material-sidebar {
-    background: var(--xedu-bg-panel);
-    border-color: var(--xedu-border-strong);
+    background: linear-gradient(160deg, rgba(18,30,22,0.92) 0%, rgba(12,22,16,0.88) 100%);
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border-right: 1px solid rgba(255,255,255,0.07);
+    box-shadow: inset -1px 0 0 rgba(15,123,83,0.1), 2px 0 16px -4px rgba(0,0,0,0.3);
   }
 
   /* ── Hover depth (card lift on hover) ── */

@@ -63,6 +63,14 @@ const config: Config = {
           DEFAULT:    'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        /* Landing page tokens */
+        leaf: {
+          DEFAULT: '#4FC47A',
+          deep:    '#1E4532',
+        },
+        cream: '#FAFAF9',
+        ink:   '#1B2620',
+
         /* Xedu brand system */
         'xedu-primary': {
           DEFAULT: 'var(--xedu-primary)',

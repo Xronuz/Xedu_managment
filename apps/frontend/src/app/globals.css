@@ -356,7 +356,116 @@
     --shadow-elevated: var(--xedu-shadow-lg);
     --shadow-dialog:   var(--xedu-shadow-dialog);
     --shadow-pill:     var(--xedu-shadow-pill);
+
+    /* ── Landing page tokens ── */
+    --leaf:      #4FC47A;
+    --leaf-deep: #1E4532;
+    --cream:     #FAFAF9;
+    --ink:       #1B2620;
+    --shadow-float: 0 24px 60px -20px rgba(30, 50, 40, 0.35);
+    --shadow-glow:  0 0 40px rgba(79, 196, 122, 0.45);
+    --gradient-leaf: linear-gradient(135deg, #1E4532 0%, #2D7A50 60%, #4FC47A 100%);
+    --hero-overlay-start:  rgba(28, 62, 44, 0.65);
+    --hero-overlay-mid:    rgba(34, 68, 50, 0.42);
+    --hero-overlay-end:    rgba(38, 72, 56, 0.18);
+    --hero-overlay-bottom: rgba(14, 26, 20, 0.4);
+    --hero-title-panel-bg: rgba(10, 20, 16, 0.55);
+    --demo-cta-overlay-start: rgba(20, 54, 38, 0.55);
+    --demo-cta-overlay-end:   rgba(26, 60, 44, 0.25);
+    --logo-active-glow-bottom: rgba(100, 255, 160, 0.18);
+    --logo-active-glare-top:   rgba(255, 255, 255, 0.55);
+    --logo-active-grad-start:  rgba(60, 200, 100, 0.55);
+    --logo-active-grad-mid:    rgba(20, 120, 60, 0.75);
+    --logo-active-grad-end:    rgba(5, 60, 30, 0.85);
+    --logo-active-inset-shadow-top:    inset 0 3px 6px rgba(255,255,255,0.5);
+    --logo-active-inset-shadow-bottom: inset 0 -3px 6px rgba(0,40,20,0.45);
+    --logo-active-inset-shadow-left:   inset 3px 0 5px rgba(255,255,255,0.18);
+    --logo-active-inset-shadow-right:  inset -3px 0 5px rgba(0,30,15,0.3);
+    --logo-active-drop-shadow: 0 6px 28px rgba(30,180,80,0.5);
+    --logo-active-base-shadow: 0 2px 8px rgba(0,0,0,0.25);
+    --logo-active-border: 1.5px solid rgba(255,255,255,0.45);
   }
+}
+
+/* ── Landing page glass utilities ── */
+@layer utilities {
+  .glass-dark {
+    background: linear-gradient(135deg, rgba(27,38,32,0.55) 0%, rgba(27,38,32,0.38) 100%);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.18), 0 20px 50px -20px rgba(0,0,0,0.5);
+  }
+  .glass-light {
+    background: linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.32) 100%);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.7);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(255,255,255,0.3), 0 20px 50px -20px rgba(0,0,0,0.35);
+  }
+  .glass-tinted {
+    background: linear-gradient(135deg, rgba(30,69,50,0.38) 0%, rgba(30,69,50,0.22) 100%);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.18);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), inset 0 -1px 0 rgba(0,0,0,0.15), 0 20px 50px -20px rgba(0,0,0,0.4);
+  }
+  .glass-module {
+    background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.45) 100%);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.8);
+    box-shadow: inset 0 1px 0 white, inset 0 -1px 0 rgba(255,255,255,0.4), 0 14px 40px -20px rgba(30,69,50,0.35);
+  }
+  .bg-leaf-gradient { background-image: var(--gradient-leaf); }
+  .shadow-float     { box-shadow: var(--shadow-float); }
+  .shadow-glow      { box-shadow: var(--shadow-glow); }
+  .pb-safe-bottom   { padding-bottom: max(1.25rem, env(safe-area-inset-bottom)); }
+  .card-glass-dark {
+    background: linear-gradient(135deg, rgba(27,38,32,0.55) 0%, rgba(27,38,32,0.38) 100%);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.14);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.18), 0 20px 50px -20px rgba(0,0,0,0.5);
+    border-radius: 1.75rem;
+    padding: 1.25rem;
+  }
+  .card-glass-light {
+    background: linear-gradient(135deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.32) 100%);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.7);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), inset 0 -1px 0 rgba(255,255,255,0.3), 0 20px 50px -20px rgba(0,0,0,0.35);
+    border-radius: 1.75rem;
+    padding: 1rem;
+  }
+  .card-glass-module {
+    background: linear-gradient(135deg, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.45) 100%);
+    backdrop-filter: blur(22px) saturate(160%);
+    -webkit-backdrop-filter: blur(22px) saturate(160%);
+    border: 1px solid rgba(255,255,255,0.8);
+    box-shadow: inset 0 1px 0 white, inset 0 -1px 0 rgba(255,255,255,0.4), 0 14px 40px -20px rgba(30,69,50,0.35);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    transition: all 0.15s cubic-bezier(0.4,0,0.2,1);
+  }
+  .card-glass-module:hover { transform: translateY(-0.25rem); }
+  .tab-bar-bg { backdrop-filter: blur(20px) saturate(1.6); }
+  .font-display { font-family: 'Inter', system-ui, sans-serif; font-weight: 700; letter-spacing: -0.02em; }
+  .text-label-xs { font-size: 0.625rem; }
+  .text-label-sm { font-size: 0.6875rem; }
+
+  /* Landing page font-size scope — override dashboard's compact scale */
+  .landing-root .text-xs   { font-size: 0.75rem;   line-height: 1rem; }
+  .landing-root .text-sm   { font-size: 0.875rem;  line-height: 1.25rem; }
+  .landing-root .text-base { font-size: 1rem;      line-height: 1.5rem; }
+  .landing-root .text-lg   { font-size: 1.125rem;  line-height: 1.75rem; }
+  .landing-root .text-xl   { font-size: 1.25rem;   line-height: 1.75rem; }
+  .landing-root .text-2xl  { font-size: 1.5rem;    line-height: 2rem; }
+  .landing-root .text-3xl  { font-size: 1.875rem;  line-height: 2.25rem; }
+  .landing-root .text-4xl  { font-size: 2.25rem;   line-height: 2.5rem; }
+  .landing-root .text-5xl  { font-size: 3rem;      line-height: 1; }
+  .landing-root .text-6xl  { font-size: 3.75rem;   line-height: 1; }
 }
 
 /* ── Base ───────────────────────────────────────────────────────────────────── */

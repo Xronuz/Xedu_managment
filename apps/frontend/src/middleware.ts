@@ -19,7 +19,7 @@ function decodeJwtPayload(token: string): Record<string, any> | null {
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const PUBLIC_PATHS = ['/login', '/forgot-password', '/reset-password', '/accept-invite', '/first-login', '/logout', '/auth/clear'];
+const PUBLIC_PATHS = ['/', '/login', '/forgot-password', '/reset-password', '/accept-invite', '/first-login', '/logout', '/auth/clear'];
 
 // Build ROLE_RESTRICTIONS from ROUTE_PERMISSIONS (single source of truth)
 const ROLE_RESTRICTIONS = Object.entries(ROUTE_PERMISSIONS).map(([path, roles]) => ({

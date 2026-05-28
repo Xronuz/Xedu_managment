@@ -51,13 +51,23 @@ export class TodaySummaryResponseDto {
 export class OpsAlertDto {
   @ApiProperty() id!: string;
   @ApiProperty({ enum: ['critical', 'warning', 'info'] }) severity!: 'critical' | 'warning' | 'info';
-  @ApiProperty({ enum: ['schedule', 'staff', 'payroll', 'setup'] }) category!: 'schedule' | 'staff' | 'payroll' | 'setup';
+  @ApiProperty({ enum: ['schedule', 'staff', 'payroll', 'setup', 'finance'] }) category!: 'schedule' | 'staff' | 'payroll' | 'setup' | 'finance';
   @ApiProperty() title!: string;
   @ApiProperty() description!: string;
   @ApiProperty({ required: false }) entityId?: string;
   @ApiProperty({ required: false }) entityType?: string;
   @ApiProperty({ required: false }) link?: string;
   @ApiProperty() createdAt!: string;
+  /** Who must act on this alert */
+  @ApiProperty({ enum: ['director', 'vice_principal', 'branch_admin', 'accountant'] })
+  owner!: 'director' | 'vice_principal' | 'branch_admin' | 'accountant';
+  /** CTA label shown to the owner */
+  @ApiProperty() actionCta!: string;
+  /** Frontend route to resolve */
+  @ApiProperty() route!: string;
+  /** Resolution state: open | in_progress | resolved */
+  @ApiProperty({ enum: ['open', 'in_progress', 'resolved'] })
+  resolutionState!: 'open' | 'in_progress' | 'resolved';
 }
 
 export class ReadinessItemDto {
@@ -68,10 +78,24 @@ export class ReadinessItemDto {
   @ApiProperty() completed!: boolean;
   @ApiProperty() required!: boolean;
   @ApiProperty({ required: false }) link?: string;
+  @ApiProperty({ enum: ['director', 'vice_principal', 'branch_admin', 'accountant', 'teacher', 'class_teacher', 'student', 'parent', 'librarian', 'super_admin'] })
+  primaryOwner!: string;
+  @ApiProperty({ required: false, enum: ['director', 'vice_principal', 'branch_admin', 'accountant', 'teacher', 'class_teacher', 'student', 'parent', 'librarian', 'super_admin'] })
+  secondaryOwner?: string;
+  @ApiProperty({ type: [String] })
+  visibilityScope!: string[];
 }
 
 export class ReadinessScoreResponseDto {
   @ApiProperty() score!: number;
   @ApiProperty({ enum: ['not_started', 'in_progress', 'ready', 'operational'] }) status!: 'not_started' | 'in_progress' | 'ready' | 'operational';
   @ApiProperty({ type: [ReadinessItemDto] }) checklist!: ReadinessItemDto[];
+}
+
+export class RoleReadinessResponseDto {
+  @ApiProperty({ type: [ReadinessItemDto] }) myActions!: ReadinessItemDto[];
+  @ApiProperty({ type: [ReadinessItemDto] }) delegatedActions!: ReadinessItemDto[];
+  @ApiProperty({ type: [ReadinessItemDto] }) informationalBlockers!: ReadinessItemDto[];
+  @ApiProperty() score!: number;
+  @ApiProperty({ enum: ['not_started', 'in_progress', 'ready', 'operational'] }) status!: 'not_started' | 'in_progress' | 'ready' | 'operational';
 }

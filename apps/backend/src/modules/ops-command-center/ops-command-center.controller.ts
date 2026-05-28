@@ -9,6 +9,7 @@ import {
   TodaySummaryResponseDto,
   OpsAlertDto,
   ReadinessScoreResponseDto,
+  RoleReadinessResponseDto,
 } from './dto/ops-response.dto';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 import { RedisService } from '@/common/redis/redis.service';
@@ -46,7 +47,7 @@ export class OpsCommandCenterController {
   // ─── Alerts ────────────────────────────────────────────────────────────────
 
   @Get('ops/alerts')
-  @ApiOperation({ summary: 'Operatsion ogohlantirishlar' })
+  @ApiOperation({ summary: 'Operatsion ogohlantirishlar (role-aware)' })
   @ApiQuery({ name: 'branchId', required: false })
   @Roles(
     UserRole.DIRECTOR,
@@ -98,6 +99,7 @@ export class OpsCommandCenterController {
     UserRole.DIRECTOR,
     UserRole.VICE_PRINCIPAL,
     UserRole.BRANCH_ADMIN,
+    UserRole.ACCOUNTANT,
   )
   async getReadiness(
     @CurrentUser() user: JwtPayload,
@@ -116,6 +118,7 @@ export class OpsCommandCenterController {
     UserRole.DIRECTOR,
     UserRole.VICE_PRINCIPAL,
     UserRole.BRANCH_ADMIN,
+    UserRole.ACCOUNTANT,
   )
   async recalculateReadiness(
     @CurrentUser() user: JwtPayload,
@@ -125,5 +128,26 @@ export class OpsCommandCenterController {
       throw new ForbiddenException('Faqat o\'z maktabingiz uchun ko\'rishingiz mumkin');
     }
     return this.opsService.recalculateReadiness(user, schoolId) as Promise<ReadinessScoreResponseDto>;
+  }
+
+  // ─── Role-Based Readiness ──────────────────────────────────────────────────
+
+  @Get('schools/:id/readiness/role')
+  @ApiOperation({ summary: 'Rolga asoslangan tayyorlik ko\'rinishi (my actions / delegated / blockers)' })
+  @ApiParam({ name: 'id', description: 'School ID' })
+  @Roles(
+    UserRole.DIRECTOR,
+    UserRole.VICE_PRINCIPAL,
+    UserRole.BRANCH_ADMIN,
+    UserRole.ACCOUNTANT,
+  )
+  async getRoleReadiness(
+    @CurrentUser() user: JwtPayload,
+    @Param('id') schoolId: string,
+  ): Promise<RoleReadinessResponseDto> {
+    if (user.schoolId !== schoolId) {
+      throw new ForbiddenException('Faqat o\'z maktabingiz uchun ko\'rishingiz mumkin');
+    }
+    return this.opsService.getRoleReadiness(user, schoolId) as Promise<RoleReadinessResponseDto>;
   }
 }

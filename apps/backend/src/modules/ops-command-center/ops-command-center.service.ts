@@ -46,13 +46,21 @@ export interface TodaySummary {
 export interface OpsAlert {
   id: string;
   severity: 'critical' | 'warning' | 'info';
-  category: 'schedule' | 'staff' | 'payroll' | 'setup';
+  category: 'schedule' | 'staff' | 'payroll' | 'setup' | 'finance';
   title: string;
   description: string;
   entityId?: string;
   entityType?: string;
   link?: string;
   createdAt: string;
+  /** Who must act on this alert */
+  owner: UserRole | 'director' | 'vice_principal' | 'branch_admin' | 'accountant';
+  /** CTA label shown to the owner */
+  actionCta: string;
+  /** Frontend route to resolve */
+  route: string;
+  /** Resolution state: open | in_progress | resolved */
+  resolutionState: 'open' | 'in_progress' | 'resolved';
 }
 
 export interface ReadinessItem {
@@ -63,6 +71,12 @@ export interface ReadinessItem {
   completed: boolean;
   required: boolean;
   link?: string;
+  /** Primary owner — must complete this item */
+  primaryOwner: UserRole;
+  /** Secondary owner — can complete if primary is unavailable */
+  secondaryOwner?: UserRole;
+  /** Who can see this item in their dashboard */
+  visibilityScope: UserRole[];
 }
 
 export interface ReadinessScore {
@@ -71,18 +85,107 @@ export interface ReadinessScore {
   checklist: ReadinessItem[];
 }
 
+export interface RoleReadinessView {
+  myActions: ReadinessItem[];
+  delegatedActions: ReadinessItem[];
+  informationalBlockers: ReadinessItem[];
+  score: number;
+  status: ReadinessScore['status'];
+}
+
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const READINESS_CACHE_TTL_SECONDS = 300; // 5 minutes
+
 const READINESS_CHECKLIST: Omit<ReadinessItem, 'completed'>[] = [
-  { id: 'schoolProfile', label: 'Maktab profili to\'liq', category: 'setup', weight: 10, required: true, link: '/dashboard/settings' },
-  { id: 'branches', label: 'Kamida 1 ta filial', category: 'setup', weight: 10, required: true, link: '/dashboard/branches' },
-  { id: 'periods', label: 'Dars soatlari sozlangan', category: 'setup', weight: 15, required: true, link: '/dashboard/periods' },
-  { id: 'rooms', label: 'Kamida 1 ta xona', category: 'setup', weight: 10, required: true, link: '/dashboard/rooms' },
-  { id: 'classes', label: 'Kamida 1 ta sinf', category: 'setup', weight: 15, required: true, link: '/dashboard/classes' },
-  { id: 'subjects', label: 'Kamida 1 ta fan', category: 'setup', weight: 15, required: true, link: '/dashboard/subjects' },
-  { id: 'teachingLoads', label: 'Dars yuklari biriktirilgan', category: 'setup', weight: 15, required: true, link: '/dashboard/teaching-loads' },
-  { id: 'publishedTimetable', label: 'Jadval nashr etilgan', category: 'schedule', weight: 10, required: false, link: '/dashboard/schedule' },
+  {
+    id: 'schoolProfile',
+    label: 'Maktab profili to\'liq',
+    category: 'setup',
+    weight: 10,
+    required: true,
+    link: '/dashboard/settings',
+    primaryOwner: UserRole.DIRECTOR,
+    secondaryOwner: UserRole.VICE_PRINCIPAL,
+    visibilityScope: [UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN],
+  },
+  {
+    id: 'branches',
+    label: 'Kamida 1 ta filial',
+    category: 'setup',
+    weight: 10,
+    required: true,
+    link: '/dashboard/branches',
+    primaryOwner: UserRole.DIRECTOR,
+    secondaryOwner: UserRole.VICE_PRINCIPAL,
+    visibilityScope: [UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN],
+  },
+  {
+    id: 'periods',
+    label: 'Dars soatlari sozlangan',
+    category: 'setup',
+    weight: 15,
+    required: true,
+    link: '/dashboard/periods',
+    primaryOwner: UserRole.BRANCH_ADMIN,
+    secondaryOwner: UserRole.VICE_PRINCIPAL,
+    visibilityScope: [UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR],
+  },
+  {
+    id: 'rooms',
+    label: 'Kamida 1 ta xona',
+    category: 'setup',
+    weight: 10,
+    required: true,
+    link: '/dashboard/rooms',
+    primaryOwner: UserRole.BRANCH_ADMIN,
+    secondaryOwner: UserRole.VICE_PRINCIPAL,
+    visibilityScope: [UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR],
+  },
+  {
+    id: 'classes',
+    label: 'Kamida 1 ta sinf',
+    category: 'setup',
+    weight: 15,
+    required: true,
+    link: '/dashboard/classes',
+    primaryOwner: UserRole.BRANCH_ADMIN,
+    secondaryOwner: UserRole.VICE_PRINCIPAL,
+    visibilityScope: [UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR],
+  },
+  {
+    id: 'subjects',
+    label: 'Kamida 1 ta fan',
+    category: 'setup',
+    weight: 15,
+    required: true,
+    link: '/dashboard/subjects',
+    primaryOwner: UserRole.VICE_PRINCIPAL,
+    secondaryOwner: UserRole.BRANCH_ADMIN,
+    visibilityScope: [UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.DIRECTOR],
+  },
+  {
+    id: 'teachingLoads',
+    label: 'Dars yuklari biriktirilgan',
+    category: 'setup',
+    weight: 15,
+    required: true,
+    link: '/dashboard/teaching-loads',
+    primaryOwner: UserRole.VICE_PRINCIPAL,
+    secondaryOwner: UserRole.BRANCH_ADMIN,
+    visibilityScope: [UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.DIRECTOR],
+  },
+  {
+    id: 'publishedTimetable',
+    label: 'Jadval nashr etilgan',
+    category: 'schedule',
+    weight: 10,
+    required: false,
+    link: '/dashboard/schedule',
+    primaryOwner: UserRole.VICE_PRINCIPAL,
+    secondaryOwner: UserRole.BRANCH_ADMIN,
+    visibilityScope: [UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.DIRECTOR, UserRole.TEACHER, UserRole.CLASS_TEACHER],
+  },
 ];
 
 const DAY_OF_WEEK_MAP: Record<number, string> = {
@@ -265,6 +368,10 @@ export class OpsCommandCenterService {
         description: 'Dars jadvali yaratish uchun kamida 1 ta dars soati sozlashingiz kerak.',
         link: '/dashboard/periods',
         createdAt: new Date().toISOString(),
+        owner: 'branch_admin',
+        actionCta: 'Dars soatlarini sozlash',
+        route: '/dashboard/periods',
+        resolutionState: 'open',
       });
     }
 
@@ -277,6 +384,10 @@ export class OpsCommandCenterService {
         description: 'Dars o\'tkazish uchun xonalarni qo\'shing.',
         link: '/dashboard/rooms',
         createdAt: new Date().toISOString(),
+        owner: 'branch_admin',
+        actionCta: 'Xona qo\'shish',
+        route: '/dashboard/rooms',
+        resolutionState: 'open',
       });
     }
 
@@ -289,6 +400,10 @@ export class OpsCommandCenterService {
         description: 'O\'quv jarayonini boshlash uchun sinflar yaratishingiz kerak.',
         link: '/dashboard/classes',
         createdAt: new Date().toISOString(),
+        owner: 'branch_admin',
+        actionCta: 'Sinf yaratish',
+        route: '/dashboard/classes',
+        resolutionState: 'open',
       });
     }
 
@@ -301,6 +416,10 @@ export class OpsCommandCenterService {
         description: 'O\'quv dasturini belgilash uchun fanlarni qo\'shing.',
         link: '/dashboard/subjects',
         createdAt: new Date().toISOString(),
+        owner: 'vice_principal',
+        actionCta: 'Fan qo\'shish',
+        route: '/dashboard/subjects',
+        resolutionState: 'open',
       });
     }
 
@@ -313,6 +432,10 @@ export class OpsCommandCenterService {
         description: 'Fanlarga o\'qituvchilarni biriktirish kerak.',
         link: '/dashboard/teaching-loads',
         createdAt: new Date().toISOString(),
+        owner: 'vice_principal',
+        actionCta: 'Dars yuklarini biriktirish',
+        route: '/dashboard/teaching-loads',
+        resolutionState: 'open',
       });
     }
 
@@ -325,6 +448,10 @@ export class OpsCommandCenterService {
         description: 'Jadval qoralama holatida. O\'qituvchilar ko\'rishi uchun nashr eting.',
         link: '/dashboard/schedule',
         createdAt: new Date().toISOString(),
+        owner: 'vice_principal',
+        actionCta: 'Jadvalni nashr etish',
+        route: '/dashboard/schedule',
+        resolutionState: 'open',
       });
     }
 
@@ -355,6 +482,10 @@ export class OpsCommandCenterService {
         description: 'Bugun o\'rinbosar biriktirilmagan o\'qituvchilar mavjud.',
         link: '/dashboard/teacher-substitutions',
         createdAt: new Date().toISOString(),
+        owner: 'branch_admin',
+        actionCta: 'O\'rinbosar belgilash',
+        route: '/dashboard/teacher-substitutions',
+        resolutionState: 'open',
       });
     }
 
@@ -367,6 +498,10 @@ export class OpsCommandCenterService {
         description: 'Ko\'p sondagi ta\'til so\'rovlarini ko\'rib chiqing.',
         link: '/dashboard/leave-requests',
         createdAt: new Date().toISOString(),
+        owner: 'vice_principal',
+        actionCta: 'So\'rovlarni ko\'rib chiqish',
+        route: '/dashboard/leave-requests',
+        resolutionState: 'open',
       });
     }
 
@@ -386,6 +521,10 @@ export class OpsCommandCenterService {
         description: `Oyni yopish uchun ${currentMonth} ish haqini hisoblang.`,
         link: '/dashboard/payroll',
         createdAt: new Date().toISOString(),
+        owner: 'accountant',
+        actionCta: 'Ish haqini hisoblash',
+        route: '/dashboard/payroll',
+        resolutionState: 'open',
       });
     }
 
@@ -399,10 +538,29 @@ export class OpsCommandCenterService {
         description: 'Ish haqi hisoblash uchun davomat yozuvlarini to\'ldiring.',
         link: '/dashboard/teacher-attendance',
         createdAt: new Date().toISOString(),
+        owner: 'accountant',
+        actionCta: 'Davomatni to\'ldirish',
+        route: '/dashboard/teacher-attendance',
+        resolutionState: 'open',
       });
     }
 
-    return alerts.sort((a, b) => {
+    // Filter alerts by role visibility
+    const roleVisibleAlerts = alerts.filter(a => {
+      if (user.role === UserRole.DIRECTOR) return true; // Director sees everything
+      if (user.role === UserRole.VICE_PRINCIPAL) {
+        return a.owner === 'vice_principal' || a.owner === 'branch_admin' || a.category === 'schedule' || a.category === 'staff';
+      }
+      if (user.role === UserRole.BRANCH_ADMIN) {
+        return a.owner === 'branch_admin' || a.category === 'setup';
+      }
+      if (user.role === UserRole.ACCOUNTANT) {
+        return a.owner === 'accountant' || a.category === 'payroll';
+      }
+      return false;
+    });
+
+    return roleVisibleAlerts.sort((a, b) => {
       const severityOrder = { critical: 0, warning: 1, info: 2 };
       return severityOrder[a.severity] - severityOrder[b.severity];
     });
@@ -446,6 +604,40 @@ export class OpsCommandCenterService {
     });
 
     return score;
+  }
+
+  async getRoleReadiness(user: JwtPayload, schoolId: string): Promise<RoleReadinessView> {
+    this.assertCanView(user);
+    if (user.schoolId !== schoolId) {
+      throw new ForbiddenException('Faqat o\'z maktabingiz uchun ko\'rishingiz mumkin');
+    }
+
+    const readiness = await this.getReadinessScore(user, schoolId);
+    const userRole = user.role as UserRole;
+
+    const myActions = readiness.checklist.filter(
+      item => item.primaryOwner === userRole && !item.completed,
+    );
+
+    const delegatedActions = readiness.checklist.filter(
+      item => item.secondaryOwner === userRole && !item.completed && item.primaryOwner !== userRole,
+    );
+
+    const informationalBlockers = readiness.checklist.filter(
+      item =>
+        item.visibilityScope.includes(userRole) &&
+        !item.completed &&
+        item.primaryOwner !== userRole &&
+        item.secondaryOwner !== userRole,
+    );
+
+    return {
+      myActions,
+      delegatedActions,
+      informationalBlockers,
+      score: readiness.score,
+      status: readiness.status,
+    };
   }
 
   private async calculateReadiness(schoolId: string): Promise<ReadinessScore> {

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import {
   Calendar, Wand2, Repeat, ClipboardCheck,
   Wallet, ShieldCheck, GraduationCap, Users, Settings,
+  TrendingUp, CreditCard, WalletIcon, Download, FileText,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -67,6 +68,47 @@ const ACTIONS: QuickAction[] = [
     href: '/dashboard/setup',
     roles: [UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN],
     color: 'bg-emerald-50 text-emerald-600',
+  },
+  // ── Accountant-specific actions ────────────────────────────────────────────
+  {
+    id: 'finance',
+    label: 'Moliyani ko\'rish',
+    icon: TrendingUp,
+    href: '/dashboard/finance',
+    roles: [UserRole.ACCOUNTANT, UserRole.DIRECTOR],
+    color: 'bg-xedu-primary-light text-xedu-primary',
+  },
+  {
+    id: 'payments',
+    label: "To'lovlarni ko\'rish",
+    icon: CreditCard,
+    href: '/dashboard/payments',
+    roles: [UserRole.ACCOUNTANT, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN],
+    color: 'bg-sky-50 text-xedu-sky',
+  },
+  {
+    id: 'fee-structures',
+    label: 'Tariflarni ko\'rish',
+    icon: WalletIcon,
+    href: '/dashboard/fee-structures',
+    roles: [UserRole.ACCOUNTANT, UserRole.DIRECTOR, UserRole.BRANCH_ADMIN],
+    color: 'bg-violet-50 text-violet-600',
+  },
+  {
+    id: 'reports',
+    label: 'Hisobotlarni ko\'rish',
+    icon: FileText,
+    href: '/dashboard/reports',
+    roles: [UserRole.ACCOUNTANT, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.TEACHER, UserRole.CLASS_TEACHER],
+    color: 'bg-emerald-50 text-emerald-600',
+  },
+  {
+    id: 'export-center',
+    label: 'Eksport markazi',
+    icon: Download,
+    href: '/dashboard/export-center',
+    roles: [UserRole.ACCOUNTANT, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER],
+    color: 'bg-amber-50 text-xedu-amber',
   },
 ];
 

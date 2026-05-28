@@ -14,6 +14,12 @@ export interface FrictionSignal {
   count: number;
   module: string;
   note: string;
+  /** Who should act on this signal */
+  owner?: 'director' | 'vice_principal' | 'branch_admin' | 'accountant';
+  /** Frontend route to resolve */
+  route?: string;
+  /** CTA label */
+  actionCta?: string;
 }
 
 export interface RoleActivity {
@@ -29,13 +35,14 @@ export class PilotEvidenceService {
 
   // ─── Workflow Funnels ───────────────────────────────────────────────────
 
-  async getSetupFunnel(): Promise<WorkflowFunnel> {
+  async getSetupFunnel(schoolId?: string): Promise<WorkflowFunnel> {
+    const where = schoolId ? { id: schoolId } : {};
     const [totalSchools, onboarded, withClasses, withSchedule, withAttendance] = await Promise.all([
-      this.prisma.school.count(),
-      this.prisma.school.count({ where: { onboardingCompleted: true } }),
-      this.prisma.school.count({ where: { classes: { some: {} } } }),
-      this.prisma.school.count({ where: { schedules: { some: {} } } }),
-      this.prisma.school.count({ where: { attendance: { some: {} } } }),
+      this.prisma.school.count({ where }),
+      this.prisma.school.count({ where: { ...where, onboardingCompleted: true } }),
+      this.prisma.school.count({ where: { ...where, classes: { some: {} } } }),
+      this.prisma.school.count({ where: { ...where, schedules: { some: {} } } }),
+      this.prisma.school.count({ where: { ...where, attendance: { some: {} } } }),
     ]);
 
     const stages = [
@@ -54,11 +61,12 @@ export class PilotEvidenceService {
     };
   }
 
-  async getScheduleFunnel(): Promise<WorkflowFunnel> {
+  async getScheduleFunnel(schoolId?: string): Promise<WorkflowFunnel> {
+    const where = schoolId ? { schoolId } : {};
     const [generated, published, conflicts] = await Promise.all([
-      this.prisma.solverRun.count(),
-      this.prisma.schedule.count({ where: { status: 'published' } }),
-      this.prisma.schedule.count({ where: { status: 'draft' } }),
+      this.prisma.solverRun.count({ where }),
+      this.prisma.schedule.count({ where: { ...where, status: 'published' } }),
+      this.prisma.schedule.count({ where: { ...where, status: 'draft' } }),
     ]);
 
     const stages = [
@@ -75,9 +83,10 @@ export class PilotEvidenceService {
     };
   }
 
-  async getHomeworkFunnel(): Promise<WorkflowFunnel> {
+  async getHomeworkFunnel(schoolId?: string): Promise<WorkflowFunnel> {
+    const where = schoolId ? { schoolId } : {};
     const [created, submissions, graded] = await Promise.all([
-      this.prisma.homework.count(),
+      this.prisma.homework.count({ where }),
       this.prisma.homeworkSubmission.count(),
       this.prisma.homeworkSubmission.count({ where: { score: { not: null } } }),
     ]);
@@ -96,10 +105,11 @@ export class PilotEvidenceService {
     };
   }
 
-  async getExamFunnel(): Promise<WorkflowFunnel> {
+  async getExamFunnel(schoolId?: string): Promise<WorkflowFunnel> {
+    const where = schoolId ? { schoolId } : {};
     const [created, sessions, graded] = await Promise.all([
-      this.prisma.exam.count(),
-      this.prisma.examSession.count(),
+      this.prisma.exam.count({ where }),
+      this.prisma.examSession.count({ where }),
       this.prisma.examSession.count({ where: { score: { not: null } } }),
     ]);
 
@@ -117,11 +127,12 @@ export class PilotEvidenceService {
     };
   }
 
-  async getExportFunnel(): Promise<WorkflowFunnel> {
+  async getExportFunnel(schoolId?: string): Promise<WorkflowFunnel> {
+    const where = schoolId ? { schoolId } : {};
     const [created, completed, failed] = await Promise.all([
-      this.prisma.exportJob.count(),
-      this.prisma.exportJob.count({ where: { status: 'completed' } }),
-      this.prisma.exportJob.count({ where: { status: 'failed' } }),
+      this.prisma.exportJob.count({ where }),
+      this.prisma.exportJob.count({ where: { ...where, status: 'completed' } }),
+      this.prisma.exportJob.count({ where: { ...where, status: 'failed' } }),
     ]);
 
     const successRate = created > 0 ? Math.round((completed / created) * 100) : 0;
@@ -138,9 +149,10 @@ export class PilotEvidenceService {
     };
   }
 
-  async getAnnouncementFunnel(): Promise<WorkflowFunnel> {
+  async getAnnouncementFunnel(schoolId?: string): Promise<WorkflowFunnel> {
+    const where = schoolId ? { schoolId } : {};
     const [sent, read] = await Promise.all([
-      this.prisma.announcement.count(),
+      this.prisma.announcement.count({ where }),
       this.prisma.announcementReceipt.count({ where: { readAt: { not: null } } }),
     ]);
 
@@ -155,10 +167,11 @@ export class PilotEvidenceService {
     };
   }
 
-  async getInvitationFunnel(): Promise<WorkflowFunnel> {
+  async getInvitationFunnel(schoolId?: string): Promise<WorkflowFunnel> {
+    const where = schoolId ? { schoolId } : {};
     const [sent, accepted] = await Promise.all([
-      this.prisma.invitation.count(),
-      this.prisma.invitation.count({ where: { status: 'ACCEPTED' } }),
+      this.prisma.invitation.count({ where }),
+      this.prisma.invitation.count({ where: { ...where, status: 'ACCEPTED' } }),
     ]);
 
     return {
@@ -174,8 +187,9 @@ export class PilotEvidenceService {
 
   // ─── Friction Signals ───────────────────────────────────────────────────
 
-  async getFrictionSignals(): Promise<FrictionSignal[]> {
+  async getFrictionSignals(schoolId?: string): Promise<FrictionSignal[]> {
     const signals: FrictionSignal[] = [];
+    const where = schoolId ? { schoolId } : {};
 
     const [
       failedExports,
@@ -187,36 +201,36 @@ export class PilotEvidenceService {
       abandonedHomework,
       highRetryLogins,
     ] = await Promise.all([
-      this.prisma.exportJob.count({ where: { status: 'failed' } }),
-      this.prisma.solverRun.count({ where: { status: 'cancelled' } }),
-      this.prisma.schedule.count({ where: { status: 'draft' } }),
-      this.prisma.grade.count({ where: { isPublished: false } }),
+      this.prisma.exportJob.count({ where: { ...where, status: 'failed' } }),
+      this.prisma.solverRun.count({ where: { ...where, status: 'cancelled' } }),
+      this.prisma.schedule.count({ where: { ...where, status: 'draft' } }),
+      this.prisma.grade.count({ where: { ...where, isPublished: false } }),
       this.prisma.announcementReceipt.count({ where: { readAt: null } }),
       this.prisma.homeworkSubmission.count({ where: { score: { equals: null } } }),
       this.prisma.homework.count({ where: { submissions: { none: {} } } }),
-      this.prisma.auditLog.count({ where: { action: 'login', createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } } }),
+      this.prisma.auditLog.count({ where: { ...where, action: 'login', createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) } } }),
     ]);
 
     if (failedExports > 0) {
-      signals.push({ signal: 'Failed exports', severity: failedExports > 5 ? 'high' : 'medium', count: failedExports, module: 'exports', note: 'Users may retry or abandon export workflow' });
+      signals.push({ signal: 'Failed exports', severity: failedExports > 5 ? 'high' : 'medium', count: failedExports, module: 'exports', note: 'Users may retry or abandon export workflow', owner: 'accountant', route: '/dashboard/export-center', actionCta: 'Eksportlarni tekshirish' });
     }
     if (failedSolvers > 0) {
-      signals.push({ signal: 'Failed solver runs', severity: failedSolvers > 3 ? 'high' : 'medium', count: failedSolvers, module: 'schedule', note: 'Schedule generation may appear unreliable' });
+      signals.push({ signal: 'Failed solver runs', severity: failedSolvers > 3 ? 'high' : 'medium', count: failedSolvers, module: 'schedule', note: 'Schedule generation may appear unreliable', owner: 'vice_principal', route: '/dashboard/schedule', actionCta: 'Jadval generatorini tekshirish' });
     }
     if (draftSchedules > 5) {
-      signals.push({ signal: 'Draft schedules never published', severity: 'medium', count: draftSchedules, module: 'schedule', note: 'Users generate but do not commit schedules' });
+      signals.push({ signal: 'Draft schedules never published', severity: 'medium', count: draftSchedules, module: 'schedule', note: 'Users generate but do not commit schedules', owner: 'vice_principal', route: '/dashboard/schedule', actionCta: 'Jadvalni nashr etish' });
     }
     if (draftGrades > 10) {
-      signals.push({ signal: 'Unpublished grades', severity: 'medium', count: draftGrades, module: 'grades', note: 'Teachers may forget or avoid publishing grades' });
+      signals.push({ signal: 'Unpublished grades', severity: 'medium', count: draftGrades, module: 'grades', note: 'Teachers may forget or avoid publishing grades', owner: 'vice_principal', route: '/dashboard/grades', actionCta: 'Baholarni nashr etish' });
     }
     if (unreadAnnouncements > 50) {
-      signals.push({ signal: 'Unread announcements', severity: 'low', count: unreadAnnouncements, module: 'announcements', note: 'Recipients not engaging with announcements' });
+      signals.push({ signal: 'Unread announcements', severity: 'low', count: unreadAnnouncements, module: 'announcements', note: 'Recipients not engaging with announcements', owner: 'branch_admin', route: '/dashboard/comms', actionCta: 'E\'lonlarni ko\'rish' });
     }
     if (ungradedSubmissions > 20) {
-      signals.push({ signal: 'Ungraded submissions', severity: 'medium', count: ungradedSubmissions, module: 'homework', note: 'Grading backlog accumulating' });
+      signals.push({ signal: 'Ungraded submissions', severity: 'medium', count: ungradedSubmissions, module: 'homework', note: 'Grading backlog accumulating', owner: 'vice_principal', route: '/dashboard/homework', actionCta: 'Topshiriqlarni baholash' });
     }
     if (abandonedHomework > 5) {
-      signals.push({ signal: 'Homework with zero submissions', severity: 'low', count: abandonedHomework, module: 'homework', note: 'Students not submitting assigned work' });
+      signals.push({ signal: 'Homework with zero submissions', severity: 'low', count: abandonedHomework, module: 'homework', note: 'Students not submitting assigned work', owner: 'vice_principal', route: '/dashboard/homework', actionCta: 'Uy vazifalarini ko\'rish' });
     }
 
     return signals;

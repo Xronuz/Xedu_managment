@@ -4,6 +4,7 @@ import { JwtPayload, UserRole } from '@eduplatform/types';
 import { CreateHomeworkDto, UpdateHomeworkDto, SubmitHomeworkDto, GradeSubmissionDto } from './dto/homework.dto';
 import { AuditService } from '@/common/audit/audit.service';
 import { NotificationsService } from '@/modules/notifications/notifications.service';
+import { AchievementService } from '@/modules/engagement/achievement.service';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 import { assertParentOfChild } from '@/common/utils/parent-guard.util';
 
@@ -13,6 +14,7 @@ export class HomeworkService {
     private readonly prisma: PrismaService,
     @Optional() private readonly auditService: AuditService,
     @Optional() private readonly notificationsService: NotificationsService,
+    @Optional() private readonly achievementService: AchievementService,
   ) {}
 
   async findAll(currentUser: JwtPayload, classId?: string, subjectId?: string) {
@@ -240,7 +242,7 @@ export class HomeworkService {
       });
     }
 
-    return this.prisma.homeworkSubmission.create({
+    const submission = await this.prisma.homeworkSubmission.create({
       data: {
         homeworkId: id,
         studentId: currentUser.sub,
@@ -252,6 +254,18 @@ export class HomeworkService {
         student: { select: { id: true, firstName: true, lastName: true } },
       },
     });
+
+    // ── Achievement progression on new homework submission ────────────────────
+    if (this.achievementService && currentUser.schoolId) {
+      this.achievementService.checkAndProgress(
+        currentUser.sub, currentUser.schoolId, 'homework_streak',
+      ).catch(() => {});
+      this.achievementService.checkAndProgress(
+        currentUser.sub, currentUser.schoolId, 'homework_count',
+      ).catch(() => {});
+    }
+
+    return submission;
   }
 
   async grade(homeworkId: string, submissionId: string, dto: GradeSubmissionDto, currentUser: JwtPayload) {

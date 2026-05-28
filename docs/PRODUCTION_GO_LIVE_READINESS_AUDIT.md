@@ -231,7 +231,7 @@ NEXT_PUBLIC_WS_URL=             # WebSocket URL
 | `notifications.service.spec.ts` — 1 failure | Test coverage gap | No production impact |
 | Soft delete not implemented | Permanent deletion | Confirmation dialogs on all destructive actions |
 | AI features are stubs | No real LLM integration | Labeled as "coming soon" in UI |
-| Mobile app | Web-only | PWA installable |
+| Mobile | Responsive web | PWA planned |
 | SMS gateway | Not integrated | Email + in-app notifications work |
 
 ### Blocking (None Identified)

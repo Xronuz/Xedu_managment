@@ -7,6 +7,7 @@ import { MarkAttendanceDto } from './dto/mark-attendance.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
+import { recordAttendanceAction } from '@/common/telemetry/pilot-telemetry';
 
 @ApiTags('attendance')
 @ApiBearerAuth('JWT')
@@ -22,6 +23,7 @@ export class AttendanceController {
     @Body() dto: MarkAttendanceDto,
     @CurrentUser() user: JwtPayload,
   ) {
+    recordAttendanceAction();
     return this.attendanceService.markAttendance(dto, user);
   }
 

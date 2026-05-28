@@ -4,6 +4,7 @@ import { OnlineExamService } from './online-exam.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { AuditService } from '@/common/audit/audit.service';
+import { ExamEngagementService } from '@/modules/engagement/exam-engagement.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 
 const SCHOOL_ID = 'school-1';
@@ -91,6 +92,9 @@ describe('OnlineExamService', () => {
         create: jest.fn(),
         update: jest.fn(),
       },
+      coinTransaction: {
+        findFirst: jest.fn().mockResolvedValue(null),
+      },
       $transaction: jest.fn(async (ops: any[]) => Promise.all(ops.map((op: any) => op))),
     };
 
@@ -100,6 +104,7 @@ describe('OnlineExamService', () => {
         { provide: PrismaService, useValue: prisma },
         { provide: EventsGateway, useValue: { emitToSchool: jest.fn(), emitToUser: jest.fn() } },
         { provide: AuditService, useValue: { log: jest.fn() } },
+        { provide: ExamEngagementService, useValue: { evaluateExamResult: jest.fn().mockResolvedValue({ action: 'reward' }) } },
       ],
     }).compile();
 
@@ -365,6 +370,39 @@ describe('OnlineExamService', () => {
           data: expect.objectContaining({ score: 1, maxScore: 100 }),
         }),
       );
+    });
+
+    it('should call evaluateExamResult after successful submission', async () => {
+      prisma.grade.findFirst.mockResolvedValue(null);
+      prisma.grade.create.mockResolvedValue({ id: 'grade-1' });
+      prisma.coinTransaction.findFirst.mockResolvedValue(null);
+
+      const examEngagementService = (service as any).examEngagementService;
+      expect(examEngagementService).toBeDefined();
+
+      await service.submitSession(SESSION_ID, mockStudent);
+
+      expect(examEngagementService.evaluateExamResult).toHaveBeenCalledWith(
+        expect.objectContaining({
+          studentId: STUDENT_ID,
+          schoolId: SCHOOL_ID,
+          examId: EXAM_ID,
+          score: 1,
+          maxScore: 1,
+          sessionId: SESSION_ID,
+        }),
+      );
+    });
+
+    it('should skip evaluateExamResult if already evaluated for this session', async () => {
+      prisma.grade.findFirst.mockResolvedValue(null);
+      prisma.grade.create.mockResolvedValue({ id: 'grade-1' });
+      prisma.coinTransaction.findFirst.mockResolvedValue({ id: 'tx-1' }); // already evaluated
+
+      const examEngagementService = (service as any).examEngagementService;
+      await service.submitSession(SESSION_ID, mockStudent);
+
+      expect(examEngagementService.evaluateExamResult).not.toHaveBeenCalled();
     });
   });
 });

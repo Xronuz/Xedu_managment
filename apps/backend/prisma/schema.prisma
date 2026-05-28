@@ -711,6 +711,7 @@ model User {
   // Discipline
   disciplineAsStudent DisciplineIncident[] @relation("DisciplineStudent")
   disciplineReported  DisciplineIncident[] @relation("DisciplineReporter")
+  disciplineResolved  DisciplineIncident[] @relation("DisciplineResolver")
 
   // Parent-Teacher Meetings
   meetingsAsTeacher ParentMeeting[] @relation("MeetingTeacher")
@@ -824,6 +825,7 @@ model Class {
   grades       Grade[]
   exams        Exam[]
   homeworks    Homework[]
+  leads        Lead[]
 
   @@index([schoolId, branchId])
   @@index([branchId])
@@ -1948,6 +1950,7 @@ model DisciplineIncident {
   branchId     String
   studentId    String
   reportedById String
+  resolvedById String?
   type         DisciplineType     @default(other)
   severity     DisciplineSeverity @default(low)
   action       DisciplineAction   @default(warning)
@@ -1963,6 +1966,7 @@ model DisciplineIncident {
   branch     Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
   student    User   @relation("DisciplineStudent", fields: [studentId], references: [id], onDelete: Cascade)
   reportedBy User   @relation("DisciplineReporter", fields: [reportedById], references: [id], onDelete: Cascade)
+  resolvedBy User?  @relation("DisciplineResolver", fields: [resolvedById], references: [id], onDelete: SetNull)
 
   @@index([schoolId, date])
   @@index([schoolId, branchId])
@@ -2321,10 +2325,11 @@ model Lead {
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 
-  school     School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
-  branch     Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
-  assignedTo User?  @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
-  createdBy  User?  @relation("LeadCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  school        School @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch        Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  assignedTo    User?  @relation("LeadAssignee", fields: [assignedToId], references: [id], onDelete: SetNull)
+  createdBy     User?  @relation("LeadCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  expectedClass Class? @relation(fields: [expectedClassId], references: [id], onDelete: SetNull)
 
   comments LeadComment[]
 
@@ -2646,4 +2651,30 @@ model ExportJob {
   @@index([schoolId, createdAt])
   @@index([createdBy])
   @@map("export_jobs")
+}
+
+// ─── PilotTelemetrySnapshot (Phase 10B: lightweight operational telemetry) ──
+
+model PilotTelemetrySnapshot {
+  id                   String   @id @default(uuid())
+  date                 DateTime @db.Date // stored as date only
+  logins               Int      @default(0)
+  setupCompletions     Int      @default(0)
+  scheduleGenerations  Int      @default(0)
+  solverRuns           Int      @default(0)
+  exports              Int      @default(0)
+  attendanceActions    Int      @default(0)
+  gradePublishes       Int      @default(0)
+  homeworkSubmissions  Int      @default(0)
+  examSubmissions      Int      @default(0)
+  coinTransactions     Int      @default(0)
+  announcementReads    Int      @default(0)
+  invitationAccepts    Int      @default(0)
+  queueFailures        Int      @default(0)
+  error500s            Int      @default(0)
+  createdAt            DateTime @default(now())
+
+  @@unique([date])
+  @@index([date])
+  @@map("pilot_telemetry_snapshots")
 }

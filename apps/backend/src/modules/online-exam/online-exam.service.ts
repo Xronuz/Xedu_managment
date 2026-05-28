@@ -10,6 +10,7 @@ import * as mammoth from 'mammoth';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { AuditService } from '@/common/audit/audit.service';
+import { ExamEngagementService } from '@/modules/engagement/exam-engagement.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 
@@ -87,6 +88,7 @@ export class OnlineExamService {
     private readonly prisma: PrismaService,
     @Optional() private readonly eventsGateway: EventsGateway,
     @Optional() private readonly auditService: AuditService,
+    @Optional() private readonly examEngagementService: ExamEngagementService,
   ) {}
 
   // ─── Question Management ──────────────────────────────────────────────────
@@ -506,6 +508,30 @@ export class OnlineExamService {
       score:     totalScore,
       percentage,
     });
+
+    // ── Engagement: evaluate exam result for coins/achievements ───────────────
+    if (this.examEngagementService) {
+      // Idempotency: skip if already evaluated for this session
+      const alreadyEvaluated = await this.prisma.coinTransaction.findFirst({
+        where: {
+          userId: currentUser.sub,
+          schoolId: session.schoolId,
+          metadata: { path: ['sessionId'], equals: session.id },
+        },
+      }).catch(() => null);
+
+      if (!alreadyEvaluated) {
+        this.examEngagementService.evaluateExamResult({
+          studentId: currentUser.sub,
+          schoolId: session.schoolId,
+          examId: session.examId,
+          score: totalScore,
+          maxScore: totalPossible,
+          triggeredBy: currentUser.sub,
+          sessionId: session.id,
+        }).catch(() => {});
+      }
+    }
 
     return {
       session: updated,

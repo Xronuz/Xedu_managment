@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { invitationsApi } from '@/lib/api/invitations';
 import { useToast } from '@/components/ui/use-toast';
 import { ROLES, type UserRole } from '@/config/permissions';
+import { useAuthStore } from '@/store/auth.store';
 
 const inviteSchema = z.object({
   email: z.string().email("Email noto'g'ri formatda"),
@@ -33,6 +34,7 @@ interface InviteUserDialogProps {
 export function InviteUserDialog({ open, onOpenChange, defaultRole }: InviteUserDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useAuthStore();
   const [form, setForm] = useState<InviteForm>({
     email: '', firstName: '', lastName: '', role: defaultRole ?? '',
   });
@@ -40,7 +42,7 @@ export function InviteUserDialog({ open, onOpenChange, defaultRole }: InviteUser
   const [sent, setSent] = useState(false);
 
   const mutation = useMutation({
-    mutationFn: () => invitationsApi.create(form),
+    mutationFn: () => invitationsApi.create({ ...form, branchId: user?.branchId ?? undefined }),
     onSuccess: () => {
       toast({ title: 'Taklif yuborildi', description: `${form.email} manziliga taklif xabari yuborildi.` });
       setSent(true);

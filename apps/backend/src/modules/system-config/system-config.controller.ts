@@ -7,6 +7,7 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { recordSetupComplete } from '@/common/telemetry/pilot-telemetry';
 import { SystemConfigService, SystemConfigMap } from './system-config.service';
 
 class UpdateConfigDto implements Partial<SystemConfigMap> {
@@ -105,6 +106,9 @@ export class SystemConfigController {
         ...(dto.onboardingCompleted !== undefined && { onboardingCompleted: dto.onboardingCompleted }),
       },
     });
+    if (dto.onboardingCompleted) {
+      recordSetupComplete();
+    }
     return { success: true };
   }
 

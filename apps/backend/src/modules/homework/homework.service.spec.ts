@@ -4,6 +4,7 @@ import { HomeworkService } from './homework.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { AuditService } from '@/common/audit/audit.service';
 import { NotificationsService } from '@/modules/notifications/notifications.service';
+import { AchievementService } from '@/modules/engagement/achievement.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 
 const SCHOOL_ID = 'school-1';
@@ -111,6 +112,7 @@ describe('HomeworkService', () => {
         { provide: PrismaService, useValue: prisma },
         { provide: AuditService, useValue: { log: jest.fn() } },
         { provide: NotificationsService, useValue: { createInApp: jest.fn().mockResolvedValue(undefined) } },
+        { provide: AchievementService, useValue: { checkAndProgress: jest.fn().mockResolvedValue([]) } },
       ],
     }).compile();
 
@@ -282,6 +284,39 @@ describe('HomeworkService', () => {
         where: { classId: CLASS_ID, studentId: STUDENT_ID },
       });
       expect(result.studentId).toBe(STUDENT_ID);
+    });
+
+    it('should trigger achievement check on new submission', async () => {
+      prisma.homework.findFirst.mockResolvedValue(mockHomework);
+      prisma.classStudent.findFirst.mockResolvedValue({ id: 'cs-1' });
+      prisma.homeworkSubmission.findFirst.mockResolvedValue(null); // new submission
+      prisma.homeworkSubmission.create.mockResolvedValue({
+        id: 'sub-1', homeworkId: HW_ID, studentId: STUDENT_ID, content: 'Javob',
+      });
+
+      const achievementService = (service as any).achievementService;
+      await service.submit(HW_ID, { content: 'Javob' }, mockStudent);
+
+      expect(achievementService.checkAndProgress).toHaveBeenCalledWith(
+        STUDENT_ID, SCHOOL_ID, 'homework_streak',
+      );
+      expect(achievementService.checkAndProgress).toHaveBeenCalledWith(
+        STUDENT_ID, SCHOOL_ID, 'homework_count',
+      );
+    });
+
+    it('should NOT trigger achievement check on resubmission', async () => {
+      prisma.homework.findFirst.mockResolvedValue(mockHomework);
+      prisma.classStudent.findFirst.mockResolvedValue({ id: 'cs-1' });
+      prisma.homeworkSubmission.findFirst.mockResolvedValue({ id: 'sub-1' }); // existing
+      prisma.homeworkSubmission.update.mockResolvedValue({
+        id: 'sub-1', homeworkId: HW_ID, studentId: STUDENT_ID, content: 'Yangilangan',
+      });
+
+      const achievementService = (service as any).achievementService;
+      await service.submit(HW_ID, { content: 'Yangilangan' }, mockStudent);
+
+      expect(achievementService.checkAndProgress).not.toHaveBeenCalled();
     });
 
     it('should reject submission when student is not enrolled', async () => {

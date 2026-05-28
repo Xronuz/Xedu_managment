@@ -22,7 +22,7 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   const sentryEnabled = initSentry(configService);
   if (sentryEnabled) {
-    console.log('🛡️ Sentry initialized');
+    app.get(Logger).log('🛡️ Sentry initialized');
   }
 
   // Lokal yuklangan fayllarni serve qilish (MinIO ishlatilmasa)
@@ -94,7 +94,16 @@ async function bootstrap() {
 
   const port = process.env.PORT ?? 3001;
   await app.listen(port);
-  console.log(`🚀 EduPlatform API: http://localhost:${port}/api/docs`);
+
+  // Startup diagnostics
+  const logger = app.get(Logger);
+  logger.log(`🚀 EduPlatform API started on port ${port}`);
+  logger.log(`Health: http://localhost:${port}/api/health`);
+  logger.log(`Metrics: http://localhost:${port}/api/metrics`);
+  logger.log(`Swagger: http://localhost:${port}/api/docs`);
+
+  // Graceful shutdown
+  app.enableShutdownHooks();
 }
 
 bootstrap();

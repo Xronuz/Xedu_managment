@@ -32,6 +32,7 @@ import { PayrollModule } from './modules/payroll/payroll.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { AuditModule } from './common/audit/audit.module';
 import { QueueModule } from './common/queue/queue.module';
+import { PilotTelemetryModule } from './common/telemetry/pilot-telemetry.module';
 import { DisplayModule } from './modules/display/display.module';
 import { AppCronModule } from './common/cron/cron.module';
 import { CanteenModule } from './modules/canteen/canteen.module';
@@ -102,6 +103,7 @@ import { envValidationSchema } from './common/config/env.validation';
     AuditModule,    // Global — barcha modulda AuditService inject qilinadi
     QueueModule,    // Global — barcha modulda NOTIFICATION_QUEUE inject qilinadi
     AppCronModule,  // Cron jobs — scheduled tasks
+    PilotTelemetryModule, // Pilot telemetry persistence (Phase 10B)
 
     // Feature modules
     AuthModule,

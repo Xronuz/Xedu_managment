@@ -56,7 +56,7 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   '/dashboard/users':          ['director', 'vice_principal', 'branch_admin'],
   '/dashboard/staff':          ['director', 'vice_principal', 'branch_admin'],
   '/dashboard/branches':       ['director', 'vice_principal'],
-  '/dashboard/crm':            ['director', 'vice_principal', 'branch_admin'],
+  '/dashboard/crm':            ['director', 'vice_principal', 'branch_admin', 'accountant'],
   '/dashboard/meetings':       ['director', 'vice_principal', 'class_teacher'],
   '/dashboard/leave-requests': ['director', 'vice_principal', 'branch_admin'],
   '/dashboard/teacher-substitutions': ['director', 'vice_principal', 'branch_admin', 'teacher', 'class_teacher'],
@@ -66,7 +66,7 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   // ═══════════════════════════════════════════════════════════════════════════════
   // DISCIPLINE
   // ═══════════════════════════════════════════════════════════════════════════════
-  '/dashboard/discipline':     ['director', 'vice_principal', 'class_teacher', 'branch_admin'],
+  '/dashboard/discipline':     ['director', 'vice_principal', 'teacher', 'class_teacher', 'branch_admin'],
 
   // ═══════════════════════════════════════════════════════════════════════════════
   // FINANCE
@@ -125,6 +125,7 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   // ═══════════════════════════════════════════════════════════════════════════════
   '/dashboard/student':        ['student'],
   '/dashboard/student/shop':   ['student'],
+  '/dashboard/staff/shop':     ['director', 'vice_principal', 'branch_admin', 'super_admin'],
   '/dashboard/parent':         ['parent'],
 
   // ═══════════════════════════════════════════════════════════════════════════════

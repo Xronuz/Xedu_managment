@@ -63,6 +63,11 @@ services:
     image: postgres:16-alpine
     container_name: eduplatform-postgres
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1G
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-eduplatform}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
@@ -87,6 +92,11 @@ services:
     image: redis:7-alpine
     container_name: eduplatform-redis
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
     command: >
       redis-server
         --appendonly yes
@@ -150,6 +160,9 @@ services:
       # RESET_DB=true qo'ysangiz DB to'liq o'chiriladi va qayta yaratiladi
       # Odatda false — faqat yangi migrationlar qo'llanadi
       RESET_DB: ${RESET_DB:-false}
+      # SEED_FORCE=true bilan bo'sh DB'ga demo maktab va super admin yaratiladi
+      # Birinchi deploy'da true, keyin false qilishingiz mumkin
+      SEED_FORCE: ${SEED_FORCE:-false}
     depends_on:
       postgres:
         condition: service_healthy
@@ -167,6 +180,13 @@ services:
       dockerfile: apps/backend/Dockerfile
     container_name: eduplatform-backend
     restart: unless-stopped
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 1536M
     environment:
       <<: *backend-env
     volumes:
@@ -206,6 +226,13 @@ services:
         NEXT_PUBLIC_WS_URL: ${NEXT_PUBLIC_WS_URL:?Set NEXT_PUBLIC_WS_URL in .env}
     container_name: eduplatform-frontend
     restart: unless-stopped
+    stop_signal: SIGTERM
+    stop_grace_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
     environment:
       NODE_ENV: production
       NEXT_TELEMETRY_DISABLED: "1"

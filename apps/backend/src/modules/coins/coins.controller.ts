@@ -11,11 +11,12 @@ import { JwtPayload, UserRole } from '@eduplatform/types';
 import { CoinsService, CreateShopItemDto } from './coins.service';
 import { SpendCoinsDto } from './dto/spend-coins.dto';
 import { EngagementConfigService } from '@/modules/engagement/engagement-config.service';
+import { recordCoinTransaction } from '@/common/telemetry/pilot-telemetry';
 import { RequireEngagement } from '@/modules/engagement/require-engagement.decorator';
 import { RequireEngagementGuard } from '@/modules/engagement/require-engagement.guard';
 
 const ADMIN_ROLES = [
-  UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.SUPER_ADMIN,
+  UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.SUPER_ADMIN,
 ];
 
 const TEACHER_ROLES = [
@@ -74,6 +75,7 @@ export class CoinsController {
     @Body() dto: SpendCoinsDto,
     @CurrentUser() user: JwtPayload,
   ) {
+    recordCoinTransaction();
     return this.coinsService.spendCoins(dto.itemId, user);
   }
 
@@ -151,6 +153,7 @@ export class CoinsController {
         }
       }
     }
+    recordCoinTransaction();
     return this.coinsService.awardManual(body.studentId, body.amount, user, body.comment);
   }
 

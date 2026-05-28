@@ -3,9 +3,10 @@ import { GradesController } from './grades.controller';
 import { GradesService } from './grades.service';
 import { NotificationsModule } from '@/modules/notifications/notifications.module';
 import { CoinsModule } from '@/modules/coins/coins.module';
+import { EngagementModule } from '@/modules/engagement/engagement.module';
 
 @Module({
-  imports: [NotificationsModule, CoinsModule],
+  imports: [NotificationsModule, CoinsModule, EngagementModule],
   controllers: [GradesController],
   providers: [GradesService],
   exports: [GradesService],

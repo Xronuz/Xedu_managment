@@ -8,6 +8,7 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 import { CoinsService, COIN_RULES } from '@/modules/coins/coins.service';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
+import { AchievementService } from '@/modules/engagement/achievement.service';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 
 // ─── Enums (mirror schema) ────────────────────────────────────────────────────
@@ -57,6 +58,7 @@ export class DisciplineService {
     private readonly prisma: PrismaService,
     @Optional() private readonly coinsService: CoinsService,
     @Optional() private readonly eventsGateway: EventsGateway,
+    @Optional() private readonly achievementService: AchievementService,
   ) {}
 
   async findAll(
@@ -168,6 +170,11 @@ export class DisciplineService {
         dto.studentId, schoolId, COIN_RULES.DISCIPLINE_PRAISE, 'discipline_praise',
         { disciplineId: incident.id, action: 'praise' },
       ).catch(() => {});
+
+      // ── Achievement progression for clean streak after deduction ───────────
+      this.achievementService?.checkAndProgress(
+        dto.studentId, schoolId, 'clean_streak_after_deduction',
+      ).catch(() => {});
     } else if (action === 'warning') {
       this.coinsService?.deductCoins(
         dto.studentId, schoolId, Math.abs(COIN_RULES.DISCIPLINE_WARNING), 'discipline_warning',
@@ -201,6 +208,7 @@ export class DisciplineService {
       data: {
         resolved:   true,
         resolvedAt: new Date(),
+        resolvedById: currentUser.sub,
         notes:      dto.notes ?? incident.notes,
       },
       include: {

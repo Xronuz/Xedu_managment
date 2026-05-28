@@ -1226,7 +1226,7 @@ User ──HTTPS──► Cloudflare ──HTTP:80──► Caddy ──► Fron
 │ • Real-time Notifications — SMS (Infobip) + Email + WebSocket + In-app     │
 │ • 14 Entity Export Center — CSV/XLSX/JSON, RBAC bilan                      │
 │ • Ops Command Center — readiness score, actionable alerts, today summary   │
-│ • Online Exam Engine — DocX import, auto-grading, real-time proctoring     │
+│ • Online Exam Engine — DocX import, auto-grading for objective questions, timer enforcement │
 │ • Self-hosted Deployment — Docker Compose, GitHub Actions, Cloudflare      │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```

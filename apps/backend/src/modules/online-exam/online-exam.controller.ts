@@ -10,6 +10,7 @@ import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
+import { recordExamSubmission } from '@/common/telemetry/pilot-telemetry';
 import {
   OnlineExamService,
   CreateQuestionDto,
@@ -126,6 +127,7 @@ export class OnlineExamController {
     @Param('examId') examId: string,
     @CurrentUser() user: JwtPayload,
   ) {
+    recordExamSubmission();
     return this.service.startSession(examId, user);
   }
 

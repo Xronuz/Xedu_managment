@@ -381,7 +381,7 @@ Arxitektura:
 
 ### Phase 5 — Differentiation (4–6 oy)
 
-**D1. Mobil ilova (React Native yoki PWA)**
+**D1. Mobil-optimallashtirilgan web interfeys (PWA rejalashtirilgan)**
 ```
 Ustuvor widgetlar:
 1. Bugungi darslar
@@ -458,6 +458,6 @@ Yangi integratsiyalar:
 1. **Darhol (1–4 hafta):** ⌘K qidiruv + Dashboard KPI + O'qituvchi hisoboti — past xarajat, katta UX foydasi
 2. **1–2 oy:** Mavsumiy baho + Sinflar reytingi + P&L hisobot — funksional bo'shliqlar
 3. **2–4 oy:** CRM/Leads + Multi-branch + Abonement billing — yangi bozor segmentlari
-4. **4–6 oy:** Mobil ilova (PWA birinchi) + Gamification + Integratsiya markazi
+4. **4–6 oy:** Mobil web interfeys (PWA birinchi) + Gamification + Integratsiya markazi
 
 > **Muhim eslatma:** EduSchool asosan **o'quv markazi (learning center)** uchun qurilgan (Abonement, Guruhlar, Leads). Bizning tizim esa asosan **davlat/xususiy maktab** uchun (Kutubxona, Transport, Online imtihon, Parent portal). Bu farqni hisobga olib, ikki yo'nalishda ham kuchli bo'lish strategiyasi optimal.

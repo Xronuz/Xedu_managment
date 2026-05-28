@@ -1,4 +1,30 @@
+import { JwtPayload } from '@eduplatform/types';
+
 export const NOTIFICATION_QUEUE = 'notification_queue';
+export const EXPORT_QUEUE = 'export_queue';
+export const SOLVER_QUEUE = 'solver_queue';
+
+export enum ExportJobType {
+  PROCESS_EXPORT = 'process_export',
+}
+
+export interface ExportJobData {
+  jobId: string;
+  user: JwtPayload;
+  filters: Record<string, any>;
+  correlationId?: string;
+}
+
+export enum SolverJobType {
+  PROCESS_SOLVER = 'process_solver',
+}
+
+export interface SolverJobData {
+  runId: string;
+  dto: Record<string, any>;
+  user: JwtPayload;
+  correlationId?: string;
+}
 
 export enum NotificationJobType {
   SEND_EMAIL = 'send_email',

@@ -7,6 +7,7 @@ import { NotificationsService } from '@/modules/notifications/notifications.serv
 import { AuditService } from '@/common/audit/audit.service';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { CoinsService } from '@/modules/coins/coins.service';
+import { AchievementService } from '@/modules/engagement/achievement.service';
 import { NOTIFICATION_QUEUE } from '@/common/queue/queue.constants';
 import { GradeType, JwtPayload, UserRole } from '@eduplatform/types';
 
@@ -68,6 +69,7 @@ describe('GradesService', () => {
         { provide: AuditService, useValue: { log: jest.fn() } },
         { provide: EventsGateway, useValue: { emitToUser: jest.fn(), emitToRoom: jest.fn(), emitToSchool: jest.fn() } },
         { provide: CoinsService, useValue: { award: jest.fn(), earnCoins: jest.fn().mockResolvedValue(undefined) } },
+        { provide: AchievementService, useValue: { checkAndProgress: jest.fn().mockResolvedValue([]) } },
       ],
     }).compile();
 
@@ -159,6 +161,40 @@ describe('GradesService', () => {
           data: expect.objectContaining({ schoolId: SCHOOL_ID, score: 85 }),
         }),
       );
+    });
+
+    it('triggers achievement check on excellent grade (>= 90%)', async () => {
+      const excellentGrade = { ...mockGrade, score: 95, maxScore: 100 };
+      prisma.grade.create.mockResolvedValueOnce(excellentGrade);
+
+      const achievementService = (service as any).achievementService;
+      const dto = {
+        classId: CLASS_ID, subjectId: SUBJ_ID, studentId: 'student-1',
+        type: GradeType.TEST, score: 95, maxScore: 100,
+        date: '2026-04-01', comment: "A'lo",
+      };
+
+      await service.create(dto, mockUser);
+
+      expect(achievementService.checkAndProgress).toHaveBeenCalledWith(
+        'student-1', SCHOOL_ID, 'subject_mastery',
+        expect.objectContaining({ score: 95, subjectId: SUBJ_ID }),
+      );
+    });
+
+    it('does NOT trigger achievement check on non-excellent grade (< 90%)', async () => {
+      prisma.grade.create.mockResolvedValueOnce(mockGrade);
+
+      const achievementService = (service as any).achievementService;
+      const dto = {
+        classId: CLASS_ID, subjectId: SUBJ_ID, studentId: 'student-1',
+        type: GradeType.TEST, score: 85, maxScore: 100,
+        date: '2026-04-01', comment: 'Yaxshi',
+      };
+
+      await service.create(dto, mockUser);
+
+      expect(achievementService.checkAndProgress).not.toHaveBeenCalled();
     });
   });
 

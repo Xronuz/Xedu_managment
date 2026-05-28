@@ -5,6 +5,7 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
+import { recordRequestMetric } from '@/modules/health/metrics.controller';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -22,6 +23,7 @@ export class TransformInterceptor<T>
     next: CallHandler,
   ): Observable<ApiResponse<T>> {
     const req = context.switchToHttp().getRequest();
+    recordRequestMetric();
     return next.handle().pipe(
       map((data) => ({
         success: true,

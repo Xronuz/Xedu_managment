@@ -13,7 +13,7 @@ function addDays(date: Date, days: number): Date {
 }
 import * as bcrypt from 'bcrypt';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
-import { canManageUser, assertCanManage } from '@/common/utils/role-hierarchy.util';
+// import { canManageUser, assertCanManage } from '@/common/utils/role-hierarchy.util';
 
 const INVITATION_EXPIRY_DAYS = 7;
 

@@ -90,8 +90,8 @@
 
 ## Known Limitations (Pilot Phase)
 
-1. **AI features**: Stubs only. No real LLM integration yet.
-2. **Mobile app**: Web-only. PWA installable but not native.
+1. **AI features**: Rule-based analytics only. No LLM integration yet. AI extension planned.
+2. **Mobile**: Responsive web interface. PWA planned.
 3. **Multi-school analytics**: Super-admin sees school list but no cross-school dashboards yet.
 4. **SMS gateway**: Not integrated. Notifications are in-app + email only.
 5. **Export sync processing**: Large exports run in the request thread — may timeout for very large datasets.

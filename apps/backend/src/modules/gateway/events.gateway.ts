@@ -13,7 +13,18 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { JwtPayload } from '@eduplatform/types';
 import { RedisService } from '@/common/redis/redis.service';
+import { PrismaService } from '@/common/prisma/prisma.service';
 import { createHash } from 'crypto';
+
+function parseCookie(cookieHeader?: string): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!cookieHeader) return cookies;
+  cookieHeader.split(';').forEach((c) => {
+    const [k, v] = c.trim().split('=');
+    if (k) cookies[k] = decodeURIComponent(v ?? '');
+  });
+  return cookies;
+}
 
 const TOKEN_DENYLIST_PREFIX = 'token_deny:';
 const USER_SESSIONS_PREFIX = 'user_sessions:';
@@ -45,18 +56,31 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private readonly jwtService: JwtService,
     private readonly config: ConfigService,
     private readonly redis: RedisService,
+    private readonly prisma: PrismaService,
   ) {}
 
   async handleConnection(client: Socket) {
     try {
       const token =
         client.handshake.auth?.token ||
-        client.handshake.headers?.authorization?.replace('Bearer ', '');
+        client.handshake.headers?.authorization?.replace('Bearer ', '') ||
+        parseCookie(client.handshake.headers?.cookie)?.access_token;
 
       if (token) {
         const payload = this.jwtService.verify<JwtPayload>(token, {
           secret: this.config.get('JWT_SECRET'),
         });
+
+        // Active user validation — deleted/deactivated users cannot connect
+        const dbUser = await this.prisma.user.findUnique({
+          where: { id: payload.sub, isActive: true },
+          select: { id: true, schoolId: true, branchId: true, role: true },
+        });
+        if (!dbUser) {
+          this.logger.warn(`Inactive/deleted user socket connection: ${client.id}`);
+          client.disconnect(true);
+          return;
+        }
 
         // Check deny-list (token revoked after logout)
         const isDenied = await this.isTokenDenied(token);
@@ -87,6 +111,12 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         await Promise.all(rooms.map((r) => client.join(r)));
+
+        // Redis socket session registry
+        try {
+          await this.redis.sadd(`ws:user:${payload.sub}`, client.id);
+        } catch { /* redis optional */ }
+
         this.logger.log(
           `Connected: ${payload.email} → [${rooms.join(', ')}] (${client.id})`,
         );
@@ -98,14 +128,18 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
           this.logger.log(`Display client connected: ${schoolSlug} (${client.id})`);
         }
       }
-    } catch {
-      this.logger.warn(`Unauthenticated socket connection: ${client.id}`);
+    } catch (err: any) {
+      this.logger.warn(`Unauthenticated socket connection: ${client.id} — ${err?.message ?? 'unknown'}`);
       client.disconnect(true);
     }
   }
 
   handleDisconnect(client: Socket) {
     wsJoinCounts.delete(client.id);
+    const user = client.data.user as JwtPayload | undefined;
+    if (user?.sub) {
+      this.redis.srem(`ws:user:${user.sub}`, client.id).catch(() => {});
+    }
     this.logger.log(`Client disconnected: ${client.id}`);
   }
 
@@ -187,6 +221,14 @@ export class EventsGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { schoolSlug: string },
   ) {
+    // Validate the school slug exists before joining
+    const school = await this.prisma.school.findUnique({
+      where: { slug: data.schoolSlug },
+      select: { id: true },
+    });
+    if (!school) {
+      return { event: 'error', message: 'Maktab topilmadi' };
+    }
     await client.join(`display:${data.schoolSlug}`);
     return { event: 'joined', room: `display:${data.schoolSlug}` };
   }

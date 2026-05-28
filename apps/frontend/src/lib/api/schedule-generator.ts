@@ -55,9 +55,55 @@ export interface GenerateScheduleDto {
   weekType?: string;
 }
 
+export interface AdvancedGenerateScheduleDto {
+  branchId?: string;
+  daysOfWeek?: string[];
+  classIds?: string[];
+  subjectIds?: string[];
+  strategy?: 'greedy' | 'hybrid';
+  overwriteExisting?: boolean;
+  weekType?: string;
+  timeoutMs?: number;
+  maxDepth?: number;
+}
+
+export type SolverRunStatus = 'running' | 'completed' | 'failed' | 'cancelled';
+
+export interface SolverRun {
+  id: string;
+  schoolId: string;
+  branchId: string | null;
+  weekType: string;
+  strategy: string;
+  status: SolverRunStatus;
+  demandsCount: number;
+  placedCount: number;
+  failureCount: number;
+  score: number | null;
+  metadata: Record<string, any> | null;
+  createdById: string;
+  createdAt: string;
+  completedAt: string | null;
+}
+
 export const scheduleGeneratorApi = {
   generate: async (dto: GenerateScheduleDto): Promise<GeneratorConflictReport> => {
     const { data } = await apiClient.post('/schedule/generate', dto);
+    return data;
+  },
+
+  advancedGenerate: async (dto: AdvancedGenerateScheduleDto): Promise<SolverRun> => {
+    const { data } = await apiClient.post('/schedule/advanced-generate', dto);
+    return data;
+  },
+
+  getSolverRun: async (id: string): Promise<SolverRun> => {
+    const { data } = await apiClient.get(`/schedule/solver-runs/${id}`);
+    return data;
+  },
+
+  listSolverRuns: async (params?: { branchId?: string; limit?: number; offset?: number }): Promise<{ runs: SolverRun[]; total: number; limit: number; offset: number }> => {
+    const { data } = await apiClient.get('/schedule/solver-runs', { params });
     return data;
   },
 

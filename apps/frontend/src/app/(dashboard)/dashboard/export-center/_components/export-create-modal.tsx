@@ -127,8 +127,8 @@ export function ExportCreateModal({ open, onOpenChange, onCreated }: ExportCreat
         ...(activeFilters.includes('weekType') && weekType ? { weekType } : {}),
       });
       toast({
-        title: 'Eksport yaratildi',
-        description: `${entityConfig.label} — ${FORMATS.find(f => f.value === format)?.label}`,
+        title: 'Eksport navbatga qo‘yildi',
+        description: `${entityConfig.label} — ${FORMATS.find(f => f.value === format)?.label}. Tayyor bo‘lganda yuklab olish mumkin.`,
       });
       onCreated();
       onOpenChange(false);

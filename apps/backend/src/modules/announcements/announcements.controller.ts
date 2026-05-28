@@ -12,6 +12,7 @@ import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { AnyAuthenticated } from '@/common/decorators/any-authenticated.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { recordAnnouncementRead } from '@/common/telemetry/pilot-telemetry';
 import { UserRole, JwtPayload } from '@eduplatform/types';
 
 @ApiTags('announcements')
@@ -73,6 +74,7 @@ export class AnnouncementsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'E‘lonni o‘qildi deb belgilash' })
   async markAsRead(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    recordAnnouncementRead();
     return this.announcementsService.markAsRead(id, user);
   }
 

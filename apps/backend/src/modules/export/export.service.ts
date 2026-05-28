@@ -74,8 +74,8 @@ export class ExportService {
     return explicitBranchId;
   }
 
-  /** Create and immediately process an export job (sync for MVP) */
-  async createAndProcess(
+  /** Create an export job record (without processing) */
+  async createJob(
     user: JwtPayload,
     entity: ExportEntity,
     format: ExportFormat,
@@ -107,7 +107,18 @@ export class ExportService {
       newData: { entity, format, filters },
     });
 
-    // Process synchronously for MVP (queued → processing → completed/failed)
+    return job;
+  }
+
+  /** Create and immediately process an export job (sync fallback) */
+  async createAndProcess(
+    user: JwtPayload,
+    entity: ExportEntity,
+    format: ExportFormat,
+    filters: ExportFilters,
+  ): Promise<ExportJob> {
+    const job = await this.createJob(user, entity, format, filters);
+
     try {
       await this.processJob(job, user, filters);
     } catch (err) {
@@ -211,7 +222,7 @@ export class ExportService {
 
   // ─── Processing ───────────────────────────────────────────────────────────
 
-  private async processJob(job: ExportJob, user: JwtPayload, filters: ExportFilters): Promise<void> {
+  async processJob(job: ExportJob, user: JwtPayload, filters: ExportFilters): Promise<void> {
     await this.prisma.exportJob.update({
       where: { id: job.id },
       data: { status: ExportJobStatus.processing, startedAt: new Date(), progress: 10 },

@@ -4,6 +4,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagg
 import { Throttle } from '@nestjs/throttler';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
+import { recordLogin } from '@/common/telemetry/pilot-telemetry';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { LogoutDto } from './dto/logout.dto';
@@ -47,6 +48,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Email yoki parol noto‘g‘ri' })
   async login(@Body() dto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const result = await this.authService.login(dto);
+    recordLogin();
     // httpOnly cookies for XSS-resistant auth
     res.cookie('access_token', result.tokens.accessToken, {
       ...this.cookieOptions,

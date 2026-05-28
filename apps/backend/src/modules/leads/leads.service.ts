@@ -607,6 +607,7 @@ export class LeadsService {
       branch:        { select: { id: true, name: true, code: true } },
       assignedTo:    { select: { id: true, firstName: true, lastName: true, role: true } },
       createdBy:     { select: { id: true, firstName: true, lastName: true } },
+      expectedClass: { select: { id: true, name: true, gradeLevel: true } },
       _count:        { select: { comments: true } },
     } as const;
   }

@@ -1,7 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Queue } from 'bullmq';
-import { NOTIFICATION_QUEUE } from './queue.constants';
+import { NOTIFICATION_QUEUE, EXPORT_QUEUE, SOLVER_QUEUE } from './queue.constants';
 
 export function createQueueProvider(queueName: string) {
   return {
@@ -31,7 +31,7 @@ export function createQueueProvider(queueName: string) {
 
 @Global()
 @Module({
-  providers: [createQueueProvider(NOTIFICATION_QUEUE)],
-  exports: [NOTIFICATION_QUEUE],
+  providers: [createQueueProvider(NOTIFICATION_QUEUE), createQueueProvider(EXPORT_QUEUE), createQueueProvider(SOLVER_QUEUE)],
+  exports: [NOTIFICATION_QUEUE, EXPORT_QUEUE, SOLVER_QUEUE],
 })
 export class QueueModule {}

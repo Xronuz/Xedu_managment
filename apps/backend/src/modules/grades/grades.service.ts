@@ -8,6 +8,7 @@ import { GradeType, JwtPayload, UserRole } from '@eduplatform/types';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 import { assertParentOfChild } from '@/common/utils/parent-guard.util';
 import { CoinsService, COIN_RULES } from '@/modules/coins/coins.service';
+import { AchievementService } from '@/modules/engagement/achievement.service';
 
 const GRADE_TTL = 5 * 60;     // 5 min — baholar tez-tez yangilanishi mumkin
 const GPA_TTL   = 3 * 60;     // 3 min — GPA hisobi qimmat, qisqaroq TTL
@@ -45,6 +46,7 @@ export class GradesService {
     @Optional() private readonly auditService: AuditService,
     @Optional() private readonly eventsGateway: EventsGateway,
     @Optional() private readonly coinsService: CoinsService,
+    @Optional() private readonly achievementService: AchievementService,
   ) {}
 
   private ck(schoolId: string, branchId: string | null | undefined, suffix: string) {
@@ -117,6 +119,14 @@ export class GradesService {
         COIN_RULES.GRADE_EXCELLENT,
         'grade_excellent',
         { gradeId: grade.id, score: grade.score, maxScore: grade.maxScore },
+      ).catch(() => {});
+
+      // ── Achievement progression for subject mastery ────────────────────────
+      this.achievementService?.checkAndProgress(
+        grade.studentId,
+        currentUser.schoolId!,
+        'subject_mastery',
+        { score: pct, subjectId: grade.subjectId, gradeId: grade.id },
       ).catch(() => {});
     }
 

@@ -18,6 +18,11 @@ export default function ExportCenterPage() {
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['exports'],
     queryFn: () => exportCenterApi.listExports(),
+    refetchInterval: (query) => {
+      const jobs = query.state.data?.data ?? [];
+      const hasActive = jobs.some((j) => j.status === 'queued' || j.status === 'processing');
+      return hasActive ? 4000 : false;
+    },
   });
 
   return (

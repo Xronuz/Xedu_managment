@@ -67,7 +67,7 @@
 | `Schedule` | `classId + dayOfWeek` | Class timetable view |
 | `Schedule` | `roomId + dayOfWeek` | Room conflict detection |
 | `ExamSession` | `studentId + status` | "My exams" dashboard |
-| `ExamSession` | `schoolId + status` | School-wide proctoring |
+| `ExamSession` | `schoolId + status` | School-wide exam session monitoring |
 | `DisciplineIncident` | `studentId + date` | Student discipline timeline |
 | `DisciplineIncident` | `schoolId + resolved + date` | Unresolved incident reports |
 | `LeaveRequest` | `requesterId + status` | "My leave requests" |

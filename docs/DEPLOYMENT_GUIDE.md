@@ -13,8 +13,9 @@
 9. [Tekshirish](#9-tekshirish)
 10. [Yangilash](#10-yangilash)
 11. [Zaxira nusxa (Backup)](#11-zaxira-nusxa-backup)
-12. [Monitoring](#12-monitoring)
-13. [Muammolarni bartaraf etish](#13-muammolarni-bartaraf-etish)
+12. [Migratsiya xavfsizligi](#12-migratsiya-xavfsizligi-migration-guards)
+13. [Monitoring](#13-monitoring)
+14. [Muammolarni bartaraf etish](#14-muammolarni-bartaraf-etish)
 
 ---
 
@@ -414,9 +415,81 @@ cat /opt/backups/db_20260417_020000.sql | \
 docker compose -f /opt/eduplatform/docker-compose.prod.yml up -d
 ```
 
+### Redis backup (RDB)
+
+```bash
+# Redis RDB fayli avtomatik saqlanadi (redis_data volume da)
+# Qo'lda trigger qilish:
+docker compose -f /opt/eduplatform/docker-compose.prod.yml exec redis redis-cli SAVE
+
+# Backupni nusxalash
+cp /var/lib/docker/volumes/eduplatform_redis_data/_data/dump.rdb /opt/backups/redis_$(date +%Y%m%d_%H%M%S).rdb
+```
+
 ---
 
-## 12. Monitoring
+## 12. Migratsiya xavfsizligi (Migration Guards)
+
+### Pre-deploy checklist (har bir deploydan oldin)
+
+```bash
+cd /opt/eduplatform
+
+# 1. Avtomatik backup olish
+DATE=$(date +%Y%m%d_%H%M%S)
+docker compose -f docker-compose.prod.yml exec -T postgres \
+  pg_dump -U eduplatform eduplatform_db \
+  > /opt/backups/pre_deploy_${DATE}.sql
+
+# 2. Migrate statusini tekshirish
+docker compose -f docker-compose.prod.yml run --rm backend npx prisma migrate status
+
+# 3. Migrate dry-run (agnostik)
+docker compose -f docker-compose.prod.yml run --rm backend npx prisma migrate diff \
+  --from-schema-datamodel prisma/schema.prisma \
+  --to-schema-datamodel prisma/schema.prisma \
+  --shadow-database-url "$DATABASE_URL"
+
+# 4. Git tag qo'yish
+git tag -a "deploy-$(date +%Y%m%d-%H%M%S)" -m "Pre-deploy snapshot"
+```
+
+### Xavfli migrate xususiyatlarini o'chirish
+
+`docker-compose.prod.yml` ga qo'shing:
+
+```yaml
+backend:
+  environment:
+    # Prisma xavfsizlik sozlamalari
+    - PRISMA_CLI_QUERY_ENGINE_TYPE=library
+    # Migrate lock ni tekshirish
+    - PRISMA_SCHEMA_DISABLE_ADVISORY_LOCK=false
+```
+
+### Migrate fail bo'lsa rollback
+
+```bash
+# 1. Servislarni to'xtatish
+docker compose -f docker-compose.prod.yml down
+
+# 2. Oldingi backupni tiklash
+cat /opt/backups/pre_deploy_20260521_143000.sql | \
+  docker compose -f docker-compose.prod.yml exec -T postgres \
+  psql -U eduplatform eduplatform_db
+
+# 3. _prisma_migrations jadvalini to'g'rilash (agar kerak bo'lsa)
+# Faqat texnik xodim tomonidan bajarilishi kerak!
+
+# 4. Servislarni qayta ishga tushirish
+docker compose -f docker-compose.prod.yml up -d
+```
+
+> **DIQQAT:** Migrate rollback nafaqat ma'lumotlar bazasini, balki application kodini ham oldingi versiyaga qaytarishni talab qiladi. Har doim Git tag bilan birga rollback qiling.
+
+---
+
+## 13. Monitoring
 
 ### Loglarni kuzatish
 
@@ -469,7 +542,7 @@ sudo systemctl start eduplatform
 
 ---
 
-## 13. Muammolarni bartaraf etish
+## 14. Muammolarni bartaraf etish
 
 ### Backend ishga tushmayapti
 

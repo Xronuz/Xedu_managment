@@ -7,6 +7,7 @@ import { RolesGuard } from '@/common/guards/roles.guard';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
+import { recordGradePublish } from '@/common/telemetry/pilot-telemetry';
 
 @ApiTags('grades')
 @ApiBearerAuth('JWT')
@@ -115,6 +116,7 @@ export class GradesController {
     @Param('id') id: string,
     @CurrentUser() user: JwtPayload,
   ) {
+    recordGradePublish();
     return this.gradesService.publish(id, user);
   }
 

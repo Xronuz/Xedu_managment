@@ -10,14 +10,9 @@ async function hash(password: string) {
 }
 
 async function main() {
-  // Production rejimda seed bajarilmaydi
-  if (process.env.NODE_ENV === 'production') {
-    console.log('⛔ Production rejimida seed bajarilmaydi');
-    return;
-  }
-
   // Idempotent guard: agar 1 dan ortiq foydalanuvchi mavjud bo'lsa, mavjud DB ustiga
   // qayta yozmaslik. Faqat SEED_FORCE=true bilan qayta majbur qilinadi.
+  // BU HAM PRODUCTION'DA ISHLAYDI — birinchi deploy'da demo maktab va super admin kerak.
   if (process.env.SEED_FORCE !== 'true') {
     const existingCount = await prisma.user.count();
     if (existingCount > 1) {

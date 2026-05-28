@@ -18,8 +18,12 @@ export const pinoConfig: Params = {
         }
       : undefined,
     ...(isDev ? {} : { formatters: { level: (label: string) => ({ level: label }) } }),
-    autoLogging: false,
-    quietReqLogger: true,
-    customProps: () => ({ context: 'HTTP' }),
+    autoLogging: true,
+    quietReqLogger: false,
+    genReqId: (req) => (req.headers['x-correlation-id'] as string) || crypto.randomUUID(),
+    customProps: (req) => ({
+      context: 'HTTP',
+      correlationId: (req as any).headers?.['x-correlation-id'],
+    }),
   },
 };

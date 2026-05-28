@@ -11,8 +11,7 @@ export interface Invitation {
   schoolId: string;
   branchId?: string | null;
   branchName?: string | null;
-  invitedById?: string;
-  invitedByName?: string;
+  createdBy?: { id: string; firstName: string; lastName: string } | null;
   token?: string;
   status: InvitationStatus;
   expiresAt: string;

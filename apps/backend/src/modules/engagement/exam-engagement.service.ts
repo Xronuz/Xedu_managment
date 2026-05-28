@@ -13,6 +13,7 @@ export interface ExamResultPayload {
   maxScore: number;
   subjectId?: string;
   triggeredBy: string;
+  sessionId?: string;
 }
 
 export interface ExamEngagementResult {
@@ -72,7 +73,7 @@ export class ExamEngagementService {
             type: 'earn',
             reason: 'exam_high_score',
             balance: user.coins + coinReward,
-            metadata: { examId: payload.examId, score: payload.score, percentage } as any,
+            metadata: { examId: payload.examId, score: payload.score, percentage, sessionId: payload.sessionId } as any,
             awardedBy: payload.triggeredBy,
           },
         });

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
@@ -9,9 +9,17 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
-import { scheduleGeneratorApi, GeneratorConflictReport, ProposedSlot } from '@/lib/api/schedule-generator';
+import {
+  scheduleGeneratorApi,
+  GeneratorConflictReport,
+  ProposedSlot,
+  SolverRun,
+} from '@/lib/api/schedule-generator';
 import { ConflictModal, ConflictDetail } from './conflict-modal';
-import { Calendar, Loader2, CheckCircle2, XCircle, AlertTriangle, Save, Trash2 } from 'lucide-react';
+import {
+  Calendar, Loader2, CheckCircle2, XCircle, AlertTriangle, Save, Trash2,
+  BrainCircuit, Zap, Timer,
+} from 'lucide-react';
 
 interface GeneratorDialogProps {
   open: boolean;
@@ -20,16 +28,43 @@ interface GeneratorDialogProps {
   onSuccess?: () => void;
 }
 
-type Step = 'config' | 'result';
+type Step = 'config' | 'running' | 'result';
+type Strategy = 'greedy' | 'hybrid';
+
+const POLL_INTERVAL_MS = 3000;
+const POLL_TIMEOUT_MS = 120000; // 2 minutes max polling
 
 export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: GeneratorDialogProps) {
   const { toast } = useToast();
   const [step, setStep] = useState<Step>('config');
+  const [strategy, setStrategy] = useState<Strategy>('greedy');
   const [overwriteExisting, setOverwriteExisting] = useState(false);
   const [weekType, setWeekType] = useState<string>('all');
   const [report, setReport] = useState<GeneratorConflictReport | null>(null);
+  const [solverRun, setSolverRun] = useState<SolverRun | null>(null);
+  const [runError, setRunError] = useState<string | null>(null);
   const [conflicts, setConflicts] = useState<ConflictDetail[]>([]);
   const [conflictOpen, setConflictOpen] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollStartRef = useRef<number>(0);
+
+  const clearPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
+  // Cleanup polling on unmount or close
+  useEffect(() => {
+    return () => clearPolling();
+  }, [clearPolling]);
+
+  useEffect(() => {
+    if (!open) {
+      clearPolling();
+    }
+  }, [open, clearPolling]);
 
   const generateMutation = useMutation({
     mutationFn: () => scheduleGeneratorApi.generate({
@@ -46,6 +81,80 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
       toast({ variant: 'destructive', title: 'Xato', description: err?.response?.data?.message ?? 'Generatsiya xatosi' });
     },
   });
+
+  const advancedGenerateMutation = useMutation({
+    mutationFn: () => scheduleGeneratorApi.advancedGenerate({
+      branchId,
+      strategy: 'hybrid',
+      overwriteExisting,
+      weekType,
+      timeoutMs: 30000,
+      maxDepth: 2,
+    }),
+    onSuccess: (run) => {
+      setSolverRun(run);
+      setStep('running');
+      startPolling(run.id);
+    },
+    onError: (err: any) => {
+      toast({ variant: 'destructive', title: 'Xato', description: err?.response?.data?.message ?? 'Ilg‘or generatsiya xatosi' });
+    },
+  });
+
+  const startPolling = useCallback((runId: string) => {
+    clearPolling();
+    pollStartRef.current = Date.now();
+
+    const check = async () => {
+      try {
+        const run = await scheduleGeneratorApi.getSolverRun(runId);
+        setSolverRun(run);
+
+        if (run.status === 'completed') {
+          clearPolling();
+          const meta = run.metadata || {};
+          // Reconstruct GeneratorConflictReport from metadata
+          const reconstructed: GeneratorConflictReport = {
+            totalDemands: run.demandsCount,
+            placed: run.placedCount,
+            failed: run.failureCount,
+            proposedSlots: meta.proposedSlots || [],
+            failures: meta.failures || [],
+            stats: {
+              byReason: meta.diagnostics?.byReason || {},
+              byTeacher: meta.diagnostics?.byTeacher || {},
+              byClass: meta.diagnostics?.byClass || {},
+              bySubject: meta.diagnostics?.bySubject || {},
+            },
+          };
+          setReport(reconstructed);
+          setStep('result');
+          toast({ title: 'Jadval generatsiyasi tugadi', description: `${run.placedCount} ta slot joylashtirildi` });
+        } else if (run.status === 'failed' || run.status === 'cancelled') {
+          clearPolling();
+          setRunError(run.metadata?.error || 'Generatsiya bekor qilindi yoki xatolik yuz berdi');
+          setStep('result');
+        }
+
+        // Timeout guard
+        if (Date.now() - pollStartRef.current > POLL_TIMEOUT_MS) {
+          clearPolling();
+          setRunError('Kutish vaqti tugadi. Iltimos, natijalarni keyinroq tekshiring.');
+          setStep('result');
+        }
+      } catch (err: any) {
+        // Network errors during polling — keep trying until timeout
+        if (Date.now() - pollStartRef.current > POLL_TIMEOUT_MS) {
+          clearPolling();
+          setRunError('Tarmoq xatosi: natijalar olinmadi.');
+          setStep('result');
+        }
+      }
+    };
+
+    check(); // immediate first check
+    pollRef.current = setInterval(check, POLL_INTERVAL_MS);
+  }, [clearPolling, toast]);
 
   const commitMutation = useMutation({
     mutationFn: (slots: ProposedSlot[]) => scheduleGeneratorApi.commit(slots, overwriteExisting),
@@ -74,14 +183,28 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
   function reset() {
     setStep('config');
     setReport(null);
+    setSolverRun(null);
+    setRunError(null);
     setOverwriteExisting(false);
     setWeekType('all');
+    setStrategy('greedy');
+    clearPolling();
   }
 
   function handleClose(v: boolean) {
     if (!v) reset();
     onOpenChange(v);
   }
+
+  const handleGenerate = () => {
+    if (strategy === 'greedy') {
+      generateMutation.mutate();
+    } else {
+      advancedGenerateMutation.mutate();
+    }
+  };
+
+  const isPending = generateMutation.isPending || advancedGenerateMutation.isPending || (step === 'running');
 
   const failureReasons = report ? Object.entries(report.stats.byReason) : [];
   const failureTeachers = report ? Object.entries(report.stats.byTeacher) : [];
@@ -96,12 +219,51 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
             Avto-jadval generatsiyasi
           </DialogTitle>
           <DialogDescription>
-            Greedy algoritm yordamida dars jadvalini avtomatik tashkil etish
+            {strategy === 'greedy'
+              ? 'Greedy algoritm yordamida dars jadvalini avtomatik tashkil etish'
+              : 'Hybrid (greedy + backtracking) algoritm yordamida optimallashtirilgan jadval'}
           </DialogDescription>
         </DialogHeader>
 
         {step === 'config' && (
           <div className="space-y-4 py-2">
+            {/* Strategy selector */}
+            <div className="space-y-2">
+              <span className="text-sm font-medium">Strategiya</span>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStrategy('greedy')}
+                  className={`flex items-center gap-2 rounded-lg border p-3 transition-colors text-left ${
+                    strategy === 'greedy'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-border hover:bg-accent'
+                  }`}
+                >
+                  <Zap className="h-5 w-5 shrink-0" />
+                  <div>
+                    <div className="text-sm font-medium">Greedy</div>
+                    <div className="text-xs opacity-70">Tez, oddiy qoidalar</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStrategy('hybrid')}
+                  className={`flex items-center gap-2 rounded-lg border p-3 transition-colors text-left ${
+                    strategy === 'hybrid'
+                      ? 'border-primary bg-primary/5 text-primary'
+                      : 'border-border hover:bg-accent'
+                  }`}
+                >
+                  <BrainCircuit className="h-5 w-5 shrink-0" />
+                  <div>
+                    <div className="text-sm font-medium">Hybrid</div>
+                    <div className="text-xs opacity-70">Optimallashtirilgan, backtracking</div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
             <div className="flex items-center gap-2 p-3 rounded-lg bg-yellow-50 border border-yellow-200">
               <input
                 id="gen-overwrite"
@@ -139,6 +301,45 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
                 <li>Xona bir vaqtda faqat 1 ta dars uchun band bo&apos;lishi mumkin</li>
                 <li>Dars soatlari filialning &quot;Dars soatlari&quot; sozlamalaridan olinadi</li>
               </ul>
+            </div>
+
+            {strategy === 'hybrid' && (
+              <div className="flex items-center gap-2 text-xs text-xedu-slate-500">
+                <Timer className="h-3.5 w-3.5" />
+                Hybrid rejimda generatsiya 10–60 soniya davom etishi mumkin. Natijalar tayyor bo‘lganda ko‘rsatiladi.
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === 'running' && solverRun && (
+          <div className="space-y-6 py-8">
+            <div className="flex flex-col items-center gap-3">
+              <div className="relative">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-medium">Jadval tayyorlanmoqda...</p>
+                <p className="text-sm text-xedu-slate-500 mt-1">
+                  Hybrid algoritm ishlamoqda. Bu bir necha soniya davom etishi mumkin.
+                </p>
+              </div>
+            </div>
+
+            <div className="max-w-md mx-auto space-y-2">
+              <div className="flex justify-between text-xs text-xedu-slate-500">
+                <span>Status</span>
+                <Badge variant="secondary" className="gap-1">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Ishlamoqda
+                </Badge>
+              </div>
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div className="h-full rounded-full bg-primary animate-pulse" style={{ width: '60%' }} />
+              </div>
+              <p className="text-[10px] text-xedu-slate-400 text-center">
+                Run ID: {solverRun.id}
+              </p>
             </div>
           </div>
         )}
@@ -253,20 +454,38 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
           </div>
         )}
 
+        {step === 'result' && runError && (
+          <div className="py-8">
+            <div className="flex flex-col items-center gap-3">
+              <XCircle className="h-10 w-10 text-destructive" />
+              <div className="text-center">
+                <p className="text-lg font-medium text-destructive">Generatsiya amalga oshmadi</p>
+                <p className="text-sm text-xedu-slate-500 mt-1 max-w-sm">{runError}</p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <DialogFooter className="gap-2">
           {step === 'config' && (
             <>
               <Button variant="outline" onClick={() => handleClose(false)}>Bekor</Button>
               <Button
-                onClick={() => generateMutation.mutate()}
-                disabled={generateMutation.isPending}
+                onClick={handleGenerate}
+                disabled={isPending}
               >
-                {generateMutation.isPending
+                {isPending
                   ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Generatsiya…</>
                   : <><Calendar className="h-4 w-4 mr-2" />Jadval yaratish</>
                 }
               </Button>
             </>
+          )}
+
+          {step === 'running' && (
+            <Button variant="outline" onClick={() => handleClose(false)}>
+              Orqaga (natijalarni keyin tekshiring)
+            </Button>
           )}
 
           {step === 'result' && report && (
@@ -288,6 +507,17 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
                   ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Saqlanmoqda…</>
                   : <><Save className="h-4 w-4 mr-2" />{report.proposedSlots.length} ta slotni saqlash</>
                 }
+              </Button>
+            </>
+          )}
+
+          {step === 'result' && runError && (
+            <>
+              <Button variant="outline" onClick={reset}>
+                Qayta urinish
+              </Button>
+              <Button variant="outline" onClick={() => handleClose(false)}>
+                Yopish
               </Button>
             </>
           )}

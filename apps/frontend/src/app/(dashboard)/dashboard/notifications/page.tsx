@@ -57,7 +57,7 @@ const PREF_LABELS: Record<string, { label: string; description: string }> = {
   sms_payment:    { label: 'SMS: To‘lov eslatmasi', description: "To'lov muddati kelganda SMS" },
   email_grades:   { label: 'Email: Yangi baholar', description: 'Yangi baho qo‘yilganda email' },
   email_homework: { label: 'Email: Uy vazifalari', description: 'Yangi vazifa berilganda email' },
-  push_all:       { label: 'Push bildirishnomalar', description: 'Barcha turdagi push notifications' },
+  push_all:       { label: 'Push bildirishnomalar (rejalashtirilgan)', description: 'Brauzer push notifications — hali faollashtirilmagan' },
 };
 
 function PreferencesPanel() {

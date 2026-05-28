@@ -157,7 +157,7 @@ export default function AiAnalyticsPage() {
           <h1 className="text-2xl font-bold tracking-tight">Insights</h1>
         </div>
         <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
-          O'quvchilar holatini tahlil qilish va risk baholash tizimi
+          O'quvchilar holatini tahlil qilish va rule-based risk baholash tizimi
         </p>
       </div>
 
@@ -237,13 +237,13 @@ export default function AiAnalyticsPage() {
       {/* AI Placeholders */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <AiPlaceholderCard
-          title="AI tavsiyalar"
-          description="Sun'iy intellekt yordamida xavf signallarini oldindan bashorat qilish"
+          title="Tahliliy tavsiyalar"
+          description="Kelgusida AI yordamida xavf signallarini oldindan bashorat qilish"
           icon={<Sparkles className="h-4 w-4" />}
         />
         <AiPlaceholderCard
           title="Bashoratli tahlil"
-          description="O'quvchi natijalarini oldindan bashorat qilish modelli"
+          description="Kelgusida o'quvchi natijalarini oldindan bashorat qilish modelli"
           icon={<BarChart3 className="h-4 w-4" />}
         />
         <AiPlaceholderCard

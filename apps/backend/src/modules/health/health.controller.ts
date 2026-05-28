@@ -8,6 +8,30 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
 import { NotificationQueueService } from '@/modules/notifications/notification-queue.service';
 import { Public } from '@/common/decorators/public.decorator';
+import { ExportJobStatus } from '@prisma/client';
+import { SolverRunStatus } from '@eduplatform/types';
+import * as fs from 'fs';
+
+// Lightweight in-memory metrics (no external vendor)
+interface MetricsSnapshot {
+  uptimeSeconds: number;
+  memory: NodeJS.MemoryUsage;
+  timestamp: string;
+}
+let lastMetrics: MetricsSnapshot | null = null;
+let requestCount = 0;
+let errorCount = 0;
+
+export function recordRequest() { requestCount++; }
+export function recordError() { errorCount++; }
+export function getMetrics(): MetricsSnapshot {
+  lastMetrics = {
+    uptimeSeconds: process.uptime(),
+    memory: process.memoryUsage(),
+    timestamp: new Date().toISOString(),
+  };
+  return lastMetrics;
+}
 
 @ApiTags('health')
 @Controller('health')
@@ -70,10 +94,66 @@ export class HealthController {
     ]);
   }
 
+  @Get('metrics')
+  @Public()
+  @ApiOperation({ summary: 'Basic operational metrics' })
+  metrics() {
+    const m = getMetrics();
+    return {
+      uptimeSeconds: m.uptimeSeconds,
+      memory: {
+        rssMb: Math.round(m.memory.rss / 1024 / 1024),
+        heapUsedMb: Math.round(m.memory.heapUsed / 1024 / 1024),
+        heapTotalMb: Math.round(m.memory.heapTotal / 1024 / 1024),
+        externalMb: Math.round(m.memory.external / 1024 / 1024),
+      },
+      requestsSinceStart: requestCount,
+      errorsSinceStart: errorCount,
+      timestamp: m.timestamp,
+    };
+  }
+
   @Get('ready')
   @Public()
-  @ApiOperation({ summary: 'Readiness check' })
-  ready() {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+  @ApiOperation({ summary: 'Readiness check with dependency health' })
+  async ready(): Promise<HealthCheckResult> {
+    return this.health.check([
+      () => this.prismaIndicator.pingCheck('database', this.prisma as any),
+      () => this.memory.checkHeap('memory_heap', 1024 * 1024 * 1024),
+      async () => {
+        // Disk pressure check — require 500MB free
+        try {
+          const stats = await fs.promises.statfs('/');
+          const freeBytes = stats.bavail * stats.bsize;
+          const minFree = 500 * 1024 * 1024; // 500MB
+          if (freeBytes < minFree) {
+            return { disk: { status: 'down', message: `Only ${Math.round(freeBytes / 1024 / 1024)}MB free (need 500MB)` } };
+          }
+          return { disk: { status: 'up', freeMb: Math.round(freeBytes / 1024 / 1024) } };
+        } catch (err: any) {
+          return { disk: { status: 'down', message: err.message } };
+        }
+      },
+      async () => {
+        // Env validation
+        const required = ['DATABASE_URL', 'JWT_SECRET'];
+        const missing = required.filter(k => !process.env[k]);
+        if (missing.length > 0) {
+          return { env: { status: 'down', message: `Missing: ${missing.join(', ')}` } };
+        }
+        return { env: { status: 'up' } };
+      },
+      async () => {
+        // Queue backlog check
+        const [exportFailed, solverFailed] = await Promise.all([
+          this.prisma.exportJob.count({ where: { status: ExportJobStatus.failed } }),
+          this.prisma.solverRun.count({ where: { status: SolverRunStatus.CANCELLED } }),
+        ]);
+        if (exportFailed > 50 || solverFailed > 20) {
+          return { queue_backlog: { status: 'down', message: `exports_failed=${exportFailed}, solver_cancelled=${solverFailed}` } };
+        }
+        return { queue_backlog: { status: 'up', exports_failed: exportFailed, solver_cancelled: solverFailed } };
+      },
+    ]);
   }
 }

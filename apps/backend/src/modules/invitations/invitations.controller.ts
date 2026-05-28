@@ -7,6 +7,7 @@ import { Throttle } from '@nestjs/throttler';
 import { InvitationsService } from './invitations.service';
 import { CreateInvitationDto } from './dto/create-invitation.dto';
 import { AcceptInvitationDto } from './dto/accept-invitation.dto';
+// Note: ResendInvitationDto exists but resend endpoint uses no body — kept for future use
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -14,6 +15,7 @@ import { Public } from '@/common/decorators/public.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { UserRole, type JwtPayload } from '@eduplatform/types';
 import { InvitationStatus } from '@prisma/client';
+import { recordInvitationAccept } from '@/common/telemetry/pilot-telemetry';
 
 @ApiTags('invitations')
 @Controller({ path: 'invitations', version: '1' })
@@ -92,6 +94,7 @@ export class InvitationsController {
   @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @ApiOperation({ summary: 'Taklifni qabul qilish va parol o‘rnatish (public)' })
   async accept(@Body() dto: AcceptInvitationDto) {
+    recordInvitationAccept();
     return this.invitationsService.accept(dto.token, dto.password);
   }
 }

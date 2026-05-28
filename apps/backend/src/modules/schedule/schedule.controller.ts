@@ -1,5 +1,6 @@
 import {
   Controller, Get, Post, Put, Delete, Body, Param, Query, Version, ParseIntPipe, DefaultValuePipe, UseGuards, Res,
+  ForbiddenException, NotFoundException, Headers,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
@@ -8,6 +9,7 @@ import { ScheduleService } from './schedule.service';
 import { ScheduleExportService } from './schedule-export.service';
 import { ScheduleGeneratorService } from './schedule-generator.service';
 import { AdvancedSolverService } from './advanced-solver.service';
+import { SolverQueueService } from './solver-queue.service';
 import { ScheduleRepairService, AnalyzeRepairInput, ApplyRepairInput } from './schedule-repair.service';
 import { TimetableAnalyticsService, AnalyticsQuery } from './timetable-analytics.service';
 import { CreateScheduleDto } from './dto/create-schedule.dto';
@@ -18,6 +20,7 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { Response } from 'express';
 import { JwtPayload, UserRole, WeekType } from '@eduplatform/types';
+import { recordScheduleGeneration, recordSolverRun } from '@/common/telemetry/pilot-telemetry';
 
 @ApiTags('schedule')
 @ApiBearerAuth('JWT')
@@ -29,6 +32,7 @@ export class ScheduleController {
     private readonly exportService: ScheduleExportService,
     private readonly generatorService: ScheduleGeneratorService,
     private readonly advancedSolver: AdvancedSolverService,
+    private readonly solverQueueService: SolverQueueService,
     private readonly repairService: ScheduleRepairService,
     private readonly analyticsService: TimetableAnalyticsService,
   ) {}
@@ -201,6 +205,7 @@ export class ScheduleController {
     @Body() dto: GenerateScheduleDto,
     @CurrentUser() user: JwtPayload,
   ) {
+    recordScheduleGeneration();
     return this.generatorService.generate(dto, user);
   }
 
@@ -220,8 +225,32 @@ export class ScheduleController {
   async advancedGenerate(
     @Body() dto: AdvancedGenerateScheduleDto,
     @CurrentUser() user: JwtPayload,
+    @Headers('x-correlation-id') correlationId?: string,
   ) {
-    return this.advancedSolver.run(dto, user);
+    // ── RBAC validation (fail fast) ──
+    if (
+      user.role === UserRole.TEACHER ||
+      user.role === UserRole.STUDENT ||
+      user.role === UserRole.PARENT
+    ) {
+      throw new ForbiddenException("Bu amalni bajarish uchun yetarli huquq yo'q");
+    }
+
+    let targetBranchId: string | undefined = dto.branchId;
+    if (user.role === UserRole.BRANCH_ADMIN) {
+      if (targetBranchId && targetBranchId !== user.branchId) {
+        throw new ForbiddenException("Filial admin faqat o'z filiali uchun jadval yaratishi mumkin");
+      }
+      targetBranchId = user.branchId ?? undefined;
+    }
+    if (!targetBranchId) {
+      throw new NotFoundException('Filial IDsi kerak');
+    }
+
+    const run = await this.advancedSolver.createRun(dto, user, targetBranchId);
+    recordSolverRun();
+    await this.solverQueueService.addSolverJob(run.id, dto, user, correlationId);
+    return run;
   }
 
   @Get('solver-runs')
@@ -241,6 +270,16 @@ export class ScheduleController {
       limit: limit ? parseInt(limit, 10) : undefined,
       offset: offset ? parseInt(offset, 10) : undefined,
     });
+  }
+
+  @Get('solver-runs/:id')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
+  @ApiOperation({ summary: 'Bitta solver run natijasini ko‘rish' })
+  async getSolverRun(
+    @Param('id') id: string,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.advancedSolver.getRun(user, id);
   }
 
   // ── Lifecycle endpoints ───────────────────────────────────────────────────

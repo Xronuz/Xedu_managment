@@ -135,6 +135,46 @@ export class AdvancedSolverService {
 
   // ─── Public API ────────────────────────────────────────────────────────────
 
+  /**
+   * Create a SolverRun record with status=running and return it.
+   * The actual solving is offloaded to a BullMQ worker (or sync fallback).
+   */
+  async createRun(
+    dto: {
+      branchId?: string;
+      daysOfWeek?: DayOfWeek[];
+      classIds?: string[];
+      subjectIds?: string[];
+      strategy?: 'greedy' | 'hybrid';
+      overwriteExisting?: boolean;
+      weekType?: WeekType;
+      timeoutMs?: number;
+      maxDepth?: number;
+    },
+    currentUser: JwtPayload,
+    targetBranchId: string,
+  ) {
+    const schoolId = currentUser.schoolId!;
+    const weekType = dto.weekType ?? WeekType.ALL;
+    const strategyUsed = dto.strategy ?? 'hybrid';
+
+    return this.prisma.solverRun.create({
+      data: {
+        schoolId,
+        branchId: targetBranchId,
+        weekType,
+        strategy: strategyUsed,
+        status: SolverRunStatus.RUNNING,
+        demandsCount: 0,
+        placedCount: 0,
+        failureCount: 0,
+        score: 0,
+        metadata: { queuedAt: new Date().toISOString() },
+        createdById: currentUser.sub,
+      },
+    });
+  }
+
   async run(
     dto: {
       branchId?: string;
@@ -148,6 +188,7 @@ export class AdvancedSolverService {
       maxDepth?: number;
     },
     currentUser: JwtPayload,
+    runId?: string,
   ): Promise<SolverResult> {
     const startedAt = Date.now();
     const strategyUsed = dto.strategy ?? 'hybrid';
@@ -377,7 +418,26 @@ export class AdvancedSolverService {
 
     // ── 9. Persist SolverRun ────────────────────────────────────────────────
     const runtimeMs = Date.now() - startedAt;
+    const result: SolverResult = {
+      strategyUsed,
+      runtimeMs,
+      totalDemands: demands.length,
+      placed: placed.length,
+      failed: failed.length,
+      score,
+      proposedSlots: placed,
+      failures: failed,
+      diagnostics: {
+        greedyPlaced,
+        greedyFailed,
+        backtrackRecovered,
+        backtrackAttempts,
+        timeoutHit,
+      },
+    };
+
     await this.persistRun({
+      id: runId,
       schoolId,
       branchId: targetBranchId,
       weekType,
@@ -397,27 +457,36 @@ export class AdvancedSolverService {
         maxDepth,
         timeoutMs,
         daysOfWeek,
+        proposedSlots: placed,
+        failures: failed,
+        diagnostics: result.diagnostics,
       },
       createdById: currentUser.sub,
     });
 
-    return {
-      strategyUsed,
-      runtimeMs,
-      totalDemands: demands.length,
-      placed: placed.length,
-      failed: failed.length,
-      score,
-      proposedSlots: placed,
-      failures: failed,
-      diagnostics: {
-        greedyPlaced,
-        greedyFailed,
-        backtrackRecovered,
-        backtrackAttempts,
-        timeoutHit,
-      },
-    };
+    return result;
+  }
+
+  // ─── Get single solver run ─────────────────────────────────────────────────
+
+  async getRun(currentUser: JwtPayload, id: string) {
+    const schoolId = currentUser.schoolId!;
+
+    const run = await this.prisma.solverRun.findFirst({
+      where: { id, schoolId },
+    });
+
+    if (!run) {
+      throw new NotFoundException('Solver run topilmadi');
+    }
+
+    if (currentUser.role === UserRole.BRANCH_ADMIN && currentUser.branchId) {
+      if (run.branchId && run.branchId !== currentUser.branchId) {
+        throw new ForbiddenException("Bu run'ga ruxsat yo'q");
+      }
+    }
+
+    return run;
   }
 
   // ─── List solver runs ──────────────────────────────────────────────────────
@@ -696,6 +765,7 @@ export class AdvancedSolverService {
   // ─── Internal: Persist run ─────────────────────────────────────────────────
 
   private async persistRun(data: {
+    id?: string;
     schoolId: string;
     branchId: string;
     weekType: WeekType;
@@ -709,14 +779,37 @@ export class AdvancedSolverService {
     createdById: string;
   }) {
     try {
-      await this.prisma.solverRun.create({
-        data: {
-          ...data,
-          score: data.score,
-          metadata: data.metadata,
-          completedAt: data.status === SolverRunStatus.COMPLETED ? new Date() : undefined,
-        },
-      });
+      if (data.id) {
+        await this.prisma.solverRun.update({
+          where: { id: data.id },
+          data: {
+            status: data.status,
+            demandsCount: data.demandsCount,
+            placedCount: data.placedCount,
+            failureCount: data.failureCount,
+            score: data.score,
+            metadata: data.metadata,
+            completedAt: data.status === SolverRunStatus.COMPLETED ? new Date() : undefined,
+          },
+        });
+      } else {
+        await this.prisma.solverRun.create({
+          data: {
+            schoolId: data.schoolId,
+            branchId: data.branchId,
+            weekType: data.weekType,
+            strategy: data.strategy,
+            status: data.status,
+            demandsCount: data.demandsCount,
+            placedCount: data.placedCount,
+            failureCount: data.failureCount,
+            score: data.score,
+            metadata: data.metadata,
+            createdById: data.createdById,
+            completedAt: data.status === SolverRunStatus.COMPLETED ? new Date() : undefined,
+          },
+        });
+      }
     } catch (e) {
       // Non-critical: log but don't fail the solver result
       // In production, this would go to a logger

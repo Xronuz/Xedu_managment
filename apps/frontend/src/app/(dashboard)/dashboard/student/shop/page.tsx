@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Coins, ShoppingBag, ArrowLeft, Loader2, History, Award, BookOpen, Calendar, Laptop } from 'lucide-react';
+import { Coins, ShoppingBag, ArrowLeft, Loader2, History, Award, BookOpen, Calendar, Laptop, AlertTriangle } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import { coinsApi, type ShopItem, type CoinTransaction } from '@/lib/api/coins';
+import { engagementApi } from '@/lib/api/engagement';
 import { AcademicEmptyState } from '@/components/workspace-system/academic-empty-state';
 
 const CATEGORY_ICONS: Record<string, React.ElementType> = {
@@ -49,6 +50,12 @@ export default function StudentShopPage() {
     queryKey: ['coins', 'history'],
     queryFn: () => coinsApi.getHistory(50),
   });
+
+  const { data: engagementConfig } = useQuery({
+    queryKey: ['engagement', 'config'],
+    queryFn: () => engagementApi.getConfig(),
+  });
+  const engagementDisabled = !engagementConfig?.engagement_enabled;
 
   const spendMutation = useMutation({
     mutationFn: (itemId: string) => coinsApi.spend(itemId),
@@ -91,6 +98,14 @@ export default function StudentShopPage() {
 
   return (
     <div className="space-y-6 p-6 max-w-4xl mx-auto">
+      {/* Engagement status banner */}
+      {engagementDisabled && (
+        <div className="rounded-lg border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800 p-3 text-sm text-amber-800 dark:text-amber-300 flex items-center gap-2">
+          <AlertTriangle className="h-4 w-4 shrink-0" />
+          <span>Faoliyat tizimi hali yoqilmagan. Mukofotlar ishlashi uchun direktor sozlamalarni yoqishi kerak.</span>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">

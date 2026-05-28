@@ -7,6 +7,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { recordErrorMetric } from '@/modules/health/metrics.controller';
+import { recordError500 } from '@/common/telemetry/pilot-telemetry';
 // Prisma v6: error classes moved out of the `Prisma` namespace.
 // They live in `@prisma/client/runtime/library` and must be imported directly.
 import {
@@ -79,12 +81,21 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       this.logger.error(exception.message, exception.stack);
     }
 
+    if (status >= 500) {
+      recordErrorMetric();
+      if (status === 500) {
+        recordError500();
+      }
+    }
+
+    const correlationId = request.headers['x-correlation-id'];
     response.status(status).json({
       statusCode: status,
       message,
       error,
       timestamp: new Date().toISOString(),
       path: request.url,
+      correlationId: correlationId || undefined,
     });
   }
 }

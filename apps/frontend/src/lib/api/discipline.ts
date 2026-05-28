@@ -2,7 +2,7 @@ import { apiClient } from './client';
 
 export type DisciplineType = 'behavior' | 'absence' | 'academic' | 'dress_code' | 'other';
 export type DisciplineSeverity = 'low' | 'medium' | 'high';
-export type DisciplineAction = 'warning' | 'detention' | 'parent_call' | 'parent_meeting' | 'suspension' | 'other';
+export type DisciplineAction = 'warning' | 'praise' | 'detention' | 'parent_call' | 'parent_meeting' | 'suspension' | 'other';
 
 export interface DisciplineIncident {
   id: string;

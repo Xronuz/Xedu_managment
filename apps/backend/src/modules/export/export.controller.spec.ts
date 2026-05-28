@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CanActivate, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { ExportController } from './export.controller';
 import { ExportService } from './export.service';
+import { ExportQueueService } from './export-queue.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { AuditService } from '@/common/audit/audit.service';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
@@ -45,6 +46,7 @@ const mockPrisma = {
 };
 
 const mockAuditService = { log: jest.fn() };
+const mockExportQueueService = { addExportJob: jest.fn() };
 
 describe('ExportController', () => {
   let controller: ExportController;
@@ -57,6 +59,7 @@ describe('ExportController', () => {
         ExportService,
         { provide: PrismaService, useValue: mockPrisma },
         { provide: AuditService, useValue: mockAuditService },
+        { provide: ExportQueueService, useValue: mockExportQueueService },
       ],
     })
       .overrideGuard(JwtAuthGuard)
@@ -71,24 +74,23 @@ describe('ExportController', () => {
   });
 
   describe('POST /exports', () => {
-    it('should create and process an export job', async () => {
+    it('should create and queue an export job', async () => {
       const job = {
         id: 'job-1',
         entity: ExportEntity.schedules,
         format: ExportFormat.csv,
-        status: ExportJobStatus.completed,
-        progress: 100,
-        fileUrl: 'job-1.csv',
+        status: ExportJobStatus.queued,
+        progress: 0,
+        fileUrl: null,
         error: null,
         createdAt: new Date(),
-        startedAt: new Date(),
-        completedAt: new Date(),
+        startedAt: null,
+        completedAt: null,
         createdBy: 'user-1',
       };
 
       mockPrisma.exportJob.create.mockResolvedValue(job);
       mockPrisma.exportJob.findUniqueOrThrow.mockResolvedValue(job);
-      mockPrisma.schedule.findMany.mockResolvedValue([]);
       mockPrisma.exportJob.update.mockResolvedValue(job);
 
       const result = await controller.create(mockDirector, {
@@ -98,7 +100,9 @@ describe('ExportController', () => {
 
       expect(result.entity).toBe(ExportEntity.schedules);
       expect(result.format).toBe(ExportFormat.csv);
+      expect(result.status).toBe(ExportJobStatus.queued);
       expect(mockAuditService.log).toHaveBeenCalled();
+      expect(mockExportQueueService.addExportJob).toHaveBeenCalled();
     });
   });
 

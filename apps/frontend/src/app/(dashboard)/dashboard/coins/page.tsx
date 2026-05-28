@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth.store';
 import { coinsApi, ShopItem, CoinTransaction, StudentBalance, CreateShopItemPayload } from '@/lib/api/coins';
 import { usersApi } from '@/lib/api/users';
+import { engagementApi } from '@/lib/api/engagement';
 import { useConfirm } from '@/store/confirm.store';
 import {
   Coins, TrendingUp, TrendingDown, ShoppingBag, History,
@@ -588,6 +589,12 @@ export default function CoinsPage() {
   const isStudent = user?.role === 'student';
   const isAdmin   = ['vice_principal', 'director'].includes(user?.role ?? '');
 
+  const { data: engagementConfig } = useQuery({
+    queryKey: ['engagement', 'config'],
+    queryFn: () => engagementApi.getConfig(),
+  });
+  const engagementDisabled = !engagementConfig?.engagement_enabled;
+
   // Student data
   const { data: balanceData, isLoading: balLoading } = useQuery({
     queryKey: ['coin-balance'],
@@ -631,6 +638,13 @@ export default function CoinsPage() {
     return (
       <div className="space-y-6 max-w-2xl mx-auto">
         <h1 className="text-2xl font-bold tracking-tight">EduCoin</h1>
+
+        {engagementDisabled && (
+          <div className="rounded-lg border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800 p-3 text-sm text-amber-800 dark:text-amber-300 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>Faoliyat tizimi hali yoqilmagan. Mukofotlar ishlashi uchun direktor sozlamalarni yoqishi kerak.</span>
+          </div>
+        )}
 
         {balLoading ? (
           <Skeleton className="h-32 rounded-2xl" />
@@ -697,6 +711,15 @@ export default function CoinsPage() {
   if (isAdmin) {
     return (
       <div className="space-y-6 max-w-3xl mx-auto">
+        {engagementDisabled && (
+          <div className="rounded-lg border bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800 p-3 text-sm text-amber-800 dark:text-amber-300 flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>Faoliyat tizimi hali yoqilmagan. Mukofotlar ishlashi uchun quyidagi sozlamalardan yoqishingiz mumkin.</span>
+            <Button variant="link" size="sm" className="h-auto p-0 text-amber-700 dark:text-amber-400" onClick={() => window.location.href = '/dashboard/settings/engagement'}>
+              Sozlamalarga o'tish →
+            </Button>
+          </div>
+        )}
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold tracking-tight">EduCoin boshqaruvi</h1>
           <Button onClick={() => setAwardOpen(true)}>

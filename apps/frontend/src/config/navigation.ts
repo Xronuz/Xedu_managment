@@ -62,6 +62,7 @@ export const DIRECTOR_NAV: NavGroup[] = [
       { label: 'Baholar', href: '/dashboard/grades', icon: GraduationCap, roles: ROUTE_PERMISSIONS['/dashboard/grades'] },
       { label: 'Imtihonlar', href: '/dashboard/exams', icon: ClipboardList, roles: ROUTE_PERMISSIONS['/dashboard/exams'] },
       { label: 'Davomat', href: '/dashboard/attendance', icon: CalendarCheck, roles: ROUTE_PERMISSIONS['/dashboard/attendance'] },
+      { label: "To'garaklar", href: '/dashboard/clubs', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/clubs'] },
     ],
   },
   {
@@ -70,6 +71,7 @@ export const DIRECTOR_NAV: NavGroup[] = [
       { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: Clock, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
       { label: 'Intizom', href: '/dashboard/discipline', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
       { label: "O'qituvchi almashtirish", href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
+      { label: "Do'kon boshqaruvi", href: '/dashboard/staff/shop', icon: ShoppingBag, roles: ROUTE_PERMISSIONS['/dashboard/staff/shop'] },
     ],
   },
   {
@@ -133,6 +135,7 @@ export const BRANCH_ADMIN_NAV: NavGroup[] = [
       { label: 'Intizom', href: '/dashboard/discipline', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
       { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
       { label: "O'qituvchi almashtirish", href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
+      { label: "Do'kon boshqaruvi", href: '/dashboard/staff/shop', icon: ShoppingBag, roles: ROUTE_PERMISSIONS['/dashboard/staff/shop'] },
     ],
   },
   {
@@ -144,6 +147,7 @@ export const BRANCH_ADMIN_NAV: NavGroup[] = [
       { label: 'Baholar', href: '/dashboard/grades', icon: GraduationCap, roles: ROUTE_PERMISSIONS['/dashboard/grades'] },
       { label: 'Imtihonlar', href: '/dashboard/exams', icon: ClipboardList, roles: ROUTE_PERMISSIONS['/dashboard/exams'] },
       { label: 'Fanlar', href: '/dashboard/subjects', icon: BookMarked, roles: ROUTE_PERMISSIONS['/dashboard/subjects'] },
+      { label: "To'garaklar", href: '/dashboard/clubs', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/clubs'] },
     ],
   },
   {
@@ -211,6 +215,7 @@ export const VICE_PRINCIPAL_NAV: NavGroup[] = [
       { label: 'Baholar', href: '/dashboard/grades', icon: GraduationCap, roles: ROUTE_PERMISSIONS['/dashboard/grades'] },
       { label: 'Imtihonlar', href: '/dashboard/exams', icon: ClipboardList, roles: ROUTE_PERMISSIONS['/dashboard/exams'] },
       { label: 'Davomat', href: '/dashboard/attendance', icon: CalendarCheck, roles: ROUTE_PERMISSIONS['/dashboard/attendance'] },
+      { label: "To'garaklar", href: '/dashboard/clubs', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/clubs'] },
     ],
   },
   {
@@ -219,6 +224,7 @@ export const VICE_PRINCIPAL_NAV: NavGroup[] = [
       { label: 'Intizom', href: '/dashboard/discipline', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
       { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
       { label: "O'qituvchi almashtirish", href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
+      { label: "Do'kon boshqaruvi", href: '/dashboard/staff/shop', icon: ShoppingBag, roles: ROUTE_PERMISSIONS['/dashboard/staff/shop'] },
     ],
   },
   {
@@ -280,6 +286,7 @@ export const TEACHER_NAV: NavGroup[] = [
       { label: 'Baholar', href: '/dashboard/grades', icon: GraduationCap, roles: ROUTE_PERMISSIONS['/dashboard/grades'] },
       { label: 'Uy vazifalari', href: '/dashboard/homework', icon: BookMarked, roles: ROUTE_PERMISSIONS['/dashboard/homework'] },
       { label: 'Imtihonlar', href: '/dashboard/exams', icon: ClipboardList, roles: ROUTE_PERMISSIONS['/dashboard/exams'] },
+      { label: "To'garaklar", href: '/dashboard/clubs', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/clubs'] },
     ],
   },
   {
@@ -384,6 +391,7 @@ export const STUDENT_NAV: NavGroup[] = [
     items: [
       { label: 'Kutubxona', href: '/dashboard/library', icon: Library, roles: ROUTE_PERMISSIONS['/dashboard/library'] },
       { label: 'Resurslar', href: '/dashboard/resources', icon: Package, roles: ROUTE_PERMISSIONS['/dashboard/resources'] },
+      { label: "To'garaklar", href: '/dashboard/clubs', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/clubs'] },
       { label: "Do'kon", href: '/dashboard/student/shop', icon: ShoppingBag, roles: ROUTE_PERMISSIONS['/dashboard/student/shop'] },
       { label: 'EduCoin', href: '/dashboard/coins', icon: Coins, roles: ROUTE_PERMISSIONS['/dashboard/coins'] },
     ],
@@ -430,6 +438,7 @@ export const SUPER_ADMIN_NAV: NavGroup[] = [
       { label: 'Maktablar', href: '/dashboard/schools', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/schools'] },
       { label: 'Tizim holati', href: '/dashboard/system-health', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/system-health'] },
       { label: 'Audit Log', href: '/dashboard/audit-log', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/audit-log'] },
+      { label: "Do'kon boshqaruvi", href: '/dashboard/staff/shop', icon: ShoppingBag, roles: ROUTE_PERMISSIONS['/dashboard/staff/shop'] },
     ],
   },
 ];

@@ -69,6 +69,7 @@ const SEVERITY_CONFIG: Record<DisciplineSeverity, { label: string; dot: string; 
 
 const ACTION_LABELS: Record<DisciplineAction, string> = {
   warning:        'Ogohlantirish',
+  praise:         'Rag\u2018batlantirish',
   detention:      'Qolib ishlash',
   parent_call:    "Ota-onaga qo'ng'iroq",
   parent_meeting: "Ota-ona yig'ilishi",

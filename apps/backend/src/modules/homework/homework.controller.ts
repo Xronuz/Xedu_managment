@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { HomeworkService } from './homework.service';
 import { CreateHomeworkDto, UpdateHomeworkDto, SubmitHomeworkDto, GradeSubmissionDto } from './dto/homework.dto';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
+import { recordHomeworkSubmission } from '@/common/telemetry/pilot-telemetry';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
@@ -71,6 +72,7 @@ export class HomeworkController {
     @Body() dto: SubmitHomeworkDto,
     @CurrentUser() user: JwtPayload,
   ) {
+    recordHomeworkSubmission();
     return this.homeworkService.submit(id, dto, user);
   }
 

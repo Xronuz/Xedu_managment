@@ -256,7 +256,7 @@ const DEFAULTS: EngagementConfig = {
 
 | # | Claim | Source | Evidence | Status | Severity | Action |
 |---|-------|--------|----------|--------|----------|--------|
-| 1 | **"Online Exam Engine — DocX import"** | `XEDU_SYSTEM_DESIGN_REPORT.md:1229` | No DocX import endpoint. No `.docx` parsing library. | **Marketing-only** | P2 | Remove from docs or build |
+| 1 | **"Online Exam Engine — DocX import"** | `XEDU_SYSTEM_DESIGN_REPORT.md:1229` | ✅ **Real** — `mammoth` parser, `/online-exam/:id/import-docx` endpoint works. | **Implemented** | — | No action needed |
 | 2 | **"Real-time proctoring"** | `XEDU_SYSTEM_DESIGN_REPORT.md:1229` | No proctoring controller. No webcam access. No anti-cheat beyond basic timer. | **Marketing-only** | P1 | Remove from docs |
 | 3 | **"AI/risk scoring"** | `COMPETITOR_ANALYSIS.md:154` | `insights/page.tsx` shows mock risk cards. AI providers stubbed. `ai-analytics.ts` queries raw grades/attendance, not AI models. | **Stub** | P2 | Document as "AI-ready infrastructure, not active" |
 | 4 | **"Gamification / Coin system"** | `COMPETITOR_ANALYSIS.md:83` | Real schema + services. Grade/discipline/weekly triggers wired. BUT: disabled by default, exam trigger dead, achievements unwired. | **Partial** | P1 | Enable by default or document opt-in |

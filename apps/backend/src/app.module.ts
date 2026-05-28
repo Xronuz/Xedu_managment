@@ -64,6 +64,7 @@ import { MarketingModule } from './modules/marketing/marketing.module';
 import { InvitationsModule } from './modules/invitations/invitations.module';
 import { OpsCommandCenterModule } from './modules/ops-command-center/ops-command-center.module';
 import { ExportModule } from './modules/export/export.module';
+import { DemoRequestsModule } from './modules/demo-requests/demo-requests.module';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { QueryTimingInterceptor } from './common/interceptors/query-timing.interceptor';
@@ -159,6 +160,7 @@ import { envValidationSchema } from './common/config/env.validation';
     InvitationsModule,           // Takliflar / invitation system
     OpsCommandCenterModule,      // Operatsion boshqaruv markazi (Phase 6A)
     ExportModule,                // Async data export (Phase 6B)
+    DemoRequestsModule,          // Landing page demo so'rovlari
   ],
   providers: [
     // Global rate limiting — barcha endpointlarga qo'llaniladi

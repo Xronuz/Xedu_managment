@@ -65,3 +65,43 @@ export const superAdminApi = {
     }>;
   },
 };
+
+export type DemoRequestStatus = 'new' | 'contacted' | 'scheduled' | 'completed' | 'rejected';
+
+export interface DemoRequest {
+  id: string;
+  firstName: string;
+  lastName: string;
+  institution: string;
+  email: string;
+  phone: string;
+  status: DemoRequestStatus;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export const demoRequestsApi = {
+  submit: async (payload: {
+    firstName: string; lastName: string;
+    institution: string; email: string; phone: string;
+  }) => {
+    const { data } = await apiClient.post('/demo-requests', payload);
+    return data as { success: boolean; data: DemoRequest };
+  },
+
+  getAll: async (params?: { page?: number; limit?: number; status?: DemoRequestStatus }) => {
+    const { data } = await apiClient.get('/demo-requests', { params });
+    return data as { success: boolean; data: DemoRequest[]; meta: { total: number; page: number; limit: number; pages: number } };
+  },
+
+  getStats: async () => {
+    const { data } = await apiClient.get('/demo-requests/stats');
+    return data as { success: boolean; data: Record<DemoRequestStatus, number> };
+  },
+
+  update: async (id: string, payload: { status?: DemoRequestStatus; notes?: string }) => {
+    const { data } = await apiClient.patch(`/demo-requests/${id}`, payload);
+    return data as { success: boolean; data: DemoRequest };
+  },
+};

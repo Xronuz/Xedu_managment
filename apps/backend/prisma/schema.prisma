@@ -2678,3 +2678,30 @@ model PilotTelemetrySnapshot {
   @@index([date])
   @@map("pilot_telemetry_snapshots")
 }
+
+// ─── DemoRequest ──────────────────────────────────────────────────────────────
+
+model DemoRequest {
+  id          String            @id @default(uuid())
+  firstName   String
+  lastName    String
+  institution String
+  email       String
+  phone       String
+  status      DemoRequestStatus @default(new)
+  notes       String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("demo_requests")
+}
+
+enum DemoRequestStatus {
+  new
+  contacted
+  scheduled
+  completed
+  rejected
+}

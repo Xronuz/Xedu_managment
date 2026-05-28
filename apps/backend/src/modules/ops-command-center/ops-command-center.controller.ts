@@ -34,8 +34,6 @@ export class OpsCommandCenterController {
     UserRole.VICE_PRINCIPAL,
     UserRole.BRANCH_ADMIN,
     UserRole.ACCOUNTANT,
-    UserRole.TEACHER,
-    UserRole.CLASS_TEACHER,
   )
   async getTodaySummary(
     @CurrentUser() user: JwtPayload,

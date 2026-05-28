@@ -25,7 +25,7 @@ export class OpsDashboardController {
   ) {}
 
   @Get('dashboard')
-  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.ACCOUNTANT, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.ACCOUNTANT)
   @ApiOperation({ summary: 'Operational dashboard with pilot usage (role-aware, school-scoped)' })
   async dashboard(@CurrentUser() user: JwtPayload) {
     const tenant = buildTenantWhere(user);
@@ -309,7 +309,7 @@ export class OpsDashboardController {
   }
 
   @Get('workflows')
-  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.ACCOUNTANT, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.ACCOUNTANT)
   @ApiOperation({ summary: 'Workflow funnel evidence (role-aware, school-scoped)' })
   async workflows(@CurrentUser() user: JwtPayload) {
     const tenant = buildTenantWhere(user);
@@ -344,7 +344,7 @@ export class OpsDashboardController {
   }
 
   @Get('friction')
-  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.ACCOUNTANT, UserRole.SUPER_ADMIN)
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.ACCOUNTANT)
   @ApiOperation({ summary: 'Friction signals (role-aware, school-scoped)' })
   async friction(@CurrentUser() user: JwtPayload) {
     const tenant = buildTenantWhere(user);

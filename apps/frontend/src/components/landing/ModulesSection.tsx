@@ -14,7 +14,7 @@ export function ModulesSection() {
   ];
 
   return (
-    <section className="relative h-full overflow-hidden px-5 pt-[68px] pb-28 md:px-10 lg:px-14 bg-background">
+    <section className="relative min-h-full px-5 pt-[68px] pb-28 md:px-10 lg:px-14 bg-background">
       <div
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
@@ -32,7 +32,7 @@ export function ModulesSection() {
         Xedu alohida tizimlarni birlashtiradi — yagona ma'lumotlar bazasi va ruxsatlar tizimida.
       </p>
 
-      <div className="mt-5 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {modules.map((m) => (
           <ModuleItem
             key={m.n}

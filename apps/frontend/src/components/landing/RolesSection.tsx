@@ -33,9 +33,9 @@ export function RolesSection() {
   ];
 
   return (
-    <section className="relative h-full overflow-hidden bg-background">
+    <section className="relative min-h-full bg-background">
       {/* Light campus bg */}
-      <img src={rolesBg} alt="" className="absolute inset-0 h-full w-full object-cover" aria-hidden />
+      <img src={rolesBg} alt="" className="absolute inset-0 h-full w-full object-cover" style={{ minHeight: '100%' }} aria-hidden />
       <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(240,250,244,0.15) 0%, rgba(230,245,236,0.35) 100%)" }} aria-hidden />
 
       <div className="relative px-5 pt-[68px] pb-28 md:px-10 lg:px-14">
@@ -47,7 +47,7 @@ export function RolesSection() {
           Xedu platformasi har bir foydalanuvchi uchun mos vositalar va imkoniyatlarni taqdim etadi.
         </p>
 
-        <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {roles.map((r) => (
             <div
               key={r.t}

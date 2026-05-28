@@ -49,7 +49,7 @@ export function LandingPage() {
       <Panel id={1} active={active} prev={prev} dir={dir}><ModulesSection /></Panel>
       <Panel id={2} active={active} prev={prev} dir={dir}><HeroSection goTo={goTo} /></Panel>
       <Panel id={3} active={active} prev={prev} dir={dir}>
-        <section className="relative h-full overflow-hidden px-5 pt-[68px] pb-28 md:px-10 lg:px-14 bg-background">
+        <section className="relative min-h-full px-5 pt-[68px] pb-28 md:px-10 lg:px-14 bg-background">
           <div className="grid gap-6 lg:grid-cols-2">
             <AnalyticsSection />
             <BranchesSection />
@@ -77,7 +77,7 @@ function Panel({
 
   return (
     <div
-      className={`absolute inset-0 overflow-hidden ${animClass}`}
+      className={`absolute inset-0 overflow-y-auto overflow-x-hidden ${animClass}`}
       style={{ zIndex: show ? 2 : 1, "--d": dir } as React.CSSProperties}
     >
       {children}

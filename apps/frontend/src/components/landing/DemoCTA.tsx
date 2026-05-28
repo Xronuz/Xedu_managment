@@ -52,7 +52,7 @@ export function DemoCTA() {
   };
 
   return (
-    <section className="relative h-full overflow-hidden px-5 pt-[68px] pb-28 md:px-10 lg:px-14 bg-background">
+    <section className="relative min-h-full px-5 pt-[68px] pb-28 md:px-10 lg:px-14 bg-background">
       <div className="relative overflow-hidden rounded-3xl bg-leaf-gradient p-8 md:p-12">
         <div className="absolute inset-0 opacity-20 mix-blend-overlay">
           <img src={campusHero} alt="" className="h-full w-full object-cover" loading="lazy" />

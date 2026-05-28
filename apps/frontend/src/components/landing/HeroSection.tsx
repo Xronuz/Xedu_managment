@@ -39,8 +39,8 @@ export function HeroSection({ goTo }: HeroSectionProps) {
 
         <div className="relative flex h-full flex-col gap-4 px-5 pt-[88px] pb-28 md:flex-row md:px-10 lg:px-14">
 
-          {/* Left column */}
-          <div className="flex-1 mt-4 flex flex-col gap-4 md:mt-6">
+          {/* Left column — desktop only */}
+          <div className="hidden md:flex flex-1 mt-4 flex-col gap-4 md:mt-6">
             <OverviewPanel />
             <ProfitCard />
             <button
@@ -51,14 +51,14 @@ export function HeroSection({ goTo }: HeroSectionProps) {
             </button>
           </div>
 
-          {/* Center column */}
+          {/* Center column — always visible */}
           <div className="flex-1 mt-2 flex flex-col items-center justify-between gap-4 md:mt-4">
-            <div className="text-center">
+            <div className="text-center w-full">
               <span className="inline-flex items-center gap-2 rounded-full glass-tinted px-3 py-1 text-xs font-medium text-cream/90">
                 <Sparkles className="h-3 w-3" /> Education Operating System
               </span>
-              <div className="mt-3 rounded-3xl px-6 py-5" style={{ background: "var(--hero-title-panel-bg)", backdropFilter: "blur(18px) saturate(1.4)" }}>
-                <h1 className="font-display text-4xl font-bold leading-[1.05] text-cream md:text-5xl">
+              <div className="mt-3 rounded-3xl px-5 py-5 md:px-6" style={{ background: "var(--hero-title-panel-bg)", backdropFilter: "blur(18px) saturate(1.4)" }}>
+                <h1 className="font-display text-3xl font-bold leading-[1.05] text-cream sm:text-4xl md:text-5xl">
                   Bitta platforma —
                   <br />
                   <span className="text-leaf">butun ta'lim guruhi.</span>
@@ -67,12 +67,19 @@ export function HeroSection({ goTo }: HeroSectionProps) {
                   ERP, LMS, CRM, moliya va analitika — barchasi yagona operatsion tizimda.
                 </p>
               </div>
+              {/* Mobile-only CTA */}
+              <button
+                onClick={() => goTo(1)}
+                className="md:hidden mt-4 rounded-full bg-leaf text-primary-foreground shadow-glow font-semibold transition hover:brightness-110 px-8 py-3 text-sm"
+              >
+                Modullar →
+              </button>
             </div>
             <TenantRequestCard />
           </div>
 
-          {/* Right column */}
-          <div className="flex-1 mt-2 flex flex-col items-end gap-4 md:mt-4">
+          {/* Right column — desktop only */}
+          <div className="hidden md:flex flex-1 mt-2 flex-col items-end gap-4 md:mt-4">
             <OccupancyCard />
             <UnpaidCard />
             <AvatarsCard />

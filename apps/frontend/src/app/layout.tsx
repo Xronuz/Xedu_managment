@@ -12,8 +12,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'EduPlatform — Maktab Boshqaruv Tizimi',
-  description: 'Hususiy maktablar va o‘quv markazlari uchun boshqaruv tizimi',
+  title: "Xedu — Ta'lim Boshqaruv Tizimi",
+  description: "Maktablar, filiallar va o'quv markazlari uchun yagona operatsion tizim",
 };
 
 export default async function RootLayout({

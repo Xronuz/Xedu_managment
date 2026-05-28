@@ -74,7 +74,7 @@ export default function SettingsPage() {
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabKey>('profil');
 
-  const isAdmin = user?.role === UserRole.DIRECTOR || user?.role === UserRole.SUPER_ADMIN;
+  const isAdmin = user?.role === UserRole.DIRECTOR;
   const TABS = isAdmin ? [...BASE_TABS, ADMIN_TAB] : BASE_TABS;
 
   // ── SystemConfig state ──

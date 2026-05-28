@@ -438,10 +438,17 @@ export const SUPER_ADMIN_NAV: NavGroup[] = [
   {
     title: 'Platforma',
     items: [
+      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
       { label: 'Maktablar', href: '/dashboard/schools', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/schools'] },
+      { label: 'Demo So\'rovlar', href: '/dashboard/demo-requests', icon: Rocket, roles: ROUTE_PERMISSIONS['/dashboard/demo-requests'] },
       { label: 'Tizim holati', href: '/dashboard/system-health', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/system-health'] },
       { label: 'Audit Log', href: '/dashboard/audit-log', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/audit-log'] },
-      { label: "Do'kon boshqaruvi", href: '/dashboard/staff/shop', icon: ShoppingBag, roles: ROUTE_PERMISSIONS['/dashboard/staff/shop'] },
+    ],
+  },
+  {
+    title: 'Tizim',
+    items: [
+      { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
     ],
   },
 ];

@@ -42,6 +42,7 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   '/dashboard/schools':        ['super_admin'],
   '/dashboard/schools/new':    ['super_admin'],
   '/dashboard/system-health':  ['super_admin'],
+  '/dashboard/demo-requests':  ['super_admin'],
   // ═══════════════════════════════════════════════════════════════════════════════
   // ONBOARDING
   // ═══════════════════════════════════════════════════════════════════════════════

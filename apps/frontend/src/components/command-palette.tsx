@@ -132,19 +132,21 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     !user?.role || item.roles?.includes(user.role as any),
   );
 
-  // Search users (debounced)
+  // Search users (debounced) — only for roles that can access user management
+  const canSearchUsers = ['director', 'vice_principal', 'branch_admin'].includes(user?.role ?? '');
   const { data: usersData } = useQuery({
     queryKey: ['command-search-users', search],
     queryFn: () => usersApi.getAll({ search, limit: 5 }),
-    enabled: open && search.length >= 2,
+    enabled: open && search.length >= 2 && canSearchUsers,
     staleTime: 30_000,
   });
 
-  // Search classes
+  // Search classes — only for school-scoped roles
+  const canSearchClasses = !!user && ROUTE_PERMISSIONS['/dashboard/classes'].includes(user.role as any);
   const { data: classesData } = useQuery({
     queryKey: ['command-search-classes', search],
     queryFn: () => classesApi.getAll(),
-    enabled: open && search.length >= 1,
+    enabled: open && search.length >= 1 && canSearchClasses,
     staleTime: 60_000,
   });
 

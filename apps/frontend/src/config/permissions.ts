@@ -155,6 +155,9 @@ export const SIDEBAR_PERMISSIONS: Record<string, UserRole[]> = {
   'Audit log':       ['super_admin'],
 };
 
+/** Rollar ki Ops Command Center ga auto-redirect qilinadi */
+export const OPS_REDIRECT_ROLES: readonly string[] = ['vice_principal', 'branch_admin', 'accountant'];
+
 /** Role'ga mos bosh sahifa (fallback redirect uchun) */
 export const ROLE_HOME: Record<UserRole, string> = {
   super_admin:   '/dashboard/schools',

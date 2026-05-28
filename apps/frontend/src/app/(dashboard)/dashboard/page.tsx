@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
+import { OPS_REDIRECT_ROLES } from '@/config/permissions';
 import { DirectorDashboard } from './_components/director-dashboard';
 import { StudentRedirect } from './_components/student-redirect';
 import { AccountantDashboard } from './_components/accountant-dashboard';
@@ -17,7 +18,7 @@ import { X } from 'lucide-react';
 
 const WELCOME_DISMISSED_KEY = 'xedu_welcome_dismissed';
 
-const OPS_REDIRECT_ROLES = ['director', 'vice_principal', 'branch_admin', 'accountant'];
+
 
 export default function DashboardPage() {
   const router = useRouter();

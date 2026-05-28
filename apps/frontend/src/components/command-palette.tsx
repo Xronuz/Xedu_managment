@@ -104,6 +104,16 @@ const NAV_ITEMS = [
   { label: 'Marketing', href: '/dashboard/marketing', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/marketing'] },
 ];
 
+/** Director Cmd+K curation — explicit allowlist for executive navigation */
+export const DIRECTOR_CMDK_ALLOWED = new Set([
+  '/dashboard', '/dashboard/ops', '/dashboard/approvals', '/dashboard/alerts',
+  '/dashboard/branches', '/dashboard/staff', '/dashboard/users',
+  '/dashboard/schedule', '/dashboard/grades', '/dashboard/attendance',
+  '/dashboard/finance', '/dashboard/payroll', '/dashboard/reports',
+  '/dashboard/kpi', '/dashboard/settings', '/dashboard/audit-log',
+  '/dashboard/profile',
+]);
+
 interface CommandPaletteProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -127,10 +137,12 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     if (open) setRecentPages(getRecentPages());
   }, [open]);
 
-  // Filter nav items by user role
-  const navItems = NAV_ITEMS.filter(item =>
-    !user?.role || item.roles?.includes(user.role as any),
-  );
+  // Filter nav items by user role, with Director curation
+  const navItems = NAV_ITEMS.filter(item => {
+    if (!user?.role || !item.roles?.includes(user.role as any)) return false;
+    if (user.role === 'director' && !DIRECTOR_CMDK_ALLOWED.has(item.href)) return false;
+    return true;
+  });
 
   // Search users (debounced) — only for roles that can access user management
   const canSearchUsers = ['director', 'vice_principal', 'branch_admin'].includes(user?.role ?? '');

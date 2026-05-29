@@ -46,32 +46,15 @@ export const DIRECTOR_NAV: NavGroup[] = [
     title: 'Umumiy ko‘rinish',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
-      { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
       { label: 'Tasdiqlash inbox', href: '/dashboard/approvals', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/approvals'] },
       { label: 'Ogohlantirishlar', href: '/dashboard/alerts', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/alerts'] },
     ],
   },
   {
-    title: 'Filial & Jamoa',
+    title: 'Tashkilot',
     items: [
-      { label: 'Filiallar', href: '/dashboard/branches', icon: Building2, roles: ROUTE_PERMISSIONS['/dashboard/branches'] },
       { label: 'Xodimlar', href: '/dashboard/staff', icon: Briefcase, roles: ROUTE_PERMISSIONS['/dashboard/staff'] },
-      { label: 'Foydalanuvchilar', href: '/dashboard/users', icon: UserCog, roles: ROUTE_PERMISSIONS['/dashboard/users'] },
-    ],
-  },
-  {
-    title: "Ta'lim",
-    items: [
-      { label: 'Dars jadvali', href: '/dashboard/schedule', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/schedule'] },
-      { label: 'Baholar', href: '/dashboard/grades', icon: GraduationCap, roles: ROUTE_PERMISSIONS['/dashboard/grades'] },
-      { label: 'Davomat', href: '/dashboard/attendance', icon: CalendarCheck, roles: ROUTE_PERMISSIONS['/dashboard/attendance'] },
-    ],
-  },
-  {
-    title: 'Moliya',
-    items: [
       { label: 'Moliya', href: '/dashboard/finance', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/finance'] },
-      { label: 'Ish haqi', href: '/dashboard/payroll', icon: Award, roles: ROUTE_PERMISSIONS['/dashboard/payroll'] },
     ],
   },
   {
@@ -85,7 +68,6 @@ export const DIRECTOR_NAV: NavGroup[] = [
     title: 'Tizim',
     items: [
       { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
-      { label: 'Audit Log', href: '/dashboard/audit-log', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/audit-log'] },
     ],
   },
 ];

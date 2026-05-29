@@ -43,13 +43,10 @@ import {
 } from '@/components/director-workspace';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   PHASE 3 — EXECUTIVE DASHBOARD REDESIGN
-   Goal: Transform stable landing page into executive command dashboard.
-   Principles:
-   - Delegation-first: every block shows WHO owns WHAT
-   - No fake AI data
-   - Reuse existing APIs only
-   - Cards, summaries, CTA navigation — no dense tables or inline editors
+   H1 — DIRECTOR DASHBOARD REFACTOR
+   Zone A: 3 executive cards (readiness, approvals, alerts)
+   Zone B: delegation feed (hidden for now — real data later)
+   Zone C: 4 metrics (students, teachers, attendance, branches)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 export function DirectorDashboard() {
@@ -59,39 +56,30 @@ export function DirectorDashboard() {
 
   const [selectedBranch, setSelectedBranch] = useState<BranchDetail | null>(null);
 
-  // ── Ops Command Center APIs (new for Phase 3) ───────────────────────────────
+  // ── Ops Command Center APIs ───────────────────────────────────────────────────
   const { data: readinessData, isLoading: readinessLoading } = useQuery({
     queryKey: ['ops', 'readiness', schoolId],
     queryFn: () => (schoolId ? opsCommandCenterApi.getReadiness(schoolId) : Promise.resolve(null)),
     staleTime: 2 * 60 * 1000,
     enabled: !!schoolId,
   });
-  const { data: roleReadiness, isLoading: roleReadinessLoading } = useQuery({
-    queryKey: ['ops', 'readiness', 'role', schoolId],
-    queryFn: () => (schoolId ? opsCommandCenterApi.getRoleReadiness(schoolId) : Promise.resolve(null)),
-    staleTime: 2 * 60 * 1000,
-    enabled: !!schoolId,
-  });
   const { data: opsAlerts, isLoading: alertsLoading } = useQuery({
     queryKey: ['ops', 'alerts', activeBranchId],
     queryFn: () => opsCommandCenterApi.getAlerts(activeBranchId ?? undefined),
+    enabled: !!activeBranchId,
     staleTime: 60_000,
   });
   const { data: todaySummary, isLoading: todayLoading } = useQuery({
     queryKey: ['ops', 'today-summary', activeBranchId],
     queryFn: () => opsCommandCenterApi.getTodaySummary(activeBranchId ?? undefined),
+    enabled: !!activeBranchId,
     staleTime: 60_000,
   });
 
-  // ── Existing APIs (Phase 2) ─────────────────────────────────────────────────
+  // ── Existing APIs ─────────────────────────────────────────────────────────────
   const { data: attendanceSummary, isLoading: attLoading } = useQuery({
     queryKey: ['attendance', 'today-summary', 'school-wide'],
     queryFn: attendanceApi.getTodaySummary,
-    staleTime: 5 * 60 * 1000,
-  });
-  const { data: classesData } = useQuery({
-    queryKey: ['classes', 'school-wide'],
-    queryFn: classesApi.getAll,
     staleTime: 5 * 60 * 1000,
   });
   const { data: usersData } = useQuery({
@@ -102,11 +90,6 @@ export function DirectorDashboard() {
   const { data: pendingLeaves } = useQuery({
     queryKey: ['leave-requests', 'pending', 'school-wide'],
     queryFn: () => leaveRequestsApi.getAll({ status: 'pending' }),
-    staleTime: 5 * 60 * 1000,
-  });
-  const { data: financeData } = useQuery({
-    queryKey: ['finance', 'dashboard', 'school-wide'],
-    queryFn: financeApi.getDashboard,
     staleTime: 5 * 60 * 1000,
   });
   const { data: pendingDiscipline } = useQuery({
@@ -130,11 +113,7 @@ export function DirectorDashboard() {
     staleTime: 5 * 60 * 1000,
   });
 
-  // ── Derived data ────────────────────────────────────────────────────────────
-  const classList: any[] = useMemo(
-    () => Array.isArray(classesData) ? classesData : (classesData as any)?.data ?? [],
-    [classesData],
-  );
+  // ── Derived data ──────────────────────────────────────────────────────────────
   const allUsers: any[] = useMemo(() => (usersData as any)?.data ?? [], [usersData]);
   const teacherCount = useMemo(
     () => allUsers.filter((u: any) => ['teacher', 'class_teacher'].includes(u.role)).length,
@@ -163,48 +142,19 @@ export function DirectorDashboard() {
     new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' }),
   []);
 
-  // Readiness derived
   const readinessScore = readinessData?.score ?? 0;
   const readinessStatus = readinessData?.status ?? 'not_started';
-  const directorOwned = useMemo(() =>
-    readinessData?.checklist?.filter((i) => i.primaryOwner === 'director' && !i.completed) ?? [],
-  [readinessData]);
-  const delegatedBlockers = useMemo(() =>
-    readinessData?.checklist?.filter((i) => i.primaryOwner !== 'director' && i.required && !i.completed) ?? [],
-  [readinessData]);
-
-  // Alerts derived
-  const criticalAlerts = useMemo(() =>
-    (opsAlerts ?? []).filter((a) => a.severity === 'critical' && a.resolutionState !== 'resolved').slice(0, 5),
-  [opsAlerts]);
-
-  // Role readiness derived
-  const vpDelegated = roleReadiness?.delegatedActions?.filter((a) => a.primaryOwner === 'vice_principal') ?? [];
-  const baDelegated = roleReadiness?.delegatedActions?.filter((a) => a.primaryOwner === 'branch_admin') ?? [];
-  const accDelegated = roleReadiness?.delegatedActions?.filter((a) => a.primaryOwner === 'accountant') ?? [];
 
   const situationData = useMemo<SituationBarData>(() => ({
     activeBranchName: activeBranchId ? undefined : 'Barcha filiallar',
     totalBranches: (branches as any[])?.length ?? 0,
-    alertCount: criticalAlerts.length,
-    pendingApprovals: pendingLeaveList.length,
+    alertCount: (opsAlerts ?? []).length,
+    pendingApprovals: todaySummary?.staff?.pendingLeaveRequests ?? 0,
     riskSignals: 0,
     attendancePct: presentPct > 0 ? presentPct : null,
     staffTotal: teacherCount + staffCount,
-    revenueGrowth: financeData?.revenueGrowth ?? null,
-  }), [activeBranchId, branches, criticalAlerts.length, pendingLeaveList.length, presentPct, teacherCount, staffCount, financeData?.revenueGrowth]);
-
-  const handleSelectBranch = useCallback((branch: BranchDetail) => {
-    setSelectedBranch(branch);
-  }, []);
-
-  const handleAlertsClick = useCallback(() => {
-    router.push('/dashboard/alerts');
-  }, [router]);
-
-  const handleApprovalsClick = useCallback(() => {
-    router.push('/dashboard/approvals');
-  }, [router]);
+    revenueGrowth: null,
+  }), [activeBranchId, branches, opsAlerts, todaySummary, presentPct, teacherCount, staffCount]);
 
   return (
     <WorkspaceShell layout="two-column" density="compact">
@@ -226,274 +176,156 @@ export function DirectorDashboard() {
             </Button>
           }
         />
-
         <div className="sticky top-0 z-20 -mx-2 px-2 py-2 xedu-sticky-executive">
           <SituationBar
             data={situationData}
-            onAlertsClick={handleAlertsClick}
-            onApprovalsClick={handleApprovalsClick}
+            onAlertsClick={() => router.push('/dashboard/alerts')}
+            onApprovalsClick={() => router.push('/dashboard/approvals')}
           />
         </div>
       </div>
 
-      {/* ── Main Canvas ─────────────────────────────────────────────────────── */}
       <WorkspaceMain>
         <div className="space-y-5">
 
           {/* ═══════════════════════════════════════════════════════════════════
-             ZONE A — EXECUTIVE SNAPSHOT
+             ZONE A — EXECUTIVE SNAPSHOT (3 cards)
              ═══════════════════════════════════════════════════════════════════ */}
           <SectionLabel title="Umumiy ko'rinish" icon={BarChart3} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-            {/* 1. School Readiness */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* 1. School Health */}
             <ExecCard
-              title="Maktab tayyorgarligi"
+              title="Maktab salomatligi"
               href="/dashboard/ops"
               owner="director"
               isLoading={readinessLoading}
+              footer={!readinessLoading && readinessScore < 80 ? (
+                <span className="text-xs font-medium text-xedu-primary cursor-pointer hover:underline">
+                  Sozlashni davom ettirish →
+                </span>
+              ) : null}
             >
               {readinessLoading ? (
                 <Skeleton className="h-10 w-20" />
               ) : (
                 <div className="space-y-2">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">
+                    <span className={cn(
+                      'text-2xl font-black',
+                      readinessScore >= 80 ? 'text-emerald-600' :
+                      readinessScore >= 60 ? 'text-amber-600' : 'text-red-600'
+                    )}>
                       {readinessScore}%
                     </span>
                     <StatusBadge status={readinessStatus} />
                   </div>
-                  {directorOwned.length > 0 && (
-                    <p className="text-xs font-medium text-xedu-ruby-600">
-                      {directorOwned.length} ta sizning vazifangiz
-                    </p>
-                  )}
-                  {delegatedBlockers.length > 0 && (
-                    <p className="text-xs text-xedu-slate-500">
-                      {delegatedBlockers.length} ta topshirilgan ish bloklangan
-                    </p>
-                  )}
-                  {directorOwned.length === 0 && delegatedBlockers.length === 0 && (
-                    <p className="text-xs text-xedu-slate-500">Barcha ko'rsatkichlar normal</p>
-                  )}
-                </div>
-              )}
-            </ExecCard>
-
-            {/* 2. Approvals Queue */}
-            <ExecCard
-              title="Tasdiqlash navbati"
-              href="/dashboard/approvals"
-              owner="director"
-              isLoading={!pendingLeaves}
-            >
-              {!pendingLeaves ? (
-                <Skeleton className="h-10 w-20" />
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">
-                      {pendingLeaveList.length}
-                    </span>
-                    {pendingLeaveList.length > 0 && (
-                      <Badge variant="destructive" className="text-[10px]">Kutilmoqda</Badge>
-                    )}
-                  </div>
                   <p className="text-xs text-xedu-slate-500">
-                    {pendingDisciplineList.length > 0
-                      ? `${pendingDisciplineList.length} ta intizom holati ham kutilmoqda`
-                      : 'Intizom holatlari yo\'q'}
+                    {readinessScore >= 80 ? 'Maktab yaxshi holatda' :
+                     readinessScore >= 60 ? 'E\'tibor talab etadi' : 'Jiddiy muammo bor'}
                   </p>
                 </div>
               )}
             </ExecCard>
 
-            {/* 3. Finance Pulse */}
-            <ExecCard
-              title="Moliya holati"
-              href="/dashboard/finance"
-              owner="accountant"
-              isLoading={!financeData}
-            >
-              {!financeData ? (
-                <Skeleton className="h-10 w-20" />
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">
-                      {financeData?.thisMonthRevenue
-                        ? `${(financeData.thisMonthRevenue / 1_000_000).toFixed(1)}M`
-                        : '—'}
-                    </span>
-                    {financeData?.overdueAmount ? (
-                      <Badge variant="destructive" className="text-[10px]">Qarzdorlik</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-[10px]">Normal</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-xedu-slate-500">
-                    {financeData?.latestPayroll
-                      ? `Ish haqi: ${financeData.latestPayroll.status}`
-                      : 'Ma\'lumot yetarli emas'}
-                  </p>
-                </div>
-              )}
-            </ExecCard>
-
-            {/* 4. Academic Pulse */}
-            <ExecCard
-              title="Ta'lim holati"
-              href="/dashboard/reports"
-              owner="vice_principal"
-              isLoading={todayLoading || attLoading}
-            >
-              {todayLoading || attLoading ? (
-                <Skeleton className="h-10 w-20" />
-              ) : (
-                <div className="space-y-2">
-                  <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">
-                      {presentPct > 0 ? `${presentPct}%` : '—'}
-                    </span>
-                    {todaySummary?.schedule?.conflicts ? (
-                      <Badge variant="destructive" className="text-[10px]">{todaySummary.schedule.conflicts} ta ziddiyat</Badge>
-                    ) : (
-                      <Badge variant="outline" className="text-[10px]">Davomat</Badge>
-                    )}
-                  </div>
-                  <p className="text-xs text-xedu-slate-500">
-                    {todaySummary?.schedule?.publishedSlots
-                      ? `${todaySummary.schedule.publishedSlots} ta dars nashr etilgan`
-                      : 'Jadval ma\'lumoti yo\'q'}
-                  </p>
-                </div>
-              )}
-            </ExecCard>
-          </div>
-
-          {/* ═══════════════════════════════════════════════════════════════════
-             ZONE B — DELEGATED OPERATIONS
-             ═══════════════════════════════════════════════════════════════════ */}
-          <SectionLabel title="Topshirilgan operatsiyalar" icon={UserCheck} />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <DelegationCard
-              title="O'rinbosar (VP)"
-              ownerLabel="VP bajaradi"
-              count={vpDelegated.length}
-              items={vpDelegated.slice(0, 4)}
-              href="/dashboard/ops"
-              color="blue"
-              isLoading={roleReadinessLoading}
-            />
-            <DelegationCard
-              title="Filial admin"
-              ownerLabel="Filial admin bajaradi"
-              count={baDelegated.length}
-              items={baDelegated.slice(0, 4)}
-              href="/dashboard/ops"
-              color="amber"
-              isLoading={roleReadinessLoading}
-            />
-            <DelegationCard
-              title="Moliya bo'limi"
-              ownerLabel="Moliya bo'limi bajaradi"
-              count={accDelegated.length}
-              items={accDelegated.slice(0, 4)}
-              href="/dashboard/ops"
-              color="emerald"
-              isLoading={roleReadinessLoading}
-            />
-          </div>
-
-          {/* ═══════════════════════════════════════════════════════════════════
-             ZONE C — STRATEGIC VISIBILITY
-             ═══════════════════════════════════════════════════════════════════ */}
-          <SectionLabel title="Strategik nazorat" icon={Shield} />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            {/* Branch Health */}
-            <div className="lg:col-span-2">
-              <BranchHealthMap
-                branches={(branches as any[]) ?? []}
-                allUsers={allUsers}
-                pendingLeaves={pendingLeaveList}
-                pendingDiscipline={pendingDisciplineList}
-                isLoading={branchesLoading}
-                selectedBranchId={selectedBranch?.id}
-                onSelectBranch={handleSelectBranch}
-              />
-            </div>
-
-            {/* Right column: Alerts + Ops Summary */}
-            <div className="space-y-3">
-              {/* Critical Alerts */}
-              <WorkspaceSection
-                title="Muhim ogohlantirishlar"
-                icon={<AlertTriangle className="h-4 w-4 text-xedu-ruby-500" />}
-                density="compact"
-                action={
-                  criticalAlerts.length > 0 ? (
-                    <Badge variant="destructive" className="text-[10px]">{criticalAlerts.length}</Badge>
-                  ) : undefined
-                }
-              >
-                {alertsLoading ? (
-                  <div className="p-3 space-y-2">
-                    <Skeleton className="h-8 w-full" />
-                    <Skeleton className="h-8 w-full" />
-                  </div>
-                ) : criticalAlerts.length === 0 ? (
-                  <EmptyState message="Muhim ogohlantirishlar yo'q" />
-                ) : (
-                  <div className="divide-y divide-xedu-border">
-                    {criticalAlerts.map((alert) => (
-                      <Link
-                        key={alert.id}
-                        href={alert.route || '/dashboard/alerts'}
-                        className="flex items-start gap-2.5 px-3 py-2.5 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30 transition-colors"
-                      >
-                        <AlertTriangle className="h-3.5 w-3.5 text-xedu-ruby-500 shrink-0 mt-0.5" />
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-xedu-slate-800 dark:text-xedu-slate-200 truncate">
-                            {alert.title}
-                          </p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <OwnerBadge owner={alert.owner} size="xs" />
-                            <span className="text-2xs text-xedu-slate-400 truncate">{alert.actionCta}</span>
-                          </div>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </WorkspaceSection>
-
-              {/* Ops Summary */}
-              <WorkspaceSection
-                title="Bugun"
-                icon={<Clock className="h-4 w-4" />}
-                density="compact"
+            {/* 2. Approvals — hidden if 0 */}
+            {todaySummary && (todaySummary.staff?.pendingLeaveRequests ?? 0) > 0 && (
+              <ExecCard
+                title="Tasdiqlashlar"
+                href="/dashboard/approvals"
+                owner="director"
+                isLoading={todayLoading}
               >
                 {todayLoading ? (
-                  <div className="p-3 space-y-2">
-                    <Skeleton className="h-6 w-full" />
-                    <Skeleton className="h-6 w-full" />
-                    <Skeleton className="h-6 w-full" />
-                  </div>
-                ) : !todaySummary ? (
-                  <EmptyState message="Ma'lumot yetarli emas" />
+                  <Skeleton className="h-10 w-20" />
                 ) : (
-                  <div className="divide-y divide-xedu-border">
-                    <TodayRow label="Darslar" value={todaySummary.stats.totalClassesToday} href="/dashboard/schedule" />
-                    <TodayRow label="O'qituvchilar" value={todaySummary.stats.totalTeachersToday} href="/dashboard/staff" />
-                    <TodayRow label="O'rinbosarlar" value={todaySummary.substitutions.activeToday} href="/dashboard/teacher-substitutions" />
-                    <TodayRow label="Tasdiqlash kutmoqda" value={todaySummary.staff.pendingLeaveRequests} href="/dashboard/approvals" tone={todaySummary.staff.pendingLeaveRequests > 0 ? 'attention' : 'calm'} />
+                  <div className="space-y-2">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">
+                        {todaySummary?.staff?.pendingLeaveRequests ?? 0}
+                      </span>
+                      <Badge variant="destructive" className="text-[10px]">Kutilmoqda</Badge>
+                    </div>
+                    <p className="text-xs text-xedu-slate-500">Ko'rish →</p>
                   </div>
                 )}
-              </WorkspaceSection>
-            </div>
+              </ExecCard>
+            )}
+
+            {/* 3. Alerts */}
+            <ExecCard
+              title="Ogohlantirishlar"
+              href="/dashboard/alerts"
+              owner="director"
+              isLoading={alertsLoading}
+            >
+              {alertsLoading ? (
+                <Skeleton className="h-10 w-20" />
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">
+                      {(opsAlerts ?? []).length}
+                    </span>
+                    {(opsAlerts ?? []).length > 0 && (
+                      <Badge variant="destructive" className="text-[10px]">Yangi</Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-xedu-slate-500">
+                    {(opsAlerts ?? []).length === 0 ? 'Hamma yaxshi' : 'Ko\'rib chiqish kerak'}
+                  </p>
+                </div>
+              )}
+            </ExecCard>
           </div>
 
-          {/* Quick Actions */}
-          <QuickActionsGrid />
+          {/* ═══════════════════════════════════════════════════════════════════
+             ZONE B — DELEGATION FEED (hidden for now)
+             ═══════════════════════════════════════════════════════════════════ */}
+
+          {/* ═══════════════════════════════════════════════════════════════════
+             ZONE C — 4 METRICS
+             ═══════════════════════════════════════════════════════════════════ */}
+          <SectionLabel title="Asosiy ko'rsatkichlar" icon={BarChart3} />
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <Link href="/dashboard/users" className="group block rounded-xl border border-xedu-border bg-xedu-bg-panel p-4 transition-all hover:shadow-sm hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700">
+              <div className="flex items-center gap-2 mb-2">
+                <GraduationCap className="h-4 w-4 text-xedu-slate-400" />
+                <span className="text-xs text-xedu-slate-500">O'quvchilar</span>
+              </div>
+              {!usersData ? <Skeleton className="h-8 w-16" /> : (
+                <p className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">{studentCount}</p>
+              )}
+            </Link>
+            <Link href="/dashboard/staff" className="group block rounded-xl border border-xedu-border bg-xedu-bg-panel p-4 transition-all hover:shadow-sm hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700">
+              <div className="flex items-center gap-2 mb-2">
+                <Users className="h-4 w-4 text-xedu-slate-400" />
+                <span className="text-xs text-xedu-slate-500">O'qituvchilar</span>
+              </div>
+              {!usersData ? <Skeleton className="h-8 w-16" /> : (
+                <p className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">{teacherCount}</p>
+              )}
+            </Link>
+            <Link href="/dashboard/attendance" className="group block rounded-xl border border-xedu-border bg-xedu-bg-panel p-4 transition-all hover:shadow-sm hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700">
+              <div className="flex items-center gap-2 mb-2">
+                <Activity className="h-4 w-4 text-xedu-slate-400" />
+                <span className="text-xs text-xedu-slate-500">Davomat</span>
+              </div>
+              {attLoading ? <Skeleton className="h-8 w-16" /> : (
+                <p className={cn('text-2xl font-black', presentPct > 0 && presentPct < 80 ? 'text-amber-600' : 'text-xedu-slate-900 dark:text-xedu-slate-100')}>
+                  {presentPct > 0 ? `${presentPct}%` : '—'}
+                </p>
+              )}
+            </Link>
+            <Link href="/dashboard/branches" className="group block rounded-xl border border-xedu-border bg-xedu-bg-panel p-4 transition-all hover:shadow-sm hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700">
+              <div className="flex items-center gap-2 mb-2">
+                <Building2 className="h-4 w-4 text-xedu-slate-400" />
+                <span className="text-xs text-xedu-slate-500">Filiallar</span>
+              </div>
+              {branchesLoading ? <Skeleton className="h-8 w-16" /> : (
+                <p className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">{(branches as any[])?.length ?? 0}</p>
+              )}
+            </Link>
+          </div>
 
         </div>
       </WorkspaceMain>
@@ -551,12 +383,14 @@ function ExecCard({
   owner,
   isLoading,
   children,
+  footer,
 }: {
   title: string;
   href: string;
   owner: 'director' | 'vice_principal' | 'branch_admin' | 'accountant';
   isLoading?: boolean;
   children: React.ReactNode;
+  footer?: React.ReactNode;
 }) {
   return (
     <Link
@@ -572,79 +406,15 @@ function ExecCard({
       <div className="px-4 py-3">
         {children}
       </div>
+      {footer && (
+        <div className="px-4 pb-2">
+          {footer}
+        </div>
+      )}
       <div className="px-4 pb-3">
         <OwnerBadge owner={owner} />
       </div>
     </Link>
-  );
-}
-
-function DelegationCard({
-  title,
-  ownerLabel,
-  count,
-  items,
-  href,
-  color,
-  isLoading,
-}: {
-  title: string;
-  ownerLabel: string;
-  count: number;
-  items: any[];
-  href: string;
-  color: 'blue' | 'amber' | 'emerald';
-  isLoading?: boolean;
-}) {
-  const colorMap = {
-    blue: { bg: 'bg-blue-50 dark:bg-blue-900/20', border: 'border-blue-200 dark:border-blue-800', text: 'text-blue-700 dark:text-blue-400', badge: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-    amber: { bg: 'bg-amber-50 dark:bg-amber-900/20', border: 'border-amber-200 dark:border-amber-800', text: 'text-amber-700 dark:text-amber-400', badge: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-    emerald: { bg: 'bg-emerald-50 dark:bg-emerald-900/20', border: 'border-emerald-200 dark:border-emerald-800', text: 'text-emerald-700 dark:text-emerald-400', badge: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  };
-  const c = colorMap[color];
-
-  return (
-    <div className={cn('rounded-xl border overflow-hidden bg-xedu-bg-panel', c.border)}>
-      <div className={cn('flex items-center justify-between px-4 py-2.5 border-b', c.bg, c.border)}>
-        <div className="flex items-center gap-2">
-          <h3 className={cn('text-sm font-bold', c.text)}>{title}</h3>
-        </div>
-        {count > 0 ? (
-          <span className={cn('text-xs font-bold px-2 py-0.5 rounded-full', c.badge)}>{count} ta</span>
-        ) : (
-          <CheckCircle2 className="h-4 w-4 text-xedu-slate-300" />
-        )}
-      </div>
-      <div className="px-4 py-3">
-        {isLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-full" />
-            <Skeleton className="h-6 w-3/4" />
-          </div>
-        ) : count === 0 ? (
-          <EmptyState message="Barcha vazifalar bajarilgan" compact />
-        ) : (
-          <div className="space-y-1.5">
-            {items.map((item, idx) => (
-              <div key={item.id ?? idx} className="flex items-center gap-2">
-                <div className={cn('h-1.5 w-1.5 rounded-full shrink-0', c.text.replace('text-', 'bg-'))} />
-                <span className="text-sm text-xedu-slate-700 dark:text-xedu-slate-300 truncate">{item.label}</span>
-              </div>
-            ))}
-            {count > 4 && (
-              <p className="text-xs text-xedu-slate-400 pl-3.5">+{count - 4} ta boshqa</p>
-            )}
-          </div>
-        )}
-      </div>
-      <div className="px-4 pb-3">
-        <OwnerBadge owner={
-          title.includes('VP') ? 'vice_principal' :
-          title.includes('Moliya') ? 'accountant' :
-          'branch_admin'
-        } />
-      </div>
-    </div>
   );
 }
 
@@ -679,38 +449,6 @@ function StatusBadge({ status }: { status: string }) {
     <span className={cn('text-2xs font-bold px-2 py-0.5 rounded-full', cfg.className)}>
       {cfg.label}
     </span>
-  );
-}
-
-function EmptyState({ message, compact = false }: { message: string; compact?: boolean }) {
-  return (
-    <div className={cn('flex flex-col items-center justify-center gap-1.5', compact ? 'py-4' : 'py-6')}>
-      <CheckCircle2 className="h-5 w-5 text-xedu-slate-300" />
-      <p className="text-xs text-xedu-slate-500 text-center">{message}</p>
-    </div>
-  );
-}
-
-function TodayRow({
-  label,
-  value,
-  href,
-  tone = 'calm',
-}: {
-  label: string;
-  value: number;
-  href: string;
-  tone?: 'calm' | 'attention' | 'urgent';
-}) {
-  const valueColor = tone === 'urgent' ? 'text-xedu-ruby-600' : tone === 'attention' ? 'text-xedu-amber-600' : 'text-xedu-slate-900 dark:text-xedu-slate-100';
-  return (
-    <Link
-      href={href}
-      className="flex items-center justify-between px-3 py-2 transition-colors hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800/30"
-    >
-      <span className="text-sm text-xedu-slate-700 dark:text-xedu-slate-300">{label}</span>
-      <span className={cn('text-sm font-bold tabular-nums', valueColor)}>{value}</span>
-    </Link>
   );
 }
 

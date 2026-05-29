@@ -292,7 +292,7 @@ export class OpsCommandCenterService {
         },
       }),
       this.prisma.monthlyPayroll.findFirst({
-        where: { schoolId, month: currentMonth, ...(branchId ? { branchId } : {}) },
+        where: { schoolId, month: currentMonth },
         orderBy: { createdAt: 'desc' },
         select: { status: true },
       }),
@@ -508,7 +508,7 @@ export class OpsCommandCenterService {
     // Payroll alerts
     const currentMonth = today.getFullYear() * 100 + (today.getMonth() + 1); // e.g. 202605
     const payrollRecord = await this.prisma.monthlyPayroll.findFirst({
-      where: { schoolId, month: currentMonth, ...(branchId ? { branchId } : {}) },
+      where: { schoolId, month: currentMonth },
       orderBy: { createdAt: 'desc' },
     });
 

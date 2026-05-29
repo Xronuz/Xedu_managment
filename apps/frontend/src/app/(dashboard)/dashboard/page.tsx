@@ -32,12 +32,6 @@ export default function DashboardPage() {
     }
   }, []);
 
-  // Redirect manager roles to Ops Command Center for a unified cockpit experience
-  useEffect(() => {
-    if (_hasHydrated && user && OPS_REDIRECT_ROLES.includes(user.role)) {
-      router.replace('/dashboard/ops');
-    }
-  }, [_hasHydrated, user, router]);
 
   const dismissWelcome = () => {
     setShowWelcome(false);

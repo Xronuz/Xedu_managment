@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, AlertCircle, Info, CheckCircle2, X, Bell, User, ArrowRight } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +12,7 @@ import { cn } from '@/lib/utils';
 import { opsCommandCenterApi, type OpsAlert } from '@/lib/api/ops-command-center';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
+import { UserRole } from '@eduplatform/types';
 
 const SEVERITY_CONFIG = {
   critical: {
@@ -43,12 +45,48 @@ const OWNER_LABELS: Record<string, string> = {
   accountant: 'Moliyachi',
 };
 
+const OWNER_BADGE_CLASS: Record<string, string> = {
+  director: 'bg-xedu-primary-light/60 text-xedu-primary dark:bg-xedu-primary/20 dark:text-xedu-emerald-400',
+  vice_principal: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  branch_admin: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  accountant: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+};
+
+/**
+ * Director alert prioritization:
+ * 1. Critical alerts where owner === director (Director must act)
+ * 2. Critical alerts where owner !== director (blocked delegated tasks)
+ * 3. Warning alerts where owner === director
+ * 4. Warning alerts where owner !== director
+ * 5. Suppress pure info alerts for Director (too noisy)
+ */
+function useDirectorAlerts(allAlerts: OpsAlert[] | undefined, isDirector: boolean): OpsAlert[] {
+  return useMemo(() => {
+    if (!allAlerts || allAlerts.length === 0) return [];
+    if (!isDirector) return allAlerts;
+
+    // Director sees: critical + warning only. Info alerts suppressed.
+    const relevant = allAlerts.filter((a) => a.severity !== 'info');
+
+    // Sort: Director-owned critical first, then other critical, then Director-owned warning, then other warning
+    const severityOrder = { critical: 0, warning: 1, info: 2 };
+    const ownershipOrder = (a: OpsAlert) => (a.owner === 'director' ? 0 : 1);
+
+    return relevant.sort((a, b) => {
+      const sevDiff = severityOrder[a.severity] - severityOrder[b.severity];
+      if (sevDiff !== 0) return sevDiff;
+      return ownershipOrder(a) - ownershipOrder(b);
+    });
+  }, [allAlerts, isDirector]);
+}
+
 function AlertItem({ alert, onAcknowledge }: { alert: OpsAlert; onAcknowledge: (id: string) => void }) {
   const router = useRouter();
   const { user } = useAuthStore();
   const config = SEVERITY_CONFIG[alert.severity];
   const Icon = config.icon;
   const isMyAlert = alert.owner === user?.role;
+  const isDirector = user?.role === UserRole.DIRECTOR;
 
   return (
     <div
@@ -70,13 +108,17 @@ function AlertItem({ alert, onAcknowledge }: { alert: OpsAlert; onAcknowledge: (
 
         {/* Ownership + Actionability */}
         <div className="mt-2 flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-1 text-[10px] text-xedu-slate-400">
-            <User className="h-3 w-3" />
-            <span>{OWNER_LABELS[alert.owner] ?? alert.owner}</span>
-          </div>
+          <span className={cn('text-[10px] font-medium px-1.5 py-0.5 rounded-full', OWNER_BADGE_CLASS[alert.owner] ?? 'bg-xedu-slate-100 text-xedu-slate-600')}>
+            {OWNER_LABELS[alert.owner] ?? alert.owner}
+          </span>
           {isMyAlert && (
             <Badge variant="outline" className="text-[10px] border-xedu-primary text-xedu-primary">
               Sizning vazifangiz
+            </Badge>
+          )}
+          {isDirector && !isMyAlert && (
+            <Badge variant="outline" className="text-[10px] border-xedu-amber text-xedu-amber">
+              Bloklangan
             </Badge>
           )}
         </div>
@@ -106,11 +148,16 @@ function AlertItem({ alert, onAcknowledge }: { alert: OpsAlert; onAcknowledge: (
 
 export function OpsAlertsPanel() {
   const queryClient = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { user } = useAuthStore();
+  const isDirector = user?.role === UserRole.DIRECTOR;
+
+  const { data: rawData, isLoading } = useQuery({
     queryKey: ['ops', 'alerts'],
     queryFn: () => opsCommandCenterApi.getAlerts(),
     staleTime: 30_000,
   });
+
+  const data = useDirectorAlerts(rawData, isDirector);
 
   const acknowledge = useMutation({
     mutationFn: (id: string) => opsCommandCenterApi.acknowledgeAlert(id),
@@ -129,13 +176,19 @@ export function OpsAlertsPanel() {
     },
   });
 
+  const title = isDirector ? 'Muhim ogohlantirishlar' : 'Ogohlantirishlar';
+  const emptyTitle = isDirector ? "Muhim ogohlantirishlar yo'q" : "Hozircha operatsion ogohlantirish yo'q";
+  const emptyDesc = isDirector
+    ? 'Barcha kritik va ogohlantiruvchi signalar normal'
+    : 'Barcha tizimlar normal ishlamoqda';
+
   return (
     <Card className="border-xedu-border">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Bell className="h-4 w-4 text-xedu-slate-500" />
-            <CardTitle className="text-base font-semibold">Ogohlantirishlar</CardTitle>
+            <CardTitle className="text-base font-semibold">{title}</CardTitle>
           </div>
           {data && data.length > 0 && (
             <span className="rounded-full bg-xedu-ruby/10 px-2 py-0.5 text-xs font-semibold text-xedu-ruby">
@@ -151,10 +204,10 @@ export function OpsAlertsPanel() {
             <Skeleton className="h-16 rounded-lg" />
             <Skeleton className="h-16 rounded-lg" />
           </div>
-        ) : !data || data.length === 0 ? (
+        ) : data.length === 0 ? (
           <EmptyState
-            title="Hozircha operatsion ogohlantirish yo\'q"
-            description="Barcha tizimlar normal ishlamoqda"
+            title={emptyTitle}
+            description={emptyDesc}
             icon={CheckCircle2}
           />
         ) : (

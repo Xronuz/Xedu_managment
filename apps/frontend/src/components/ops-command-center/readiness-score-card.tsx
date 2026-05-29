@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { opsCommandCenterApi } from '@/lib/api/ops-command-center';
 import { useAuthStore } from '@/store/auth.store';
+import { UserRole } from '@eduplatform/types';
 
 const STATUS_CONFIG = {
   not_started: { label: 'Boshlanmagan', tone: 'bg-xedu-slate-100 text-xedu-slate-600' as const, icon: XCircle },
@@ -25,12 +26,20 @@ const OWNER_LABELS: Record<string, string> = {
   accountant: 'Moliyachi',
 };
 
+const OWNER_BADGE_CLASS: Record<string, string> = {
+  director: 'bg-xedu-primary-light/60 text-xedu-primary dark:bg-xedu-primary/20 dark:text-xedu-emerald-400',
+  vice_principal: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  branch_admin: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+  accountant: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400',
+};
+
 export function ReadinessScoreCard() {
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
   const [expanded, setExpanded] = useState(false);
   const schoolId = user?.schoolId;
   const userRole = user?.role;
+  const isDirector = userRole === UserRole.DIRECTOR;
 
   const { data, isLoading } = useQuery({
     queryKey: ['ops', 'readiness', schoolId],
@@ -79,6 +88,14 @@ export function ReadinessScoreCard() {
       i.primaryOwner !== userRole &&
       i.secondaryOwner !== userRole
   );
+
+  // Director-specific: group delegated blockers by owner
+  const blockerByOwner = isDirector
+    ? informational.reduce<Record<string, number>>((acc, item) => {
+        acc[item.primaryOwner] = (acc[item.primaryOwner] ?? 0) + 1;
+        return acc;
+      }, {})
+    : {};
 
   return (
     <Card className="border-xedu-border">
@@ -147,6 +164,19 @@ export function ReadinessScoreCard() {
                 <Eye className="mr-1 h-3 w-3" />
                 {informational.length} ta ma'lumot
               </Badge>
+            )}
+            {/* Director delegation summary */}
+            {isDirector && Object.keys(blockerByOwner).length > 0 && (
+              <div className="w-full flex flex-wrap gap-1.5 mt-1">
+                {Object.entries(blockerByOwner).map(([owner, count]) => (
+                  <span
+                    key={owner}
+                    className={cn('text-[10px] font-medium px-1.5 py-0.5 rounded-full', OWNER_BADGE_CLASS[owner] ?? 'bg-xedu-slate-100 text-xedu-slate-600')}
+                  >
+                    {OWNER_LABELS[owner] ?? owner}: {count} ta
+                  </span>
+                ))}
+              </div>
             )}
           </div>
         )}
@@ -242,7 +272,7 @@ function ReadinessItemRow({ item, userRole }: { item: any; userRole?: string }) 
       </div>
       <div className="flex items-center gap-2">
         {!item.completed && (
-          <span className="text-[10px] text-xedu-slate-400">
+          <span className={cn('text-[10px] font-medium px-1.5 py-0.5 rounded-full', OWNER_BADGE_CLASS[item.primaryOwner] ?? 'bg-xedu-slate-100 text-xedu-slate-600')}>
             {OWNER_LABELS[item.primaryOwner] ?? item.primaryOwner}
           </span>
         )}

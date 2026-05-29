@@ -17,6 +17,7 @@ import type { UserRole } from '@eduplatform/types';
 export default function OpsCommandCenterPage() {
   const router = useRouter();
   const { user, _hasHydrated } = useAuthStore();
+  const isDirector = user?.role === 'director';
 
   useEffect(() => {
     if (!_hasHydrated || !user) return;
@@ -48,10 +49,17 @@ export default function OpsCommandCenterPage() {
               Operatsion markaz
             </h1>
             <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
-              Jadval, xodim va moliyaviy operatsiyalarni boshqarish
+              {isDirector
+                ? 'Maktab operatsiyalarining strategik nazorati'
+                : 'Jadval, xodim va moliyaviy operatsiyalarni boshqarish'}
             </p>
           </div>
         </div>
+        {isDirector && (
+          <span className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 bg-xedu-slate-100 dark:bg-xedu-slate-800 px-2.5 py-1 rounded-full">
+            Direktor ko&apos;rinishi
+          </span>
+        )}
       </div>
 
       {/* Readiness + Today Summary */}

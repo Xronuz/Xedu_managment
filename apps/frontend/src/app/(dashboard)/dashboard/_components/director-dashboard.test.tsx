@@ -22,7 +22,7 @@ vi.mock('next/navigation', () => ({
 
 // Mock auth store
 vi.mock('@/store/auth.store', () => ({
-  useAuthStore: () => ({ activeBranchId: null }),
+  useAuthStore: () => ({ user: { schoolId: 'school-1' }, activeBranchId: null }),
 }));
 
 // Mock API modules — return empty/safe data so the dashboard renders without crashes
@@ -53,8 +53,23 @@ vi.mock('@/lib/api/discipline', () => ({
 vi.mock('@/lib/api/finance', () => ({
   financeApi: { getDashboard: vi.fn().mockResolvedValue({}) },
 }));
+vi.mock('@/lib/api/ops-command-center', () => ({
+  opsCommandCenterApi: {
+    getTodaySummary: vi.fn().mockResolvedValue({
+      stats: { totalClassesToday: 0, totalTeachersToday: 0, periodsConfigured: false, roomsConfigured: false },
+      schedule: { publishedSlots: 0, draftSlots: 0, conflicts: 0 },
+      staff: { teachersPresent: 0, teachersAbsent: 0, teachersSubstituted: 0, pendingLeaveRequests: 0 },
+      substitutions: { pendingProposals: 0, activeToday: 0 },
+      payroll: { currentMonthStatus: 'pending', missingAttendanceCount: 0 },
+      alerts: { critical: 0, warning: 0, info: 0 },
+    }),
+    getAlerts: vi.fn().mockResolvedValue([]),
+    getReadiness: vi.fn().mockResolvedValue({ score: 0, status: 'not_started', checklist: [] }),
+    getRoleReadiness: vi.fn().mockResolvedValue({ myActions: [], delegatedActions: [], informationalBlockers: [], score: 0, status: 'not_started' }),
+  },
+}));
 
-describe('DirectorDashboard (Phase 2 restoration)', () => {
+describe('DirectorDashboard (Phase 3 executive redesign)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -67,17 +82,39 @@ describe('DirectorDashboard (Phase 2 restoration)', () => {
 
   it('shows Operatsion markaz CTA button', () => {
     render(React.createElement(DirectorDashboard), { wrapper: Wrapper });
-    const els = screen.getAllByText('Operatsion markaz');
-    expect(els.length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Operatsion markaz').length).toBeGreaterThan(0);
   });
 
-  it('shows Approval Preview section', () => {
+  it('shows ZONE A — Executive Snapshot cards', () => {
     render(React.createElement(DirectorDashboard), { wrapper: Wrapper });
-    const elements = screen.getAllByText('Tasdiqlash inbox');
-    expect(elements.length).toBeGreaterThan(0);
+    expect(screen.getByText("Maktab tayyorgarligi")).toBeTruthy();
+    expect(screen.getByText("Tasdiqlash navbati")).toBeTruthy();
+    expect(screen.getByText("Moliya holati")).toBeTruthy();
+    expect(screen.getByText("Ta'lim holati")).toBeTruthy();
   });
 
-  it('shows Quick Actions section with curated routes', () => {
+  it('shows ZONE B — Delegated Operations section', () => {
+    render(React.createElement(DirectorDashboard), { wrapper: Wrapper });
+    expect(screen.getByText("O'rinbosar (VP)")).toBeTruthy();
+    expect(screen.getByText('Filial admin')).toBeTruthy();
+    expect(screen.getAllByText("Moliya bo'limi").length).toBeGreaterThan(0);
+  });
+
+  it('shows ZONE C — Strategic Visibility sections', () => {
+    render(React.createElement(DirectorDashboard), { wrapper: Wrapper });
+    expect(screen.getByText("Muhim ogohlantirishlar")).toBeTruthy();
+    expect(screen.getByText('Bugun')).toBeTruthy();
+  });
+
+  it('shows ownership badges on executive cards', () => {
+    render(React.createElement(DirectorDashboard), { wrapper: Wrapper });
+    expect(screen.getAllByText("Sizning vazifangiz").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("VP bajaradi").length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Filial admin bajaradi').length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Moliya bo'limi").length).toBeGreaterThan(0);
+  });
+
+  it('shows Quick Actions section with curated routes and ownership badges', () => {
     render(React.createElement(DirectorDashboard), { wrapper: Wrapper });
     expect(screen.getByText('Tezkor harakatlar')).toBeTruthy();
 
@@ -93,8 +130,7 @@ describe('DirectorDashboard (Phase 2 restoration)', () => {
     ];
 
     for (const label of expectedActions) {
-      const els = screen.getAllByText(label);
-      expect(els.length).toBeGreaterThan(0);
+      expect(screen.getAllByText(label).length).toBeGreaterThan(0);
     }
   });
 

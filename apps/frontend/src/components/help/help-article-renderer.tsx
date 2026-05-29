@@ -138,9 +138,9 @@ export function HelpArticleRenderer() {
           <button
             onClick={() => setActiveCategory(null)}
             className={cn(
-              'px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors',
+              'px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors',
               !activeCategory
-                ? 'bg-xedu-primary text-white border-xedu-primary'
+                ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-xedu-bg-elevated text-xedu-slate-600 border-xedu-border hover:bg-xedu-slate-100'
             )}
           >
@@ -151,9 +151,9 @@ export function HelpArticleRenderer() {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                'px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors',
+                'px-3 py-1.5 rounded-full text-sm font-semibold border transition-colors',
                 activeCategory === cat
-                  ? 'bg-xedu-primary text-white border-xedu-primary'
+                  ? 'bg-primary text-primary-foreground border-primary'
                   : 'bg-xedu-bg-elevated text-xedu-slate-600 border-xedu-border hover:bg-xedu-slate-100'
               )}
             >
@@ -207,7 +207,7 @@ export function HelpArticleRenderer() {
               <button
                 key={article.id}
                 onClick={() => setCurrentArticle(article.id)}
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-accent"
+                className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-muted/50 border-b border-border/50"
               >
                 <HelpCircle className="h-4 w-4 text-xedu-slate-400 shrink-0" />
                 <div className="min-w-0">
@@ -224,7 +224,7 @@ export function HelpArticleRenderer() {
                     </span>
                   </div>
                 </div>
-                <ChevronRight className="ml-auto h-4 w-4 text-xedu-slate-400 shrink-0" />
+                <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground shrink-0" />
               </button>
             ))
           )}

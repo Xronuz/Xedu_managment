@@ -28,7 +28,7 @@ export function HelpButton({ articleId, pages }: HelpButtonProps) {
     <Button
       variant="outline"
       size="icon"
-      className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full shadow-lg border-primary/20 bg-xedu-bg-elevated hover:bg-primary/5"
+      className="fixed bottom-6 right-20 z-40 h-12 w-12 rounded-full shadow-lg border-primary/20 bg-xedu-bg-elevated hover:bg-primary/5"
       onClick={() => openHelp(detectedArticleId ?? undefined)}
       aria-label="Yordam"
     >

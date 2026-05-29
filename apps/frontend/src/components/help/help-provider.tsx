@@ -123,7 +123,7 @@ export function HelpProvider({ children }: { children: ReactNode }) {
   // Keyboard shortcut: Cmd/Ctrl + Shift + ?
   useKeyboardShortcut(() => {
     setIsOpen(prev => !prev);
-  }, ['cmd', 'shift', '?']);
+  }, ['cmd', 'shift', 'h']);
 
   return (
     <HelpContext.Provider

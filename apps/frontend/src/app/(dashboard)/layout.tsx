@@ -143,19 +143,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <ConfirmDialog />
             <MobileFab />
             <HelpDrawer />
-            <HelpButton pages={[
-              '/dashboard/ops',
-              '/dashboard/setup',
-              '/dashboard/schedule',
-              '/dashboard/export-center',
-              '/dashboard/teaching-loads',
-              '/dashboard/teacher-substitutions',
-              '/dashboard/payroll',
-              '/dashboard/analytics/timetable',
-              '/dashboard/reports/workload',
-              '/dashboard/leave-requests',
-              '/dashboard/users',
-            ]} />
+            <HelpButton />
           </div>
         </HelpProvider>
       </WorkspaceProvider>

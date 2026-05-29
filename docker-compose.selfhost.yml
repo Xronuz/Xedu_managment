@@ -261,6 +261,33 @@ services:
       driver: "json-file"
       options: { max-size: "10m", max-file: "3" }
 
+  # ─── 6. Backup (Cron) ──────────────────────────────────────────────────────────
+  backup:
+    image: postgres:16-alpine
+    container_name: eduplatform-backup
+    restart: unless-stopped
+    environment:
+      <<: *backend-env
+    volumes:
+      - ./apps/backend/scripts/backup.sh:/usr/local/bin/backup.sh:ro
+      - backups_data:/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal
+    logging:
+      driver: "json-file"
+      options: { max-size: "10m", max-file: "3" }
+    command: >
+      sh -c "
+        chmod +x /usr/local/bin/backup.sh &&
+        echo '0 2 * * * /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1' | crontab - &&
+        mkdir -p /var/log &&
+        touch /var/log/backup.log &&
+        crond -f -l 2
+      "
+
 # ─── Volumes ───────────────────────────────────────────────────────────────────
 volumes:
   postgres_data:
@@ -269,6 +296,8 @@ volumes:
     name: eduplatform_redis_data
   uploads_data:
     name: eduplatform_uploads_data
+  backups_data:
+    name: eduplatform_backups_data
 
 # ─── Networks ──────────────────────────────────────────────────────────────────
 networks:

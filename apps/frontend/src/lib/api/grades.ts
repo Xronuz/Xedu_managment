@@ -50,7 +50,7 @@ export const gradesApi = {
   },
 
   update: async (id: string, payload: Partial<{ score: number; comment: string }>) => {
-    const { data } = await apiClient.patch(`/grades/${id}`, payload);
+    const { data } = await apiClient.put(`/grades/${id}`, payload);
     return data;
   },
 

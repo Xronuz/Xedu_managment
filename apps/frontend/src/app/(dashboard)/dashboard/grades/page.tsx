@@ -419,7 +419,7 @@ export default function GradesPage() {
 
   const isStudent = user?.role === 'student';
   const isTeacher = ['teacher', 'class_teacher'].includes(user?.role ?? '');
-  const canManage = ['director', 'vice_principal', 'teacher', 'class_teacher'].includes(user?.role ?? '');
+  const canManage = ['vice_principal', 'teacher', 'class_teacher'].includes(user?.role ?? '');
 
   const [selectedClass, setSelectedClass] = useState('');
   const [selectedSubject, setSelectedSubject] = useState('');
@@ -785,11 +785,13 @@ export default function GradesPage() {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 max-w-sm">
-          <TabsTrigger value="view">Ko'rish</TabsTrigger>
-          {canManage && <TabsTrigger value="entry">Baho kirish</TabsTrigger>}
-          {canManage && <TabsTrigger value="quarterly">Choraklik</TabsTrigger>}
-        </TabsList>
+        {canManage && (
+          <TabsList className="grid grid-cols-3 max-w-sm">
+            <TabsTrigger value="view">Ko'rish</TabsTrigger>
+            <TabsTrigger value="entry">Baho kirish</TabsTrigger>
+            <TabsTrigger value="quarterly">Choraklik</TabsTrigger>
+          </TabsList>
+        )}
 
         {/* ── Tab: Ko'rish ────────────────────────────────────────────── */}
         <TabsContent value="view" className="space-y-4 mt-4">

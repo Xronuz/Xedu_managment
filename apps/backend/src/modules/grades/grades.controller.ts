@@ -35,7 +35,7 @@ export class GradesController {
   }
 
   @Post()
-  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL, UserRole.DIRECTOR)
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL)
   @ApiOperation({ summary: 'Baho qo‘shish' })
   create(
     @Body() dto: CreateGradeDto,
@@ -99,7 +99,7 @@ export class GradesController {
   }
 
   @Put(':id')
-  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL)
   @ApiOperation({ summary: 'Bahoni yangilash' })
   update(
     @Param('id') id: string,
@@ -110,7 +110,7 @@ export class GradesController {
   }
 
   @Post(':id/publish')
-  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
+  @Roles(UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.VICE_PRINCIPAL)
   @ApiOperation({ summary: 'Bahoni nashr qilish' })
   publish(
     @Param('id') id: string,

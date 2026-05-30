@@ -114,7 +114,7 @@ export function HelpArticleRenderer() {
   return (
     <div className="space-y-4">
       {/* Search */}
-      <div className="relative">
+      <div className="relative mb-3">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           placeholder="Qidirish..."
@@ -134,11 +134,11 @@ export function HelpArticleRenderer() {
 
       {/* Categories */}
       {categories.length > 0 && (
-        <div className="overflow-x-auto flex flex-nowrap gap-1.5 pb-1 mt-1 mb-2">
+        <div className="overflow-x-auto flex flex-nowrap gap-1.5 pb-2 mb-1">
           <button
             onClick={() => setActiveCategory(null)}
             className={cn(
-              'px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors',
+              'px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors whitespace-nowrap',
               !activeCategory
                 ? 'bg-primary text-primary-foreground border-primary'
                 : 'bg-muted/50 text-foreground border-border hover:bg-accent'
@@ -151,7 +151,7 @@ export function HelpArticleRenderer() {
               key={cat}
               onClick={() => setActiveCategory(cat)}
               className={cn(
-                'px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors',
+                'px-2.5 py-1 rounded-md text-xs font-semibold border transition-colors whitespace-nowrap',
                 activeCategory === cat
                   ? 'bg-primary text-primary-foreground border-primary'
                   : 'bg-muted/50 text-foreground border-border hover:bg-accent'

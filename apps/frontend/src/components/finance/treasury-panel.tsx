@@ -141,15 +141,17 @@ export function TreasuryPanel() {
         <div className="flex flex-col items-center py-6 text-center text-xedu-slate-500 dark:text-xedu-slate-400 text-sm border rounded-lg border-dashed gap-2">
           <Banknote className="h-8 w-8 opacity-30" />
           <p>G'aznalar hali yaratilmagan</p>
-          <Button
-            size="sm"
-            variant="outline"
-            className="gap-1"
-            onClick={() => window.location.assign('/dashboard/treasury')}
-          >
-            <Plus className="h-3.5 w-3.5" />
-            G'azna qo'shish
-          </Button>
+          {user?.role !== 'director' && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1"
+              onClick={() => window.location.assign('/dashboard/treasury')}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              G'azna qo'shish
+            </Button>
+          )}
         </div>
       ) : (
         <div className="grid gap-3 sm:grid-cols-2">

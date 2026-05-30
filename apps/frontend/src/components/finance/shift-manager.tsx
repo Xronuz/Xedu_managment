@@ -40,6 +40,8 @@ export function ShiftManager() {
   const queryClient = useQueryClient();
   const user = useAuthStore((s) => s.user);
 
+  if (user?.role === 'director') return null;
+
   const [openShiftDialog, setOpenShiftDialog] = useState(false);
   const [closeShiftDialog, setCloseShiftDialog] = useState(false);
   const [selectedTreasuryId, setSelectedTreasuryId] = useState('');
@@ -195,14 +197,16 @@ export function ShiftManager() {
               <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
                 Naqd to'lov qabul qilish uchun avval smenani oching
               </p>
-              <Button
-                className="w-full gap-2"
-                variant="outline"
-                onClick={() => setOpenShiftDialog(true)}
-              >
-                <PlayCircle className="h-4 w-4 text-xedu-primary" />
-                Smenani ochish
-              </Button>
+              {user?.role !== 'director' && (
+                <Button
+                  className="w-full gap-2"
+                  variant="outline"
+                  onClick={() => setOpenShiftDialog(true)}
+                >
+                  <PlayCircle className="h-4 w-4 text-xedu-primary" />
+                  Smenani ochish
+                </Button>
+              )}
             </>
           )}
         </CardContent>

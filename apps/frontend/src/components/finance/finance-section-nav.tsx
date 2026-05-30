@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth.store';
 
 const FINANCE_TABS = [
   { label: 'Moliya',    href: '/dashboard/finance' },
@@ -13,10 +14,15 @@ const FINANCE_TABS = [
 
 export function FinanceSectionNav() {
   const pathname = usePathname();
+  const user = useAuthStore((s) => s.user);
+
+  const visibleTabs = user?.role === 'director'
+    ? FINANCE_TABS.filter((t) => t.href !== '/dashboard/fee-structures')
+    : FINANCE_TABS;
 
   return (
     <div className="mb-5 inline-flex items-center gap-1 overflow-x-auto no-scrollbar rounded-[18px] p-1.5 bg-xedu-slate-100 dark:bg-white/[0.06] shadow-[var(--xedu-shadow-inset)]">
-      {FINANCE_TABS.map((tab) => {
+      {visibleTabs.map((tab) => {
         const active = pathname === tab.href;
         return (
           <Link

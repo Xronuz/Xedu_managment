@@ -14,11 +14,13 @@ export function HelpDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => { if (!open) closeHelp(); }}>
-      <SheetContent className="w-[420px] sm:w-[460px] overflow-y-auto">
-        <SheetHeader className="pb-4 border-b border-border/50">
-          <SheetTitle className="text-lg font-semibold">Yordam</SheetTitle>
+      <SheetContent className="w-[420px] sm:w-[460px] overflow-y-auto p-0">
+        <SheetHeader className="pb-3 border-b border-border/50">
+          <SheetTitle className="text-lg font-semibold mb-0">Yordam</SheetTitle>
         </SheetHeader>
-        <HelpArticleRenderer />
+        <div className="px-5 py-4">
+          <HelpArticleRenderer />
+        </div>
       </SheetContent>
     </Sheet>
   );

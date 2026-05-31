@@ -1156,44 +1156,6 @@ export function ReportsWorkspace() {
         <AnalyticsSectionNav />
       </div>
 
-      {/* Header */}
-      <div className="w-full">
-        <WorkspaceHeader
-          title="Hisobotlar va tahlil"
-          subtitle="Institutsional intellektual ishchi oyna"
-          icon={<BarChart3 className="h-5 w-5 text-xedu-slate-500" />}
-          actions={
-            <ActionBar
-              primary={
-                activeTab === 'analytics' ? (
-                  <PrimaryAction
-                    icon={<FileSpreadsheet className="h-3.5 w-3.5" />}
-                    onClick={() => handleExportExcel('students')}
-                    disabled={!!exporting}
-                  >
-                    {exporting ? 'Yuklanmoqda...' : 'Excel'}
-                  </PrimaryAction>
-                ) : (
-                  <PrimaryAction
-                    icon={<Download className="h-3.5 w-3.5" />}
-                    onClick={handlePdf}
-                  >
-                    PDF
-                  </PrimaryAction>
-                )
-              }
-              secondary={
-                activeTab !== 'analytics' ? (
-                  <SecondaryAction icon={<Download className="h-3.5 w-3.5" />} onClick={handlePrint}>
-                    Chop
-                  </SecondaryAction>
-                ) : undefined
-              }
-            />
-          }
-        />
-      </div>
-
       {/* Toolbar: tabs + filters */}
       <div className="w-full">
         <WorkspaceToolbar sticky>
@@ -1205,14 +1167,14 @@ export function ReportsWorkspace() {
                 onClick={() => setActiveTab(key)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
                   activeTab === key
-                    ? 'bg-white dark:bg-xedu-slate-950 shadow text-foreground'
-                    : 'text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground'
+                    ? 'bg-white dark:bg-background shadow text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 <Icon className="h-4 w-4" />
                 {label}
                 {premium && (
-                  <span className="ml-0.5 text-2xs font-bold text-xedu-violet-500 bg-xedu-violet-500/10 rounded px-1 py-0.5 leading-none">
+                  <span className="ml-0.5 text-[10px] font-bold text-violet-500 bg-violet-500/10 rounded px-1 py-0.5 leading-none">
                     PRO
                   </span>
                 )}

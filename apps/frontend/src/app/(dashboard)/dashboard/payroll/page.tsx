@@ -518,14 +518,16 @@ export default function PayrollPage() {
         <TabsList className={isManager ? "grid grid-cols-4 w-full max-w-xl" : "grid grid-cols-1 w-48"}>
           {isManager && <TabsTrigger value="staff">Xodimlar</TabsTrigger>}
           {isManager && <TabsTrigger value="payroll">Oylik</TabsTrigger>}
-          <TabsTrigger value="advances">
-            Avanslar
-            {pendingAdvanceCount > 0 && (
-              <Badge variant="destructive" className="ml-1.5 h-4 min-w-4 px-1 text-[10px]">
-                {pendingAdvanceCount}
-              </Badge>
-            )}
-          </TabsTrigger>
+          {user?.role !== 'director' && (
+            <TabsTrigger value="advances">
+              Avanslar
+              {pendingAdvanceCount > 0 && (
+                <Badge variant="destructive" className="ml-1.5 h-4 min-w-4 px-1 text-[10px]">
+                  {pendingAdvanceCount}
+                </Badge>
+              )}
+            </TabsTrigger>
+          )}
           {isManager && <TabsTrigger value="history">Tarix</TabsTrigger>}
         </TabsList>
 
@@ -536,9 +538,11 @@ export default function PayrollPage() {
               <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">
                 {(salaryConfigs as any[]).length} ta xodim sozlangan
               </p>
-              <Button size="sm" onClick={openNewConfig}>
-                <Plus className="mr-1.5 h-4 w-4" /> Xodim qo'shish
-              </Button>
+              {user?.role !== 'director' && (
+                <Button size="sm" onClick={openNewConfig}>
+                  <Plus className="mr-1.5 h-4 w-4" /> Xodim qo'shish
+                </Button>
+              )}
             </div>
 
             {configsLoading ? (
@@ -548,7 +552,9 @@ export default function PayrollPage() {
                 <CardContent className="py-12 text-center">
                   <Banknote className="mx-auto mb-2 h-10 w-10 text-xedu-slate-500 dark:text-xedu-slate-400 opacity-30" />
                   <p className="text-xedu-slate-500 dark:text-xedu-slate-400">Hali xodimlar maoshi sozlanmagan</p>
-                  <Button className="mt-3" size="sm" onClick={openNewConfig}><Plus className="mr-1.5 h-4 w-4" />Boshlash</Button>
+                  {user?.role !== 'director' && (
+                    <Button className="mt-3" size="sm" onClick={openNewConfig}><Plus className="mr-1.5 h-4 w-4" />Boshlash</Button>
+                  )}
                 </CardContent>
               </Card>
             ) : (
@@ -702,7 +708,7 @@ export default function PayrollPage() {
             <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">{(advances as any[]).length} ta so'rov</p>
             <div className="flex gap-2">
               {/* Admin: directly issue advance to any staff member */}
-              {isManager && (
+              {isManager && user?.role !== 'director' && (
                 <Button size="sm" variant="outline" onClick={() => setIssueOpen(true)}>
                   <Banknote className="mr-1.5 h-4 w-4" /> Avans berish
                 </Button>

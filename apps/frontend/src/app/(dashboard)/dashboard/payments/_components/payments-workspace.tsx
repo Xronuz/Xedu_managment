@@ -641,7 +641,9 @@ export function PaymentsWorkspace() {
           <div className="space-y-1">
             <QuickLink href="/dashboard/finance" icon={TrendingUp} label="Moliyaviy dashboard" />
             <QuickLink href="/dashboard/fee-structures" icon={FileText} label="To'lov tartiblari" />
-            <QuickLink href="/dashboard/payroll" icon={Banknote} label="Maoshlar" />
+            {user?.role !== 'director' && (
+              <QuickLink href="/dashboard/payroll" icon={Banknote} label="Maoshlar" />
+            )}
             <QuickLink href="/dashboard/reports" icon={FileText} label="Hisobotlar" />
           </div>
         </WorkspaceSection>

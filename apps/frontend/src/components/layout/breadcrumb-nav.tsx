@@ -64,6 +64,9 @@ export function BreadcrumbNav() {
   // Skip breadcrumb for dashboard root (single crumb isn't useful)
   if (segments.length <= 1) return null;
 
+  // Hide breadcrumb on reports page
+  if (pathname.startsWith('/dashboard/reports')) return null;
+
   interface Crumb {
     label: string;
     href: string;

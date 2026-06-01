@@ -1394,7 +1394,7 @@ aside.group\/sidebar a[class*="bg-xedu-emerald"] {
   margin-right: 0 !important;
   padding-right: 16px !important;
   position: relative !important;
-  z-index: 20 !important;
+  z-index: 1 !important;
 }
 
 aside.group\/sidebar a[class*="bg-xedu-emerald"] span {

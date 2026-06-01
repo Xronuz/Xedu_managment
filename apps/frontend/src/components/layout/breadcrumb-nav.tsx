@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronRight, Home } from 'lucide-react';
+import { useAuthStore } from '@/store/auth.store';
 
 // Map of path segments → Uzbek labels
 const SEGMENT_LABELS: Record<string, string> = {
@@ -66,6 +67,10 @@ export function BreadcrumbNav() {
 
   // Hide breadcrumb on reports page
   if (pathname.startsWith('/dashboard/reports')) return null;
+
+  // Hide breadcrumb for director
+  const { user } = useAuthStore();
+  if (user?.role === 'director') return null;
 
   interface Crumb {
     label: string;

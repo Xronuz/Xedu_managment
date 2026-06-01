@@ -8,6 +8,7 @@ import { usePageActions } from '@/lib/header-actions-context';
 import { useAuthStore } from '@/store/auth.store';
 
 import BranchesPage      from '../branches/page';
+import UsersPage         from '../users/page';
 
 import LeaveRequestsPage from '../leave-requests/page';
 import DisciplinePage    from '../discipline/page';
@@ -37,6 +38,7 @@ function TabFallback() {
 function TabContent({ tab }: { tab: string }) {
   switch (tab) {
     case 'branches':   return <BranchesPage />;
+    case 'users':      return <UsersPage />;
     case 'leave':      return <LeaveRequestsPage />;
     case 'discipline': return <DisciplinePage />;
     case 'meetings':   return <MeetingsPage />;

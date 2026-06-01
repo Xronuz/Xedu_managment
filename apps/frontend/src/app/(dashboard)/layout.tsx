@@ -126,17 +126,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Sidebar />
             </div>
 
-            <div className="flex flex-1 min-w-0 flex-col overflow-hidden">
-              <Header />
-              <main
-                className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg-canvas dark:bg-xedu-bg-canvas rounded-tl-2xl p-6"
-                style={{ isolation: 'isolate' }}
-              >
-                <BreadcrumbNav />
-                <PageErrorBoundary>
-                  <PageTransition>{children}</PageTransition>
-                </PageErrorBoundary>
-              </main>
+            <div className="flex flex-1 min-w-0 flex-col overflow-hidden p-3 pl-0">
+              <div className="flex flex-1 min-h-0 flex-col overflow-hidden rounded-2xl bg-xedu-bg-canvas shadow-sm border border-xedu-slate-100 dark:border-xedu-slate-800">
+                <Header />
+                <main
+                  className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg-canvas dark:bg-xedu-bg-canvas p-6"
+                  style={{ isolation: 'isolate' }}
+                >
+                  <BreadcrumbNav />
+                  <PageErrorBoundary>
+                    <PageTransition>{children}</PageTransition>
+                  </PageErrorBoundary>
+                </main>
+              </div>
             </div>
 
             <CommandPalette open={commandOpen} onOpenChange={setCommandOpen} />

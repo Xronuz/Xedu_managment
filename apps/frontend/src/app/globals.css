@@ -1352,69 +1352,80 @@
   }
 }
 
-/* ── Sidebar light theme — Jobie style ── */
+/* ── Sidebar — Jobie+Emerald style ── */
 aside.group\/sidebar {
-  background-color: #ffffff !important;
-  border-right: 1px solid #e2e8f0 !important;
+  background-color: #0f2318 !important;
+  border-right: none !important;
 }
 
-aside.group\/sidebar .border-xedu-slate-800 {
-  border-color: #e2e8f0 !important;
+aside.group\/sidebar .border-xedu-slate-800,
+aside.group\/sidebar .border-t {
+  border-color: rgba(255,255,255,0.08) !important;
 }
 
-/* Active nav item — emerald highlight */
-aside.group\/sidebar a[class*="bg-xedu-emerald"] {
-  background-color: #ecfdf5 !important;
-  color: #059669 !important;
-  border-left: 3px solid #059669 !important;
-  border-radius: 8px !important;
-}
-
-/* Active icon */
-aside.group\/sidebar a[class*="bg-xedu-emerald"] span {
-  background-color: transparent !important;
-  color: #059669 !important;
+/* Logo */
+aside.group\/sidebar span.font-black,
+aside.group\/sidebar span.text-white {
+  color: #ffffff !important;
 }
 
 /* Inactive nav items */
-aside.group\/sidebar a:not([class*="bg-xedu-emerald"]) {
-  color: #64748b !important;
+aside.group\/sidebar a {
+  color: rgba(255,255,255,0.6) !important;
 }
 
-aside.group\/sidebar a:not([class*="bg-xedu-emerald"]):hover {
-  background-color: #f8fafc !important;
-  color: #1e293b !important;
+aside.group\/sidebar a:hover {
+  background-color: rgba(255,255,255,0.08) !important;
+  color: #ffffff !important;
 }
 
-/* Logo text */
-aside.group\/sidebar span.text-white,
-aside.group\/sidebar a span.font-black {
-  color: #1e293b !important;
+/* Active nav item */
+aside.group\/sidebar a[class*="bg-xedu-emerald"] {
+  background-color: rgba(255,255,255,0.12) !important;
+  color: #ffffff !important;
+  border-left: 3px solid #10b981 !important;
 }
 
-/* Footer area */
-aside.group\/sidebar .bg-xedu-slate-900 {
-  background-color: #f8fafc !important;
+aside.group\/sidebar a[class*="bg-xedu-emerald"] span {
+  color: #10b981 !important;
 }
 
+/* Icons inactive */
+aside.group\/sidebar a span {
+  color: rgba(255,255,255,0.5) !important;
+}
+
+aside.group\/sidebar a:hover span {
+  color: #ffffff !important;
+}
+
+/* Section headers */
+aside.group\/sidebar button.text-xedu-slate-600 {
+  color: rgba(255,255,255,0.3) !important;
+}
+
+/* Footer */
+aside.group\/sidebar .bg-xedu-slate-900,
 aside.group\/sidebar .bg-xedu-slate-800 {
-  background-color: #f1f5f9 !important;
+  background-color: rgba(0,0,0,0.2) !important;
 }
 
-aside.group\/sidebar .text-xedu-slate-300 {
-  color: #475569 !important;
-}
-
+aside.group\/sidebar .text-xedu-slate-300,
 aside.group\/sidebar .text-xedu-slate-500 {
-  color: #94a3b8 !important;
+  color: rgba(255,255,255,0.5) !important;
 }
 
 /* Toggle button */
-aside.group\/sidebar button {
-  color: #94a3b8 !important;
+aside.group\/sidebar > div button {
+  color: rgba(255,255,255,0.4) !important;
 }
 
-aside.group\/sidebar button:hover {
-  background-color: #f1f5f9 !important;
-  color: #1e293b !important;
+aside.group\/sidebar > div button:hover {
+  background-color: rgba(255,255,255,0.1) !important;
+  color: #ffffff !important;
+}
+
+/* Scrollbar */
+aside.group\/sidebar .scrollbar-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.15) !important;
 }

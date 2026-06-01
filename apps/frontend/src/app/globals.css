@@ -1410,7 +1410,7 @@ aside.group\/sidebar a[class*="bg-xedu-emerald"]::before {
   right: 0 !important;
   width: 16px !important;
   height: 16px !important;
-  background-color: #F4F6F5 !important;
+  background: radial-gradient(circle at top left, transparent 16px, #F4F6F5 16px) !important;
   z-index: -1 !important;
 }
 
@@ -1421,7 +1421,7 @@ aside.group\/sidebar a[class*="bg-xedu-emerald"]::after {
   right: 0 !important;
   width: 16px !important;
   height: 16px !important;
-  background-color: #F4F6F5 !important;
+  background: radial-gradient(circle at bottom left, transparent 16px, #F4F6F5 16px) !important;
   z-index: -1 !important;
 }
 

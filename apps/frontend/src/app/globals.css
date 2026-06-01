@@ -1379,14 +1379,20 @@ aside.group\/sidebar a:hover {
   color: #ffffff !important;
 }
 
-/* Active nav item */
+/* Active nav item — Jobie connected style */
 aside.group\/sidebar a[class*="bg-xedu-emerald"] {
-  background-color: #ffffff !important;
+  background-color: #F4F6F5 !important;
   color: #0f2318 !important;
   border-left: none !important;
-  border-radius: 12px !important;
+  border-top-left-radius: 14px !important;
+  border-bottom-left-radius: 14px !important;
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
   font-weight: 700 !important;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+  box-shadow: none !important;
+  margin-right: -8px !important;
+  padding-right: 20px !important;
+  position: relative !important;
 }
 
 aside.group\/sidebar a[class*="bg-xedu-emerald"] span {
@@ -1427,6 +1433,11 @@ aside.group\/sidebar > div button {
 aside.group\/sidebar > div button:hover {
   background-color: rgba(255,255,255,0.1) !important;
   color: #ffffff !important;
+}
+
+/* Nav container padding */
+aside.group\/sidebar nav {
+  padding-right: 0 !important;
 }
 
 /* Scrollbar */

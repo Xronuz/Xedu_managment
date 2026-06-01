@@ -51,7 +51,7 @@ export function Header() {
     <header
       className={cn(
         'flex h-[60px] shrink-0 items-center justify-between gap-4 px-5',
-        'xedu-material-header edge-emerald',
+        'bg-white dark:bg-xedu-slate-950 border-b border-xedu-slate-100 dark:border-xedu-slate-800',
       )}
     >
       {/* Left: mobile nav + search */}
@@ -61,10 +61,10 @@ export function Header() {
           onClick={() => document.dispatchEvent(new CustomEvent('open-command-palette'))}
           aria-label="Qidiruv panelini ochish"
           className={cn(
-            'hidden md:flex items-center gap-2.5 rounded-xl h-[42px] px-4 w-[260px] lg:w-[360px] transition-all duration-150',
-            'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
-            'border border-xedu-border dark:border-xedu-border',
-            'hover:bg-xedu-bg-elevated hover:border-xedu-primary/20 hover:shadow-sm',
+            'hidden md:flex items-center gap-2.5 rounded-full h-[42px] px-4 w-[260px] lg:w-[360px] transition-all duration-150',
+            'bg-xedu-slate-50 dark:bg-xedu-slate-900',
+            'border-none',
+            'hover:bg-xedu-slate-100 dark:hover:bg-xedu-slate-800 hover:shadow-sm',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary/20'
           )}
         >
@@ -87,11 +87,11 @@ export function Header() {
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
           aria-label="Mavzuni o'zgartirish"
           className={cn(
-            'relative flex h-[42px] w-[42px] items-center justify-center rounded-xl transition-all duration-150',
-            'text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-slate-700 dark:hover:text-xedu-slate-200',
-            'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
-            'border border-xedu-border dark:border-xedu-border',
-            'hover:bg-xedu-bg-elevated hover:border-xedu-primary/15 hover:shadow-xs'
+            'relative flex h-[42px] w-[42px] items-center justify-center rounded-full transition-all duration-150',
+            'text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-xedu-emerald dark:hover:text-xedu-emerald',
+            'bg-xedu-slate-50 dark:bg-xedu-slate-900',
+            'border-none',
+            'hover:bg-xedu-slate-100 dark:hover:bg-xedu-slate-800 hover:shadow-xs'
           )}
         >
           <Sun  className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
@@ -103,16 +103,16 @@ export function Header() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className={cn(
-              'flex items-center gap-2.5 rounded-xl pl-2 pr-4 ml-0.5 h-[52px]',
+              'flex items-center gap-2.5 rounded-full pl-2 pr-4 ml-0.5 h-[52px]',
               'focus:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary/30',
               'transition-all duration-200 hover:shadow-sm',
-              'bg-xedu-slate-100/80 dark:bg-xedu-slate-800/80',
-              'border border-xedu-border dark:border-xedu-border',
-              'hover:bg-xedu-bg-elevated hover:border-xedu-primary/15',
+              'bg-xedu-slate-50 dark:bg-xedu-slate-900',
+              'border-none',
+              'hover:bg-xedu-slate-100 dark:hover:bg-xedu-slate-800',
             )}>
-              <Avatar className={cn('h-8 w-8 ring-2 ring-offset-1 ring-offset-xedu-bg-elevated dark:ring-offset-xedu-slate-900 shrink-0', ringColor)}>
+              <Avatar className={cn('h-8 w-8 ring-2 ring-offset-1 ring-offset-white dark:ring-offset-xedu-slate-950 shrink-0', ringColor)}>
                 <AvatarImage src={user?.avatarUrl ?? undefined} />
-                <AvatarFallback className="text-[11px] font-bold bg-xedu-primary-light dark:bg-xedu-primary/20 text-xedu-primary dark:text-xedu-primary">
+                <AvatarFallback className="text-[11px] font-bold bg-xedu-emerald/20 text-xedu-emerald">
                   {user ? getInitials(user.firstName, user.lastName) : 'U'}
                 </AvatarFallback>
               </Avatar>

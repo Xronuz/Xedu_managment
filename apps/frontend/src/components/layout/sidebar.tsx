@@ -37,24 +37,19 @@ function NavLink({ item, pathname, collapsed }: {
       href={item.href}
       title={collapsed ? item.label : undefined}
       className={cn(
-        'group relative flex items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-medium transition-all duration-150',
+        'group relative flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150',
         collapsed ? 'justify-center px-2' : '',
         active
-          ? 'bg-leaf/12 text-leaf-deep dark:bg-leaf/20 dark:text-leaf'
-          : 'text-[#252E28]/65 hover:bg-leaf/8 hover:text-leaf-deep dark:text-slate-400 dark:hover:bg-leaf/15 dark:hover:text-leaf',
+          ? 'bg-xedu-emerald/20 text-xedu-emerald border-l-2 border-xedu-emerald'
+          : 'text-xedu-slate-400 hover:bg-xedu-slate-800 hover:text-white',
       )}
     >
-      {/* active left rail */}
-      {active && !collapsed && (
-        <span className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-leaf" />
-      )}
-
       {/* icon container */}
       <span className={cn(
         'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg transition-all duration-150',
         active
-          ? 'bg-leaf/20 text-leaf-deep dark:bg-leaf/30 dark:text-leaf'
-          : 'text-[#252E28]/40 group-hover:text-leaf-deep dark:text-slate-500 dark:group-hover:text-leaf',
+          ? 'bg-xedu-emerald/20 text-xedu-emerald'
+          : 'text-xedu-slate-400 group-hover:text-white',
       )}>
         <Icon className={cn('shrink-0', collapsed ? 'h-[18px] w-[18px]' : 'h-4 w-4')}
           strokeWidth={active ? 2.2 : 1.8} />
@@ -75,7 +70,7 @@ function GroupHeader({ title, collapsed, expanded, onToggle }: {
   if (collapsed) {
     return (
       <div className="my-2 flex justify-center">
-        <div className="h-px w-6 rounded-full bg-leaf/20 dark:bg-leaf/15" />
+        <div className="h-px w-6 rounded-full bg-xedu-slate-800" />
       </div>
     );
   }
@@ -83,9 +78,9 @@ function GroupHeader({ title, collapsed, expanded, onToggle }: {
     <button
       onClick={onToggle}
       className={cn(
-        'mb-1 mt-4 flex w-full items-center justify-between px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest transition-colors',
+        'mb-1 mt-4 flex w-full items-center justify-between px-3 py-0.5 text-xs font-bold uppercase tracking-wider transition-colors',
         onToggle ? 'cursor-pointer' : 'cursor-default',
-        'text-leaf-deep/50 hover:text-leaf-deep dark:text-leaf/40 dark:hover:text-leaf',
+        'text-xedu-slate-600 hover:text-xedu-slate-400',
       )}
     >
       <span>{title}</span>
@@ -111,8 +106,8 @@ function BranchContext({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
       <div className="flex justify-center py-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-leaf/12 dark:bg-leaf/20">
-          <span className="text-[10px] font-bold text-leaf-deep dark:text-leaf">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-xedu-slate-800">
+          <span className="text-[10px] font-bold text-xedu-slate-300">
             {branchName[0]}
           </span>
         </div>
@@ -121,11 +116,11 @@ function BranchContext({ collapsed }: { collapsed: boolean }) {
   }
 
   return (
-    <div className="mx-2 mb-2 rounded-xl border border-leaf/15 bg-leaf/8 px-3 py-2 dark:border-leaf/20 dark:bg-leaf/10">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-leaf-deep/50 dark:text-leaf/40">
+    <div className="mx-2 mb-2 rounded-xl bg-xedu-slate-800 px-3 py-2">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-xedu-slate-500">
         Filial
       </p>
-      <p className="mt-0.5 truncate text-xs font-semibold text-leaf-deep dark:text-leaf">
+      <p className="mt-0.5 truncate text-xs font-semibold text-xedu-slate-300">
         {branchName}
       </p>
     </div>
@@ -144,9 +139,9 @@ function ProfileFooter({ collapsed }: { collapsed: boolean }) {
   if (collapsed) {
     return (
       <div className="flex justify-center py-3">
-        <Avatar className="h-8 w-8 ring-2 ring-leaf/20">
+        <Avatar className="h-8 w-8 ring-2 ring-xedu-slate-800">
           <AvatarImage src={user.avatarUrl ?? undefined} />
-          <AvatarFallback className="bg-leaf/15 text-xs font-bold text-leaf-deep dark:bg-leaf/25 dark:text-leaf">
+          <AvatarFallback className="bg-xedu-emerald/20 text-xs font-bold text-xedu-emerald">
             {initials}
           </AvatarFallback>
         </Avatar>
@@ -155,18 +150,18 @@ function ProfileFooter({ collapsed }: { collapsed: boolean }) {
   }
 
   return (
-    <div className="mx-2 mb-2 flex items-center gap-2.5 rounded-xl border border-leaf/15 bg-leaf/8 px-3 py-2.5 dark:border-leaf/20 dark:bg-leaf/10">
-      <Avatar className="h-8 w-8 shrink-0 ring-2 ring-leaf/20">
+    <div className="mx-2 mb-2 flex items-center gap-2.5 rounded-xl bg-xedu-slate-900 px-3 py-2.5">
+      <Avatar className="h-8 w-8 shrink-0 ring-2 ring-xedu-slate-800">
         <AvatarImage src={user.avatarUrl ?? undefined} />
-        <AvatarFallback className="bg-leaf/15 text-xs font-bold text-leaf-deep dark:bg-leaf/25 dark:text-leaf">
+        <AvatarFallback className="bg-xedu-emerald/20 text-xs font-bold text-xedu-emerald">
           {initials}
         </AvatarFallback>
       </Avatar>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-semibold text-[#252E28] dark:text-slate-100">
+        <p className="truncate text-xs font-semibold text-xedu-slate-300">
           {fullName}
         </p>
-        <p className="truncate text-[10px] text-leaf-deep/60 dark:text-leaf/50">
+        <p className="truncate text-[10px] text-xedu-slate-500">
           {getCompactRoleLabel(user.role)}
         </p>
       </div>
@@ -222,13 +217,13 @@ export function Sidebar() {
 
   return (
     <aside className={cn(
-      'group/sidebar relative flex h-screen shrink-0 flex-col xedu-material-sidebar transition-[width] duration-[var(--xedu-duration)] ease-out',
+      'group/sidebar relative flex h-screen shrink-0 flex-col bg-xedu-slate-950 border-r border-xedu-slate-800 transition-[width] duration-[var(--xedu-duration)] ease-out',
       sidebarCollapsed ? 'w-[84px]' : 'w-[272px]',
     )}>
 
       {/* ── Logo ──────────────────────────────────────────────────────── */}
       <div className={cn(
-        'relative flex h-16 shrink-0 items-center border-b border-leaf/10 dark:border-leaf/10',
+        'relative flex h-16 shrink-0 items-center border-b border-xedu-slate-800',
         sidebarCollapsed ? 'justify-center px-2' : 'px-4',
       )}>
         <Link href="/dashboard" className="flex items-center gap-2.5 transition-opacity duration-150">
@@ -238,7 +233,7 @@ export function Sidebar() {
             className={cn('object-contain shrink-0', sidebarCollapsed ? 'h-8 w-8' : 'h-7 w-7')}
           />
           {!sidebarCollapsed && (
-            <span className="text-base font-black tracking-tight text-leaf-deep dark:text-leaf">
+            <span className="text-base font-black tracking-tight text-white">
               Xedu
             </span>
           )}
@@ -250,8 +245,8 @@ export function Sidebar() {
           className={cn(
             'absolute right-2 top-1/2 -translate-y-1/2',
             'flex h-6 w-6 items-center justify-center rounded-lg',
-            'text-leaf-deep/40 transition-all duration-150',
-            'hover:bg-leaf/12 hover:text-leaf-deep dark:text-leaf/30 dark:hover:bg-leaf/20 dark:hover:text-leaf',
+            'text-xedu-slate-500 transition-all duration-150',
+            'hover:bg-xedu-slate-800 hover:text-white',
           )}
         >
           {sidebarCollapsed
@@ -286,7 +281,7 @@ export function Sidebar() {
       </nav>
 
       {/* ── Footer ────────────────────────────────────────────────────── */}
-      <div className="shrink-0 border-t border-leaf/10 py-2 dark:border-leaf/10">
+      <div className="shrink-0 border-t border-xedu-slate-800 py-2">
         <BranchContext collapsed={sidebarCollapsed} />
         <ProfileFooter collapsed={sidebarCollapsed} />
       </div>

@@ -71,6 +71,7 @@ export default function DashboardPage() {
       {role === 'accountant'   && <AccountantDashboard />}
       {role === 'librarian'    && <LibrarianDashboard />}
       {role === 'branch_admin' && <BranchAdminDashboard />}
+      {role === 'vice_principal' && <BranchAdminDashboard />}
       {(role === 'teacher' || role === 'class_teacher') && <TeacherDashboard />}
       {!role && <SchoolDashboard />}
     </div>

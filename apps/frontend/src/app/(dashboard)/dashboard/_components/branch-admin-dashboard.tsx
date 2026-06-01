@@ -93,7 +93,7 @@ export function BranchAdminDashboard() {
       {/* ── Header ── */}
       <div>
         <h1 className="text-[32px] font-black tracking-tight leading-none" style={{ color: C.text }}>
-          Filial boshqaruvi
+          {user?.role === 'vice_principal' ? "O'rinbosar boshqaruvi" : 'Filial boshqaruvi'}
         </h1>
         <p className="text-sm mt-2 font-medium" style={{ color: C.muted }}>
           {getRoleLabel(user?.role ?? '')} &middot; {dayLabel}

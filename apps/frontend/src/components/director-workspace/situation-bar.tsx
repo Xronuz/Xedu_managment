@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import { useAuthStore } from '@/store/auth.store';
 
 export interface SituationBarData {
   activeBranchName?: string | null;
@@ -27,6 +28,9 @@ interface SituationBarProps {
 type Tone = 'calm' | 'attention' | 'urgent';
 
 export const SituationBar = memo(function SituationBar({ data, onAlertsClick, onApprovalsClick }: SituationBarProps) {
+  const { user } = useAuthStore();
+  if (user?.role === 'director') return null;
+
   const {
     activeBranchName,
     totalBranches = 0,

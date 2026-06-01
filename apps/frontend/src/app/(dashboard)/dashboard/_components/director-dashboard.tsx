@@ -27,6 +27,7 @@ import { leaveRequestsApi } from '@/lib/api/leave-requests';
 import { disciplineApi } from '@/lib/api/discipline';
 import { financeApi } from '@/lib/api/finance';
 import { opsCommandCenterApi } from '@/lib/api/ops-command-center';
+import { academicCalendarApi } from '@/lib/api/academic-calendar';
 
 import {
   WorkspaceShell,
@@ -74,6 +75,23 @@ export function DirectorDashboard() {
     queryFn: () => opsCommandCenterApi.getTodaySummary(activeBranchId ?? undefined),
     enabled: !!activeBranchId,
     staleTime: 60_000,
+  });
+
+  // ── Academic Calendar (next 30 days) ──────────────────────────────────────────
+  const dateRange = useMemo(() => {
+    const today = new Date();
+    const nextMonth = new Date(today);
+    nextMonth.setDate(today.getDate() + 30);
+    return {
+      from: today.toISOString().split('T')[0],
+      to: nextMonth.toISOString().split('T')[0],
+    };
+  }, []);
+  const { data: academicEvents, isLoading: eventsLoading } = useQuery({
+    queryKey: ['academic-calendar', 'upcoming', dateRange.from, dateRange.to],
+    queryFn: () => academicCalendarApi.getAll(dateRange),
+    enabled: !!schoolId,
+    staleTime: 5 * 60 * 1000,
   });
 
   // ── Existing APIs ─────────────────────────────────────────────────────────────
@@ -227,29 +245,33 @@ export function DirectorDashboard() {
               )}
             </ExecCard>
 
-            {/* 2. Approvals — hidden if 0 */}
-            {todaySummary && (todaySummary.staff?.pendingLeaveRequests ?? 0) > 0 && (
-              <ExecCard
-                title="Tasdiqlashlar"
-                href="/dashboard/approvals"
-                owner="director"
-                isLoading={todayLoading}
-              >
-                {todayLoading ? (
-                  <Skeleton className="h-10 w-20" />
-                ) : (
-                  <div className="space-y-2">
+            {/* 2. Approvals */}
+            <ExecCard
+              title="Tasdiqlashlar"
+              href="/dashboard/approvals"
+              owner="director"
+              isLoading={todayLoading}
+            >
+              {todayLoading ? (
+                <Skeleton className="h-10 w-20" />
+              ) : (
+                <div className="space-y-2">
+                  {(todaySummary?.staff?.pendingLeaveRequests ?? 0) > 0 ? (
                     <div className="flex items-baseline gap-2">
                       <span className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">
                         {todaySummary?.staff?.pendingLeaveRequests ?? 0}
                       </span>
-                      <Badge variant="destructive" className="text-[10px]">Kutilmoqda</Badge>
+                      <span className={cn('text-2xs font-bold px-2 py-0.5 rounded-full bg-xedu-amber-100 text-xedu-amber-700 dark:bg-xedu-amber-900/30 dark:text-xedu-amber-400')}>
+                        Kutilmoqda
+                      </span>
                     </div>
-                    <p className="text-xs text-xedu-slate-500">Ko'rish →</p>
-                  </div>
-                )}
-              </ExecCard>
-            )}
+                  ) : (
+                    <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Hamma tasdiqlangan</p>
+                  )}
+                  <p className="text-xs text-xedu-slate-500">Ko'rish →</p>
+                </div>
+              )}
+            </ExecCard>
 
             {/* 3. Alerts */}
             <ExecCard
@@ -279,8 +301,80 @@ export function DirectorDashboard() {
           </div>
 
           {/* ═══════════════════════════════════════════════════════════════════
-             ZONE B — DELEGATION FEED (hidden for now)
+             ZONE B — UPCOMING EVENTS + ACTIVITY FEED
              ═══════════════════════════════════════════════════════════════════ */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+            {/* Qism 1 — Academic Calendar (60%) */}
+            <div className="lg:col-span-3 rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
+                <Calendar className="h-4 w-4 text-xedu-slate-500" />
+                <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">Yaqin tadbirlar</h3>
+              </div>
+              <div className="px-4 py-3">
+                {eventsLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {((academicEvents as any[])?.length ?? 0) > 0 ? (
+                      (academicEvents as any[]).slice(0, 5).map((evt: any) => (
+                        <div key={evt.id} className="flex items-center gap-3 py-1.5">
+                          <div className={cn('h-2 w-2 rounded-full shrink-0', EVENT_TYPE_DOT[evt.type] ?? EVENT_TYPE_DOT.other)} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-xedu-slate-800 dark:text-xedu-slate-200 truncate">{evt.title}</p>
+                          </div>
+                          <span className="text-xs text-xedu-slate-500 shrink-0">
+                            {formatEventDate(evt.startDate)}
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-xedu-slate-500 py-2">30 kunlik tadbirlar yo&apos;q</p>
+                    )}
+                  </div>
+                )}
+              </div>
+              <div className="px-4 pb-3">
+                <Link href="/dashboard/academic-calendar" className="text-xs font-medium text-xedu-primary hover:underline">
+                  Barchasi →
+                </Link>
+              </div>
+            </div>
+
+            {/* Qism 2 — Activity Feed (40%) */}
+            <div className="lg:col-span-2 rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden">
+              <div className="flex items-center gap-2 px-4 py-3 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
+                <Clock className="h-4 w-4 text-xedu-slate-500" />
+                <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">Faoliyat</h3>
+              </div>
+              <div className="px-4 py-3 space-y-3">
+                <div className="flex items-start gap-2.5">
+                  <div className="h-2 w-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                  <div>
+                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200">Jadval nashr qilindi</p>
+                    <p className="text-xs text-xedu-slate-500">Bugun</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <div className="h-2 w-2 rounded-full bg-red-500 mt-1.5 shrink-0" />
+                  <div>
+                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200">5 ta ogohlantirish</p>
+                    <p className="text-xs text-xedu-slate-500">Yangi</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <div className="h-2 w-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                  <div>
+                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200">Ish haqi loyihasi</p>
+                    <p className="text-xs text-xedu-slate-500">Kutilmoqda</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* ═══════════════════════════════════════════════════════════════════
              ZONE C — 4 METRICS
@@ -450,6 +544,21 @@ function StatusBadge({ status }: { status: string }) {
       {cfg.label}
     </span>
   );
+}
+
+const EVENT_TYPE_DOT: Record<string, string> = {
+  holiday: 'bg-emerald-500',
+  exam_week: 'bg-red-500',
+  school_event: 'bg-blue-500',
+  quarter_start: 'bg-violet-500',
+  quarter_end: 'bg-violet-500',
+  meeting: 'bg-amber-500',
+  other: 'bg-slate-400',
+};
+
+function formatEventDate(dateStr: string) {
+  const d = new Date(dateStr);
+  return d.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
 }
 
 function StatRow({ label, value, href }: { label: string; value: number; href: string }) {

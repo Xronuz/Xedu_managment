@@ -1352,32 +1352,68 @@
   }
 }
 
-/* ── Sidebar dark theme override ── */
+/* ── Sidebar light theme — Jobie style ── */
 aside.group\/sidebar {
-  background-color: #020617 !important;
-  border-right-color: #1e293b !important;
-}
-
-aside.group\/sidebar a[href] {
-  color: #94a3b8;
-}
-
-aside.group\/sidebar a[href]:hover {
-  background-color: #1e293b !important;
-  color: #ffffff !important;
-}
-
-aside.group\/sidebar a.bg-xedu-emerald\/20,
-aside.group\/sidebar a[class*="bg-xedu-emerald"] {
-  background-color: rgba(16, 185, 129, 0.2) !important;
-  color: #10b981 !important;
-  border-left: 2px solid #10b981 !important;
-}
-
-aside.group\/sidebar .text-white {
-  color: #ffffff !important;
+  background-color: #ffffff !important;
+  border-right: 1px solid #e2e8f0 !important;
 }
 
 aside.group\/sidebar .border-xedu-slate-800 {
-  border-color: #1e293b !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Active nav item — emerald highlight */
+aside.group\/sidebar a[class*="bg-xedu-emerald"] {
+  background-color: #ecfdf5 !important;
+  color: #059669 !important;
+  border-left: 3px solid #059669 !important;
+  border-radius: 8px !important;
+}
+
+/* Active icon */
+aside.group\/sidebar a[class*="bg-xedu-emerald"] span {
+  background-color: transparent !important;
+  color: #059669 !important;
+}
+
+/* Inactive nav items */
+aside.group\/sidebar a:not([class*="bg-xedu-emerald"]) {
+  color: #64748b !important;
+}
+
+aside.group\/sidebar a:not([class*="bg-xedu-emerald"]):hover {
+  background-color: #f8fafc !important;
+  color: #1e293b !important;
+}
+
+/* Logo text */
+aside.group\/sidebar span.text-white {
+  color: #1e293b !important;
+}
+
+/* Footer area */
+aside.group\/sidebar .bg-xedu-slate-900 {
+  background-color: #f8fafc !important;
+}
+
+aside.group\/sidebar .bg-xedu-slate-800 {
+  background-color: #f1f5f9 !important;
+}
+
+aside.group\/sidebar .text-xedu-slate-300 {
+  color: #475569 !important;
+}
+
+aside.group\/sidebar .text-xedu-slate-500 {
+  color: #94a3b8 !important;
+}
+
+/* Toggle button */
+aside.group\/sidebar button {
+  color: #94a3b8 !important;
+}
+
+aside.group\/sidebar button:hover {
+  background-color: #f1f5f9 !important;
+  color: #1e293b !important;
 }

@@ -1379,19 +1379,20 @@ aside.group\/sidebar a:hover {
   color: #ffffff !important;
 }
 
-/* Active nav item — Jobie connected style */
+/* Active nav item — Jobie inverted corner */
 aside.group\/sidebar a[class*="bg-xedu-emerald"] {
   background-color: #F4F6F5 !important;
   color: #0f2318 !important;
   border: none !important;
-  border-top-left-radius: 14px !important;
-  border-bottom-left-radius: 14px !important;
+  border-top-left-radius: 16px !important;
+  border-bottom-left-radius: 16px !important;
   border-top-right-radius: 0 !important;
   border-bottom-right-radius: 0 !important;
   font-weight: 700 !important;
   box-shadow: none !important;
-  margin-right: -12px !important;
-  padding-right: 24px !important;
+  margin-left: 8px !important;
+  margin-right: 0 !important;
+  padding-right: 16px !important;
   position: relative !important;
   z-index: 1 !important;
 }
@@ -1399,6 +1400,29 @@ aside.group\/sidebar a[class*="bg-xedu-emerald"] {
 aside.group\/sidebar a[class*="bg-xedu-emerald"] span {
   background-color: transparent !important;
   color: #059669 !important;
+}
+
+/* Inverted corner — top */
+aside.group\/sidebar a[class*="bg-xedu-emerald"]::before {
+  content: '' !important;
+  position: absolute !important;
+  top: -16px !important;
+  right: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  background-color: #F4F6F5 !important;
+  z-index: -1 !important;
+}
+
+aside.group\/sidebar a[class*="bg-xedu-emerald"]::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -16px !important;
+  right: 0 !important;
+  width: 16px !important;
+  height: 16px !important;
+  background-color: #F4F6F5 !important;
+  z-index: -1 !important;
 }
 
 /* Icons inactive */
@@ -1436,13 +1460,12 @@ aside.group\/sidebar > div button:hover {
   color: #ffffff !important;
 }
 
-/* Nav container padding & overflow */
+/* nav container — allow overflow for inverted corners */
 aside.group\/sidebar nav {
   padding-right: 0 !important;
-  overflow-x: visible !important;
+  overflow: visible !important;
 }
 
-/* Scrollbar overflow fix */
 aside.group\/sidebar .scrollbar-sidebar {
   overflow-x: visible !important;
 }

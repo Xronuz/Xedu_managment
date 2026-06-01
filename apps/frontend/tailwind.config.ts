@@ -284,6 +284,18 @@ const config: Config = {
     },
   },
   plugins: [require('tailwindcss-animate')],
+  safelist: [
+    'bg-xedu-slate-950',
+    'bg-xedu-slate-900',
+    'bg-xedu-slate-800',
+    'border-xedu-slate-800',
+    'text-xedu-slate-400',
+    'text-xedu-slate-300',
+    'hover:bg-xedu-slate-800',
+    'bg-xedu-emerald/20',
+    'text-xedu-emerald',
+    'border-xedu-emerald',
+  ],
 };
 
 export default config;

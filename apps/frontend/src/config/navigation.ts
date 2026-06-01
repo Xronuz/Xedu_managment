@@ -58,97 +58,80 @@ export const DIRECTOR_NAV: NavGroup[] = [
   },
 ];
 
-// ── BRANCH ADMIN ──────────────────────────────────────────────────────────────
+// ── BRANCH ADMIN ──────────────────────────────────────────────
 export const BRANCH_ADMIN_NAV: NavGroup[] = [
   {
-    title: 'Umumiy ko‘rinish',
+    title: '',
     items: [
-      { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
-      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
-      { label: 'Maktab sozlash', href: '/dashboard/setup', icon: Rocket, roles: ROUTE_PERMISSIONS['/dashboard/setup'] },
-      { label: 'Ogohlantirishlar', href: '/dashboard/alerts', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/alerts'] },
+      { label: 'Dashboard',        href: '/dashboard',        icon: LayoutDashboard, exact: true },
+      { label: 'Operatsion markaz',href: '/dashboard/ops',    icon: Activity,  roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
+      { label: 'Maktab sozlash',   href: '/dashboard/setup',  icon: Rocket,    roles: ROUTE_PERMISSIONS['/dashboard/setup'] },
+      { label: 'Ogohlantirishlar', href: '/dashboard/alerts', icon: Bell,      roles: ROUTE_PERMISSIONS['/dashboard/alerts'] },
+    ],
+  },
+  {
+    title: 'Ta‘lim',
+    items: [
+      { label: 'Dars jadvali', href: '/dashboard/schedule',   icon: Calendar,     roles: ROUTE_PERMISSIONS['/dashboard/schedule'] },
+      { label: 'Davomat',      href: '/dashboard/attendance', icon: CalendarCheck,roles: ROUTE_PERMISSIONS['/dashboard/attendance'] },
+      { label: 'Sinflar',      href: '/dashboard/classes',    icon: School,       roles: ROUTE_PERMISSIONS['/dashboard/classes'] },
+      { label: 'Baholar',      href: '/dashboard/grades',     icon: GraduationCap,roles: ROUTE_PERMISSIONS['/dashboard/grades'] },
+      { label: 'Imtihonlar',   href: '/dashboard/exams',      icon: ClipboardList,roles: ROUTE_PERMISSIONS['/dashboard/exams'] },
+      { label: 'Fanlar',       href: '/dashboard/subjects',   icon: BookMarked,   roles: ROUTE_PERMISSIONS['/dashboard/subjects'] },
     ],
   },
   {
     title: 'Operatsiyalar',
     items: [
-      { label: 'Intizom', href: '/dashboard/discipline', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
-      { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
-      { label: "O'qituvchi almashtirish", href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
-      { label: "Do'kon boshqaruvi", href: '/dashboard/staff/shop', icon: ShoppingBag, roles: ROUTE_PERMISSIONS['/dashboard/staff/shop'] },
-    ],
-  },
-  {
-    title: "Ta'lim",
-    items: [
-      { label: 'Dars jadvali', href: '/dashboard/schedule', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/schedule'] },
-      { label: 'Davomat', href: '/dashboard/attendance', icon: CalendarCheck, roles: ROUTE_PERMISSIONS['/dashboard/attendance'] },
-      { label: 'Sinflar', href: '/dashboard/classes', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/classes'] },
-      { label: 'Baholar', href: '/dashboard/grades', icon: GraduationCap, roles: ROUTE_PERMISSIONS['/dashboard/grades'] },
-      { label: 'Imtihonlar', href: '/dashboard/exams', icon: ClipboardList, roles: ROUTE_PERMISSIONS['/dashboard/exams'] },
-      { label: 'Fanlar', href: '/dashboard/subjects', icon: BookMarked, roles: ROUTE_PERMISSIONS['/dashboard/subjects'] },
+      { label: 'Intizom',              href: '/dashboard/discipline',            icon: Shield,      roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
+      { label: 'Ta‘til so‘rovlar', href: '/dashboard/leave-requests',   icon: FileText,    roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
+      { label: 'O‘qituvchi almashtirish', href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
+      { label: 'Do‘kon boshqaruvi', href: '/dashboard/staff/shop',         icon: ShoppingBag, roles: ROUTE_PERMISSIONS['/dashboard/staff/shop'] },
       { label: 'Akademik kalendar', href: '/dashboard/academic-calendar', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/academic-calendar'] },
-      { label: "To'garaklar", href: '/dashboard/clubs', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/clubs'] },
+      { label: 'To‘garaklar',    href: '/dashboard/clubs',                 icon: Users,       roles: ROUTE_PERMISSIONS['/dashboard/clubs'] },
     ],
   },
   {
     title: 'Jamoa',
     items: [
-      { label: "O'quvchilar", href: '/dashboard/students', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/students'] },
-      { label: 'Xodimlar', href: '/dashboard/staff', icon: Briefcase, roles: ROUTE_PERMISSIONS['/dashboard/staff'] },
-      { label: 'Foydalanuvchilar', href: '/dashboard/users', icon: UserCog, roles: ROUTE_PERMISSIONS['/dashboard/users'] },
+      { label: 'O‘quvchilar',  href: '/dashboard/students', icon: Users,    roles: ROUTE_PERMISSIONS['/dashboard/students'] },
+      { label: 'Xodimlar',          href: '/dashboard/staff',    icon: Briefcase,roles: ROUTE_PERMISSIONS['/dashboard/staff'] },
+      { label: 'Foydalanuvchilar',  href: '/dashboard/users',    icon: UserCog,  roles: ROUTE_PERMISSIONS['/dashboard/users'] },
     ],
   },
   {
-    title: 'Moliya',
+    title: 'Moliya & Sotuv',
     items: [
-      { label: 'Moliya', href: '/dashboard/finance', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/finance'] },
-      { label: "To'lovlar", href: '/dashboard/payments', icon: CreditCard, roles: ROUTE_PERMISSIONS['/dashboard/payments'] },
-      { label: 'Tariflar', href: '/dashboard/fee-structures', icon: Wallet, roles: ROUTE_PERMISSIONS['/dashboard/fee-structures'] },
+      { label: 'Moliya',        href: '/dashboard/finance',        icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/finance'] },
+      { label: 'To‘lovlar', href: '/dashboard/payments',      icon: CreditCard, roles: ROUTE_PERMISSIONS['/dashboard/payments'] },
+      { label: 'Tariflar',      href: '/dashboard/fee-structures', icon: Wallet,     roles: ROUTE_PERMISSIONS['/dashboard/fee-structures'] },
+      { label: 'CRM — Leadlar', href: '/dashboard/crm',      icon: Megaphone,  roles: ROUTE_PERMISSIONS['/dashboard/crm'] },
     ],
   },
   {
-    title: 'Sotuv',
+    title: 'Hisobot & Tizim',
     items: [
-      { label: 'CRM — Leadlar', href: '/dashboard/crm', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/crm'] },
-    ],
-  },
-  {
-    title: 'Aloqa',
-    items: [
-      { label: 'Kommunikatsiya', href: '/dashboard/comms', icon: MessageSquare, roles: ROUTE_PERMISSIONS['/dashboard/comms'] },
-      { label: 'Bildirishnomalar', href: '/dashboard/notifications', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/notifications'] },
-    ],
-  },
-  {
-    title: 'Analitika',
-    items: [
-      { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'], matchPaths: ['/dashboard/kpi', '/dashboard/insights', '/dashboard/marketing', '/dashboard/analytics'] },
-      { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
-      { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
-    ],
-  },
-  {
-    title: 'Tizim',
-    items: [
-      { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
+      { label: 'Hisobotlar',         href: '/dashboard/reports',              icon: BarChart3,     roles: ROUTE_PERMISSIONS['/dashboard/reports'], matchPaths: ['/dashboard/kpi', '/dashboard/insights', '/dashboard/marketing', '/dashboard/analytics'] },
+      { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity,      roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
+      { label: 'Eksport markazi',    href: '/dashboard/export-center',        icon: Download,      roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
+      { label: 'Kommunikatsiya',     href: '/dashboard/comms',                icon: MessageSquare, roles: ROUTE_PERMISSIONS['/dashboard/comms'] },
+      { label: 'Bildirishnomalar',   href: '/dashboard/notifications',        icon: Bell,          roles: ROUTE_PERMISSIONS['/dashboard/notifications'] },
+      { label: 'Sozlamalar',         href: '/dashboard/settings',             icon: Settings,      roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
     ],
   },
 ];
 
-// ── VICE PRINCIPAL ────────────────────────────────────────────────────────────
+// ── VICE PRINCIPAL ────────────────────────────────────────────────────────────────────────────────────
 export const VICE_PRINCIPAL_NAV: NavGroup[] = [
   {
-    title: 'Umumiy ko‘rinish',
+    title: '',
     items: [
-      { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/ops'] },
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
-      { label: 'Maktab sozlash', href: '/dashboard/setup', icon: Rocket, roles: ROUTE_PERMISSIONS['/dashboard/setup'] },
       { label: 'Ogohlantirishlar', href: '/dashboard/alerts', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/alerts'] },
     ],
   },
   {
-    title: "Ta'lim",
+    title: 'Ta‘lim',
     items: [
       { label: 'Dars jadvali', href: '/dashboard/schedule', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/schedule'] },
       { label: 'Sinflar', href: '/dashboard/classes', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/classes'] },
@@ -157,50 +140,29 @@ export const VICE_PRINCIPAL_NAV: NavGroup[] = [
       { label: 'Imtihonlar', href: '/dashboard/exams', icon: ClipboardList, roles: ROUTE_PERMISSIONS['/dashboard/exams'] },
       { label: 'Davomat', href: '/dashboard/attendance', icon: CalendarCheck, roles: ROUTE_PERMISSIONS['/dashboard/attendance'] },
       { label: 'Akademik kalendar', href: '/dashboard/academic-calendar', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/academic-calendar'] },
-      { label: "To'garaklar", href: '/dashboard/clubs', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/clubs'] },
+      { label: 'To‘garaklar', href: '/dashboard/clubs', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/clubs'] },
     ],
   },
   {
     title: 'Operatsiyalar',
     items: [
       { label: 'Intizom', href: '/dashboard/discipline', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/discipline'] },
-      { label: "Ta'til so'rovlar", href: '/dashboard/leave-requests', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
-      { label: "O'qituvchi almashtirish", href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
-      { label: "Do'kon boshqaruvi", href: '/dashboard/staff/shop', icon: ShoppingBag, roles: ROUTE_PERMISSIONS['/dashboard/staff/shop'] },
+      { label: 'Ta‘til so‘rovlar', href: '/dashboard/leave-requests', icon: FileText, roles: ROUTE_PERMISSIONS['/dashboard/leave-requests'] },
+      { label: 'O‘qituvchi almashtirish', href: '/dashboard/teacher-substitutions', icon: UserCheck, roles: ROUTE_PERMISSIONS['/dashboard/teacher-substitutions'] },
     ],
   },
   {
     title: 'Jamoa',
     items: [
-      { label: "O'quvchilar", href: '/dashboard/students', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/students'] },
+      { label: 'O‘quvchilar', href: '/dashboard/students', icon: Users, roles: ROUTE_PERMISSIONS['/dashboard/students'] },
       { label: 'Xodimlar', href: '/dashboard/staff', icon: Briefcase, roles: ROUTE_PERMISSIONS['/dashboard/staff'] },
     ],
   },
   {
-    title: 'Sotuv',
-    items: [
-      { label: 'CRM — Leadlar', href: '/dashboard/crm', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/crm'] },
-    ],
-  },
-  {
-    title: 'Aloqa',
-    items: [
-      { label: 'Kommunikatsiya', href: '/dashboard/comms', icon: MessageSquare, roles: ROUTE_PERMISSIONS['/dashboard/comms'] },
-      { label: 'Bildirishnomalar', href: '/dashboard/notifications', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/notifications'] },
-    ],
-  },
-  {
-    title: 'Analitika',
+    title: 'Hisobot & Tizim',
     items: [
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'], matchPaths: ['/dashboard/kpi', '/dashboard/insights', '/dashboard/marketing', '/dashboard/analytics'] },
-      { label: 'KPI Dashboard', href: '/dashboard/kpi', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/kpi'] },
-      { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
       { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
-    ],
-  },
-  {
-    title: 'Tizim',
-    items: [
       { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
     ],
   },

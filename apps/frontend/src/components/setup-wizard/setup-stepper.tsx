@@ -11,17 +11,24 @@ export interface WizardStep {
   label: string;
   shortLabel: string;
   icon: React.ElementType;
+  /** Which role is responsible for completing this step */
+  ownerRole: 'director' | 'branch_admin';
 }
 
 export const WIZARD_STEPS: WizardStep[] = [
-  { id: 1, label: 'Maktab & Filial', shortLabel: 'Maktab', icon: School },
-  { id: 2, label: 'Dars davrlari', shortLabel: 'Davrlar', icon: Clock },
-  { id: 3, label: 'Xonalar', shortLabel: 'Xonalar', icon: DoorOpen },
-  { id: 4, label: 'Sinflar', shortLabel: 'Sinflar', icon: GraduationCap },
-  { id: 5, label: "Fanlar & O'qituvchi yuklamalari", shortLabel: "Yuklamalar", icon: BookOpen },
-  { id: 6, label: 'Jadval generatsiya', shortLabel: 'Generatsiya', icon: Wand2 },
-  { id: 7, label: 'Tekshirish & Nashr', shortLabel: 'Nashr', icon: Rocket },
+  { id: 1, label: 'Maktab & Filial',                    shortLabel: 'Maktab',      icon: School,       ownerRole: 'director'     },
+  { id: 2, label: 'Dars davrlari',                      shortLabel: 'Davrlar',     icon: Clock,        ownerRole: 'branch_admin' },
+  { id: 3, label: 'Xonalar',                            shortLabel: 'Xonalar',     icon: DoorOpen,     ownerRole: 'branch_admin' },
+  { id: 4, label: 'Sinflar',                            shortLabel: 'Sinflar',     icon: GraduationCap,ownerRole: 'branch_admin' },
+  { id: 5, label: "Fanlar & O'qituvchi yuklamalari",    shortLabel: 'Yuklamalar',  icon: BookOpen,     ownerRole: 'branch_admin' },
+  { id: 6, label: 'Jadval generatsiya',                 shortLabel: 'Generatsiya', icon: Wand2,        ownerRole: 'branch_admin' },
+  { id: 7, label: 'Tekshirish & Nashr',                 shortLabel: 'Nashr',       icon: Rocket,       ownerRole: 'branch_admin' },
 ];
+
+/** Steps director is responsible for */
+export const DIRECTOR_STEPS = WIZARD_STEPS.filter(s => s.ownerRole === 'director');
+/** Steps branch_admin is responsible for */
+export const BRANCH_ADMIN_STEPS = WIZARD_STEPS.filter(s => s.ownerRole === 'branch_admin');
 
 interface SetupStepperProps {
   current: number;

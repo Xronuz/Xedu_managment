@@ -88,12 +88,14 @@ export function BranchAdminDashboard() {
   const pendingDisciplineList: any[] = (pendingDiscipline as any)?.data ?? [];
   const debtors: any[] = paymentReport?.debtors ?? [];
 
+  const isVP = user?.role === 'vice_principal';
+
   return (
     <div className="space-y-6">
       {/* ── Header ── */}
       <div>
         <h1 className="text-[32px] font-black tracking-tight leading-none" style={{ color: C.text }}>
-          {user?.role === 'vice_principal' ? "O'rinbosar boshqaruvi" : 'Filial boshqaruvi'}
+          {isVP ? "O'rinbosar boshqaruvi" : 'Filial boshqaruvi'}
         </h1>
         <p className="text-sm mt-2 font-medium" style={{ color: C.muted }}>
           {getRoleLabel(user?.role ?? '')} &middot; {dayLabel}
@@ -130,16 +132,18 @@ export function BranchAdminDashboard() {
           loading={attLoading}
           href="/dashboard/attendance"
         />
-        <StatCard
-          title="Qarzdorlik"
-          value={formatCurrency(paymentReport?.overdue ?? 0)}
-          icon={CreditCard}
-          description="Kechikkan to'lovlar"
-          color="red"
-          trend="down"
-          loading={paymentsLoading}
-          href="/dashboard/payments"
-        />
+        {!isVP && (
+          <StatCard
+            title="Qarzdorlik"
+            value={formatCurrency(paymentReport?.overdue ?? 0)}
+            icon={CreditCard}
+            description="Kechikkan to'lovlar"
+            color="red"
+            trend="down"
+            loading={paymentsLoading}
+            href="/dashboard/payments"
+          />
+        )}
       </div>
 
       {/* ── Operations grid ── */}
@@ -214,8 +218,8 @@ export function BranchAdminDashboard() {
           </PCard>
         )}
 
-        {/* Debtors */}
-        {debtors.length > 0 && (
+        {/* Debtors — branch_admin only */}
+        {!isVP && debtors.length > 0 && (
           <PCard>
             <div className="flex items-center justify-between mb-5">
               <div>
@@ -267,7 +271,14 @@ export function BranchAdminDashboard() {
         {/* Quick actions */}
         <PCard>
           <p className="font-bold text-[15px] mb-5" style={{ color: C.text }}>Tezkor harakatlar</p>
-          <QuickActions items={[
+          <QuickActions items={isVP ? [
+            { label: 'Davomat',      href: '/dashboard/attendance',         icon: ClipboardCheck, iconColor: ICON_CFG.emerald.icon },
+            { label: 'Baholar',      href: '/dashboard/grades',             icon: BookOpen,       iconColor: ICON_CFG.blue.icon },
+            { label: 'Dars jadvali', href: '/dashboard/schedule',           icon: Calendar,       iconColor: ICON_CFG.violet.icon },
+            { label: "O'quvchilar",  href: '/dashboard/students',           icon: Users,          iconColor: ICON_CFG.amber.icon },
+            { label: 'Intizom',      href: '/dashboard/discipline',         icon: FileText,       iconColor: ICON_CFG.red.icon },
+            { label: "Ta'til so'rov",href: '/dashboard/leave-requests',     icon: GraduationCap,  iconColor: ICON_CFG.cyan.icon },
+          ] : [
             { label: 'Davomat',      href: '/dashboard/attendance', icon: ClipboardCheck, iconColor: ICON_CFG.emerald.icon },
             { label: 'Baholar',      href: '/dashboard/grades',     icon: BookOpen,       iconColor: ICON_CFG.blue.icon },
             { label: 'Dars jadvali', href: '/dashboard/schedule',   icon: Calendar,       iconColor: ICON_CFG.violet.icon },

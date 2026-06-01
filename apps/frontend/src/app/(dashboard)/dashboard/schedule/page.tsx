@@ -34,17 +34,22 @@ export default function SchedulePage() {
   }
 
   if (periods.length === 0) {
+    const isVP = user?.role === 'vice_principal';
     return (
       <div className="max-w-2xl mx-auto pt-10">
         <StandardEmptyState
           icon={Clock}
           title="Dars davrlari sozlanmagan"
-          description="Dars jadvalini ko'rish va boshqarish uchun avval dars davrlarini (qo'ng'iroq jadvali) sozlang."
-          primaryAction={{
+          description={
+            isVP
+              ? "Dars jadvalini ko'rish uchun filial administratori dars davrlarini (qo'ng'iroq jadvali) sozlashi kerak."
+              : "Dars jadvalini ko'rish va boshqarish uchun avval dars davrlarini (qo'ng'iroq jadvali) sozlang."
+          }
+          primaryAction={isVP ? undefined : {
             label: 'Maktabni sozlash',
             onClick: () => router.push('/dashboard/setup'),
           }}
-          secondaryAction={{
+          secondaryAction={isVP ? undefined : {
             label: 'Sozlamalar',
             onClick: () => router.push('/dashboard/settings'),
           }}

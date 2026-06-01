@@ -15,11 +15,14 @@
       "id": "setup-wizard",
       "title": "Maktab sozlash ustasi",
       "category": "onboarding",
-      "content": "Maktab sozlash ustasi yangi maktabni tez va oson sozlash uchun mo'ljallangan. 7 bosqichdan iborat: maktab ma'lumotlari, dars soatlari, xonalar, sinflar, o'quv yuklamalari, jadval yaratish va nashr etish.",
+      "content": "Maktab sozlash ustasi zanjir (chain) rejimida ishlaydi: avval Direktor o'z bosqichini bajaradi, keyin Filial boshqaruvchisi qolgan bosqichlarni yakunlaydi. Mudir o'rinbosari (VP) setup jarayoniga kirish huquqiga ega emas — u tayyor tizimdan foydalanadi.\n\n• Direktor — 1-bosqich: Maktab & Filial ma'lumotlarini kiritadi va filiallarni sozlaydi. Yakunlangach, tizim filial boshqaruvchisini davom ettirishga yo'naltiradi.\n\n• Filial boshqaruvchisi — 2–7-bosqichlar: Dars davrlari (qo'ng'iroq jadvali), Xonalar, Sinflar, Fanlar & O'qituvchi yuklamalari, Jadval generatsiyasi va Tekshirish & Nashr bosqichlarini ketma-ket bajaradi.\n\n• Mudir o'rinbosari — setup sahifasiga kira olmaydi. Dars jadvali yoki boshqa bo'limlar sozlanmagan bo'lsa, filial boshqaruvchisiga murojaat qilish tavsiya etiladi.",
       "faq": [
-        { "q": "Sozlashni qoldirsa bo'ladimi?", "a": "Ha, har bir bosqichni saqlab, keyin davom ettirish mumkin. Progress avtomatik saqlanadi." },
-        { "q": "Bosqichlarni qayta o'tish mumkinmi?", "a": "Ha, chap paneldagi bosqichlarni bosib, oldingi bosqichlarga qaytishingiz mumkin." },
-        { "q": "Nima uchun 'Nashr etish' bosqichi muhim?", "a": "Bu bosqich dars jadvalini o'quvchilar va o'qituvchilar uchun ko'rinadigan qiladi. Nashr etilmagan jadval faqat administratorlar ko'radi." }
+        { "q": "Direktor barcha bosqichlarni o'zi bajarishi mumkinmi?", "a": "Yo'q. Direktor faqat 1-bosqich (Maktab & Filial) uchun javobgar. 2–7-bosqichlar filial boshqaruvchisi tomonidan amalga oshiriladi. Bu rol va mas'uliyatlarni aniq ajratish uchun qilingan." },
+        { "q": "Mudir o'rinbosari (VP) nima uchun setup sahifasiga kira olmaydi?", "a": "VP akademik jarayonlarni boshqaruvchi rol bo'lib, maktabni sozlash uning vazifasi emas. Agar dars davrlari yoki xonalar sozlanmagan bo'lsa, filial boshqaruvchisiga murojaat qiling." },
+        { "q": "Filial boshqaruvchisi qachon boshlashi mumkin?", "a": "Direktor 1-bosqichni (Maktab & Filial) yakunlaganidan so'ng. Direktor bosqich yakunlanmagan bo'lsa, tizim filial boshqaruvchisini 2-bosqichdan oldin kutishga yo'naltiradi." },
+        { "q": "Sozlashni qoldirsa bo'ladimi?", "a": "Ha, har bir bosqichni saqlab, keyin davom ettirish mumkin. Progress avtomatik saqlanadi va keyingi kirishda davom etasiz." },
+        { "q": "Nima uchun 'Nashr etish' bosqichi muhim?", "a": "Bu bosqich dars jadvalini o'quvchilar va o'qituvchilar uchun ko'rinadigan qiladi. Nashr etilmagan jadval faqat administratorlar ko'radi." },
+        { "q": "Stepper da boshqa rol qadamlari kulrang ko'rinsa?", "a": "Kulrang (pasaytirilgan) qadamlar boshqa rolga tegishli bosqichlardir. Siz faqat o'z rolizga tegishli bosqichlarni boshqara olasiz." }
       ]
     },
     {
@@ -224,11 +227,12 @@
       "id": "user-rbac",
       "title": "Foydalanuvchilar va huquqlar",
       "category": "system",
-      "content": "Xedu platformasida har bir foydalanuvchi ma'lum rolga ega. Rollar: direktor, mudir o'rinbosari, filial boshqaruvchisi, o'qituvchi, sinf rahbari, moliyachi, kutubxonachi, o'quvchi va ota-ona.",
+      "content": "Xedu platformasida har bir foydalanuvchi ma'lum rolga ega. Rollar va ularning asosiy vazifalari:\n\n• Direktor — maktab strategik boshqaruvi, filiallar, xodimlar, hisobotlar va maktab sozlash (1-bosqich).\n• Mudir o'rinbosari (VP) — akademik jarayon: dars jadvali, sinflar, fanlar, baholar, imtihonlar, davomat, intizom, ta'til so'rovlari. Setup sahifasiga kirish huquqi yo'q.\n• Filial boshqaruvchisi — filial operatsiyalari va to'liq sozlash (2–7-bosqich): dars davrlari, xonalar, sinflar, yuklamalar, jadval.\n• O'qituvchi / Sinf rahbari — dars jadvali, davomat, baholar, uy vazifalari.\n• Moliyachi — to'lovlar, ish haqi, moliya hisobotlari.\n• Kutubxonachi — kutubxona va resurslar.\n• O'quvchi — o'z dars jadvali, baholar, uy vazifalari.\n• Ota-ona — farzandi ma'lumotlari, davomat, baholar, to'lovlar.",
       "faq": [
-        { "q": "Rolni qandol o'zgartirish mumkin?", "a": "Faqat direktor yoki super admin foydalanuvchi rolini o'zgartirishi mumkin." },
+        { "q": "Mudir o'rinbosari (VP) qaysi sahifalarga kira olmaydi?", "a": "VP maktabni sozlash (/dashboard/setup) sahifasiga kira olmaydi. Bu sahifa faqat direktor (1-bosqich) va filial boshqaruvchisi (2–7-bosqich) uchun. Shuningdek, moliya va CRM bo'limlari ham VP uchun mavjud emas." },
+        { "q": "Rolni qanday o'zgartirish mumkin?", "a": "Faqat direktor yoki super admin foydalanuvchi rolini o'zgartirishi mumkin. 'Foydalanuvchilar' bo'limida kerakli foydalanuvchini topib, rolini yangilang." },
         { "q": "Bitta foydalanuvchi bir necha rolda bo'lishi mumkinmi?", "a": "Yo'q, har bir foydalanuvchi faqat bitta asosiy rolga ega. Biroq, bir necha filialga biriktirilishi mumkin." },
-        { "q": "Huquqlarni qayerdan ko'rish mumkin?", "a": "'Sozlamalar' bo'limida har bir rolla ruxsat etilgan amallar ro'yxati ko'rsatiladi." }
+        { "q": "Setup zanjiri qanday ishlaydi?", "a": "Avval Direktor 1-bosqichni (Maktab & Filial) bajaradi. Keyin Filial boshqaruvchisi 2–7-bosqichlarni yakunlaydi. VP setup jarayoniga ishtirok etmaydi." }
       ]
     }
   ],

@@ -184,11 +184,12 @@ export function Sidebar() {
     const set = new Set<string>();
     if (navGroups[0]) set.add(navGroups[0].title);
     const roleDefaults: Record<string, string[]> = {
-      director:     ["Ta'lim", 'Moliya', 'Analitika'],
-      super_admin:  ["Ta'lim", 'Moliya'],
-      branch_admin: ["Ta'lim", 'Operatsiyalar'],
-      teacher:      ['Sinflarim'],
-      class_teacher:['Sinflarim'],
+      director:       [],
+      super_admin:    [],
+      branch_admin:   [],
+      vice_principal: [],
+      teacher:        [],
+      class_teacher:  [],
     };
     (roleDefaults[role] ?? []).forEach((t) => {
       if (navGroups.find((g) => g.title === t)) set.add(t);

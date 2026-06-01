@@ -42,7 +42,7 @@
 
     /* ── Surface — Elevation Ladder (light) ── */
     --xedu-bg:          #F4F6F5;
-    --xedu-bg-canvas:   #F4F6F5;
+    --xedu-bg-canvas:   #EDEFF2;
     --xedu-bg-sidebar:  #EAEDEC;
     --xedu-bg-rail:     #F5F7F6;
     --xedu-bg-panel:    #FFFFFF;
@@ -1381,7 +1381,7 @@ aside.group\/sidebar a:hover {
 
 /* Active nav item — Jobie inverted corner */
 aside.group\/sidebar a[class*="bg-xedu-emerald"] {
-  background-color: #F4F6F5 !important;
+  background-color: #EDEFF2 !important;
   color: #0f2318 !important;
   border: none !important;
   border-top-left-radius: 16px !important;
@@ -1410,7 +1410,7 @@ aside.group\/sidebar a[class*="bg-xedu-emerald"]::before {
   right: 0 !important;
   width: 16px !important;
   height: 16px !important;
-  background: radial-gradient(circle at top left, transparent 16px, #F4F6F5 16px) !important;
+  background: radial-gradient(circle at top left, transparent 16px, #EDEFF2 16px) !important;
   z-index: -1 !important;
 }
 
@@ -1421,7 +1421,7 @@ aside.group\/sidebar a[class*="bg-xedu-emerald"]::after {
   right: 0 !important;
   width: 16px !important;
   height: 16px !important;
-  background: radial-gradient(circle at bottom left, transparent 16px, #F4F6F5 16px) !important;
+  background: radial-gradient(circle at bottom left, transparent 16px, #EDEFF2 16px) !important;
   z-index: -1 !important;
 }
 

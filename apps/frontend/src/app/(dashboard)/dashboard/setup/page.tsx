@@ -50,6 +50,7 @@ export default function SetupWizardPage() {
   const [step, setStep] = useState(myFirstStep);
   const [completed, setCompleted] = useState<number[]>([]);
   const [done, setDone] = useState(false);
+  const [loadingTimedOut, setLoadingTimedOut] = useState(false);
 
   // Role guard — only director and branch_admin
   const canAccess = !!(user?.role && ROUTE_PERMISSIONS['/dashboard/setup']?.includes(user.role as any));
@@ -59,12 +60,20 @@ export default function SetupWizardPage() {
     if (!canAccess) router.replace('/dashboard');
   }, [_hasHydrated, user, canAccess, router]);
 
+  // Safety timeout: if loading takes >5s, proceed with defaults
+  useEffect(() => {
+    const t = setTimeout(() => setLoadingTimedOut(true), 5000);
+    return () => clearTimeout(t);
+  }, []);
+
   // Restore progress from backend
-  const { data: onboardingStatus, isLoading: statusLoading } = useQuery({
+  const { data: onboardingStatus, isLoading: statusLoading, isError: statusError } = useQuery({
     queryKey: ['onboarding-status'],
     queryFn: systemConfigApi.getOnboardingStatus,
     staleTime: Infinity,
     enabled: canAccess,
+    retry: 1,
+    retryDelay: 1000,
   });
 
   useEffect(() => {
@@ -151,7 +160,9 @@ export default function SetupWizardPage() {
     queryClient.prefetchQuery({ queryKey: ['teaching-loads'], queryFn: () => teachingLoadApi.getAll({ status: 'approved' }) });
   }, [canAccess, queryClient]);
 
-  if (!_hasHydrated || statusLoading) return <PageSkeleton statsCount={3} />;
+  // Don't block render if API errored or timed out
+  const isReallyLoading = statusLoading && !statusError && !loadingTimedOut;
+  if (!_hasHydrated || isReallyLoading) return <PageSkeleton statsCount={3} />;
   if (!canAccess) return null;
 
   // ── Completion screens ──────────────────────────────────────────────────────

@@ -27,6 +27,8 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   exact?: boolean;
+  /** Additional paths that should also activate this nav item */
+  matchPaths?: string[];
   /** If omitted, visible to all roles that can access the route */
   roles?: string[];
 }
@@ -50,7 +52,7 @@ export const DIRECTOR_NAV: NavGroup[] = [
       { label: 'Ogohlantirishlar', href: '/dashboard/alerts', icon: Bell, roles: ROUTE_PERMISSIONS['/dashboard/alerts'] },
       { label: 'Xodimlar', href: '/dashboard/staff', icon: Briefcase, roles: ROUTE_PERMISSIONS['/dashboard/staff'] },
       { label: 'Akademik kalendar', href: '/dashboard/academic-calendar', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/academic-calendar'] },
-      { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
+      { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'], matchPaths: ['/dashboard/kpi', '/dashboard/insights', '/dashboard/marketing', '/dashboard/analytics'] },
       { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
     ],
   },
@@ -121,7 +123,7 @@ export const BRANCH_ADMIN_NAV: NavGroup[] = [
   {
     title: 'Analitika',
     items: [
-      { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
+      { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'], matchPaths: ['/dashboard/kpi', '/dashboard/insights', '/dashboard/marketing', '/dashboard/analytics'] },
       { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
       { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
     ],
@@ -190,7 +192,7 @@ export const VICE_PRINCIPAL_NAV: NavGroup[] = [
   {
     title: 'Analitika',
     items: [
-      { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
+      { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'], matchPaths: ['/dashboard/kpi', '/dashboard/insights', '/dashboard/marketing', '/dashboard/analytics'] },
       { label: 'KPI Dashboard', href: '/dashboard/kpi', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/kpi'] },
       { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
       { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
@@ -266,7 +268,7 @@ export const ACCOUNTANT_NAV: NavGroup[] = [
   {
     title: 'Analitika',
     items: [
-      { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'] },
+      { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'], matchPaths: ['/dashboard/kpi', '/dashboard/insights', '/dashboard/marketing', '/dashboard/analytics'] },
       { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
       { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
     ],

@@ -35,7 +35,7 @@ export function SplitView({
       {/* Detail pane */}
       <div
         className={cn(
-          'flex-1 flex flex-col h-full overflow-hidden bg-xedu-bg-elevated',
+          'flex-1 flex flex-col h-full overflow-hidden',
           !showDetail && 'hidden lg:flex'
         )}
       >
@@ -53,15 +53,6 @@ export function SplitView({
         {detailPane}
       </div>
 
-      {/* Empty state for desktop when no detail */}
-      {!showDetail && (
-        <div className="hidden lg:flex flex-1 items-center justify-center">
-          <div className="text-center">
-            <p className="text-sm text-xedu-slate-400">Element tanlang</p>
-            <p className="text-xs text-xedu-slate-300 mt-1">Batafsil ma&apos;lumot ko&apos;rish uchun ro&apos;yxatdan tanlang</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -78,7 +69,7 @@ export function SplitViewListHeader({
   return (
     <div
       className={cn(
-        'flex items-center justify-between px-4 py-2.5 border-b border-xedu-slate-100 dark:border-xedu-slate-800 xedu-frosted sticky top-0 z-10',
+        'flex items-center justify-between px-4 py-2.5 border-b border-xedu-slate-100 dark:border-xedu-slate-800 bg-white dark:bg-xedu-slate-900',
         className
       )}
     >

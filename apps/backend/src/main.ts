@@ -30,8 +30,11 @@ async function bootstrap() {
 
   // Security
   app.use(helmet());
+  const isDev = process.env.NODE_ENV !== 'production';
   app.enableCors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') ?? ['http://localhost:3000'],
+    origin: isDev
+      ? (origin, cb) => cb(null, true)
+      : process.env.ALLOWED_ORIGINS?.split(',') ?? ['http://localhost:3000'],
     credentials: true,
   });
 

@@ -19,9 +19,10 @@ function getInitials(firstName?: string, lastName?: string): string {
 }
 
 function isNavActive(item: NavItem, pathname: string): boolean {
-  return item.exact
-    ? pathname === item.href
-    : pathname === item.href || pathname.startsWith(item.href + '/');
+  if (item.exact) return pathname === item.href;
+  if (pathname === item.href || pathname.startsWith(item.href + '/')) return true;
+  if (item.matchPaths?.some((p) => pathname === p || pathname.startsWith(p + '/'))) return true;
+  return false;
 }
 
 /* ── Nav Link ────────────────────────────────────────────────────────────── */
@@ -218,7 +219,7 @@ export function Sidebar() {
   return (
     <aside className={cn(
       'group/sidebar relative flex h-screen shrink-0 flex-col bg-xedu-slate-950 border-r border-xedu-slate-800 transition-[width] duration-[var(--xedu-duration)] ease-out',
-      sidebarCollapsed ? 'w-[84px]' : 'w-[272px]',
+      sidebarCollapsed ? 'w-[84px]' : 'w-[218px]',
     )}>
 
       {/* ── Logo ──────────────────────────────────────────────────────── */}

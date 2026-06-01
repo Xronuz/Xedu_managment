@@ -260,7 +260,7 @@ export default function ApprovalInboxPage() {
             </div>
 
             {/* Filters */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-0.5 bg-xedu-slate-100 dark:bg-xedu-slate-800 rounded-full p-0.5">
               <FilterChip active={filterType === 'all'} onClick={() => setFilterType('all')}>
                 Barchasi
               </FilterChip>
@@ -379,10 +379,10 @@ function FilterChip({
     <button
       onClick={onClick}
       className={cn(
-        'px-2 py-1 min-h-[44px] min-w-[44px] rounded-md text-[11px] font-semibold transition-colors',
+        'px-3 py-1 rounded-full text-[11px] font-semibold transition-all',
         active
-          ? 'bg-xedu-slate-900 text-white dark:bg-white dark:text-xedu-slate-900'
-          : 'text-xedu-slate-500 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800'
+          ? 'bg-white dark:bg-xedu-slate-700 text-xedu-slate-900 dark:text-white shadow-sm'
+          : 'text-xedu-slate-500 hover:text-xedu-slate-700 dark:hover:text-xedu-slate-300'
       )}
     >
       {children}

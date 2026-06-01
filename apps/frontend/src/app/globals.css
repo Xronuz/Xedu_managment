@@ -1374,7 +1374,7 @@ aside.group\/sidebar a {
   color: rgba(255,255,255,0.6) !important;
 }
 
-aside.group\/sidebar a:hover {
+aside.group\/sidebar a:not([class*="bg-xedu-emerald"]):hover {
   background-color: rgba(255,255,255,0.08) !important;
   color: #ffffff !important;
 }
@@ -1430,7 +1430,7 @@ aside.group\/sidebar a span {
   color: rgba(255,255,255,0.5) !important;
 }
 
-aside.group\/sidebar a:hover span {
+aside.group\/sidebar a:not([class*="bg-xedu-emerald"]):hover span {
   color: #ffffff !important;
 }
 

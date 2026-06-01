@@ -194,13 +194,6 @@ export function DirectorDashboard() {
             </Button>
           }
         />
-        <div className="sticky top-0 z-20 -mx-2 px-2 py-2 xedu-sticky-executive">
-          <SituationBar
-            data={situationData}
-            onAlertsClick={() => router.push('/dashboard/alerts')}
-            onApprovalsClick={() => router.push('/dashboard/approvals')}
-          />
-        </div>
       </div>
 
       <WorkspaceMain>

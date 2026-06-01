@@ -1387,7 +1387,8 @@ aside.group\/sidebar a:not([class*="bg-xedu-emerald"]):hover {
 }
 
 /* Logo text */
-aside.group\/sidebar span.text-white {
+aside.group\/sidebar span.text-white,
+aside.group\/sidebar a span.font-black {
   color: #1e293b !important;
 }
 

@@ -126,8 +126,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Sidebar />
             </div>
 
-            <div className="flex flex-1 min-w-0 flex-col overflow-hidden -ml-4 z-10">
-              <div className="flex flex-1 min-h-0 flex-col overflow-hidden rounded-tl-2xl bg-xedu-bg-canvas border-l border-t border-xedu-slate-100 dark:border-xedu-slate-800 shadow-[-4px_0_12px_-2px_rgba(0,0,0,0.05)]">
+            <div className="flex flex-1 min-w-0 flex-col overflow-hidden -ml-4 z-10 py-3">
+              <div className="flex flex-1 min-h-0 flex-col overflow-hidden rounded-l-2xl bg-xedu-bg-canvas border-l border-t border-b border-xedu-slate-100 dark:border-xedu-slate-800 shadow-[-4px_0_12px_-2px_rgba(0,0,0,0.05)]">
                 <Header />
                 <main
                   className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg-canvas dark:bg-xedu-bg-canvas p-6"

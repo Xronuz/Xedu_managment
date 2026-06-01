@@ -1381,13 +1381,17 @@ aside.group\/sidebar a:hover {
 
 /* Active nav item */
 aside.group\/sidebar a[class*="bg-xedu-emerald"] {
-  background-color: rgba(255,255,255,0.12) !important;
-  color: #ffffff !important;
-  border-left: 3px solid #10b981 !important;
+  background-color: #ffffff !important;
+  color: #0f2318 !important;
+  border-left: none !important;
+  border-radius: 12px !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
 }
 
 aside.group\/sidebar a[class*="bg-xedu-emerald"] span {
-  color: #10b981 !important;
+  background-color: transparent !important;
+  color: #059669 !important;
 }
 
 /* Icons inactive */

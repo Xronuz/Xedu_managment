@@ -264,7 +264,16 @@ export default function UsersPage() {
         }
       }
 
-      // 3. Parent → link to student if selected
+      // 3. Class teacher → assign to class if selected
+      if (values.role === 'class_teacher' && values.classId) {
+        try {
+          await classesApi.update(values.classId, { classTeacherId: created.id });
+        } catch {
+          toast({ variant: 'destructive', title: "Sinfga biriktirishda xato", description: "Sinf rahbari yaratildi, lekin sinfga biriktirilmadi" });
+        }
+      }
+
+      // 4. Parent → link to student if selected
       if (values.role === 'parent' && values.studentId) {
         try {
           await usersApi.linkParentStudent(created.id, values.studentId);
@@ -578,11 +587,11 @@ export default function UsersPage() {
               />
             </TH>
             <TH>Foydalanuvchi</TH>
-            <TH>Rol</TH>
-            <TH>Telefon</TH>
-            <TH>Filial</TH>
-            <TH>Holat</TH>
-            <TH className="text-right">Amal</TH>
+            <TH center>Rol</TH>
+            <TH center>Telefon</TH>
+            <TH center>Filial</TH>
+            <TH center>Holat</TH>
+            <TH right>Amal</TH>
           </THead>
           <TBody>
             {filtered.map((u: any) => {
@@ -601,12 +610,15 @@ export default function UsersPage() {
                         setSelectedUserIds((prev) => prev.filter((id) => id !== u.id));
                       }
                     }}
-                    className="h-4 w-4 rounded border-gray-300"
+                    className={cn(
+                      "h-4 w-4 rounded border-gray-300 transition-opacity duration-150",
+                      selectedUserIds.includes(u.id) ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                    )}
                   />
                 </TD>
                 <TD><AvatarCell name={`${u.firstName} ${u.lastName}`} subtitle={u.email} /></TD>
-                <TD><span className="text-[12px] font-semibold" style={{ color: DS.muted }}>{getRoleLabel(u.role)}</span></TD>
-                <TD><span className="text-[13px]" style={{ color: DS.muted }}>{u.phone || '—'}</span></TD>
+                <TD center><span className="text-[12px] font-semibold" style={{ color: DS.muted }}>{getRoleLabel(u.role)}</span></TD>
+                <TD center><span className="text-[13px]" style={{ color: DS.muted }}>{u.phone || '—'}</span></TD>
                 <TD>
                   <div className="flex flex-wrap gap-1 max-w-[140px]">
                     {u.branch?.name && (
@@ -621,12 +633,12 @@ export default function UsersPage() {
                     ))}
                   </div>
                 </TD>
-                <TD>
+                <TD center>
                   <StatusBadge variant={u.isActive ? 'success' : 'danger'}>
                     {u.isActive ? 'Aktiv' : 'Bloklangan'}
                   </StatusBadge>
                 </TD>
-                <TD className="text-right">
+                <TD right>
                   <div className="flex items-center justify-end gap-1.5">
                     {/* Parolni tiklash */}
                     {(() => {
@@ -1033,6 +1045,36 @@ export default function UsersPage() {
                     Fan nomini yozib, sinf tanlang. Har bir fan alohida sinfga biriktiriladi.
                   </p>
                 </div>
+              </div>
+            )}
+
+            {/* Sinf rahbari → Sinf tanlash */}
+            {watchedRole === 'class_teacher' && (
+              <div className="rounded-lg border border-emerald-200 bg-emerald-50 dark:bg-emerald-950/20 dark:border-emerald-800 p-3 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                  <GraduationCap className="h-4 w-4" /> Sinf rahbari sinfi
+                </div>
+                <Controller
+                  name="classId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value ?? ''} onValueChange={field.onChange}>
+                      <SelectTrigger className="bg-white dark:bg-xedu-slate-950">
+                        <SelectValue placeholder="Sinf tanlang..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(classesData ?? []).length === 0 ? (
+                          <div className="px-3 py-2 text-sm text-xedu-slate-500">Sinflar topilmadi</div>
+                        ) : (
+                          (classesData ?? []).map((c: any) => (
+                            <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 opacity-70">Sinf rahbari tanlangan sinfga avtomatik biriktiriladi</p>
               </div>
             )}
 

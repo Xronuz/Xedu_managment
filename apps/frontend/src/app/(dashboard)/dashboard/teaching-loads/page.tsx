@@ -448,14 +448,14 @@ export default function TeachingLoadsPage() {
                 filteredLoads.map((load: TeachingLoad) => {
                   const statusMeta = STATUS_LABELS[load.status] ?? { label: load.status, variant: 'outline' as const };
                   return (
-                    <tr key={load.id} className="border-b hover:bg-muted/30 transition-colors">
+                    <tr key={load.id} className="group border-b hover:bg-muted/30 transition-colors">
                       {isManager && (
                         <td className="px-4 py-3 text-center">
                           <input
                             type="checkbox"
                             checked={selectedIds.includes(load.id)}
                             onChange={() => toggleSelect(load.id)}
-                            className="h-4 w-4 rounded border-gray-300"
+                            className={cn("h-4 w-4 rounded border-gray-300 transition-opacity duration-150", selectedIds.includes(load.id) ? "opacity-100" : "opacity-0 group-hover:opacity-100")}
                           />
                         </td>
                       )}

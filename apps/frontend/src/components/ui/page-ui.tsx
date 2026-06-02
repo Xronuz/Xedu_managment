@@ -209,9 +209,9 @@ export function THead({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function TH({ children, className }: { children?: React.ReactNode; className?: string }) {
+export function TH({ children, className, center, right }: { children?: React.ReactNode; className?: string; center?: boolean; right?: boolean }) {
   return (
-    <th className={cn('px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.1em] whitespace-nowrap text-xedu-slate-500 dark:text-xedu-slate-400', className)}>
+    <th className={cn('px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.1em] whitespace-nowrap text-xedu-slate-500 dark:text-xedu-slate-400', center && 'text-center', right && 'text-right', className)}>
       {children}
     </th>
   );
@@ -226,7 +226,7 @@ export function TR({ children, onClick, className }: { children: React.ReactNode
     <tr
       onClick={onClick}
       className={cn(
-        'border-b border-black/[0.04] dark:border-white/[0.05] transition-colors duration-[var(--xedu-duration)]',
+        'group border-b border-black/[0.04] dark:border-white/[0.05] transition-colors duration-[var(--xedu-duration)]',
         onClick && 'cursor-pointer hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30',
         className,
       )}
@@ -236,9 +236,9 @@ export function TR({ children, onClick, className }: { children: React.ReactNode
   );
 }
 
-export function TD({ children, className }: { children?: React.ReactNode; className?: string }) {
+export function TD({ children, className, center, right }: { children?: React.ReactNode; className?: string; center?: boolean; right?: boolean }) {
   return (
-    <td className={cn('px-5 py-3.5 align-middle text-xedu-slate-900 dark:text-xedu-slate-100', className)}>
+    <td className={cn('px-5 py-3.5 align-middle text-xedu-slate-900 dark:text-xedu-slate-100', center && 'text-center', right && 'text-right', className)}>
       {children}
     </td>
   );

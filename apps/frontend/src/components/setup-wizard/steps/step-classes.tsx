@@ -49,11 +49,14 @@ export function StepClasses({ onDone }: StepClassesProps) {
       toast({ variant: 'destructive', title: `Sinif darajasi 1-${MAX_GRADE} orasida bo'lishi kerak` });
       return;
     }
-    const promises = bulkLetters.map((letter) =>
-      createMut.mutateAsync({ name: `${grade}${letter}`, gradeLevel: grade, academicYear })
-    );
-    await Promise.all(promises);
-    toast({ title: `${bulkLetters.length} ta sinf yaratildi` });
+    let created = 0;
+    for (const letter of bulkLetters) {
+      try {
+        await createMut.mutateAsync({ name: `${grade}${letter}`, gradeLevel: grade, academicYear });
+        created++;
+      } catch {}
+    }
+    if (created > 0) toast({ title: `${created} ta sinf yaratildi` });
   };
 
   const toggleLetter = (letter: string) => {
@@ -75,7 +78,7 @@ export function StepClasses({ onDone }: StepClassesProps) {
       </div>
 
       {/* Bulk create */}
-      <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 p-3 space-y-3">
+      <div className="rounded-xl border-2 border-xedu-slate-200 dark:border-xedu-slate-700 p-3 space-y-3">
         <p className="text-xs font-medium text-xedu-slate-700 dark:text-xedu-slate-200">Ommaviy yaratish</p>
         <div className="flex gap-2">
           <Input
@@ -104,8 +107,8 @@ export function StepClasses({ onDone }: StepClassesProps) {
               className={cn(
                 'text-xs px-2 py-1 rounded-full border transition-colors',
                 bulkLetters.includes(letter)
-                  ? 'border-xedu-primary/30 bg-xedu-primary-light/30 text-xedu-primary'
-                  : 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 hover:border-xedu-primary/20'
+                  ? 'border-xedu-primary bg-xedu-primary-light/40 text-xedu-primary font-semibold'
+                  : 'border-xedu-slate-400 dark:border-xedu-slate-500 text-xedu-slate-600 dark:text-xedu-slate-400 hover:border-xedu-primary/60'
               )}
             >
               {letter}

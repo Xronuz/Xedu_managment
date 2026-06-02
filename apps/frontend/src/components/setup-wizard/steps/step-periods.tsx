@@ -18,6 +18,16 @@ interface StepPeriodsProps {
 
 const DEFAULT_TEMPLATES = [
   {
+    name: '5 davr',
+    periods: [
+      { periodNumber: 1, startTime: '08:00', endTime: '08:45' },
+      { periodNumber: 2, startTime: '08:55', endTime: '09:40' },
+      { periodNumber: 3, startTime: '09:50', endTime: '10:35' },
+      { periodNumber: 4, startTime: '10:45', endTime: '11:30' },
+      { periodNumber: 5, startTime: '11:40', endTime: '12:25' },
+    ],
+  },
+  {
     name: '6 davr (standart)',
     periods: [
       { periodNumber: 1, startTime: '08:00', endTime: '08:45' },
@@ -29,7 +39,7 @@ const DEFAULT_TEMPLATES = [
     ],
   },
   {
-    name: '7 davr (uzaytirilgan)',
+    name: '7 davr',
     periods: [
       { periodNumber: 1, startTime: '08:00', endTime: '08:45' },
       { periodNumber: 2, startTime: '08:55', endTime: '09:40' },
@@ -38,6 +48,19 @@ const DEFAULT_TEMPLATES = [
       { periodNumber: 5, startTime: '11:40', endTime: '12:25' },
       { periodNumber: 6, startTime: '12:35', endTime: '13:20' },
       { periodNumber: 7, startTime: '13:30', endTime: '14:15' },
+    ],
+  },
+  {
+    name: '8 davr',
+    periods: [
+      { periodNumber: 1, startTime: '07:30', endTime: '08:10' },
+      { periodNumber: 2, startTime: '08:20', endTime: '09:00' },
+      { periodNumber: 3, startTime: '09:10', endTime: '09:50' },
+      { periodNumber: 4, startTime: '10:00', endTime: '10:40' },
+      { periodNumber: 5, startTime: '10:50', endTime: '11:30' },
+      { periodNumber: 6, startTime: '11:40', endTime: '12:20' },
+      { periodNumber: 7, startTime: '12:30', endTime: '13:10' },
+      { periodNumber: 8, startTime: '13:20', endTime: '14:00' },
     ],
   },
 ];
@@ -75,21 +98,28 @@ export function StepPeriods({ onDone }: StepPeriodsProps) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['periods'] }),
   });
 
-  const applyTemplate = (template: typeof DEFAULT_TEMPLATES[0]) => {
+  const applyTemplate = async (template: typeof DEFAULT_TEMPLATES[0]) => {
     if (!branchId) {
       toast({ variant: 'destructive', title: 'Avval filial tanlang' });
       return;
     }
-    const promises = template.periods.map((p) =>
-      createMut.mutateAsync({ ...p, branchId })
-    );
-    Promise.all(promises)
-      .then(() => {
-        toast({ title: `${template.periods.length} ta dars davri qo'shildi` });
-      })
-      .catch(() => {
-        toast({ variant: 'destructive', title: 'Ba\'zi davrlar qo\'shilmadi' });
-      });
+    // Delete existing periods first to avoid duplicates
+    for (const p of existingPeriods as any[]) {
+      try { await removeMut.mutateAsync(p.id); } catch {}
+    }
+    // Create periods one by one (serial) to avoid race conditions
+    let created = 0;
+    for (const p of template.periods) {
+      try {
+        await createMut.mutateAsync({ ...p, branchId });
+        created++;
+      } catch (e: any) {
+        toast({ variant: 'destructive', title: `${p.periodNumber}-davr qo'shilmadi`, description: e?.response?.data?.message });
+      }
+    }
+    if (created === template.periods.length) {
+      toast({ title: `${created} ta dars davri muvaffaqiyatli qo'shildi` });
+    }
   };
 
   const addCustom = () => {
@@ -129,26 +159,25 @@ export function StepPeriods({ onDone }: StepPeriodsProps) {
         </div>
       )}
 
-      {/* Templates */}
-      {existingPeriods.length === 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+      {/* Templates — always visible */}
+      <div>
+        <p className="text-xs font-medium text-xedu-slate-500 mb-2 uppercase tracking-wider">Tezkor shablonlar</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {DEFAULT_TEMPLATES.map((t) => (
             <Card
               key={t.name}
-              className="border border-xedu-slate-100 dark:border-xedu-slate-800 hover:border-xedu-primary/30 cursor-pointer transition-colors"
+              className="border border-xedu-slate-100 dark:border-xedu-slate-800 hover:border-xedu-primary/40 cursor-pointer transition-colors"
               onClick={() => applyTemplate(t)}
             >
-              <CardContent className="p-3 space-y-1">
-                <p className="text-sm font-medium flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-xedu-primary" />
-                  {t.name}
-                </p>
-                <p className="text-xs text-xedu-slate-500">{t.periods.length} ta davr</p>
+              <CardContent className="p-2.5 text-center">
+                <p className="text-sm font-bold text-xedu-primary">{t.periods.length}</p>
+                <p className="text-[10px] text-xedu-slate-500 mt-0.5">davr</p>
               </CardContent>
             </Card>
           ))}
         </div>
-      )}
+        <p className="text-[10px] text-xedu-slate-400 mt-1.5">Shablon tanlansa, mavjud davrlar almashtiriladi</p>
+      </div>
 
       {/* Periods list */}
       {isLoading ? (

@@ -210,11 +210,17 @@ export function Sidebar() {
     });
   }, [pathname, navGroups]);
 
+  // Accordion: yangi guruh ochilganda oldingilari yopiladi
   const toggleGroup = (title: string) =>
     setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      next.has(title) ? next.delete(title) : next.add(title);
-      return next;
+      if (prev.has(title)) {
+        // Ochiq bo'lsa — yopamiz
+        const next = new Set(prev);
+        next.delete(title);
+        return next;
+      }
+      // Yopiq bo'lsa — faqat shuni ochamiz, boshqalarini yopamiz
+      return new Set([title]);
     });
 
   return (

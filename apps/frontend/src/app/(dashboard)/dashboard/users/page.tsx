@@ -591,7 +591,7 @@ export default function UsersPage() {
 
         <TableShell>
           <THead>
-            <TH className="w-10 px-3">
+            <TH className="w-8 !px-3">
               <input
                 type="checkbox"
                 checked={selectedUserIds.length > 0 && selectedUserIds.length === filtered.length}
@@ -605,7 +605,7 @@ export default function UsersPage() {
                 className="h-4 w-4 rounded border-gray-300"
               />
             </TH>
-            <TH>Foydalanuvchi</TH>
+            <TH className="!pl-2">Foydalanuvchi</TH>
             <TH center>Rol</TH>
             <TH center>Telefon</TH>
             <TH center>Filial</TH>
@@ -618,7 +618,7 @@ export default function UsersPage() {
               const isUntouchable = u.role === 'super_admin' || u.role === 'director' || isSelf;
               return (
               <TR key={u.id}>
-                <TD className="w-10 px-3">
+                <TD className="w-8 !px-3">
                   <input
                     type="checkbox"
                     checked={selectedUserIds.includes(u.id)}
@@ -635,7 +635,7 @@ export default function UsersPage() {
                     )}
                   />
                 </TD>
-                <TD><AvatarCell name={`${u.firstName} ${u.lastName}`} subtitle={u.email} /></TD>
+                <TD className="!pl-2"><AvatarCell name={`${u.firstName} ${u.lastName}`} subtitle={u.email} /></TD>
                 <TD center><span className="text-[12px] font-semibold" style={{ color: DS.muted }}>{getRoleLabel(u.role)}</span></TD>
                 <TD center><span className="text-[13px]" style={{ color: DS.muted }}>{u.phone || '—'}</span></TD>
                 <TD>

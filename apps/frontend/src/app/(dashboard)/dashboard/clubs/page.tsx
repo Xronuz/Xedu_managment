@@ -493,11 +493,30 @@ function ClubCard({
 function LedClubCard({
   club, isAdmin, onEdit, onDelete,
 }: { club: any; isAdmin: boolean; onEdit: () => void; onDelete: () => void }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const ask = useConfirm();
   const [showRequests, setShowRequests] = useState(false);
+  const [showMembers, setShowMembers] = useState(false);
   const { data: pendingRequests = [] } = useQuery({
     queryKey: ['clubs', club.id, 'requests', 'PENDING'],
     queryFn: () => clubsApi.getJoinRequests(club.id, 'PENDING'),
     staleTime: 30_000,
+  });
+  const { data: members = [], refetch: refetchMembers } = useQuery({
+    queryKey: ['clubs', club.id, 'members'],
+    queryFn: () => clubsApi.getMembers(club.id),
+    enabled: showMembers,
+    staleTime: 30_000,
+  });
+  const removeMemberMut = useMutation({
+    mutationFn: (studentId: string) => clubsApi.removeMember(club.id, studentId),
+    onSuccess: () => {
+      toast({ title: "A'zo to'garakdan chiqarildi" });
+      refetchMembers();
+      qc.invalidateQueries({ queryKey: ['clubs'] });
+    },
+    onError: (err: any) => toast({ title: 'Xatolik', description: err?.response?.data?.message ?? 'Xatolik', variant: 'destructive' }),
   });
   const pendingCount = (pendingRequests as any[]).length;
 
@@ -541,14 +560,54 @@ function LedClubCard({
           </div>
         )}
 
-        <Button
-          size="sm" variant={pendingCount > 0 ? 'default' : 'outline'}
-          className="w-full"
-          onClick={() => setShowRequests(v => !v)}
-        >
-          <Bell className="h-3.5 w-3.5 mr-1" />
-          {showRequests ? 'Arizalarni yopish' : `Arizalar${pendingCount > 0 ? ` (${pendingCount})` : ''}`}
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            size="sm" variant="outline" className="flex-1"
+            onClick={() => { setShowMembers(v => !v); setShowRequests(false); }}
+          >
+            <Users className="h-3.5 w-3.5 mr-1" />
+            {showMembers ? "A'zolarni yopish" : `A'zolar (${club._count?.members ?? 0})`}
+          </Button>
+          <Button
+            size="sm" variant={pendingCount > 0 ? 'default' : 'outline'} className="flex-1"
+            onClick={() => { setShowRequests(v => !v); setShowMembers(false); }}
+          >
+            <Bell className="h-3.5 w-3.5 mr-1" />
+            {showRequests ? 'Yopish' : `Arizalar${pendingCount > 0 ? ` (${pendingCount})` : ''}`}
+          </Button>
+        </div>
+
+        {/* Members list */}
+        {showMembers && (
+          <div className="border-t pt-3 space-y-2">
+            {(members as any[]).length === 0 ? (
+              <p className="text-xs text-xedu-slate-500 text-center py-2">A'zolar yo'q</p>
+            ) : (
+              (members as any[]).map((m: any) => (
+                <div key={m.id} className="flex items-center gap-2 p-2 rounded-lg border bg-xedu-bg-elevated">
+                  <Avatar className="h-7 w-7 shrink-0">
+                    <AvatarImage src={m.avatarUrl} />
+                    <AvatarFallback className="text-[10px]">{m.firstName?.[0]}{m.lastName?.[0]}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium truncate">{m.firstName} {m.lastName}</p>
+                  </div>
+                  <Button
+                    size="icon" variant="ghost" className="h-6 w-6 text-xedu-ruby hover:text-xedu-ruby hover:bg-xedu-ruby/10"
+                    title="A'zolikdan chiqarish"
+                    onClick={async () => {
+                      if (await ask({ title: `${m.firstName} ${m.lastName}ni chiqarish`, description: "Bu a'zo to'garakdan chiqariladi.", variant: 'destructive', confirmText: "Chiqarish" }))
+                        removeMemberMut.mutate(m.id);
+                    }}
+                    disabled={removeMemberMut.isPending}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              ))
+            )}
+          </div>
+        )}
 
         {showRequests && (
           <div className="border-t pt-3">

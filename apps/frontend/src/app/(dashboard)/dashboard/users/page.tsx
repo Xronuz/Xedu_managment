@@ -591,21 +591,23 @@ export default function UsersPage() {
 
         <TableShell>
           <THead>
-            <TH className="w-8 !px-3">
-              <input
-                type="checkbox"
-                checked={selectedUserIds.length > 0 && selectedUserIds.length === filtered.length}
-                onChange={(e) => {
-                  if (e.target.checked) {
-                    setSelectedUserIds(filtered.map((u: any) => u.id));
-                  } else {
-                    setSelectedUserIds([]);
-                  }
-                }}
-                className="h-4 w-4 rounded border-gray-300"
-              />
+            <TH>
+              <div className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={selectedUserIds.length > 0 && selectedUserIds.length === filtered.length}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setSelectedUserIds(filtered.map((u: any) => u.id));
+                    } else {
+                      setSelectedUserIds([]);
+                    }
+                  }}
+                  className="h-4 w-4 rounded border-gray-300 shrink-0"
+                />
+                Foydalanuvchi
+              </div>
             </TH>
-            <TH className="!pl-2">Foydalanuvchi</TH>
             <TH center>Rol</TH>
             <TH center>Telefon</TH>
             <TH center>Filial</TH>
@@ -618,24 +620,26 @@ export default function UsersPage() {
               const isUntouchable = u.role === 'super_admin' || u.role === 'director' || isSelf;
               return (
               <TR key={u.id}>
-                <TD className="w-8 !px-3">
-                  <input
-                    type="checkbox"
-                    checked={selectedUserIds.includes(u.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedUserIds((prev) => [...prev, u.id]);
-                      } else {
-                        setSelectedUserIds((prev) => prev.filter((id) => id !== u.id));
-                      }
-                    }}
-                    className={cn(
-                      "h-4 w-4 rounded border-gray-300 transition-opacity duration-150",
-                      selectedUserIds.includes(u.id) ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                    )}
-                  />
+                <TD>
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="checkbox"
+                      checked={selectedUserIds.includes(u.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedUserIds((prev) => [...prev, u.id]);
+                        } else {
+                          setSelectedUserIds((prev) => prev.filter((id) => id !== u.id));
+                        }
+                      }}
+                      className={cn(
+                        "h-4 w-4 rounded border-gray-300 shrink-0 transition-opacity duration-150",
+                        selectedUserIds.includes(u.id) ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                      )}
+                    />
+                    <AvatarCell name={`${u.firstName} ${u.lastName}`} subtitle={u.email} />
+                  </div>
                 </TD>
-                <TD className="!pl-2"><AvatarCell name={`${u.firstName} ${u.lastName}`} subtitle={u.email} /></TD>
                 <TD center><span className="text-[12px] font-semibold" style={{ color: DS.muted }}>{getRoleLabel(u.role)}</span></TD>
                 <TD center><span className="text-[13px]" style={{ color: DS.muted }}>{u.phone || '—'}</span></TD>
                 <TD>

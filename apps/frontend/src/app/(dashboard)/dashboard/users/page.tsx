@@ -100,7 +100,9 @@ export default function UsersPage() {
   const isDirector = user?.role === 'director';
   const [csvResult, setCsvResult] = useState<{ created: number; skipped: number; errors: string[] } | null>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
-  const [teacherSubjects, setTeacherSubjects] = useState<{ name: string; classId: string }[]>([]);
+  const [teacherSubjects, setTeacherSubjects] = useState<{ name: string; classIds: string[] }[]>([]);
+  const [newSubjectName, setNewSubjectName] = useState('');
+  const [newSubjectClassIds, setNewSubjectClassIds] = useState<string[]>([]);
   const [subjectWarning, setSubjectWarning] = useState<string>('');
   const [filterRole, setFilterRole] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
@@ -301,25 +303,21 @@ export default function UsersPage() {
         }
       }
 
-      // 4. Teacher → create subjects if specified
+      // 4. Teacher: create subjects (one per subject, multiple classIds)
       if (values.role === 'teacher' && teacherSubjects.length > 0) {
-        try {
-          for (const subj of teacherSubjects) {
-            if (subj.name.trim() && subj.classId) {
-              await subjectsApi.create({
-                name: subj.name.trim(),
-                classIds: [subj.classId],
-                teacherId: created.id,
-              });
-            }
+        let totalClasses = 0;
+        for (const subj of teacherSubjects) {
+          if (subj.name.trim() && subj.classIds.length > 0) {
+            try {
+              await subjectsApi.create({ name: subj.name.trim(), classIds: subj.classIds, teacherId: created.id });
+              totalClasses += subj.classIds.length;
+            } catch { /* ignore per-subject error */ }
           }
-          toast({ title: ` Foydalanuvchi va ${teacherSubjects.length} ta fan qo'shildi` });
-        } catch {
-          toast({ variant: 'destructive', title: "Fan qo'shishda xato", description: "O'qituvchi yaratildi, lekin ba'zi fanlar qo'shilmadi" });
         }
+        toast({ title: `O'qituvchi va ${teacherSubjects.length} ta fan (${totalClasses} sinf) qo'shildi` });
       } else {
-        toast({ title: " Foydalanuvchi qo'shildi" });
-      }
+        toast({ title: "Foydalanuvchi qo'shildi" });
+      }}
 
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setTeacherSubjects([]);
@@ -997,7 +995,7 @@ export default function UsersPage() {
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{subj.name}</p>
                           <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
-                            {(classesData ?? []).find((c: any) => c.id === subj.classId)?.name ?? subj.classId}
+                            {subj.classIds.map((id: string) => (classesData ?? []).find((c: any) => c.id === id)?.name ?? id).join(', ')}
                           </p>
                         </div>
                         <Button
@@ -1014,65 +1012,62 @@ export default function UsersPage() {
                   </div>
                 )}
 
-                {/* Yangi fan qo'shish */}
-                <div className="space-y-2">
-                  <p className="text-xs text-violet-600 dark:text-violet-400 font-medium">Yangi fan qo'shish:</p>
-                  <div className="grid grid-cols-2 gap-2">
-                    <Input
-                      id="subject-name"
-                      placeholder="Fan nomi"
-                      className="bg-white dark:bg-white dark:bg-xedu-slate-950"
-                      onChange={(e) => {
-                        const name = e.target.value.trim();
-                        if (!name) { setSubjectWarning(''); return; }
-                        const dup = existingCatalog.find((s: any) => s.normalizedName === name.toLowerCase());
-                        if (dup) {
-                          const classHint = dup.count > 1 ? `${dup.count} ta sinf` : (dup.classes[0]?.name ?? '');
-                          setSubjectWarning(`"${dup.name}" fani allaqachon mavjud (${classHint})`);
-                        } else {
-                          setSubjectWarning('');
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') e.preventDefault();
-                      }}
-                    />
-                    <Select
-                      value=""
-                      onValueChange={(v) => {
-                        const nameInput = document.getElementById('subject-name') as HTMLInputElement;
-                        const name = nameInput?.value.trim();
-                        if (name && v) {
-                          const className = (classesData ?? []).find((c: any) => c.id === v)?.name ?? v;
-                          const alreadyInList = teacherSubjects.some(
-                            (s) => s.name.toLowerCase() === name.toLowerCase() && s.classId === v
-                          );
-                          if (alreadyInList) {
-                            toast({ variant: 'destructive', title: 'Bu fan allaqachon ro‘yxatda' });
-                            return;
-                          }
-                          setTeacherSubjects(prev => [...prev, { name, classId: v }]);
-                          nameInput.value = '';
-                          setSubjectWarning('');
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="bg-white dark:bg-white dark:bg-xedu-slate-950">
-                        <SelectValue placeholder="Sinf tanlang" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {(classesData ?? []).map((c: any) => (
-                          <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {subjectWarning && (
-                    <p className="text-xs text-xedu-amber dark:text-amber-400 font-medium"> {subjectWarning}</p>
+                {/* Yangi fan qo'shish - multi-sinf */}
+                <div className="space-y-2 border-t border-violet-200 dark:border-violet-800 pt-2">
+                  <Input
+                    placeholder="Fan nomi (masalan: Matematika)"
+                    className="bg-white dark:bg-xedu-slate-950"
+                    value={newSubjectName}
+                    onChange={(e) => setNewSubjectName(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.preventDefault(); }}
+                  />
+                  {(classesData ?? []).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5">
+                      {(classesData ?? []).map((c: any) => (
+                        <button
+                          key={c.id}
+                          type="button"
+                          onClick={() => setNewSubjectClassIds(prev =>
+                            prev.includes(c.id) ? prev.filter((id) => id !== c.id) : [...prev, c.id]
+                          )}
+                          className={cn(
+                            'px-2 py-0.5 rounded-full text-xs border transition-colors',
+                            newSubjectClassIds.includes(c.id)
+                              ? 'bg-violet-600 text-white border-violet-600'
+                              : 'bg-white dark:bg-xedu-slate-950 border-violet-300 text-violet-600 hover:border-violet-500'
+                          )}
+                        >
+                          {c.name}
+                        </button>
+                      ))}
+                    </div>
                   )}
-                  <p className="text-xs text-violet-600 dark:text-violet-400 opacity-70">
-                    Fan nomini yozib, sinf tanlang. Har bir fan alohida sinfga biriktiriladi.
-                  </p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    className="w-full border-violet-300 text-violet-700 dark:text-violet-400 hover:bg-violet-50"
+                    disabled={!newSubjectName.trim() || newSubjectClassIds.length === 0}
+                    onClick={() => {
+                      const name = newSubjectName.trim();
+                      if (!name || newSubjectClassIds.length === 0) return;
+                      setTeacherSubjects(prev => {
+                        const dup = prev.find((s) => s.name.toLowerCase() === name.toLowerCase());
+                        if (dup) {
+                          return prev.map((s) =>
+                            s.name.toLowerCase() === name.toLowerCase()
+                              ? { ...s, classIds: [...new Set([...s.classIds, ...newSubjectClassIds])] }
+                              : s
+                          );
+                        }
+                        return [...prev, { name, classIds: newSubjectClassIds }];
+                      });
+                      setNewSubjectName('');
+                      setNewSubjectClassIds([]);
+                    }}
+                  >
+                    + Qo'shish ({newSubjectClassIds.length > 0 ? `${newSubjectClassIds.length} sinf tanlangan` : 'sinf tanlang'})
+                  </Button>
                 </div>
               </div>
             )}

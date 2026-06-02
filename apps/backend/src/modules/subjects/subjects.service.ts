@@ -96,17 +96,34 @@ export class SubjectsService {
 
     const results: any[] = [];
     for (const classId of classIds) {
-      const subject = await this.prisma.subject.create({
-        data: {
+      // Upsert: bir xil nom+sinf+maktab bo'lsa o'qituvchini yangilaydi, aks holda yaratadi
+      const existing = await this.prisma.subject.findFirst({
+        where: {
           name: dto.name,
           classId,
-          teacherId: dto.teacherId,
           schoolId: currentUser.schoolId!,
-          branchId: currentUser.branchId!,
-          hoursPerWeek: dto.hoursPerWeek ?? 2,
         },
-        include: { teacher: { select: { id: true, firstName: true, lastName: true } } },
       });
+      let subject: any;
+      if (existing) {
+        subject = await this.prisma.subject.update({
+          where: { id: existing.id },
+          data: { teacherId: dto.teacherId, hoursPerWeek: dto.hoursPerWeek ?? existing.hoursPerWeek },
+          include: { teacher: { select: { id: true, firstName: true, lastName: true } } },
+        });
+      } else {
+        subject = await this.prisma.subject.create({
+          data: {
+            name: dto.name,
+            classId,
+            teacherId: dto.teacherId,
+            schoolId: currentUser.schoolId!,
+            branchId: currentUser.branchId!,
+            hoursPerWeek: dto.hoursPerWeek ?? 2,
+          },
+          include: { teacher: { select: { id: true, firstName: true, lastName: true } } },
+        });
+      }
       results.push(subject);
     }
     return results.length === 1 ? results[0] : results;

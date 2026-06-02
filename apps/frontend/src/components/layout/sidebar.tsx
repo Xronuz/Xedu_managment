@@ -2,21 +2,19 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
-import { cn, getCompactRoleLabel } from '@/lib/utils';
+import { usePathname, useRouter } from 'next/navigation';
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronsUpDown, LogOut, User, Settings } from 'lucide-react';
+import { cn, getCompactRoleLabel, getRoleLabel, getInitials } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import { useBranchStore } from '@/store/branch.store';
 import { useUIStore } from '@/store/ui.store';
 import { getNavForRole } from '@/config/navigation';
 import type { NavItem } from '@/config/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
-function getInitials(firstName?: string, lastName?: string): string {
-  const f = firstName?.[0] ?? '';
-  const l = lastName?.[0] ?? '';
-  return (f + l).toUpperCase() || 'U';
-}
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 function isNavActive(item: NavItem, pathname: string): boolean {
   if (item.exact) return pathname === item.href;
@@ -95,78 +93,68 @@ function GroupHeader({ title, collapsed, expanded, onToggle }: {
   );
 }
 
-/* ── Branch Context ──────────────────────────────────────────────────────── */
+/* ── Sidebar User Menu ───────────────────────────────────────────────────── */
 
-function BranchContext({ collapsed }: { collapsed: boolean }) {
+function SidebarUserMenu({ collapsed }: { collapsed: boolean }) {
+  const { user, logout } = useAuthStore();
   const { activeBranchMeta } = useBranchStore();
-  const { user } = useAuthStore();
+  const router = useRouter();
   if (!user) return null;
 
+  const initials   = getInitials(user.firstName, user.lastName);
+  const fullName   = `${user.firstName} ${user.lastName}`.trim() || user.email;
   const branchName = activeBranchMeta?.name ?? 'Barcha filiallar';
 
-  if (collapsed) {
-    return (
-      <div className="flex justify-center py-2">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-xedu-slate-800">
-          <span className="text-[10px] font-bold text-xedu-slate-300">
-            {branchName[0]}
-          </span>
-        </div>
-      </div>
-    );
-  }
+  const handleLogout = async () => {
+    await logout();
+    window.location.href = '/login?reason=logged_out';
+  };
 
   return (
-    <div className="mx-2 mb-2 rounded-xl bg-xedu-slate-800 px-3 py-2">
-      <p className="text-[10px] font-bold uppercase tracking-widest text-xedu-slate-500">
-        Filial
-      </p>
-      <p className="mt-0.5 truncate text-xs font-semibold text-xedu-slate-300">
-        {branchName}
-      </p>
-    </div>
-  );
-}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button className={cn(
+          'mx-2 mb-2 flex w-[calc(100%-1rem)] items-center rounded-xl transition-colors duration-150',
+          'hover:bg-xedu-slate-800 focus:outline-none focus-visible:ring-1 focus-visible:ring-xedu-primary/40',
+          collapsed ? 'justify-center p-2' : 'gap-2.5 bg-xedu-slate-900 px-3 py-2.5',
+        )}>
+          <Avatar className="h-8 w-8 shrink-0 ring-2 ring-xedu-slate-700">
+            <AvatarImage src={user.avatarUrl ?? undefined} />
+            <AvatarFallback className="bg-xedu-emerald/20 text-xs font-bold text-xedu-emerald">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+          {!collapsed && (
+            <>
+              <div className="min-w-0 flex-1 text-left">
+                <p className="truncate text-xs font-semibold text-xedu-slate-300">{fullName}</p>
+                <p className="truncate text-[10px] text-xedu-slate-500">{getCompactRoleLabel(user.role)}</p>
+              </div>
+              <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-xedu-slate-600" />
+            </>
+          )}
+        </button>
+      </DropdownMenuTrigger>
 
-/* ── Profile Footer ──────────────────────────────────────────────────────── */
-
-function ProfileFooter({ collapsed }: { collapsed: boolean }) {
-  const { user } = useAuthStore();
-  if (!user) return null;
-
-  const initials  = getInitials(user.firstName, user.lastName);
-  const fullName  = `${user.firstName} ${user.lastName}`.trim() || user.email;
-
-  if (collapsed) {
-    return (
-      <div className="flex justify-center py-3">
-        <Avatar className="h-8 w-8 ring-2 ring-xedu-slate-800">
-          <AvatarImage src={user.avatarUrl ?? undefined} />
-          <AvatarFallback className="bg-xedu-emerald/20 text-xs font-bold text-xedu-emerald">
-            {initials}
-          </AvatarFallback>
-        </Avatar>
-      </div>
-    );
-  }
-
-  return (
-    <div className="mx-2 mb-2 flex items-center gap-2.5 rounded-xl bg-xedu-slate-900 px-3 py-2.5">
-      <Avatar className="h-8 w-8 shrink-0 ring-2 ring-xedu-slate-800">
-        <AvatarImage src={user.avatarUrl ?? undefined} />
-        <AvatarFallback className="bg-xedu-emerald/20 text-xs font-bold text-xedu-emerald">
-          {initials}
-        </AvatarFallback>
-      </Avatar>
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-semibold text-xedu-slate-300">
-          {fullName}
-        </p>
-        <p className="truncate text-[10px] text-xedu-slate-500">
-          {getCompactRoleLabel(user.role)}
-        </p>
-      </div>
-    </div>
+      <DropdownMenuContent side="top" align={collapsed ? 'center' : 'start'} className="w-56 mb-1">
+        <DropdownMenuLabel className="pb-1">
+          <p className="text-sm font-semibold">{fullName}</p>
+          <p className="text-xs font-normal text-xedu-slate-400 mt-0.5">{getRoleLabel(user.role)}</p>
+          <p className="text-[10px] text-xedu-slate-500 mt-0.5">{branchName}</p>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => router.push('/dashboard/profile')} className="cursor-pointer">
+          <User className="mr-2 h-4 w-4 text-xedu-slate-400" /> Profil
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => router.push('/dashboard/settings')} className="cursor-pointer">
+          <Settings className="mr-2 h-4 w-4 text-xedu-slate-400" /> Sozlamalar
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-xedu-ruby focus:text-xedu-ruby focus:bg-xedu-ruby/10">
+          <LogOut className="mr-2 h-4 w-4" /> Chiqish
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -289,9 +277,8 @@ export function Sidebar() {
       </nav>
 
       {/* ── Footer ────────────────────────────────────────────────────── */}
-      <div className="shrink-0 border-t border-xedu-slate-800 py-2">
-        <BranchContext collapsed={sidebarCollapsed} />
-        <ProfileFooter collapsed={sidebarCollapsed} />
+      <div className="shrink-0 border-t border-xedu-slate-800 pt-2">
+        <SidebarUserMenu collapsed={sidebarCollapsed} />
       </div>
     </aside>
   );

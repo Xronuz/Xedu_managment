@@ -52,8 +52,16 @@ export class InvitationsService {
   }
 
   private getFrontendUrl(): string {
+    // FRONTEND_URL explicitly set takes priority
+    const explicit = this.config.get('FRONTEND_URL', '');
+    if (explicit) return explicit.trim();
+    // Fallback: first origin that is NOT a bind-all address
     const origins = this.config.get('ALLOWED_ORIGINS', 'http://localhost:3000');
-    return origins.split(',')[0].trim();
+    const valid = origins
+      .split(',')
+      .map((o: string) => o.trim())
+      .find((o: string) => !o.includes('0.0.0.0') && o.startsWith('http'));
+    return valid ?? 'http://localhost:3000';
   }
 
   private validateRoleCreation(creatorRole: UserRole, targetRole: UserRole): void {

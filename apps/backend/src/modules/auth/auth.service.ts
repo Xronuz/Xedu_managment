@@ -295,7 +295,13 @@ export class AuthService {
     }
 
     // Send password reset email
-    const frontendUrl = this.config.get('ALLOWED_ORIGINS', 'http://localhost:3000').split(',')[0].trim();
+    const explicit = this.config.get('FRONTEND_URL', '');
+    const frontendUrl = explicit
+      ? explicit.trim()
+      : (this.config.get('ALLOWED_ORIGINS', 'http://localhost:3000')
+          .split(',').map((o: string) => o.trim())
+          .find((o: string) => !o.includes('0.0.0.0') && o.startsWith('http'))
+        ?? 'http://localhost:3000');
     const resetUrl = `${frontendUrl}/reset-password?token=${resetToken}`;
     await this.notificationQueue.queueEmail({
       to: user.email,

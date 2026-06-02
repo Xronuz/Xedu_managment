@@ -317,7 +317,7 @@ export default function UsersPage() {
         toast({ title: `O'qituvchi va ${teacherSubjects.length} ta fan (${totalClasses} sinf) qo'shildi` });
       } else {
         toast({ title: "Foydalanuvchi qo'shildi" });
-      }}
+      }
 
       queryClient.invalidateQueries({ queryKey: ['users'] });
       setTeacherSubjects([]);
@@ -1056,7 +1056,7 @@ export default function UsersPage() {
                         if (dup) {
                           return prev.map((s) =>
                             s.name.toLowerCase() === name.toLowerCase()
-                              ? { ...s, classIds: [...new Set([...s.classIds, ...newSubjectClassIds])] }
+                              ? { ...s, classIds: Array.from(new Set([...s.classIds, ...newSubjectClassIds])) }
                               : s
                           );
                         }

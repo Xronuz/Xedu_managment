@@ -276,7 +276,7 @@ export function Sidebar() {
                 expanded={expanded}
                 onToggle={canCollapse && !sidebarCollapsed ? () => toggleGroup(group.title) : undefined}
               />
-              {(sidebarCollapsed || expanded) && (
+              {(sidebarCollapsed || expanded || !canCollapse) && (
                 <div className="flex flex-col gap-0.5">
                   {group.items.map((item) => (
                     <NavLink key={item.href} item={item} pathname={pathname} collapsed={sidebarCollapsed} />

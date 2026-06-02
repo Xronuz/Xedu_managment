@@ -765,11 +765,19 @@ export function SubjectsWorkspace() {
         selectedIds={selectedIds}
         actions={[
           {
-            id: 'export',
-            label: 'Export',
-            icon: ArrowRight,
-            tone: 'neutral',
-            onClick: () => toast({ title: `${selectedIds.length} ta fan export qilindi` }),
+            id: 'delete',
+            label: "O'chirish",
+            icon: Trash2,
+            tone: 'danger',
+            onClick: async () => {
+              if (!confirm(`${selectedIds.length} ta fanni o'chirishni tasdiqlaysizmi?`)) return;
+              for (const id of selectedIds) {
+                try { await subjectsApi.remove(id); } catch {}
+              }
+              toast({ title: `${selectedIds.length} ta fan o'chirildi` });
+              queryClient.invalidateQueries({ queryKey: ['subjects'] });
+              clearSelection();
+            },
           },
         ]}
         onClear={clearSelection}

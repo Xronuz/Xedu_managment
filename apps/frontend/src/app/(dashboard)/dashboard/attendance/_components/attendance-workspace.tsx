@@ -17,6 +17,7 @@ import { cn, getScoreColor, getInitials } from '@/lib/utils';
 import { attendanceApi } from '@/lib/api/attendance';
 import { classesApi } from '@/lib/api/classes';
 import { usersApi } from '@/lib/api/users';
+import { parentApi } from '@/lib/api/parent';
 import { useAuthStore } from '@/store/auth.store';
 import { useToast } from '@/components/ui/use-toast';
 import { AttendanceStatus } from '@eduplatform/types';
@@ -101,6 +102,7 @@ export function AttendanceWorkspace() {
   const isDirector = user?.role === 'director';
   const isVP = user?.role === 'vice_principal';
   const isBranchAdmin = user?.role === 'branch_admin';
+  const isParent = user?.role === 'parent';
   const canSeeAll = isDirector || isVP || isBranchAdmin;
 
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -119,7 +121,20 @@ export function AttendanceWorkspace() {
     queryKey: ['classes', activeBranchId],
     queryFn: classesApi.getAll,
   });
-  const classList: ClassInfo[] = Array.isArray(classes) ? classes : [];
+
+  // Parent: faqat bolasining sinfi ko'rinadi
+  const { data: parentChildren = [] } = useQuery({
+    queryKey: ['parent', 'children'],
+    queryFn: parentApi.getChildren,
+    enabled: isParent,
+  });
+  const childClassIds = new Set((parentChildren as any[]).map((c: any) => c.classId).filter(Boolean));
+
+  const classList: ClassInfo[] = (() => {
+    const all: ClassInfo[] = Array.isArray(classes) ? classes : [];
+    if (isParent && childClassIds.size > 0) return all.filter(c => childClassIds.has(c.id));
+    return all;
+  })();
 
   const { data: classStudents } = useQuery<ClassStudent[]>({
     queryKey: ['class-students', selectedClass, activeBranchId],

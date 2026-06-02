@@ -238,7 +238,7 @@ export function TodayScheduleWidget() {
                 {slot.timeSlot}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold truncate" style={{ color: C.text }}>{slot.subject?.name}</p>
+                <p className="text-sm font-semibold truncate" style={{ color: C.text }}>{slot.subject?.name ?? '—'}</p>
                 <p className="text-xs truncate" style={{ color: C.muted }}>
                   {slot.class?.name}{slot.roomNumber ? ` · ${slot.roomNumber}-xona` : ''}
                 </p>

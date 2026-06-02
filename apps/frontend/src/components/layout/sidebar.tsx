@@ -219,7 +219,7 @@ export function Sidebar() {
 
   return (
     <aside className={cn(
-      'group/sidebar relative flex h-screen shrink-0 flex-col bg-xedu-slate-950 border-r border-xedu-slate-800 transition-[width] duration-[var(--xedu-duration)] ease-out',
+      'group/sidebar relative flex h-screen shrink-0 flex-col bg-xedu-slate-950 border-r border-xedu-slate-800 transition-[width] duration-[var(--xedu-duration)] ease-out overflow-hidden',
       sidebarCollapsed ? 'w-[84px]' : 'w-[218px]',
     )}>
 
@@ -258,7 +258,7 @@ export function Sidebar() {
       </div>
 
       {/* ── Navigation ────────────────────────────────────────────────── */}
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-2 py-2 scrollbar-sidebar">
+      <nav className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-2 py-2 pb-4 scrollbar-sidebar">
         {navGroups.map((group, idx) => {
           const expanded    = expandedGroups.has(group.title);
           const canCollapse = idx > 0;

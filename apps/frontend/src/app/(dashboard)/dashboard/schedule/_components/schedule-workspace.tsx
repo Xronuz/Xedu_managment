@@ -1158,7 +1158,7 @@ export function ScheduleWorkspace() {
                 >
                   <BookOpen className="h-3.5 w-3.5 text-xedu-primary shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-xedu-slate-700 truncate">{s.subject?.name}</p>
+                    <p className="text-xs font-medium text-xedu-slate-700 truncate">{s.subject?.name ?? '—'}</p>
                     <p className="text-2xs text-xedu-slate-400">{s.class?.name} · {s.startTime}</p>
                   </div>
                 </button>

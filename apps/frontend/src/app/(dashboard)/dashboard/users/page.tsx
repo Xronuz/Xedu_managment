@@ -90,6 +90,8 @@ export default function UsersPage() {
   const [importOpen, setImportOpen] = useState(false);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [showPass, setShowPass] = useState(false);
+  const [editUser, setEditUser] = useState<any>(null);
+  const [editForm, setEditForm] = useState({ firstName: '', lastName: '', phone: '', role: '' });
   const [confirmDelete, setConfirmDelete]     = useState<any>(null);
   const [confirmHardDelete, setConfirmHardDelete] = useState<any>(null);
   const [confirmReset, setConfirmReset] = useState<any>(null);
@@ -218,6 +220,23 @@ export default function UsersPage() {
     onError: (err: any) => {
       const msg = err?.response?.data?.message;
       toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+    },
+  });
+
+  const editMutation = useMutation({
+    mutationFn: (id: string) => usersApi.update(id, {
+      firstName: editForm.firstName.trim(),
+      lastName:  editForm.lastName.trim(),
+      phone:     editForm.phone.trim() || undefined,
+    }),
+    onSuccess: () => {
+      toast({ title: 'Foydalanuvchi yangilandi' });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
+      setEditUser(null);
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: "Xato", description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
     },
   });
 
@@ -660,6 +679,12 @@ export default function UsersPage() {
                         </Btn>
                       ) : null;
                     })()}
+                    {!isSelf && (
+                      <Btn variant="soft" size="sm" icon={<Eye className="h-3.5 w-3.5" />}
+                        onClick={() => { setEditUser(u); setEditForm({ firstName: u.firstName, lastName: u.lastName, phone: u.phone ?? '', role: u.role }); }}
+                        title="Tahrirlash"
+                      />
+                    )}
                     {isUntouchable ? (
                       <span className="text-[12px]" style={{ color: DS.muted }}>—</span>
                     ) : u.isActive ? (
@@ -1157,6 +1182,51 @@ export default function UsersPage() {
             reset();
           }}
         />
+      )}
+
+      {/* Edit user dialog */}
+      {editUser && (
+        <Dialog open={!!editUser} onOpenChange={(v) => { if (!v) setEditUser(null); }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Foydalanuvchini tahrirlash</DialogTitle>
+              <DialogDescription>{editUser.email} — Email o'zgartirib bo'lmaydi</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-2">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Ism</Label>
+                  <Input value={editForm.firstName} onChange={e => setEditForm(p => ({ ...p, firstName: e.target.value }))} placeholder="Ism" />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Familiya</Label>
+                  <Input value={editForm.lastName} onChange={e => setEditForm(p => ({ ...p, lastName: e.target.value }))} placeholder="Familiya" />
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Telefon</Label>
+                <Input value={editForm.phone} onChange={e => setEditForm(p => ({ ...p, phone: e.target.value }))} placeholder="+998 90 000 00 00" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Email (o'zgartirib bo'lmaydi)</Label>
+                <Input value={editUser.email} disabled className="opacity-60 cursor-not-allowed" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Rol</Label>
+                <div className="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground items-center">
+                  {getRoleLabel(editForm.role)}
+                </div>
+                <p className="text-xs text-xedu-slate-500">Rolni o'zgartirish uchun foydalanuvchini yangi filialga tayinlang</p>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setEditUser(null)}>Bekor qilish</Button>
+              <Button disabled={editMutation.isPending || !editForm.firstName.trim() || !editForm.lastName.trim()} onClick={() => editMutation.mutate(editUser.id)}>
+                {editMutation.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saqlanmoqda...</> : 'Saqlash'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
 
       {/* Excel import dialog */}

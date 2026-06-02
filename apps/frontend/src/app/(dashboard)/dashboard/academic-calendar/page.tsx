@@ -263,9 +263,12 @@ export default function AcademicCalendarPage() {
               return (
                 <div key={e.id} className="flex items-center gap-3 rounded-lg border p-3 text-sm">
                   <div className="h-3 w-3 rounded-full shrink-0" style={{ background: e.color ?? typeConf?.color ?? '#94a3b8' }} />
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <p className="font-medium">{e.title}</p>
-                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
+                    {e.description && (
+                      <p className="text-xs text-xedu-slate-600 dark:text-xedu-slate-300 mt-0.5 line-clamp-2">{e.description}</p>
+                    )}
+                    <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mt-0.5">
                       {new Date(e.startDate).toLocaleDateString('uz-UZ')}
                       {e.startDate !== e.endDate && ` – ${new Date(e.endDate).toLocaleDateString('uz-UZ')}`}
                     </p>

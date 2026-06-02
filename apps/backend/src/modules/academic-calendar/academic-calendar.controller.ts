@@ -17,8 +17,8 @@ export class AcademicCalendarController {
 
   @Get()
   @Roles(
-    UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.TEACHER,
-    UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT, UserRole.ACCOUNTANT,
+    UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN,
+    UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.STUDENT, UserRole.PARENT, UserRole.ACCOUNTANT,
   )
   @ApiOperation({ summary: 'Akademik kalendar tadbirlari' })
   @ApiQuery({ name: 'from', required: false, description: 'ISO date (from)' })

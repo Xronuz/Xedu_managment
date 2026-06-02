@@ -591,7 +591,7 @@ export default function UsersPage() {
 
         <TableShell>
           <THead>
-            <TH>
+            <TH className="w-10 px-3">
               <input
                 type="checkbox"
                 checked={selectedUserIds.length > 0 && selectedUserIds.length === filtered.length}
@@ -618,7 +618,7 @@ export default function UsersPage() {
               const isUntouchable = u.role === 'super_admin' || u.role === 'director' || isSelf;
               return (
               <TR key={u.id}>
-                <TD>
+                <TD className="w-10 px-3">
                   <input
                     type="checkbox"
                     checked={selectedUserIds.includes(u.id)}

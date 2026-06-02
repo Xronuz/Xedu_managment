@@ -85,7 +85,7 @@ export function StepPeriods({ onDone }: StepPeriodsProps) {
   const branchId = selectedBranchId || branches[0]?.id || '';
 
   const createMut = useMutation({
-    mutationFn: (payload: { periodNumber: number; startTime: string; endTime: string; branchId: string }) =>
+    mutationFn: (payload: { periodNumber: number; startTime: string; endTime: string }) =>
       periodsApi.create(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['periods'] });
@@ -111,7 +111,7 @@ export function StepPeriods({ onDone }: StepPeriodsProps) {
     let created = 0;
     for (const p of template.periods) {
       try {
-        await createMut.mutateAsync({ ...p, branchId });
+        await createMut.mutateAsync({ periodNumber: p.periodNumber, startTime: p.startTime, endTime: p.endTime });
         created++;
       } catch (e: any) {
         toast({ variant: 'destructive', title: `${p.periodNumber}-davr qo'shilmadi`, description: e?.response?.data?.message });
@@ -130,7 +130,7 @@ export function StepPeriods({ onDone }: StepPeriodsProps) {
 
   const saveCustom = async (item: typeof localPeriods[0]) => {
     if (!branchId) return;
-    await createMut.mutateAsync({ periodNumber: item.periodNumber, startTime: item.startTime, endTime: item.endTime, branchId });
+    await createMut.mutateAsync({ periodNumber: item.periodNumber, startTime: item.startTime, endTime: item.endTime });
     setLocalPeriods((p) => p.filter((x) => x.periodNumber !== item.periodNumber));
   };
 

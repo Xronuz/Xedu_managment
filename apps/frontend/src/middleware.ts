@@ -84,7 +84,11 @@ export function middleware(request: NextRequest) {
   // ── 2. Dashboard routes require authentication ────────────────────────
   if (pathname.startsWith('/dashboard')) {
     if (!isAuthenticated) {
-      const login = new URL('/login', request.url);
+      // Use x-forwarded-host to avoid 0.0.0.0 bind address in redirects
+      const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? '';
+      const proto = request.headers.get('x-forwarded-proto') ?? (host.includes('localhost') ? 'http' : 'https');
+      const base = host ? `${proto}://${host}` : request.nextUrl.origin;
+      const login = new URL('/login', base);
       login.searchParams.set('reason', 'session_expired');
       return NextResponse.redirect(login);
     }

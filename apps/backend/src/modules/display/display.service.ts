@@ -11,22 +11,22 @@ export class DisplayService {
   async getTodaySchedule(schoolSlug: string, branchId?: string) {
     const school = await this.prisma.school.findUnique({
       where: { slug: schoolSlug },
-      select: {
-        id: true, name: true, slug: true, phone: true, logoUrl: true,
-        modules: { select: { name: true, isEnabled: true } },
-      },
+      select: { id: true, name: true, slug: true, phone: true, logoUrl: true },
     });
 
     if (!school) throw new NotFoundException(`Maktab topilmadi: ${schoolSlug}`);
 
     // Display moduli yoqilganmi tekshirish
-    const displayModule = (school.modules as any[]).find(m => m.name === 'display');
+    const displayModule = await this.prisma.schoolModule.findFirst({
+      where: { schoolId: school.id, moduleName: 'display' as any },
+      select: { isEnabled: true },
+    });
     if (displayModule && !displayModule.isEnabled) {
       throw new NotFoundException('Display moduli bu maktab uchun yoqilmagan');
     }
 
     // Filial ma'lumotlari
-    let branch: { id: string; name: string; code: string } | null = null;
+    let branch: { id: string; name: string; code: string | null } | null = null;
     if (branchId) {
       branch = await this.prisma.branch.findFirst({
         where: { id: branchId, schoolId: school.id },

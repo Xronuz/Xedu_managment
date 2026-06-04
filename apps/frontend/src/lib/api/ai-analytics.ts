@@ -127,4 +127,21 @@ export const aiAnalyticsApi = {
 
   updateConfig: (cfg: Partial<RuleEngineConfig>) =>
     apiClient.put<RuleEngineConfig>('/ai-analytics/config', cfg).then(r => r.data),
+
+  resetConfig: () =>
+    apiClient.post<RuleEngineConfig>('/ai-analytics/config/reset', {}).then(r => r.data),
+
+  previewConfig: (cfg: Partial<RuleEngineConfig>) =>
+    apiClient.post<{
+      distribution: { critical: number; high: number; medium: number; low: number };
+      totalStudents: number;
+      sampleSize: number;
+    }>('/ai-analytics/config/preview', cfg).then(r => r.data),
+
+  getConfigAuditLog: () =>
+    apiClient.get<Array<{
+      timestamp: string; userId: string; userName: string; userRole: string;
+      action: 'update' | 'reset_to_default';
+      oldConfig: RuleEngineConfig; newConfig: RuleEngineConfig;
+    }>>('/ai-analytics/config/audit').then(r => r.data),
 };

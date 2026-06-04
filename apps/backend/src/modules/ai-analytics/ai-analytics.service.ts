@@ -147,34 +147,130 @@ const RULES = {
 export class AiAnalyticsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // -- Calibration Panel CRUD ------------------------------------------------
+  // -- Calibration Panel CRUD -----------------------------------------------
+
   async getRuleEngineConfig(schoolId: string): Promise<RuleEngineConfig> {
     const record = await this.prisma.systemConfig.findUnique({
       where: { schoolId_key: { schoolId, key: RULE_ENGINE_CONFIG_KEY } },
       select: { value: true },
     });
-    return record ? { ...DEFAULT_RULE_CONFIG, ...(record.value as Partial<RuleEngineConfig>) } : { ...DEFAULT_RULE_CONFIG };
+    return record
+      ? { ...DEFAULT_RULE_CONFIG, ...(record.value as Partial<RuleEngineConfig>) }
+      : { ...DEFAULT_RULE_CONFIG };
   }
 
-  async updateRuleEngineConfig(schoolId: string, partial: Partial<RuleEngineConfig>): Promise<RuleEngineConfig> {
+  // Guard 1: Threshold validation
+  private validateConfig(cfg: RuleEngineConfig): string | null {
+    if (cfg.criticalThreshold <= cfg.highThreshold)
+      return `criticalThreshold (${cfg.criticalThreshold}) > highThreshold (${cfg.highThreshold}) bo'lishi shart`;
+    if (cfg.highThreshold <= cfg.mediumThreshold)
+      return `highThreshold (${cfg.highThreshold}) > mediumThreshold (${cfg.mediumThreshold}) bo'lishi shart`;
+    if (cfg.mediumThreshold < 5)
+      return `mediumThreshold kamida 5 bo'lishi kerak`;
+    if (cfg.criticalThreshold > 99)
+      return `criticalThreshold 99 dan katta bo'lishi mumkin emas`;
+    return null;
+  }
+
+  async updateRuleEngineConfig(
+    schoolId: string,
+    partial: Partial<RuleEngineConfig>,
+    updatedBy?: { id: string; name: string; role: string },
+  ): Promise<{ config: RuleEngineConfig; validationError?: string }> {
     const current = await this.getRuleEngineConfig(schoolId);
-    const updated = { ...current };
-    const fields: (keyof RuleEngineConfig)[] = [
+    const updated  = { ...current };
+    const FIELDS: (keyof RuleEngineConfig)[] = [
       'attendanceWeight','gpaWeight','gpaDropWeight','paymentWeight','disciplineWeight','homeworkWeight',
       'attendanceThreshold','gpaThreshold','gpaDropThreshold','homeworkThreshold','disciplineThreshold',
       'minGpaSample','criticalThreshold','highThreshold','mediumThreshold',
     ];
-    for (const f of fields) {
+    for (const f of FIELDS) {
       if (partial[f] !== undefined && typeof partial[f] === 'number') {
         (updated as any)[f] = partial[f];
       }
     }
+
+    // Guard 1 -- Threshold order validation
+    const err = this.validateConfig(updated);
+    if (err) return { config: current, validationError: err };
+
+    // Guard 3 -- Reset to default if requested
+    const isReset = (partial as any).__reset === true;
+    const finalConfig = isReset ? { ...DEFAULT_RULE_CONFIG } : updated;
+
+    // Save config
     await this.prisma.systemConfig.upsert({
       where:  { schoolId_key: { schoolId, key: RULE_ENGINE_CONFIG_KEY } },
-      update: { value: updated as any },
-      create: { schoolId, key: RULE_ENGINE_CONFIG_KEY, value: updated as any, label: 'Rule Engine konfiguratsiyasi' },
+      update: { value: finalConfig as any, updatedBy: updatedBy?.id },
+      create: { schoolId, key: RULE_ENGINE_CONFIG_KEY, value: finalConfig as any, label: 'Rule Engine konfiguratsiyasi', updatedBy: updatedBy?.id },
     });
-    return updated;
+
+    // Guard 2 -- Audit log (append to existing array in SystemConfig)
+    if (updatedBy) {
+      const AUDIT_KEY = `${RULE_ENGINE_CONFIG_KEY}_audit`;
+      const auditRecord = await this.prisma.systemConfig.findUnique({
+        where: { schoolId_key: { schoolId, key: AUDIT_KEY } },
+        select: { value: true },
+      });
+      const entries: any[] = Array.isArray((auditRecord?.value as any)) ? (auditRecord!.value as any) : [];
+      entries.push({
+        timestamp:   new Date().toISOString(),
+        userId:      updatedBy.id,
+        userName:    updatedBy.name,
+        userRole:    updatedBy.role,
+        action:      isReset ? 'reset_to_default' : 'update',
+        oldConfig:   current,
+        newConfig:   finalConfig,
+      });
+      // Keep last 50 entries
+      const trimmed = entries.slice(-50);
+      await this.prisma.systemConfig.upsert({
+        where:  { schoolId_key: { schoolId, key: AUDIT_KEY } },
+        update: { value: trimmed as any },
+        create: { schoolId, key: AUDIT_KEY, value: trimmed as any, label: 'Rule Engine audit log' },
+      });
+    }
+
+    return { config: finalConfig };
+  }
+
+  // Guard 4 -- Preview: temp config bilan distribution hisoblash
+  async previewConfig(user: JwtPayload, tempConfig: Partial<RuleEngineConfig>): Promise<{
+    distribution: { critical: number; high: number; medium: number; low: number };
+    totalStudents: number;
+    sampleSize: number;
+  }> {
+    const baseCfg = await this.getRuleEngineConfig(user.schoolId!);
+    const cfg: RuleEngineConfig = { ...baseCfg, ...tempConfig };
+
+    const err = this.validateConfig(cfg);
+    if (err) throw new Error(err);
+
+    // Fast preview: use first 50 students (perf tradeoff)
+    const profiles = await this.getStudentRiskProfiles(user);
+    const SAMPLE = profiles.slice(0, 50);
+
+    const dist = { critical: 0, high: 0, medium: 0, low: 0 };
+    for (const p of SAMPLE) {
+      // Re-score with new thresholds only (weights already applied)
+      const s = p.riskScore;
+      if      (s >= cfg.criticalThreshold) dist.critical++;
+      else if (s >= cfg.highThreshold)     dist.high++;
+      else if (s >= cfg.mediumThreshold)   dist.medium++;
+      else                                 dist.low++;
+    }
+
+    return { distribution: dist, totalStudents: profiles.length, sampleSize: SAMPLE.length };
+  }
+
+  // Guard 2 -- Get audit log
+  async getConfigAuditLog(schoolId: string): Promise<any[]> {
+    const AUDIT_KEY = `${RULE_ENGINE_CONFIG_KEY}_audit`;
+    const record = await this.prisma.systemConfig.findUnique({
+      where: { schoolId_key: { schoolId, key: AUDIT_KEY } },
+      select: { value: true },
+    });
+    return Array.isArray(record?.value) ? (record!.value as any[]).reverse() : [];
   }
 
   // -- Haftalik davomat trendini hisoblash ------------------------------------

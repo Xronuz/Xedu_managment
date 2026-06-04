@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
 import {
   Brain, AlertTriangle, TrendingUp, TrendingDown, Minus,
   Users, GraduationCap, Calendar, ShieldAlert, ChevronDown, ChevronUp,
-  Search, CreditCard, BookOpen, Activity,
+  Search, CreditCard, BookOpen, Activity, SlidersHorizontal,
 } from 'lucide-react';
+import { useAuthStore } from '@/store/auth.store';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -380,6 +382,7 @@ function TriggeredCard({ label, count, total, icon: Icon, color }: {
 
 // ── Main page ──────────────────────────────────────────────────────────────
 export default function InsightsPage() {
+  const { user } = useAuthStore();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'ALL' | 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'>('ALL');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -410,14 +413,26 @@ export default function InsightsPage() {
       <AnalyticsSectionNav />
 
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-2">
-          <Brain className="h-6 w-6 text-indigo-500" />
-          <h1 className="text-2xl font-bold tracking-tight">Insights</h1>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <Brain className="h-6 w-6 text-indigo-500" />
+            <h1 className="text-2xl font-bold tracking-tight">Insights</h1>
+          </div>
+          <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
+            Rule-based xavf baholash · Har o'quvchi uchun aniq sabab va tavsiya
+          </p>
         </div>
-        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400 mt-1">
-          Rule-based xavf baholash · Har o'quvchi uchun aniq sabab va tavsiya
-        </p>
+        {/* Calibration button — director va branch_admin uchun */}
+        {['director', 'branch_admin', 'super_admin'].includes(user?.role ?? '') && (
+          <Link
+            href="/dashboard/insights/calibration"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-xedu-slate-200 dark:border-xedu-slate-700 text-sm font-medium text-xedu-slate-600 dark:text-xedu-slate-300 hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all shrink-0"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Kalibrasiya
+          </Link>
+        )}
       </div>
 
       {/* Summary KPI cards */}

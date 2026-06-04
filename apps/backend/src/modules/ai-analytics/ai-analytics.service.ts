@@ -16,13 +16,14 @@ export interface RuleBreakdown {
     triggered: boolean;
   };
   gpaDrop: {
-    score:     number;   // risk hissasi (0-15)
-    dropPct:   number;   // so'nggi 4 hafta vs avvalgi 4 hafta farqi (%)
-    triggered: boolean;
+    score:       number;   // risk hissasi (0-15)
+    dropPct:     number;   // so'nggi 4 hafta vs avvalgi 4 hafta farqi (%)
+    triggered:   boolean;
+    skipped:     boolean;  // true = minimum sample yetmadi
   };
   payment: {
     score:          number;  // risk hissasi (0-20)
-    overdueMonths:  number;  // kechikkan oylar soni
+    overdueMonths:  number;  // distinct kechikkan oylar soni
     triggered:      boolean;
   };
   discipline: {
@@ -34,6 +35,11 @@ export interface RuleBreakdown {
     score:       number;  // risk hissasi (0-10)
     completion:  number;  // % (topshirilgan / berilgan)
     triggered:   boolean;
+  };
+  trendPenalty: {
+    score:     number;   // bonus risk (0, 5, yoki 10)
+    weeks:     number;   // ketma-ket pasaygan haftalar soni
+    triggered: boolean;
   };
 }
 
@@ -61,6 +67,7 @@ export interface StudentRiskProfile {
   // ─── Explainability ──────────────────────────────────────────────────────
   ruleBreakdown:          RuleBreakdown;
   weeklyTrend:            WeeklyTrend[];     // so'nggi 8 hafta
+  primaryReason:          string;
   recommendations:        string[];
 }
 
@@ -145,57 +152,74 @@ export class AiAnalyticsService {
 
   // ── Asosiy risk hisoblash ──────────────────────────────────────────────────
   private computeRiskScore(
-    attendanceRate:   number,
-    gpa:              number,
-    gpaDrop:          number,   // %
-    overdueMonths:    number,
-    disciplineCount:  number,
-    homeworkPct:      number,
+    attendanceRate:        number,
+    gpa:                   number,
+    gpaDrop:               number,   // %
+    gpaDropSkipped:        boolean,  // Fix 1: minimum sample yetmadi
+    overdueMonths:         number,   // Fix 2: distinct calendar months
+    disciplineCount:       number,
+    homeworkPct:           number,
+    consecutiveDeclining:  number,   // Fix 4: trend penalty
   ): { score: number; breakdown: RuleBreakdown } {
 
-    // Attendance: < 80% → maksimal 30 ball
+    // Signal 1 — Attendance: < 80% -> maks 30 ball
     const attTriggered = attendanceRate < RULES.ATTENDANCE_THRESHOLD;
     const attScore = attTriggered
-      ? Math.min(RULES.ATTENDANCE_MAX, Math.round((RULES.ATTENDANCE_THRESHOLD - attendanceRate) / RULES.ATTENDANCE_THRESHOLD * RULES.ATTENDANCE_MAX))
+      ? Math.min(RULES.ATTENDANCE_MAX, Math.round(
+          (RULES.ATTENDANCE_THRESHOLD - attendanceRate) / RULES.ATTENDANCE_THRESHOLD * RULES.ATTENDANCE_MAX
+        ))
       : 0;
 
-    // GPA: < 3.0 → maksimal 25 ball
+    // Signal 2 — GPA: < 3.0 -> maks 25 ball
     const gpaTriggered = gpa < RULES.GPA_THRESHOLD;
     const gpaScore = gpaTriggered
-      ? Math.min(RULES.GPA_MAX, Math.round((RULES.GPA_THRESHOLD - gpa) / RULES.GPA_THRESHOLD * RULES.GPA_MAX))
+      ? Math.min(RULES.GPA_MAX, Math.round(
+          (RULES.GPA_THRESHOLD - gpa) / RULES.GPA_THRESHOLD * RULES.GPA_MAX
+        ))
       : 0;
 
-    // GPA drop: > 15% tushsa → maksimal 15 ball
-    const gpaDropTriggered = gpaDrop > RULES.GPA_DROP_THRESHOLD;
+    // Signal 3 — GPA drop: > 15% tushsa -> maks 15 ball
+    // Fix 1: gpaDropSkipped=true bo'lsa (sample yetarli emas) — trigger bo'lmaydi
+    const gpaDropTriggered = !gpaDropSkipped && gpaDrop > RULES.GPA_DROP_THRESHOLD;
     const gpaDropScore = gpaDropTriggered
-      ? Math.min(RULES.GPA_DROP_MAX, Math.round((gpaDrop - RULES.GPA_DROP_THRESHOLD) / RULES.GPA_DROP_THRESHOLD * RULES.GPA_DROP_MAX))
+      ? Math.min(RULES.GPA_DROP_MAX, Math.round(
+          (gpaDrop - RULES.GPA_DROP_THRESHOLD) / RULES.GPA_DROP_THRESHOLD * RULES.GPA_DROP_MAX
+        ))
       : 0;
 
-    // Payment: har kechikkan oy uchun 10 ball, maks 20
+    // Signal 4 — Payment: maks 20 ball (Fix 2: distinct months)
     const payTriggered = overdueMonths > 0;
     const payScore = Math.min(RULES.PAYMENT_MAX, overdueMonths * 10);
 
-    // Discipline: > 3 hodisa → maksimal 15 ball
+    // Signal 5 — Discipline: > 3 hodisa -> maks 15 ball
     const discTriggered = disciplineCount > RULES.DISCIPLINE_THRESHOLD;
     const discScore = discTriggered
       ? Math.min(RULES.DISCIPLINE_MAX, disciplineCount * 3)
       : disciplineCount > 0 ? disciplineCount * 2 : 0;
 
-    // Homework: < 60% → maksimal 10 ball
+    // Signal 6 — Homework: < 60% -> maks 10 ball
     const hwTriggered = homeworkPct < RULES.HOMEWORK_THRESHOLD;
     const hwScore = hwTriggered
-      ? Math.min(RULES.HOMEWORK_MAX, Math.round((RULES.HOMEWORK_THRESHOLD - homeworkPct) / RULES.HOMEWORK_THRESHOLD * RULES.HOMEWORK_MAX))
+      ? Math.min(RULES.HOMEWORK_MAX, Math.round(
+          (RULES.HOMEWORK_THRESHOLD - homeworkPct) / RULES.HOMEWORK_THRESHOLD * RULES.HOMEWORK_MAX
+        ))
       : 0;
 
-    const total = Math.min(100, attScore + gpaScore + gpaDropScore + payScore + discScore + hwScore);
+    // Fix 4 — Trend penalty: asosiy score'dan alohida accelerator
+    const trendScore  = consecutiveDeclining >= 3 ? 10 : consecutiveDeclining >= 2 ? 5 : 0;
+    const trendTriggered = trendScore > 0;
+
+    const baseSignals = attScore + gpaScore + gpaDropScore + payScore + discScore + hwScore;
+    const total       = Math.min(100, baseSignals + trendScore);
 
     const breakdown: RuleBreakdown = {
-      attendance: { score: attScore, rate: attendanceRate, triggered: attTriggered },
-      gpa:        { score: gpaScore, value: gpa, triggered: gpaTriggered },
-      gpaDrop:    { score: gpaDropScore, dropPct: gpaDrop, triggered: gpaDropTriggered },
-      payment:    { score: payScore, overdueMonths, triggered: payTriggered },
-      discipline: { score: discScore, incidents: disciplineCount, triggered: discTriggered },
-      homework:   { score: hwScore, completion: homeworkPct, triggered: hwTriggered },
+      attendance:   { score: attScore,      rate: attendanceRate,           triggered: attTriggered      },
+      gpa:          { score: gpaScore,      value: gpa,                     triggered: gpaTriggered      },
+      gpaDrop:      { score: gpaDropScore,  dropPct: gpaDrop,               triggered: gpaDropTriggered, skipped: gpaDropSkipped },
+      payment:      { score: payScore,      overdueMonths,                  triggered: payTriggered      },
+      discipline:   { score: discScore,     incidents: disciplineCount,     triggered: discTriggered     },
+      homework:     { score: hwScore,       completion: homeworkPct,        triggered: hwTriggered       },
+      trendPenalty: { score: trendScore,    weeks: consecutiveDeclining,    triggered: trendTriggered    },
     };
 
     return { score: total, breakdown };
@@ -309,14 +333,20 @@ export class AiAnalyticsService {
     const hwAssignedMap    = new Map(homeworkAssigned.map(h => [h.classId, h._count._all]));
     const hwSubmittedMap   = new Map(homeworkSubmitted.map(h => [h.studentId, h._count._all]));
 
-    // Kechikkan oylarni hisoblash
-    const overdueMap = new Map<string, number>();
+    // Fix 2: distinct calendar months — bir oyda nechta payment bo'lishidan qat'i nazar 1 oy
+    const overdueMonthsByStudent = new Map<string, Set<string>>();
     for (const pay of allOverduePayments) {
-      const monthsAgo = pay.dueDate
-        ? Math.max(0, Math.floor((now.getTime() - new Date(pay.dueDate).getTime()) / (30 * 24 * 60 * 60 * 1000)))
-        : 1;
-      overdueMap.set(pay.studentId, (overdueMap.get(pay.studentId) ?? 0) + monthsAgo);
+      const monthKey = pay.dueDate
+        ? new Date(pay.dueDate).toISOString().slice(0, 7)  // "2026-04"
+        : new Date().toISOString().slice(0, 7);
+      if (!overdueMonthsByStudent.has(pay.studentId)) {
+        overdueMonthsByStudent.set(pay.studentId, new Set());
+      }
+      overdueMonthsByStudent.get(pay.studentId)!.add(monthKey);
     }
+    const overdueMap = new Map<string, number>(
+      Array.from(overdueMonthsByStudent.entries()).map(([sid, months]) => [sid, months.size])
+    );
 
     // 3. Har bir o'quvchi uchun hisoblash
     const profiles: StudentRiskProfile[] = [];
@@ -341,13 +371,18 @@ export class AiAnalyticsService {
       const recentGrades = validGrades.filter(g => new Date(g.date) >= fourWeeksAgo);
       const olderGrades  = validGrades.filter(g => new Date(g.date) < fourWeeksAgo);
 
+      // Fix 1: minimum 3 ta baho bo'lmasa gpaDrop hisoblanmaydi (false positive oldini olish)
+      const GPA_MIN_SAMPLE = 3;
       let gpaDrop = 0;
-      if (recentGrades.length > 0 && olderGrades.length > 0) {
+      let gpaDropSkipped = false;
+      if (recentGrades.length >= GPA_MIN_SAMPLE && olderGrades.length >= GPA_MIN_SAMPLE) {
         const recentAvg = recentGrades.reduce((s, g) => s + g.score / g.maxScore, 0) / recentGrades.length;
         const olderAvg  = olderGrades.reduce((s, g) => s + g.score / g.maxScore, 0) / olderGrades.length;
         if (olderAvg > 0 && olderAvg > recentAvg) {
           gpaDrop = ((olderAvg - recentAvg) / olderAvg) * 100;
         }
+      } else {
+        gpaDropSkipped = true; // sample yetarli emas — signal o'chirildi
       }
 
       // ── Grade trend (IMPROVING / STABLE / DECLINING) ───────────────────────
@@ -405,14 +440,12 @@ export class AiAnalyticsService {
         } else break;
       }
 
-      // ── Rule Engine ────────────────────────────────────────────────────────
-      const { score: baseScore, breakdown } = this.computeRiskScore(
-        attendanceRate, gpa, gpaDrop, overdueMonths, disciplineIncidents, homeworkCompletion,
+      // ── Rule Engine (Fix 1+2+4 integrated) ─────────────────────────────────
+      const { score: riskScore, breakdown } = this.computeRiskScore(
+        attendanceRate, gpa, gpaDrop, gpaDropSkipped,
+        overdueMonths, disciplineIncidents, homeworkCompletion,
+        consecutiveDecliningWeeks,
       );
-
-      // Consecutive decline bonus: 3+ hafta ketma-ket pasaysa +10
-      const declineBonus = consecutiveDecliningWeeks >= 3 ? 10 : consecutiveDecliningWeeks >= 2 ? 5 : 0;
-      const riskScore = Math.min(100, baseScore + declineBonus);
 
       // Risk level
       let riskLevel: StudentRiskProfile['riskLevel'];
@@ -440,6 +473,35 @@ export class AiAnalyticsService {
       if (recommendations.length === 0)
         recommendations.push('Barqaror natijalar — muvaffaqiyatlarini rag\'batlantiring');
 
+      // Fix 3 — primaryReason: eng yuqori score'li 1-2 triggered signal
+      const signalLabels: Record<string, string> = {
+        attendance:   'davomat',
+        gpa:          'GPA',
+        gpaDrop:      'GPA pasayishi',
+        payment:      'to\'lov qarzdorligi',
+        discipline:   'intizom',
+        homework:     'uy vazifasi',
+        trendPenalty: 'davomat trendi',
+      };
+      const allSignals = [
+        { key: 'attendance',   score: breakdown.attendance.score,   triggered: breakdown.attendance.triggered },
+        { key: 'gpa',          score: breakdown.gpa.score,          triggered: breakdown.gpa.triggered },
+        { key: 'gpaDrop',      score: breakdown.gpaDrop.score,      triggered: breakdown.gpaDrop.triggered },
+        { key: 'payment',      score: breakdown.payment.score,      triggered: breakdown.payment.triggered },
+        { key: 'discipline',   score: breakdown.discipline.score,   triggered: breakdown.discipline.triggered },
+        { key: 'homework',     score: breakdown.homework.score,     triggered: breakdown.homework.triggered },
+        { key: 'trendPenalty', score: breakdown.trendPenalty.score, triggered: breakdown.trendPenalty.triggered },
+      ];
+      const top2 = allSignals
+        .filter(s => s.triggered && s.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 2)
+        .map(s => signalLabels[s.key]);
+
+      const primaryReason = top2.length > 0
+        ? `Asosiy sabab: ${top2.join(' va ')}`
+        : 'Barqaror holat';
+
       profiles.push({
         studentId:   student.id,
         firstName:   student.firstName,
@@ -456,6 +518,7 @@ export class AiAnalyticsService {
         consecutiveDecliningWeeks,
         ruleBreakdown:          breakdown,
         weeklyTrend,
+        primaryReason,
         recommendations,
       });
     }

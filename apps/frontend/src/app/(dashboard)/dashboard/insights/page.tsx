@@ -74,8 +74,9 @@ function RiskBreakdownPanel({ breakdown }: { breakdown: RuleBreakdown }) {
         triggered={breakdown.gpa.triggered}         color="bg-red-400"
       />
       <RuleBar
-        label="GPA tushish" score={breakdown.gpaDrop.score} maxScore={15}
-        value={`-${breakdown.gpaDrop.dropPct.toFixed(0)}%`}
+        label={breakdown.gpaDrop.skipped ? "GPA tushish (sample yetarli emas)" : "GPA tushish"}
+        score={breakdown.gpaDrop.score} maxScore={15}
+        value={breakdown.gpaDrop.skipped ? "—" : `-${breakdown.gpaDrop.dropPct.toFixed(0)}%`}
         triggered={breakdown.gpaDrop.triggered}     color="bg-red-500"
       />
       <RuleBar
@@ -93,6 +94,22 @@ function RiskBreakdownPanel({ breakdown }: { breakdown: RuleBreakdown }) {
         value={`${breakdown.homework.completion.toFixed(0)}%`}
         triggered={breakdown.homework.triggered}    color="bg-sky-400"
       />
+      {breakdown.trendPenalty.triggered && (
+        <RuleBar
+          label="Davomat trendi" score={breakdown.trendPenalty.score} maxScore={10}
+          value={`${breakdown.trendPenalty.weeks} hafta↓`}
+          triggered={breakdown.trendPenalty.triggered} color="bg-rose-500"
+        />
+      )}
+      {/* Total divider */}
+      <div className="pt-1.5 border-t border-xedu-slate-200 dark:border-xedu-slate-700 flex items-center justify-between text-xs">
+        <span className="text-xedu-slate-400 font-medium">Jami</span>
+        <span className="font-bold text-xedu-slate-700 dark:text-xedu-slate-200">
+          {breakdown.attendance.score + breakdown.gpa.score + breakdown.gpaDrop.score +
+           breakdown.payment.score + breakdown.discipline.score + breakdown.homework.score +
+           breakdown.trendPenalty.score} / 100
+        </span>
+      </div>
     </div>
   );
 }
@@ -155,6 +172,11 @@ function StudentCard({ student, expanded, onToggle }: {
                 {student.className ?? "Sinf yo'q"}
                 {student.branchName && ` · ${student.branchName}`}
               </p>
+              {student.primaryReason && student.riskLevel !== 'LOW' && (
+                <p className="text-[10px] text-xedu-slate-400 dark:text-xedu-slate-500 mt-0.5 truncate italic">
+                  {student.primaryReason}
+                </p>
+              )}
             </div>
           </div>
 

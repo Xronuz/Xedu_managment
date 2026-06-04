@@ -4,10 +4,11 @@ import { apiClient } from './client';
 export interface RuleBreakdown {
   attendance: { score: number; rate: number;         triggered: boolean };
   gpa:        { score: number; value: number;        triggered: boolean };
-  gpaDrop:    { score: number; dropPct: number;      triggered: boolean };
+  gpaDrop:    { score: number; dropPct: number;      triggered: boolean; skipped: boolean };
   payment:    { score: number; overdueMonths: number; triggered: boolean };
   discipline: { score: number; incidents: number;    triggered: boolean };
-  homework:   { score: number; completion: number;   triggered: boolean };
+  homework:     { score: number; completion: number;   triggered: boolean };
+  trendPenalty: { score: number; weeks: number;        triggered: boolean };
 }
 
 export interface WeeklyTrend {
@@ -34,6 +35,7 @@ export interface StudentRiskProfile {
   // ─── Explainability ───────────────────────────────────────────────────────
   ruleBreakdown:             RuleBreakdown;
   weeklyTrend:               WeeklyTrend[];
+  primaryReason:             string;
   recommendations:           string[];
 }
 

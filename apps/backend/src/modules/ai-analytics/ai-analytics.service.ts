@@ -100,6 +100,35 @@ export interface StudentRiskProfile {
 }
 
 // --- Rule Engine constants ----------------------------------------------------
+// -- Calibration Panel: RuleEngineConfig -----------------------------------------------
+export interface RuleEngineConfig {
+  attendanceWeight:    number;  // max risk points for attendance (default: 30)
+  gpaWeight:           number;  // default: 25
+  gpaDropWeight:       number;  // default: 15
+  paymentWeight:       number;  // default: 20
+  disciplineWeight:    number;  // default: 15
+  homeworkWeight:      number;  // default: 10
+  attendanceThreshold: number;  // % below triggers (default: 80)
+  gpaThreshold:        number;  // 5-scale threshold (default: 3.0)
+  gpaDropThreshold:    number;  // % drop triggers (default: 15)
+  homeworkThreshold:   number;  // % below triggers (default: 60)
+  disciplineThreshold: number;  // incidents in 30d (default: 3)
+  minGpaSample:        number;  // minimum grade count (default: 3)
+  criticalThreshold:   number;  // riskScore >= X = CRITICAL (default: 70)
+  highThreshold:       number;  // default: 50
+  mediumThreshold:     number;  // default: 25
+}
+
+export const DEFAULT_RULE_CONFIG: RuleEngineConfig = {
+  attendanceWeight:    30, gpaWeight:           25, gpaDropWeight:       15,
+  paymentWeight:       20, disciplineWeight:    15, homeworkWeight:      10,
+  attendanceThreshold: 80, gpaThreshold:        3.0, gpaDropThreshold:  15,
+  homeworkThreshold:   60, disciplineThreshold: 3, minGpaSample:        3,
+  criticalThreshold:   70, highThreshold:       50, mediumThreshold:    25,
+};
+
+const RULE_ENGINE_CONFIG_KEY = 'rule_engine_config';
+
 const RULES = {
   ATTENDANCE_THRESHOLD: 80,  // % dan past bo'lsa trigger
   ATTENDANCE_MAX:       30,  // maksimal risk hissasi
@@ -117,6 +146,36 @@ const RULES = {
 @Injectable()
 export class AiAnalyticsService {
   constructor(private readonly prisma: PrismaService) {}
+
+  // -- Calibration Panel CRUD ------------------------------------------------
+  async getRuleEngineConfig(schoolId: string): Promise<RuleEngineConfig> {
+    const record = await this.prisma.systemConfig.findUnique({
+      where: { schoolId_key: { schoolId, key: RULE_ENGINE_CONFIG_KEY } },
+      select: { value: true },
+    });
+    return record ? { ...DEFAULT_RULE_CONFIG, ...(record.value as Partial<RuleEngineConfig>) } : { ...DEFAULT_RULE_CONFIG };
+  }
+
+  async updateRuleEngineConfig(schoolId: string, partial: Partial<RuleEngineConfig>): Promise<RuleEngineConfig> {
+    const current = await this.getRuleEngineConfig(schoolId);
+    const updated = { ...current };
+    const fields: (keyof RuleEngineConfig)[] = [
+      'attendanceWeight','gpaWeight','gpaDropWeight','paymentWeight','disciplineWeight','homeworkWeight',
+      'attendanceThreshold','gpaThreshold','gpaDropThreshold','homeworkThreshold','disciplineThreshold',
+      'minGpaSample','criticalThreshold','highThreshold','mediumThreshold',
+    ];
+    for (const f of fields) {
+      if (partial[f] !== undefined && typeof partial[f] === 'number') {
+        (updated as any)[f] = partial[f];
+      }
+    }
+    await this.prisma.systemConfig.upsert({
+      where:  { schoolId_key: { schoolId, key: RULE_ENGINE_CONFIG_KEY } },
+      update: { value: updated as any },
+      create: { schoolId, key: RULE_ENGINE_CONFIG_KEY, value: updated as any, label: 'Rule Engine konfiguratsiyasi' },
+    });
+    return updated;
+  }
 
   // -- Haftalik davomat trendini hisoblash ------------------------------------
   private async getWeeklyTrend(
@@ -179,7 +238,7 @@ export class AiAnalyticsService {
   }
 
   // -- Asosiy risk hisoblash --------------------------------------------------
-  // -- Trend alert hisoblash (existing data'dan — N+1 yo'q) -----------------
+  // -- Trend alert hisoblash (existing data'dan -- N+1 yo'q) -----------------
   private computeTrendAlerts(
     weeklyTrend:          WeeklyTrend[],
     recentGradesAvg:      number | null,
@@ -257,7 +316,7 @@ export class AiAnalyticsService {
       }
     }
 
-    // ─── Guard 1: Deduplication — attendance_decline ─────────────────────────
+    // ─── Guard 1: Deduplication -- attendance_decline ─────────────────────────
     // Ikkalasi ham bo'lsa, eng og'ir severity'li birini qoldiramiz
     if (consecutiveAlert && avgDeclAlert) {
       const sevWeight = { critical: 2, warning: 1, info: 0 };
@@ -376,61 +435,62 @@ export class AiAnalyticsService {
   }
 
 
-      private computeRiskScore(
+  private computeRiskScore(
     attendanceRate:        number,
     gpa:                   number,
-    gpaDrop:               number,   // %
-    gpaDropSkipped:        boolean,  // Fix 1: minimum sample yetmadi
-    overdueMonths:         number,   // Fix 2: distinct calendar months
+    gpaDrop:               number,
+    gpaDropSkipped:        boolean,
+    overdueMonths:         number,
     disciplineCount:       number,
     homeworkPct:           number,
-    consecutiveDeclining:  number,   // Fix 4: trend penalty
+    consecutiveDeclining:  number,
+    cfg:                   RuleEngineConfig,
   ): { score: number; breakdown: RuleBreakdown } {
 
-    // Signal 1 — Attendance: < 80% -> maks 30 ball
-    const attTriggered = attendanceRate < RULES.ATTENDANCE_THRESHOLD;
+    // Signal 1 -- Attendance: < 80% -> maks 30 ball
+    const attTriggered = attendanceRate < cfg.attendanceThreshold;
     const attScore = attTriggered
-      ? Math.min(RULES.ATTENDANCE_MAX, Math.round(
-          (RULES.ATTENDANCE_THRESHOLD - attendanceRate) / RULES.ATTENDANCE_THRESHOLD * RULES.ATTENDANCE_MAX
+      ? Math.min(cfg.attendanceWeight, Math.round(
+          (cfg.attendanceThreshold - attendanceRate) / cfg.attendanceThreshold * cfg.attendanceWeight
         ))
       : 0;
 
-    // Signal 2 — GPA: < 3.0 -> maks 25 ball
-    const gpaTriggered = gpa < RULES.GPA_THRESHOLD;
+    // Signal 2 -- GPA: < 3.0 -> maks 25 ball
+    const gpaTriggered = gpa < cfg.gpaThreshold;
     const gpaScore = gpaTriggered
-      ? Math.min(RULES.GPA_MAX, Math.round(
-          (RULES.GPA_THRESHOLD - gpa) / RULES.GPA_THRESHOLD * RULES.GPA_MAX
+      ? Math.min(cfg.gpaWeight, Math.round(
+          (cfg.gpaThreshold - gpa) / cfg.gpaThreshold * cfg.gpaWeight
         ))
       : 0;
 
-    // Signal 3 — GPA drop: > 15% tushsa -> maks 15 ball
-    // Fix 1: gpaDropSkipped=true bo'lsa (sample yetarli emas) — trigger bo'lmaydi
-    const gpaDropTriggered = !gpaDropSkipped && gpaDrop > RULES.GPA_DROP_THRESHOLD;
+    // Signal 3 -- GPA drop: > 15% tushsa -> maks 15 ball
+    // Fix 1: gpaDropSkipped=true bo'lsa (sample yetarli emas) -- trigger bo'lmaydi
+    const gpaDropTriggered = !gpaDropSkipped && gpaDrop > cfg.gpaDropThreshold;
     const gpaDropScore = gpaDropTriggered
-      ? Math.min(RULES.GPA_DROP_MAX, Math.round(
-          (gpaDrop - RULES.GPA_DROP_THRESHOLD) / RULES.GPA_DROP_THRESHOLD * RULES.GPA_DROP_MAX
+      ? Math.min(cfg.gpaDropWeight, Math.round(
+          (gpaDrop - cfg.gpaDropThreshold) / cfg.gpaDropThreshold * cfg.gpaDropWeight
         ))
       : 0;
 
-    // Signal 4 — Payment: maks 20 ball (Fix 2: distinct months)
+    // Signal 4 -- Payment: maks 20 ball (Fix 2: distinct months)
     const payTriggered = overdueMonths > 0;
-    const payScore = Math.min(RULES.PAYMENT_MAX, overdueMonths * 10);
+    const payScore = Math.min(cfg.paymentWeight, overdueMonths * 10);
 
-    // Signal 5 — Discipline: > 3 hodisa -> maks 15 ball
-    const discTriggered = disciplineCount > RULES.DISCIPLINE_THRESHOLD;
+    // Signal 5 -- Discipline: > 3 hodisa -> maks 15 ball
+    const discTriggered = disciplineCount > cfg.disciplineThreshold;
     const discScore = discTriggered
-      ? Math.min(RULES.DISCIPLINE_MAX, disciplineCount * 3)
+      ? Math.min(cfg.disciplineWeight, disciplineCount * 3)
       : disciplineCount > 0 ? disciplineCount * 2 : 0;
 
-    // Signal 6 — Homework: < 60% -> maks 10 ball
-    const hwTriggered = homeworkPct < RULES.HOMEWORK_THRESHOLD;
+    // Signal 6 -- Homework: < 60% -> maks 10 ball
+    const hwTriggered = homeworkPct < cfg.homeworkThreshold;
     const hwScore = hwTriggered
-      ? Math.min(RULES.HOMEWORK_MAX, Math.round(
-          (RULES.HOMEWORK_THRESHOLD - homeworkPct) / RULES.HOMEWORK_THRESHOLD * RULES.HOMEWORK_MAX
+      ? Math.min(cfg.homeworkWeight, Math.round(
+          (cfg.homeworkThreshold - homeworkPct) / cfg.homeworkThreshold * cfg.homeworkWeight
         ))
       : 0;
 
-    // Fix 4 — Trend penalty: asosiy score'dan alohida accelerator
+    // Fix 4 -- Trend penalty: asosiy score'dan alohida accelerator
     const trendScore  = consecutiveDeclining >= 3 ? 10 : consecutiveDeclining >= 2 ? 5 : 0;
     const trendTriggered = trendScore > 0;
 
@@ -453,6 +513,7 @@ export class AiAnalyticsService {
   // -- Student risk profillarini hisoblash ------------------------------------
   async getStudentRiskProfiles(user: JwtPayload): Promise<StudentRiskProfile[]> {
     const where = buildTenantWhere(user);
+    const cfg = await this.getRuleEngineConfig(user.schoolId!);
 
     // 1. O'quvchilar ro'yxati (sinf va filial bilan)
     const students = await this.prisma.user.findMany({
@@ -486,12 +547,12 @@ export class AiAnalyticsService {
       allDiscipline30d,
       allOverduePayments,
     ] = await Promise.all([
-      // Davomat — so'nggi 30 kun
+      // Davomat -- so'nggi 30 kun
       this.prisma.attendance.findMany({
         where: { studentId: { in: studentIds }, schoolId: user.schoolId!, date: { gte: thirtyDaysAgo } },
         select: { studentId: true, status: true, date: true },
       }),
-      // Baholar — so'nggi 8 hafta (trend uchun)
+      // Baholar -- so'nggi 8 hafta (trend uchun)
       this.prisma.grade.findMany({
         where: {
           studentId: { in: studentIds },
@@ -503,7 +564,7 @@ export class AiAnalyticsService {
         select: { studentId: true, score: true, maxScore: true, date: true },
         orderBy: { date: 'desc' },
       }),
-      // Intizom — so'nggi 30 kun
+      // Intizom -- so'nggi 30 kun
       this.prisma.disciplineIncident.groupBy({
         by:    ['studentId'],
         where: { studentId: { in: studentIds }, schoolId: user.schoolId!, createdAt: { gte: thirtyDaysAgo } },
@@ -558,7 +619,7 @@ export class AiAnalyticsService {
     const hwAssignedMap    = new Map(homeworkAssigned.map(h => [h.classId, h._count._all]));
     const hwSubmittedMap   = new Map(homeworkSubmitted.map(h => [h.studentId, h._count._all]));
 
-    // Fix 2: distinct calendar months — bir oyda nechta payment bo'lishidan qat'i nazar 1 oy
+    // Fix 2: distinct calendar months -- bir oyda nechta payment bo'lishidan qat'i nazar 1 oy
     const overdueMonthsByStudent = new Map<string, Set<string>>();
     for (const pay of allOverduePayments) {
       const monthKey = pay.dueDate
@@ -597,7 +658,7 @@ export class AiAnalyticsService {
       const olderGrades  = validGrades.filter(g => new Date(g.date) < fourWeeksAgo);
 
       // Fix 1: minimum 3 ta baho bo'lmasa gpaDrop hisoblanmaydi (false positive oldini olish)
-      const GPA_MIN_SAMPLE = 3;
+      const GPA_MIN_SAMPLE = cfg.minGpaSample;
       let gpaDrop = 0;
       let gpaDropSkipped = false;
       if (recentGrades.length >= GPA_MIN_SAMPLE && olderGrades.length >= GPA_MIN_SAMPLE) {
@@ -607,7 +668,7 @@ export class AiAnalyticsService {
           gpaDrop = ((olderAvg - recentAvg) / olderAvg) * 100;
         }
       } else {
-        gpaDropSkipped = true; // sample yetarli emas — signal o'chirildi
+        gpaDropSkipped = true; // sample yetarli emas -- signal o'chirildi
       }
 
       // -- Grade trend (IMPROVING / STABLE / DECLINING) -----------------------
@@ -669,36 +730,36 @@ export class AiAnalyticsService {
       const { score: riskScore, breakdown } = this.computeRiskScore(
         attendanceRate, gpa, gpaDrop, gpaDropSkipped,
         overdueMonths, disciplineIncidents, homeworkCompletion,
-        consecutiveDecliningWeeks,
+        consecutiveDecliningWeeks, cfg,
       );
 
       // Risk level
       let riskLevel: StudentRiskProfile['riskLevel'];
-      if (riskScore >= 70)      riskLevel = 'CRITICAL';
-      else if (riskScore >= 50) riskLevel = 'HIGH';
-      else if (riskScore >= 25) riskLevel = 'MEDIUM';
-      else                      riskLevel = 'LOW';
+      if (riskScore >= cfg.criticalThreshold)      riskLevel = 'CRITICAL';
+      else if (riskScore >= cfg.highThreshold)     riskLevel = 'HIGH';
+      else if (riskScore >= cfg.mediumThreshold)   riskLevel = 'MEDIUM';
+      else                                         riskLevel = 'LOW';
 
       // -- Tavsiyalar (triggered rule'larga asoslanadi) -----------------------
       const recommendations: string[] = [];
       if (breakdown.attendance.triggered)
-        recommendations.push(`Davomat juda past (${Math.round(breakdown.attendance.rate)}%) — individual suhbat o'tkazing`);
+        recommendations.push(`Davomat juda past (${Math.round(breakdown.attendance.rate)}%) -- individual suhbat o'tkazing`);
       if (breakdown.gpaDrop.triggered)
-        recommendations.push(`Baho ${Math.round(breakdown.gpaDrop.dropPct)}% ga tushgan — qo'shimcha darslar kerak`);
+        recommendations.push(`Baho ${Math.round(breakdown.gpaDrop.dropPct)}% ga tushgan -- qo'shimcha darslar kerak`);
       if (breakdown.gpa.triggered)
-        recommendations.push(`GPA past (${breakdown.gpa.value.toFixed(1)}/5) — o'qituvchi bilan maslahat`);
+        recommendations.push(`GPA past (${breakdown.gpa.value.toFixed(1)}/5) -- o'qituvchi bilan maslahat`);
       if (breakdown.payment.triggered)
-        recommendations.push(`${breakdown.payment.overdueMonths} oy to'lov kechikmoqda — moliyaviy bo'lim bilan bog'laning`);
+        recommendations.push(`${breakdown.payment.overdueMonths} oy to'lov kechikmoqda -- moliyaviy bo'lim bilan bog'laning`);
       if (breakdown.discipline.triggered)
-        recommendations.push(`${breakdown.discipline.incidents} ta intizom hodisasi — ota-ona bilan uchrashuv tashkil eting`);
+        recommendations.push(`${breakdown.discipline.incidents} ta intizom hodisasi -- ota-ona bilan uchrashuv tashkil eting`);
       if (breakdown.homework.triggered)
-        recommendations.push(`Uy vazifalari bajarish ${Math.round(breakdown.homework.completion)}% — nazoratni kuchaytiring`);
+        recommendations.push(`Uy vazifalari bajarish ${Math.round(breakdown.homework.completion)}% -- nazoratni kuchaytiring`);
       if (consecutiveDecliningWeeks >= 3)
-        recommendations.push(`Davomat ${consecutiveDecliningWeeks} hafta ketma-ket pasaymoqda — zudlik bilan chora ko'ring`);
+        recommendations.push(`Davomat ${consecutiveDecliningWeeks} hafta ketma-ket pasaymoqda -- zudlik bilan chora ko'ring`);
       if (recommendations.length === 0)
-        recommendations.push('Barqaror natijalar — muvaffaqiyatlarini rag\'batlantiring');
+        recommendations.push('Barqaror natijalar -- muvaffaqiyatlarini rag\'batlantiring');
 
-      // Fix 3 — primaryReason: eng yuqori score'li 1-2 triggered signal
+      // Fix 3 -- primaryReason: eng yuqori score'li 1-2 triggered signal
       const signalLabels: Record<string, string> = {
         attendance:   'davomat',
         gpa:          'GPA',
@@ -727,7 +788,7 @@ export class AiAnalyticsService {
         ? `Asosiy sabab: ${top2.join(' va ')}`
         : 'Barqaror holat';
 
-      // -- Phase 2: Trend Alerts (no new queries — existing data only) ---------
+      // -- Phase 2: Trend Alerts (no new queries -- existing data only) ---------
       // recentGrades/olderGrades already computed above for GPA drop
       const recentGradesAvg = recentGrades.length > 0
         ? recentGrades.reduce((s, g) => s + g.score / g.maxScore, 0) / recentGrades.length

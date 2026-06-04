@@ -89,10 +89,42 @@ export interface AiDashboardSummary {
   topAtRisk:        StudentRiskProfile[];
 }
 
+export interface RuleEngineConfig {
+  attendanceWeight:    number;
+  gpaWeight:           number;
+  gpaDropWeight:       number;
+  paymentWeight:       number;
+  disciplineWeight:    number;
+  homeworkWeight:      number;
+  attendanceThreshold: number;
+  gpaThreshold:        number;
+  gpaDropThreshold:    number;
+  homeworkThreshold:   number;
+  disciplineThreshold: number;
+  minGpaSample:        number;
+  criticalThreshold:   number;
+  highThreshold:       number;
+  mediumThreshold:     number;
+}
+
+export const DEFAULT_RULE_CONFIG: RuleEngineConfig = {
+  attendanceWeight: 30, gpaWeight: 25, gpaDropWeight: 15, paymentWeight: 20,
+  disciplineWeight: 15, homeworkWeight: 10, attendanceThreshold: 80,
+  gpaThreshold: 3.0, gpaDropThreshold: 15, homeworkThreshold: 60,
+  disciplineThreshold: 3, minGpaSample: 3, criticalThreshold: 70,
+  highThreshold: 50, mediumThreshold: 25,
+};
+
 export const aiAnalyticsApi = {
   getStudentProfiles: () =>
     apiClient.get<StudentRiskProfile[]>('/ai-analytics/students').then(r => r.data),
 
   getDashboard: () =>
     apiClient.get<AiDashboardSummary>('/ai-analytics/dashboard').then(r => r.data),
+
+  getConfig: () =>
+    apiClient.get<RuleEngineConfig>('/ai-analytics/config').then(r => r.data),
+
+  updateConfig: (cfg: Partial<RuleEngineConfig>) =>
+    apiClient.put<RuleEngineConfig>('/ai-analytics/config', cfg).then(r => r.data),
 };

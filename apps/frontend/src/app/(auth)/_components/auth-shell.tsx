@@ -76,8 +76,8 @@ export function AuthShell({ children, className }: AuthShellProps) {
                   key={f.label}
                   className="rounded-xl p-3 space-y-2"
                   style={{
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.07)',
+                    border: '1px solid rgba(255,255,255,0.12)',
                   }}
                 >
                   <div
@@ -87,8 +87,8 @@ export function AuthShell({ children, className }: AuthShellProps) {
                     <Icon className="h-3.5 w-3.5" style={{ color: f.iconColor }} />
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold text-white/80">{f.label}</p>
-                    <p className="text-[10px] text-white/35 mt-0.5">{f.desc}</p>
+                    <p className="text-[11px] font-semibold" style={{ color: 'rgba(255,255,255,0.92)' }}>{f.label}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: 'rgba(255,255,255,0.50)' }}>{f.desc}</p>
                   </div>
                 </div>
               );
@@ -119,10 +119,10 @@ export function AuthShell({ children, className }: AuthShellProps) {
       <div
         className="flex-1 flex flex-col justify-center items-center p-4 sm:p-8 relative"
         style={{
-          background: '#EEF5F0',
+          background: '#f5f9f6',
           backgroundImage:
-            'radial-gradient(65% 55% at 15% 20%, rgba(79,196,122,0.13) 0%, transparent 70%), ' +
-            'radial-gradient(55% 50% at 85% 80%, rgba(15,123,83,0.10) 0%, transparent 70%)',
+            'radial-gradient(65% 55% at 15% 20%, rgba(79,196,122,0.09) 0%, transparent 70%), ' +
+            'radial-gradient(55% 50% at 85% 80%, rgba(15,123,83,0.07) 0%, transparent 70%)',
         }}
       >
         {/* mobile logo */}

@@ -88,11 +88,11 @@ export default function LoginPage() {
       {/* ── Card ─────────────────────────────────────────────────────── */}
       <div
         style={{
-          background: 'linear-gradient(145deg, rgba(255,255,255,0.82) 0%, rgba(255,255,255,0.60) 100%)',
-          backdropFilter: 'blur(24px) saturate(170%)',
-          WebkitBackdropFilter: 'blur(24px) saturate(170%)',
-          border: '1px solid rgba(255,255,255,0.85)',
-          boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(255,255,255,0.4), 0 20px 50px -20px rgba(30,69,50,0.28)',
+          background: 'rgba(255,255,255,0.95)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(0,0,0,0.06)',
+          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05), 0 24px 48px -12px rgba(30,69,50,0.15)',
           borderRadius: '1.5rem',
           padding: '2rem',
         }}

@@ -3,7 +3,7 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload } from '@eduplatform/types';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 
-// ── Rule breakdown: har bir signal uchun alohida hissa ───────────────────────
+// -- Rule breakdown: har bir signal uchun alohida hissa -----------------------
 export interface RuleBreakdown {
   attendance: {
     score:     number;   // risk hissasi (0-30)
@@ -49,6 +49,28 @@ export interface WeeklyTrend {
   avgGrade:       number;
 }
 
+export type TrendAlertType =
+  | 'attendance_decline'
+  | 'gpa_decline'
+  | 'homework_decline'
+  | 'payment_risk'
+  | 'discipline_spike';
+
+export type TrendAlertSeverity = 'info' | 'warning' | 'critical';
+
+export interface TrendAlert {
+  type:              TrendAlertType;
+  severity:          TrendAlertSeverity;
+  title:             string;
+  description:       string;
+  metric:            string;      // masalan: "attendanceRate"
+  previousValue:     number;
+  currentValue:      number;
+  changePct:         number;      // o'zgarish foizi (manfiy = pasayish)
+  weeks:             number;      // nechta hafta kuzatildi
+  recommendedAction: string;
+}
+
 export interface StudentRiskProfile {
   studentId:              string;
   firstName:              string;
@@ -57,21 +79,24 @@ export interface StudentRiskProfile {
   branchName?:            string;
   riskScore:              number;            // 0-100, yuqori = xavfli
   riskLevel:              'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-  // ─── Raw metrics ─────────────────────────────────────────────────────────
+  // --- Raw metrics ---------------------------------------------------------
   gpa:                    number;
   attendanceRate:         number;
   homeworkCompletion:     number;
   disciplineIncidents:    number;
   lastGradeTrend:         'IMPROVING' | 'STABLE' | 'DECLINING';
   consecutiveDecliningWeeks: number;
-  // ─── Explainability ──────────────────────────────────────────────────────
+  // --- Explainability ------------------------------------------------------
   ruleBreakdown:          RuleBreakdown;
   weeklyTrend:            WeeklyTrend[];     // so'nggi 8 hafta
   primaryReason:          string;
+  trendAlerts:            TrendAlert[];
+  alertCount:             number;
+  criticalAlertCount:     number;
   recommendations:        string[];
 }
 
-// ─── Rule Engine constants ────────────────────────────────────────────────────
+// --- Rule Engine constants ----------------------------------------------------
 const RULES = {
   ATTENDANCE_THRESHOLD: 80,  // % dan past bo'lsa trigger
   ATTENDANCE_MAX:       30,  // maksimal risk hissasi
@@ -90,7 +115,7 @@ const RULES = {
 export class AiAnalyticsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  // ── Haftalik davomat trendini hisoblash ────────────────────────────────────
+  // -- Haftalik davomat trendini hisoblash ------------------------------------
   private async getWeeklyTrend(
     studentId: string,
     schoolId:  string,
@@ -135,7 +160,7 @@ export class AiAnalyticsService {
     return trend;
   }
 
-  // ── Ketma-ket pasayish haftalarini sanash ──────────────────────────────────
+  // -- Ketma-ket pasayish haftalarini sanash ----------------------------------
   private countConsecutiveDecline(trend: WeeklyTrend[]): number {
     // trend[0] = bu hafta, trend[1] = o'tgan hafta, ...
     // Birinchi haftadan boshlab qaysi haftadan pasayish boshlangan
@@ -150,8 +175,154 @@ export class AiAnalyticsService {
     return count;
   }
 
-  // ── Asosiy risk hisoblash ──────────────────────────────────────────────────
-  private computeRiskScore(
+  // -- Asosiy risk hisoblash --------------------------------------------------
+  // -- Trend alert hisoblash (existing data'dan — N+1 yo'q) -----------------
+  private computeTrendAlerts(
+    weeklyTrend:          WeeklyTrend[],
+    recentGradesAvg:      number | null,   // so'nggi 4 hafta avg (0-1)
+    olderGradesAvg:       number | null,   // avvalgi 4 hafta avg (0-1)
+    recentGradeCount:     number,
+    olderGradeCount:      number,
+    homeworkCompletion:   number,
+    disciplineIncidents:  number,
+    overdueMonths:        number,
+  ): TrendAlert[] {
+    const alerts: TrendAlert[] = [];
+    const validAtt = weeklyTrend.filter(t => t.attendanceRate >= 0);
+
+    // -- Alert 1: Attendance — 3+ hafta ketma-ket pasayish ---------------------
+    if (validAtt.length >= 3) {
+      let consecutive = 0;
+      for (let i = 0; i < validAtt.length - 1; i++) {
+        if (validAtt[i].attendanceRate < validAtt[i + 1].attendanceRate) consecutive++;
+        else break;
+      }
+      if (consecutive >= 3) {
+        const current  = validAtt[0].attendanceRate;
+        const previous = validAtt[consecutive].attendanceRate;
+        const changePct = ((current - previous) / previous) * 100;
+        alerts.push({
+          type:              'attendance_decline',
+          severity:          consecutive >= 4 ? 'critical' : 'warning',
+          title:             `Davomat ${consecutive} hafta ketma-ket pasaymoqda`,
+          description:       `${consecutive} hafta davomida davomat ${previous.toFixed(0)}% dan ${current.toFixed(0)}% ga tushdi`,
+          metric:            'attendanceRate',
+          previousValue:     previous,
+          currentValue:      current,
+          changePct:         Math.round(changePct * 10) / 10,
+          weeks:             consecutive,
+          recommendedAction: "O'quvchi bilan shaxsiy suhbat o'tkazing va ota-onasini xabardor qiling",
+        });
+      }
+    }
+
+    // -- Alert 2: Attendance — 4 hafta avg vs avvalgi 4 hafta 15%+ tushish ----
+    if (validAtt.length >= 6) {
+      const recent4 = validAtt.slice(0, 4).map(t => t.attendanceRate);
+      const older4  = validAtt.slice(4, 8).map(t => t.attendanceRate);
+      if (recent4.length >= 3 && older4.length >= 2) {
+        const recentAvg = recent4.reduce((s, v) => s + v, 0) / recent4.length;
+        const olderAvg  = older4.reduce((s, v)  => s + v, 0) / older4.length;
+        const changePct  = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
+        // Faqat agar ketma-ket alert ALLAQACHON qo'shilmagan bo'lsa
+        const alreadyHas = alerts.some(a => a.type === 'attendance_decline');
+        if (!alreadyHas && changePct < -15) {
+          alerts.push({
+            type:              'attendance_decline',
+            severity:          changePct < -25 ? 'critical' : 'warning',
+            title:             'Davomat keskin tushdi (4 hafta)',
+            description:       `So'nggi 4 hafta o'rtacha: ${recentAvg.toFixed(0)}% (oldin: ${olderAvg.toFixed(0)}%)`,
+            metric:            'attendanceRate',
+            previousValue:     Math.round(olderAvg * 10) / 10,
+            currentValue:      Math.round(recentAvg * 10) / 10,
+            changePct:         Math.round(changePct * 10) / 10,
+            weeks:             4,
+            recommendedAction: "Davomat sabablari aniqlansin, zarur bo'lsa ota-ona bilan uchrashuv",
+          });
+        }
+      }
+    }
+
+    // -- Alert 3: GPA decline — 4 hafta vs avvalgi 4 hafta, min sample --------
+    const GPA_MIN_SAMPLE = 3;
+    if (
+      recentGradesAvg !== null && olderGradesAvg !== null &&
+      recentGradeCount >= GPA_MIN_SAMPLE && olderGradeCount >= GPA_MIN_SAMPLE &&
+      olderGradesAvg > 0
+    ) {
+      const changePct = ((recentGradesAvg - olderGradesAvg) / olderGradesAvg) * 100;
+      if (changePct < -15) {
+        const currentGpa  = recentGradesAvg * 5;
+        const previousGpa = olderGradesAvg  * 5;
+        alerts.push({
+          type:              'gpa_decline',
+          severity:          changePct < -25 ? 'critical' : 'warning',
+          title:             'GPA keskin pasaydi',
+          description:       `So'nggi 4 hafta GPA: ${currentGpa.toFixed(1)}/5 (oldin: ${previousGpa.toFixed(1)}/5), ${Math.abs(Math.round(changePct))}% tushish`,
+          metric:            'gpa',
+          previousValue:     Math.round(previousGpa * 10) / 10,
+          currentValue:      Math.round(currentGpa  * 10) / 10,
+          changePct:         Math.round(changePct  * 10) / 10,
+          weeks:             4,
+          recommendedAction: "O'qituvchi bilan qo'shimcha mashg'ulot rejalashtiring",
+        });
+      }
+    }
+
+    // -- Alert 4: Homework decline ---------------------------------------------
+    if (homeworkCompletion < 40) {
+      alerts.push({
+        type:              'homework_decline',
+        severity:          homeworkCompletion < 25 ? 'critical' : 'warning',
+        title:             'Uy vazifalari juda past bajarilmoqda',
+        description:       `Bajarilish: ${homeworkCompletion.toFixed(0)}% — uy vazifalari nazorati yetarli emas`,
+        metric:            'homeworkCompletion',
+        previousValue:     60,
+        currentValue:      Math.round(homeworkCompletion * 10) / 10,
+        changePct:         Math.round(((homeworkCompletion - 60) / 60) * 100),
+        weeks:             4,
+        recommendedAction: "Sinf rahbari bilan uy vazifalari nazoratini mustahkamlang",
+      });
+    }
+
+    // -- Alert 5: Payment risk -------------------------------------------------
+    if (overdueMonths >= 2) {
+      alerts.push({
+        type:              'payment_risk',
+        severity:          overdueMonths >= 3 ? 'critical' : 'warning',
+        title:             `To'lov ${overdueMonths} oy kechikmoqda`,
+        description:       `${overdueMonths} ta oylik to'lov kechikkan — moliyaviy holat nazorat ostiga olinishi kerak`,
+        metric:            'overdueMonths',
+        previousValue:     0,
+        currentValue:      overdueMonths,
+        changePct:         -100,
+        weeks:             overdueMonths * 4,
+        recommendedAction: "Moliya bo'limi bilan bog'laning, ota-onaga to'lov eslatmasi yuboring",
+      });
+    }
+
+    // -- Alert 6: Discipline spike ---------------------------------------------
+    if (disciplineIncidents >= 3) {
+      alerts.push({
+        type:              'discipline_spike',
+        severity:          disciplineIncidents >= 5 ? 'critical' : 'warning',
+        title:             `Intizom hodisalari ko'paydi`,
+        description:       `30 kun ichida ${disciplineIncidents} ta hodisa qayd etildi`,
+        metric:            'disciplineIncidents',
+        previousValue:     0,
+        currentValue:      disciplineIncidents,
+        changePct:         -100,
+        weeks:             4,
+        recommendedAction: "Psixolog yoki klassruk bilan uchrashuv tashkil eting",
+      });
+    }
+
+    // Severity bo'yicha sort: critical > warning > info
+    const severityOrder: Record<TrendAlertSeverity, number> = { critical: 0, warning: 1, info: 2 };
+    return alerts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
+  }
+
+    private computeRiskScore(
     attendanceRate:        number,
     gpa:                   number,
     gpaDrop:               number,   // %
@@ -225,7 +396,7 @@ export class AiAnalyticsService {
     return { score: total, breakdown };
   }
 
-  // ── Student risk profillarini hisoblash ────────────────────────────────────
+  // -- Student risk profillarini hisoblash ------------------------------------
   async getStudentRiskProfiles(user: JwtPayload): Promise<StudentRiskProfile[]> {
     const where = buildTenantWhere(user);
 
@@ -356,18 +527,18 @@ export class AiAnalyticsService {
       const att     = attByStudent.get(student.id) ?? [];
       const grades  = gradeByStudent.get(student.id) ?? [];
 
-      // ── Attendance rate ────────────────────────────────────────────────────
+      // -- Attendance rate ----------------------------------------------------
       const presentCount  = att.filter(a => a.status === 'present').length;
       const attendanceRate = att.length > 0 ? (presentCount / att.length) * 100 : 100;
 
-      // ── GPA (so'nggi 8 hafta) ───────────────────────────────────────────────
+      // -- GPA (so'nggi 8 hafta) -----------------------------------------------
       const validGrades = grades.filter(g => g.maxScore > 0);
       const avgPct = validGrades.length > 0
         ? validGrades.reduce((s, g) => s + (g.score / g.maxScore) * 100, 0) / validGrades.length
         : 100;
       const gpa = (avgPct / 100) * 5;
 
-      // ── GPA drop: so'nggi 4 hafta vs oldingi 4 hafta ──────────────────────
+      // -- GPA drop: so'nggi 4 hafta vs oldingi 4 hafta ----------------------
       const recentGrades = validGrades.filter(g => new Date(g.date) >= fourWeeksAgo);
       const olderGrades  = validGrades.filter(g => new Date(g.date) < fourWeeksAgo);
 
@@ -385,7 +556,7 @@ export class AiAnalyticsService {
         gpaDropSkipped = true; // sample yetarli emas — signal o'chirildi
       }
 
-      // ── Grade trend (IMPROVING / STABLE / DECLINING) ───────────────────────
+      // -- Grade trend (IMPROVING / STABLE / DECLINING) -----------------------
       let lastGradeTrend: 'IMPROVING' | 'STABLE' | 'DECLINING' = 'STABLE';
       if (recentGrades.length > 0 && olderGrades.length > 0) {
         const recentAvg = recentGrades.reduce((s, g) => s + g.score / g.maxScore, 0) / recentGrades.length;
@@ -394,18 +565,18 @@ export class AiAnalyticsService {
         else if (recentAvg < olderAvg - 0.05) lastGradeTrend = 'DECLINING';
       }
 
-      // ── Homework completion ────────────────────────────────────────────────
+      // -- Homework completion ------------------------------------------------
       const assigned  = classId ? (hwAssignedMap.get(classId)  ?? 0) : 0;
       const submitted = hwSubmittedMap.get(student.id) ?? 0;
       const homeworkCompletion = assigned > 0 ? Math.min(100, (submitted / assigned) * 100) : 100;
 
-      // ── Payment debt ────────────────────────────────────────────────────────
+      // -- Payment debt --------------------------------------------------------
       const overdueMonths = overdueMap.get(student.id) ?? 0;
 
-      // ── Discipline ─────────────────────────────────────────────────────────
+      // -- Discipline ---------------------------------------------------------
       const disciplineIncidents = disciplineMap.get(student.id) ?? 0;
 
-      // ── Weekly trend (davomat + baho) ──────────────────────────────────────
+      // -- Weekly trend (davomat + baho) --------------------------------------
       const weeklyTrend: WeeklyTrend[] = [];
       const attList = att.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       const gradeList = validGrades.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -440,7 +611,7 @@ export class AiAnalyticsService {
         } else break;
       }
 
-      // ── Rule Engine (Fix 1+2+4 integrated) ─────────────────────────────────
+      // -- Rule Engine (Fix 1+2+4 integrated) ---------------------------------
       const { score: riskScore, breakdown } = this.computeRiskScore(
         attendanceRate, gpa, gpaDrop, gpaDropSkipped,
         overdueMonths, disciplineIncidents, homeworkCompletion,
@@ -454,7 +625,7 @@ export class AiAnalyticsService {
       else if (riskScore >= 25) riskLevel = 'MEDIUM';
       else                      riskLevel = 'LOW';
 
-      // ── Tavsiyalar (triggered rule'larga asoslanadi) ───────────────────────
+      // -- Tavsiyalar (triggered rule'larga asoslanadi) -----------------------
       const recommendations: string[] = [];
       if (breakdown.attendance.triggered)
         recommendations.push(`Davomat juda past (${Math.round(breakdown.attendance.rate)}%) — individual suhbat o'tkazing`);
@@ -502,6 +673,26 @@ export class AiAnalyticsService {
         ? `Asosiy sabab: ${top2.join(' va ')}`
         : 'Barqaror holat';
 
+      // -- Phase 2: Trend Alerts (no new queries — existing data only) ---------
+      // recentGrades/olderGrades already computed above for GPA drop
+      const recentGradesAvg = recentGrades.length > 0
+        ? recentGrades.reduce((s, g) => s + g.score / g.maxScore, 0) / recentGrades.length
+        : null;
+      const olderGradesAvg = olderGrades.length > 0
+        ? olderGrades.reduce((s, g) => s + g.score / g.maxScore, 0) / olderGrades.length
+        : null;
+
+      const trendAlerts = this.computeTrendAlerts(
+        weeklyTrend,
+        recentGradesAvg,
+        olderGradesAvg,
+        recentGrades.length,
+        olderGrades.length,
+        homeworkCompletion,
+        disciplineIncidents,
+        overdueMonths,
+      );
+
       profiles.push({
         studentId:   student.id,
         firstName:   student.firstName,
@@ -519,6 +710,9 @@ export class AiAnalyticsService {
         ruleBreakdown:          breakdown,
         weeklyTrend,
         primaryReason,
+        trendAlerts,
+        alertCount:             trendAlerts.length,
+        criticalAlertCount:     trendAlerts.filter(a => a.severity === 'critical').length,
         recommendations,
       });
     }
@@ -526,7 +720,7 @@ export class AiAnalyticsService {
     return profiles.sort((a, b) => b.riskScore - a.riskScore);
   }
 
-  // ── Dashboard summary ──────────────────────────────────────────────────────
+  // -- Dashboard summary ------------------------------------------------------
   async getDashboardSummary(user: JwtPayload) {
     const profiles = await this.getStudentRiskProfiles(user);
     const total    = profiles.length;
@@ -549,6 +743,17 @@ export class AiAnalyticsService {
       homework:   profiles.filter(p => p.ruleBreakdown.homework.triggered).length,
     };
 
+    // Phase 2: alert aggregation
+    const totalAlerts         = profiles.reduce((s, p) => s + p.alertCount,         0);
+    const totalCriticalAlerts = profiles.reduce((s, p) => s + p.criticalAlertCount, 0);
+    const alertsByType = {
+      attendance_decline: profiles.reduce((s, p) => s + p.trendAlerts.filter(a => a.type === 'attendance_decline').length, 0),
+      gpa_decline:        profiles.reduce((s, p) => s + p.trendAlerts.filter(a => a.type === 'gpa_decline').length,        0),
+      homework_decline:   profiles.reduce((s, p) => s + p.trendAlerts.filter(a => a.type === 'homework_decline').length,   0),
+      payment_risk:       profiles.reduce((s, p) => s + p.trendAlerts.filter(a => a.type === 'payment_risk').length,       0),
+      discipline_spike:   profiles.reduce((s, p) => s + p.trendAlerts.filter(a => a.type === 'discipline_spike').length,   0),
+    };
+
     return {
       totalStudents:    total,
       riskDistribution: { critical, high, medium, low },
@@ -557,6 +762,11 @@ export class AiAnalyticsService {
         attendance: Math.round(avgAttendance * 10) / 10,
       },
       triggeredCounts,
+      alertSummary: {
+        totalAlerts,
+        totalCriticalAlerts,
+        alertsByType,
+      },
       topAtRisk: profiles.slice(0, 10),
     };
   }

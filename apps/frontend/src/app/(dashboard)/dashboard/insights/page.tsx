@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { aiAnalyticsApi, type StudentRiskProfile, type RuleBreakdown } from '@/lib/api/ai-analytics';
+import { aiAnalyticsApi, type StudentRiskProfile, type RuleBreakdown, type TrendAlert, type TrendAlertSeverity } from '@/lib/api/ai-analytics';
 import { cn } from '@/lib/utils';
 import { AnalyticsSectionNav } from '@/components/analytics/analytics-section-nav';
 
@@ -110,6 +110,42 @@ function RiskBreakdownPanel({ breakdown }: { breakdown: RuleBreakdown }) {
            breakdown.trendPenalty.score} / 100
         </span>
       </div>
+    </div>
+  );
+}
+
+// -- TrendAlert mini list ----------------------------------------------------------------
+const ALERT_SEV: Record<TrendAlertSeverity, { bg: string; text: string; dot: string }> = {
+  critical: { bg: 'bg-red-50 dark:bg-red-950/30',    text: 'text-red-700 dark:text-red-400',    dot: 'bg-red-500'    },
+  warning:  { bg: 'bg-amber-50 dark:bg-amber-950/30', text: 'text-amber-700 dark:text-amber-400', dot: 'bg-amber-500'  },
+  info:     { bg: 'bg-sky-50 dark:bg-sky-950/30',     text: 'text-sky-700 dark:text-sky-400',     dot: 'bg-sky-400'    },
+};
+
+function TrendAlertList({ alerts }: { alerts: TrendAlert[] }) {
+  if (!alerts.length) return null;
+  return (
+    <div className="space-y-1.5">
+      <p className="text-[10px] font-bold uppercase tracking-wider text-xedu-slate-400">Trend ogohlantirishlari</p>
+      {alerts.map((alert, i) => {
+        const sev = ALERT_SEV[alert.severity];
+        return (
+          <div key={i} className={cn('rounded-xl p-3 border', sev.bg)}>
+            <div className="flex items-start gap-2">
+              <span className={cn('mt-1 h-2 w-2 rounded-full shrink-0', sev.dot)} />
+              <div className="min-w-0 flex-1">
+                <p className={cn('text-xs font-semibold', sev.text)}>{alert.title}</p>
+                <p className={cn('text-[11px] mt-0.5 opacity-80', sev.text)}>{alert.description}</p>
+                <div className="flex items-center justify-between mt-1.5 gap-2">
+                  <span className={cn('text-[10px] opacity-60 min-w-0 truncate', sev.text)}>{alert.recommendedAction}</span>
+                  <span className={cn('text-[10px] font-mono font-bold shrink-0', sev.text)}>
+                    {alert.changePct > 0 ? '+' : ''}{alert.changePct.toFixed(0)}%
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -279,6 +315,11 @@ function StudentCard({ student, expanded, onToggle }: {
               </div>
             )}
 
+            {/* Trend alerts */}
+            {student.trendAlerts?.length > 0 && (
+              <TrendAlertList alerts={student.trendAlerts} />
+            )}
+
             {/* Rule breakdown */}
             <RiskBreakdownPanel breakdown={student.ruleBreakdown} />
 
@@ -391,6 +432,36 @@ export default function InsightsPage() {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Phase 2: Alert summary banner */}
+      {dashboard?.alertSummary && (dashboard.alertSummary.totalCriticalAlerts > 0 || dashboard.alertSummary.totalAlerts > 0) && (
+        <div className={cn(
+          'rounded-xl p-4 border flex items-start gap-3',
+          dashboard.alertSummary.totalCriticalAlerts > 0
+            ? 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800'
+            : 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800'
+        )}>
+          <AlertTriangle className={cn('h-5 w-5 mt-0.5 shrink-0', dashboard.alertSummary.totalCriticalAlerts > 0 ? 'text-red-600' : 'text-amber-600')} />
+          <div className="flex-1 min-w-0">
+            <p className={cn('text-sm font-bold', dashboard.alertSummary.totalCriticalAlerts > 0 ? 'text-red-700 dark:text-red-400' : 'text-amber-700 dark:text-amber-400')}>
+              {dashboard.alertSummary.totalCriticalAlerts > 0
+                ? `${dashboard.alertSummary.totalCriticalAlerts} ta kritik trend ogohlantirishi — zudlik bilan e'tibor kerak`
+                : `${dashboard.alertSummary.totalAlerts} ta trend ogohlantirishi mavjud`}
+            </p>
+            <div className="flex flex-wrap gap-3 mt-1.5 text-xs">
+              {Object.entries(dashboard.alertSummary.alertsByType).filter(([,count]) => count > 0).map(([type, count]) => (
+                <span key={type} className="text-xedu-slate-600 dark:text-xedu-slate-400">
+                  {type === 'attendance_decline' ? 'Davomat' :
+                   type === 'gpa_decline'        ? 'GPA' :
+                   type === 'homework_decline'   ? 'Uy vazifasi' :
+                   type === 'payment_risk'       ? "To'lov" :
+                   type === 'discipline_spike'   ? 'Intizom' : type}: <strong>{count}</strong>
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 

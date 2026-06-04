@@ -12,9 +12,31 @@ export interface RuleBreakdown {
 }
 
 export interface WeeklyTrend {
-  week:           number;  // 1 = bu hafta, 2 = o'tgan hafta, ...
+  week:           number;
   attendanceRate: number;  // -1 = ma'lumot yo'q
   avgGrade:       number;  // -1 = ma'lumot yo'q
+}
+
+export type TrendAlertType =
+  | 'attendance_decline'
+  | 'gpa_decline'
+  | 'homework_decline'
+  | 'payment_risk'
+  | 'discipline_spike';
+
+export type TrendAlertSeverity = 'info' | 'warning' | 'critical';
+
+export interface TrendAlert {
+  type:              TrendAlertType;
+  severity:          TrendAlertSeverity;
+  title:             string;
+  description:       string;
+  metric:            string;
+  previousValue:     number;
+  currentValue:      number;
+  changePct:         number;
+  weeks:             number;
+  recommendedAction: string;
 }
 
 export interface StudentRiskProfile {
@@ -36,6 +58,9 @@ export interface StudentRiskProfile {
   ruleBreakdown:             RuleBreakdown;
   weeklyTrend:               WeeklyTrend[];
   primaryReason:             string;
+  trendAlerts:               TrendAlert[];
+  alertCount:                number;
+  criticalAlertCount:        number;
   recommendations:           string[];
 }
 
@@ -53,6 +78,11 @@ export interface AiDashboardSummary {
   riskDistribution: { critical: number; high: number; medium: number; low: number };
   averages:         { gpa: number; attendance: number };
   triggeredCounts:  TriggeredCounts;
+  alertSummary: {
+    totalAlerts:        number;
+    totalCriticalAlerts: number;
+    alertsByType: Record<TrendAlertType, number>;
+  };
   topAtRisk:        StudentRiskProfile[];
 }
 

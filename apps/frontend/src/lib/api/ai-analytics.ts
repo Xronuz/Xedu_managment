@@ -24,11 +24,13 @@ export type TrendAlertType =
   | 'payment_risk'
   | 'discipline_spike';
 
-export type TrendAlertSeverity = 'info' | 'warning' | 'critical';
+export type TrendAlertSeverity   = 'info' | 'warning' | 'critical';
+export type TrendAlertConfidence = 'low' | 'medium' | 'high';
 
 export interface TrendAlert {
   type:              TrendAlertType;
   severity:          TrendAlertSeverity;
+  confidence:        TrendAlertConfidence;
   title:             string;
   description:       string;
   metric:            string;
@@ -36,6 +38,7 @@ export interface TrendAlert {
   currentValue:      number;
   changePct:         number;
   weeks:             number;
+  sampleCount?:      number;
   recommendedAction: string;
 }
 

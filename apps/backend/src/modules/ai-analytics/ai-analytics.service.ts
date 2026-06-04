@@ -56,18 +56,21 @@ export type TrendAlertType =
   | 'payment_risk'
   | 'discipline_spike';
 
-export type TrendAlertSeverity = 'info' | 'warning' | 'critical';
+export type TrendAlertSeverity  = 'info' | 'warning' | 'critical';
+export type TrendAlertConfidence = 'low' | 'medium' | 'high';
 
 export interface TrendAlert {
   type:              TrendAlertType;
   severity:          TrendAlertSeverity;
+  confidence:        TrendAlertConfidence; // Guard 3
   title:             string;
   description:       string;
-  metric:            string;      // masalan: "attendanceRate"
+  metric:            string;
   previousValue:     number;
   currentValue:      number;
-  changePct:         number;      // o'zgarish foizi (manfiy = pasayish)
-  weeks:             number;      // nechta hafta kuzatildi
+  changePct:         number;
+  weeks:             number;
+  sampleCount?:      number;       // GPA uchun nechta baho ishlatildi
   recommendedAction: string;
 }
 
@@ -179,18 +182,27 @@ export class AiAnalyticsService {
   // -- Trend alert hisoblash (existing data'dan — N+1 yo'q) -----------------
   private computeTrendAlerts(
     weeklyTrend:          WeeklyTrend[],
-    recentGradesAvg:      number | null,   // so'nggi 4 hafta avg (0-1)
-    olderGradesAvg:       number | null,   // avvalgi 4 hafta avg (0-1)
+    recentGradesAvg:      number | null,
+    olderGradesAvg:       number | null,
     recentGradeCount:     number,
     olderGradeCount:      number,
     homeworkCompletion:   number,
     disciplineIncidents:  number,
     overdueMonths:        number,
   ): TrendAlert[] {
-    const alerts: TrendAlert[] = [];
+    const raw: TrendAlert[] = [];
     const validAtt = weeklyTrend.filter(t => t.attendanceRate >= 0);
 
-    // -- Alert 1: Attendance — 3+ hafta ketma-ket pasayish ---------------------
+    // Helper: attendance confidence from sample weeks
+    const attConf = (weeks: number): TrendAlertConfidence =>
+      weeks >= 6 ? 'high' : weeks >= 3 ? 'medium' : 'low';
+
+    // Helper: GPA confidence from sample count (Guard 3)
+    const gpaConf = (n: number): TrendAlertConfidence =>
+      n >= 6 ? 'high' : n >= 3 ? 'medium' : 'low';
+
+    // ─── Alert 1a: Attendance consecutive decline ────────────────────────────
+    let consecutiveAlert: TrendAlert | null = null;
     if (validAtt.length >= 3) {
       let consecutive = 0;
       for (let i = 0; i < validAtt.length - 1; i++) {
@@ -200,82 +212,105 @@ export class AiAnalyticsService {
       if (consecutive >= 3) {
         const current  = validAtt[0].attendanceRate;
         const previous = validAtt[consecutive].attendanceRate;
-        const changePct = ((current - previous) / previous) * 100;
-        alerts.push({
+        const changePct = previous > 0 ? ((current - previous) / previous) * 100 : 0;
+        consecutiveAlert = {
           type:              'attendance_decline',
           severity:          consecutive >= 4 ? 'critical' : 'warning',
+          confidence:        attConf(consecutive),
           title:             `Davomat ${consecutive} hafta ketma-ket pasaymoqda`,
           description:       `${consecutive} hafta davomida davomat ${previous.toFixed(0)}% dan ${current.toFixed(0)}% ga tushdi`,
           metric:            'attendanceRate',
-          previousValue:     previous,
-          currentValue:      current,
+          previousValue:     Math.round(previous  * 10) / 10,
+          currentValue:      Math.round(current   * 10) / 10,
           changePct:         Math.round(changePct * 10) / 10,
           weeks:             consecutive,
           recommendedAction: "O'quvchi bilan shaxsiy suhbat o'tkazing va ota-onasini xabardor qiling",
-        });
+        };
       }
     }
 
-    // -- Alert 2: Attendance — 4 hafta avg vs avvalgi 4 hafta 15%+ tushish ----
+    // ─── Alert 1b: Attendance 4-week average drop ────────────────────────────
+    let avgDeclAlert: TrendAlert | null = null;
     if (validAtt.length >= 6) {
       const recent4 = validAtt.slice(0, 4).map(t => t.attendanceRate);
-      const older4  = validAtt.slice(4, 8).map(t => t.attendanceRate);
+      const older4  = validAtt.slice(4, 8).filter(t => t.attendanceRate >= 0).map(t => t.attendanceRate);
       if (recent4.length >= 3 && older4.length >= 2) {
         const recentAvg = recent4.reduce((s, v) => s + v, 0) / recent4.length;
         const olderAvg  = older4.reduce((s, v)  => s + v, 0) / older4.length;
-        const changePct  = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
-        // Faqat agar ketma-ket alert ALLAQACHON qo'shilmagan bo'lsa
-        const alreadyHas = alerts.some(a => a.type === 'attendance_decline');
-        if (!alreadyHas && changePct < -15) {
-          alerts.push({
+        const changePct = olderAvg > 0 ? ((recentAvg - olderAvg) / olderAvg) * 100 : 0;
+        if (changePct < -15) {
+          avgDeclAlert = {
             type:              'attendance_decline',
             severity:          changePct < -25 ? 'critical' : 'warning',
-            title:             'Davomat keskin tushdi (4 hafta)',
-            description:       `So'nggi 4 hafta o'rtacha: ${recentAvg.toFixed(0)}% (oldin: ${olderAvg.toFixed(0)}%)`,
+            confidence:        attConf(recent4.length + older4.length),
+            title:             "Davomat keskin tushdi (4 hafta o'rtacha)",
+            description:       `So'nggi 4 hafta: ${recentAvg.toFixed(0)}% | Avvalgi: ${olderAvg.toFixed(0)}%`,
             metric:            'attendanceRate',
-            previousValue:     Math.round(olderAvg * 10) / 10,
+            previousValue:     Math.round(olderAvg  * 10) / 10,
             currentValue:      Math.round(recentAvg * 10) / 10,
             changePct:         Math.round(changePct * 10) / 10,
             weeks:             4,
             recommendedAction: "Davomat sabablari aniqlansin, zarur bo'lsa ota-ona bilan uchrashuv",
-          });
+          };
         }
       }
     }
 
-    // -- Alert 3: GPA decline — 4 hafta vs avvalgi 4 hafta, min sample --------
+    // ─── Guard 1: Deduplication — attendance_decline ─────────────────────────
+    // Ikkalasi ham bo'lsa, eng og'ir severity'li birini qoldiramiz
+    if (consecutiveAlert && avgDeclAlert) {
+      const sevWeight = { critical: 2, warning: 1, info: 0 };
+      const winner = sevWeight[consecutiveAlert.severity] >= sevWeight[avgDeclAlert.severity]
+        ? consecutiveAlert
+        : avgDeclAlert;
+      // Description'ni boyitamiz (ikkalasi trigger qilganini ko'rsatamiz)
+      raw.push({
+        ...winner,
+        description: winner.description + ' (ketma-ket pasayish ham aniqlandi)',
+      });
+    } else if (consecutiveAlert) {
+      raw.push(consecutiveAlert);
+    } else if (avgDeclAlert) {
+      raw.push(avgDeclAlert);
+    }
+
+    // ─── Alert 2: GPA decline (Guard 3: confidence) ──────────────────────────
     const GPA_MIN_SAMPLE = 3;
     if (
       recentGradesAvg !== null && olderGradesAvg !== null &&
       recentGradeCount >= GPA_MIN_SAMPLE && olderGradeCount >= GPA_MIN_SAMPLE &&
       olderGradesAvg > 0
     ) {
-      const changePct = ((recentGradesAvg - olderGradesAvg) / olderGradesAvg) * 100;
+      const changePct   = ((recentGradesAvg - olderGradesAvg) / olderGradesAvg) * 100;
+      const totalSample = recentGradeCount + olderGradeCount;
       if (changePct < -15) {
         const currentGpa  = recentGradesAvg * 5;
         const previousGpa = olderGradesAvg  * 5;
-        alerts.push({
+        raw.push({
           type:              'gpa_decline',
           severity:          changePct < -25 ? 'critical' : 'warning',
+          confidence:        gpaConf(Math.min(recentGradeCount, olderGradeCount)),
           title:             'GPA keskin pasaydi',
-          description:       `So'nggi 4 hafta GPA: ${currentGpa.toFixed(1)}/5 (oldin: ${previousGpa.toFixed(1)}/5), ${Math.abs(Math.round(changePct))}% tushish`,
+          description:       `So'nggi 4 hafta: ${currentGpa.toFixed(1)}/5 | Avvalgi: ${previousGpa.toFixed(1)}/5 (${Math.abs(Math.round(changePct))}% tushish)`,
           metric:            'gpa',
           previousValue:     Math.round(previousGpa * 10) / 10,
           currentValue:      Math.round(currentGpa  * 10) / 10,
-          changePct:         Math.round(changePct  * 10) / 10,
+          changePct:         Math.round(changePct   * 10) / 10,
           weeks:             4,
+          sampleCount:       totalSample,
           recommendedAction: "O'qituvchi bilan qo'shimcha mashg'ulot rejalashtiring",
         });
       }
     }
 
-    // -- Alert 4: Homework decline ---------------------------------------------
+    // ─── Alert 3: Homework ───────────────────────────────────────────────────
     if (homeworkCompletion < 40) {
-      alerts.push({
+      raw.push({
         type:              'homework_decline',
         severity:          homeworkCompletion < 25 ? 'critical' : 'warning',
+        confidence:        'medium',
         title:             'Uy vazifalari juda past bajarilmoqda',
-        description:       `Bajarilish: ${homeworkCompletion.toFixed(0)}% — uy vazifalari nazorati yetarli emas`,
+        description:       `Bajarilish: ${homeworkCompletion.toFixed(0)}%`,
         metric:            'homeworkCompletion',
         previousValue:     60,
         currentValue:      Math.round(homeworkCompletion * 10) / 10,
@@ -285,13 +320,14 @@ export class AiAnalyticsService {
       });
     }
 
-    // -- Alert 5: Payment risk -------------------------------------------------
+    // ─── Alert 4: Payment ────────────────────────────────────────────────────
     if (overdueMonths >= 2) {
-      alerts.push({
+      raw.push({
         type:              'payment_risk',
         severity:          overdueMonths >= 3 ? 'critical' : 'warning',
+        confidence:        'high',   // payment data aniq
         title:             `To'lov ${overdueMonths} oy kechikmoqda`,
-        description:       `${overdueMonths} ta oylik to'lov kechikkan — moliyaviy holat nazorat ostiga olinishi kerak`,
+        description:       `${overdueMonths} ta oylik to'lov kechikkan`,
         metric:            'overdueMonths',
         previousValue:     0,
         currentValue:      overdueMonths,
@@ -301,12 +337,13 @@ export class AiAnalyticsService {
       });
     }
 
-    // -- Alert 6: Discipline spike ---------------------------------------------
+    // ─── Alert 5: Discipline ─────────────────────────────────────────────────
     if (disciplineIncidents >= 3) {
-      alerts.push({
+      raw.push({
         type:              'discipline_spike',
         severity:          disciplineIncidents >= 5 ? 'critical' : 'warning',
-        title:             `Intizom hodisalari ko'paydi`,
+        confidence:        'high',   // discipline data aniq
+        title:             "Intizom hodisalari ko'paydi",
         description:       `30 kun ichida ${disciplineIncidents} ta hodisa qayd etildi`,
         metric:            'disciplineIncidents',
         previousValue:     0,
@@ -317,12 +354,23 @@ export class AiAnalyticsService {
       });
     }
 
-    // Severity bo'yicha sort: critical > warning > info
-    const severityOrder: Record<TrendAlertSeverity, number> = { critical: 0, warning: 1, info: 2 };
-    return alerts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity]);
+    // ─── Guard 2: Priority sort — critical→warning→info, then by type ────────
+    const SEV_WEIGHT: Record<TrendAlertSeverity, number>  = { critical: 100, warning: 50, info: 10 };
+    const TYPE_WEIGHT: Record<TrendAlertType, number> = {
+      payment_risk:       5,   // moliya — eng yuqori prioritet
+      gpa_decline:        4,
+      attendance_decline: 3,
+      homework_decline:   2,
+      discipline_spike:   1,
+    };
+    return raw.sort((a, b) => {
+      const sevDiff = (SEV_WEIGHT[b.severity] + TYPE_WEIGHT[b.type]) -
+                      (SEV_WEIGHT[a.severity] + TYPE_WEIGHT[a.type]);
+      return sevDiff;
+    });
   }
 
-    private computeRiskScore(
+      private computeRiskScore(
     attendanceRate:        number,
     gpa:                   number,
     gpaDrop:               number,   // %

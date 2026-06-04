@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
-import { aiAnalyticsApi, type StudentRiskProfile, type RuleBreakdown, type TrendAlert, type TrendAlertSeverity } from '@/lib/api/ai-analytics';
+import { aiAnalyticsApi, type StudentRiskProfile, type RuleBreakdown, type TrendAlert, type TrendAlertSeverity, type TrendAlertConfidence } from '@/lib/api/ai-analytics';
 import { cn } from '@/lib/utils';
 import { AnalyticsSectionNav } from '@/components/analytics/analytics-section-nav';
 
@@ -133,8 +133,23 @@ function TrendAlertList({ alerts }: { alerts: TrendAlert[] }) {
             <div className="flex items-start gap-2">
               <span className={cn('mt-1 h-2 w-2 rounded-full shrink-0', sev.dot)} />
               <div className="min-w-0 flex-1">
-                <p className={cn('text-xs font-semibold', sev.text)}>{alert.title}</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className={cn('text-xs font-semibold', sev.text)}>{alert.title}</p>
+                  {/* Guard 3: confidence badge */}
+                  <span className={cn(
+                    'text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wide',
+                    alert.confidence === 'high'   ? 'bg-current/15 opacity-80' :
+                    alert.confidence === 'medium' ? 'bg-current/10 opacity-60' :
+                                                    'bg-current/8  opacity-50',
+                    sev.text,
+                  )}>
+                    {alert.confidence === 'high' ? 'ishonchli' : alert.confidence === 'medium' ? "o'rta" : 'kam sample'}
+                  </span>
+                </div>
                 <p className={cn('text-[11px] mt-0.5 opacity-80', sev.text)}>{alert.description}</p>
+                {alert.sampleCount !== undefined && (
+                  <p className={cn('text-[10px] mt-0.5 opacity-50', sev.text)}>{alert.sampleCount} ta baho asosida</p>
+                )}
                 <div className="flex items-center justify-between mt-1.5 gap-2">
                   <span className={cn('text-[10px] opacity-60 min-w-0 truncate', sev.text)}>{alert.recommendedAction}</span>
                   <span className={cn('text-[10px] font-mono font-bold shrink-0', sev.text)}>

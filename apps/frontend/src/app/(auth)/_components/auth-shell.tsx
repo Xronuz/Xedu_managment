@@ -1,6 +1,7 @@
 'use client';
 
-import { Shield, BarChart3, Users, Calendar, CreditCard, BookOpen } from 'lucide-react';
+import { Shield, BarChart3, Users, Calendar, CreditCard, BookOpen, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import { cn } from '@/lib/utils';
 
 interface AuthShellProps {
@@ -47,11 +48,29 @@ export function AuthShell({ children, className }: AuthShellProps) {
             style={{ background: 'radial-gradient(circle, rgba(15,123,83,0.14) 0%, transparent 70%)' }} />
         </div>
 
-        {/* top: logo */}
-        <div className="relative z-10 p-10 xl:p-14">
-          <div className="flex items-center gap-3">
+        {/* top: logo + back link */}
+        <div className="relative z-10 p-10 xl:p-14 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 group">
             <img src="/landing/xedu-emerald-transparent.png" alt="Xedu" className="h-8 w-auto" />
-          </div>
+          </Link>
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 text-xs font-medium transition-all duration-150 px-3 py-1.5 rounded-full"
+            style={{ color: 'rgba(255,255,255,0.38)', border: '1px solid rgba(255,255,255,0.10)' }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.75)';
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,0.22)';
+              (e.currentTarget as HTMLAnchorElement).style.background = 'rgba(255,255,255,0.06)';
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.color = 'rgba(255,255,255,0.38)';
+              (e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(255,255,255,0.10)';
+              (e.currentTarget as HTMLAnchorElement).style.background = 'transparent';
+            }}
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Bosh sahifa
+          </Link>
         </div>
 
         {/* middle: tagline + feature grid */}
@@ -125,9 +144,19 @@ export function AuthShell({ children, className }: AuthShellProps) {
             'radial-gradient(55% 50% at 85% 80%, rgba(15,123,83,0.07) 0%, transparent 70%)',
         }}
       >
-        {/* mobile logo */}
-        <div className="lg:hidden absolute top-6 left-6">
-          <img src="/landing/xedu-emerald-transparent.png" alt="Xedu" className="h-7 w-auto" />
+        {/* mobile header */}
+        <div className="lg:hidden absolute top-0 left-0 right-0 flex items-center justify-between px-5 pt-5">
+          <Link href="/">
+            <img src="/landing/xedu-emerald-transparent.png" alt="Xedu" className="h-7 w-auto" />
+          </Link>
+          <Link
+            href="/"
+            className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full transition-colors"
+            style={{ color: 'rgba(37,46,40,0.45)', border: '1px solid rgba(37,46,40,0.12)', background: 'rgba(255,255,255,0.6)' }}
+          >
+            <ArrowLeft className="h-3 w-3" />
+            Bosh sahifa
+          </Link>
         </div>
 
         <div className="w-full max-w-[420px]">

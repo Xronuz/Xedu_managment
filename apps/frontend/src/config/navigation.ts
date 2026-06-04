@@ -18,7 +18,7 @@ import {
   Building2, Package, Library, School,
   ShoppingBag, Coins, Heart,
   BarChart2, UserCheck, Activity, Rocket, Clock,
-  Download,
+  Download, Monitor,
 } from 'lucide-react';
 import { ROUTE_PERMISSIONS } from './permissions';
 
@@ -53,6 +53,7 @@ export const DIRECTOR_NAV: NavGroup[] = [
       { label: 'Xodimlar', href: '/dashboard/staff', icon: Briefcase, roles: ROUTE_PERMISSIONS['/dashboard/staff'] },
       { label: 'Akademik kalendar', href: '/dashboard/academic-calendar', icon: Calendar, roles: ROUTE_PERMISSIONS['/dashboard/academic-calendar'] },
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'], matchPaths: ['/dashboard/kpi', '/dashboard/insights', '/dashboard/marketing', '/dashboard/analytics'] },
+      { label: 'Maktab ekrani', href: '/dashboard/display', icon: Monitor, roles: ROUTE_PERMISSIONS['/dashboard/display'] },
       { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
     ],
   },
@@ -116,6 +117,7 @@ export const BRANCH_ADMIN_NAV: NavGroup[] = [
       { label: 'Eksport markazi',    href: '/dashboard/export-center',        icon: Download,      roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
       { label: 'Kommunikatsiya',     href: '/dashboard/comms',                icon: MessageSquare, roles: ROUTE_PERMISSIONS['/dashboard/comms'] },
       { label: 'Bildirishnomalar',   href: '/dashboard/notifications',        icon: Bell,          roles: ROUTE_PERMISSIONS['/dashboard/notifications'] },
+      { label: 'Maktab ekrani',    href: '/dashboard/display',              icon: Monitor,       roles: ROUTE_PERMISSIONS['/dashboard/display'] },
       { label: 'Sozlamalar',         href: '/dashboard/settings',             icon: Settings,      roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
     ],
   },
@@ -163,6 +165,7 @@ export const VICE_PRINCIPAL_NAV: NavGroup[] = [
     items: [
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'], matchPaths: ['/dashboard/kpi', '/dashboard/insights', '/dashboard/marketing', '/dashboard/analytics'] },
       { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
+      { label: 'Maktab ekrani',    href: '/dashboard/display',              icon: Monitor,       roles: ROUTE_PERMISSIONS['/dashboard/display'] },
       { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
     ],
   },

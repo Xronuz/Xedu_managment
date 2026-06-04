@@ -39,6 +39,7 @@ export class BranchesService {
         isActive: true,
         createdAt: true,
         updatedAt: true,
+        school: { select: { id: true, name: true, slug: true } },
         _count: {
           select: {
             users: true,

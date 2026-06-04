@@ -1,0 +1,276 @@
+/**
+ * Risk Engine Test Seed
+ * 5 xil risk profil bo'yicha 30 ta student uchun realistic data yaratadi:
+ *   A: Critical (davomat + GPA drop + payment)
+ *   B: High (davomat yoki GPA)
+ *   C: Medium (bitta signal)
+ *   D: Low (hamma yaxshi)
+ *   E: False-positive test (bitta baho = past sample)
+ */
+
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
+const SCHOOL_ID = 'e92ad1ed-d6f1-4b4d-b3d2-2e87eaf71eed';
+const BRANCH_ID = '679c47f8-5554-47f8-a443-1b5a377649c0'; // Yangi filial
+
+// Hozirdan N kun oldin
+function daysAgo(n: number): Date {
+  const d = new Date();
+  d.setDate(d.getDate() - n);
+  return d;
+}
+
+// 0-index hafta boshidan
+function weekStart(weeksBack: number): Date {
+  const d = new Date();
+  d.setDate(d.getDate() - weeksBack * 7);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+async function seedAttendance(studentId: string, classId: string, profile: 'good' | 'declining' | 'bad') {
+  // 8 haftalik davomat yaratamiz
+  const records: any[] = [];
+  for (let w = 1; w <= 8; w++) {
+    const wStart = new Date(); wStart.setDate(wStart.getDate() - w * 7);
+    // Har hafta 5 kun
+    for (let d = 0; d < 5; d++) {
+      const date = new Date(wStart);
+      date.setDate(date.getDate() + d);
+
+      let status: string;
+      if (profile === 'good') {
+        // 95% davomat — faqat 1-2 kelmadi
+        status = Math.random() > 0.05 ? 'present' : 'absent';
+      } else if (profile === 'declining') {
+        // Oxirgi 3 hafta ketma-ket pasayish: w<=3 60-70%, w4-6 80%, w7-8 90%
+        const attRate = w <= 3 ? 0.60 + (3 - w) * 0.05 : w <= 6 ? 0.80 : 0.90;
+        status = Math.random() < attRate ? 'present' : 'absent';
+      } else { // bad
+        // 55% davomat
+        status = Math.random() < 0.55 ? 'present' : 'absent';
+      }
+
+      records.push({
+        schoolId:  SCHOOL_ID,
+        branchId:  BRANCH_ID,
+        classId,
+        studentId,
+        date,
+        status,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+  }
+
+  await prisma.attendance.createMany({ data: records, skipDuplicates: true });
+}
+
+async function seedGrades(studentId: string, classId: string, subjectId: string, profile: 'good' | 'gpa_drop' | 'low_sample' | 'bad') {
+  const grades: any[] = [];
+  const now = new Date();
+
+  if (profile === 'low_sample') {
+    // Faqat 1 ta yaqin baho va 1 ta eski — false positive test
+    grades.push({
+      schoolId: SCHOOL_ID, branchId: BRANCH_ID, classId, studentId, subjectId,
+      type: 'quiz', score: 45, maxScore: 100,
+      date: daysAgo(10), weight: 1, isPublished: true,
+      source: 'manual', createdAt: new Date(), updatedAt: new Date(),
+    });
+    grades.push({
+      schoolId: SCHOOL_ID, branchId: BRANCH_ID, classId, studentId, subjectId,
+      type: 'quiz', score: 90, maxScore: 100,
+      date: daysAgo(40), weight: 1, isPublished: true,
+      source: 'manual', createdAt: new Date(), updatedAt: new Date(),
+    });
+  } else if (profile === 'gpa_drop') {
+    // So'nggi 4 hafta: 55-65%, oldingi 4 hafta: 85-90% → 25%+ drop
+    for (let i = 0; i < 4; i++) {
+      grades.push({
+        schoolId: SCHOOL_ID, branchId: BRANCH_ID, classId, studentId, subjectId,
+        type: 'quiz', score: 55 + Math.random() * 10, maxScore: 100,
+        date: daysAgo(3 + i * 5), weight: 1, isPublished: true,
+        source: 'manual', createdAt: new Date(), updatedAt: new Date(),
+      });
+    }
+    for (let i = 0; i < 4; i++) {
+      grades.push({
+        schoolId: SCHOOL_ID, branchId: BRANCH_ID, classId, studentId, subjectId,
+        type: 'quiz', score: 85 + Math.random() * 5, maxScore: 100,
+        date: daysAgo(35 + i * 5), weight: 1, isPublished: true,
+        source: 'manual', createdAt: new Date(), updatedAt: new Date(),
+      });
+    }
+  } else if (profile === 'good') {
+    // 80-95% barcha baholar
+    for (let i = 0; i < 8; i++) {
+      grades.push({
+        schoolId: SCHOOL_ID, branchId: BRANCH_ID, classId, studentId, subjectId,
+        type: 'quiz', score: 80 + Math.random() * 15, maxScore: 100,
+        date: daysAgo(3 + i * 7), weight: 1, isPublished: true,
+        source: 'manual', createdAt: new Date(), updatedAt: new Date(),
+      });
+    }
+  } else { // bad
+    // 40-55%
+    for (let i = 0; i < 8; i++) {
+      grades.push({
+        schoolId: SCHOOL_ID, branchId: BRANCH_ID, classId, studentId, subjectId,
+        type: 'quiz', score: 40 + Math.random() * 15, maxScore: 100,
+        date: daysAgo(3 + i * 7), weight: 1, isPublished: true,
+        source: 'manual', createdAt: new Date(), updatedAt: new Date(),
+      });
+    }
+  }
+
+  await prisma.grade.createMany({ data: grades, skipDuplicates: true });
+}
+
+async function seedOverduePayment(studentId: string, months: number) {
+  for (let m = 0; m < months; m++) {
+    const dueDate = new Date();
+    dueDate.setMonth(dueDate.getMonth() - m - 1);
+    await prisma.payment.create({
+      data: {
+        schoolId:  SCHOOL_ID,
+        branchId:  BRANCH_ID,
+        studentId,
+        amount:    500_000,
+        currency:  'UZS',
+        status:    'overdue',
+        dueDate,
+        description: `Test overdue payment (month ${m + 1})`,
+      },
+    });
+  }
+}
+
+async function seedDiscipline(studentId: string, count: number) {
+  for (let i = 0; i < count; i++) {
+    await prisma.disciplineIncident.create({
+      data: {
+        schoolId:    SCHOOL_ID,
+        branchId:    BRANCH_ID,
+        studentId,
+        type:        'behavior',
+        description: `Test intizom hodisasi #${i + 1}`,
+        severity:    i >= 3 ? 'high' : 'medium',
+        status:      'open',
+        date:        daysAgo(2 + i * 5),
+      },
+    });
+  }
+}
+
+async function main() {
+  // Birinchi 30 ta real student'ni olish
+  const students = await prisma.user.findMany({
+    where: { role: 'student', isActive: true, schoolId: SCHOOL_ID },
+    include: {
+      studentClasses: {
+        include: { class: { include: { subjects: { take: 1, select: { id: true } } } } },
+        take: 1,
+      },
+    },
+    take: 30,
+    orderBy: { createdAt: 'asc' },
+  });
+
+  console.log(`\nTest data kiritish boshlanadi (${students.length} ta student)...\n`);
+
+  // Oldingi test data'ni tozalash
+  const studentIds = students.map(s => s.id);
+  await prisma.attendance.deleteMany({ where: { studentId: { in: studentIds }, schoolId: SCHOOL_ID } });
+  await prisma.grade.deleteMany({ where: { studentId: { in: studentIds }, schoolId: SCHOOL_ID } });
+  await prisma.payment.deleteMany({ where: { studentId: { in: studentIds }, schoolId: SCHOOL_ID, description: { startsWith: 'Test' } } });
+  await prisma.disciplineIncident.deleteMany({ where: { studentId: { in: studentIds }, schoolId: SCHOOL_ID, description: { startsWith: 'Test' } } });
+  console.log('  Old test data cleared\n');
+
+  // Profil bo'yicha taqsimot (30 ta):
+  //   6 ta CRITICAL (A): bad att + gpa_drop + 2-3 oy payment
+  //   6 ta HIGH (B): declining att yoki gpa_drop
+  //   6 ta MEDIUM (C): bitta signal
+  //   6 ta LOW (D): yaxshi
+  //   3 ta FALSE-POSITIVE (E): low_sample GPA
+  //   3 ta EDGE: bitta signal chegara yaqin
+
+  const profiles: Array<{
+    attProfile: 'good' | 'declining' | 'bad';
+    gradeProfile: 'good' | 'gpa_drop' | 'low_sample' | 'bad';
+    payment: number;
+    discipline: number;
+    label: string;
+  }> = [
+    // 6 CRITICAL
+    { attProfile: 'bad',      gradeProfile: 'gpa_drop', payment: 3, discipline: 5, label: 'CRITICAL-A1' },
+    { attProfile: 'bad',      gradeProfile: 'bad',      payment: 2, discipline: 4, label: 'CRITICAL-A2' },
+    { attProfile: 'bad',      gradeProfile: 'gpa_drop', payment: 2, discipline: 0, label: 'CRITICAL-A3' },
+    { attProfile: 'declining',gradeProfile: 'bad',      payment: 3, discipline: 3, label: 'CRITICAL-A4' },
+    { attProfile: 'bad',      gradeProfile: 'bad',      payment: 1, discipline: 6, label: 'CRITICAL-A5' },
+    { attProfile: 'declining',gradeProfile: 'gpa_drop', payment: 2, discipline: 2, label: 'CRITICAL-A6' },
+    // 6 HIGH
+    { attProfile: 'declining',gradeProfile: 'gpa_drop', payment: 0, discipline: 2, label: 'HIGH-B1' },
+    { attProfile: 'bad',      gradeProfile: 'good',     payment: 1, discipline: 1, label: 'HIGH-B2' },
+    { attProfile: 'good',     gradeProfile: 'gpa_drop', payment: 1, discipline: 0, label: 'HIGH-B3' },
+    { attProfile: 'declining',gradeProfile: 'good',     payment: 2, discipline: 0, label: 'HIGH-B4' },
+    { attProfile: 'good',     gradeProfile: 'bad',      payment: 0, discipline: 4, label: 'HIGH-B5' },
+    { attProfile: 'bad',      gradeProfile: 'good',     payment: 0, discipline: 3, label: 'HIGH-B6' },
+    // 6 MEDIUM
+    { attProfile: 'declining',gradeProfile: 'good',     payment: 0, discipline: 0, label: 'MEDIUM-C1' },
+    { attProfile: 'good',     gradeProfile: 'gpa_drop', payment: 0, discipline: 0, label: 'MEDIUM-C2' },
+    { attProfile: 'good',     gradeProfile: 'good',     payment: 1, discipline: 0, label: 'MEDIUM-C3' },
+    { attProfile: 'good',     gradeProfile: 'good',     payment: 0, discipline: 3, label: 'MEDIUM-C4' },
+    { attProfile: 'declining',gradeProfile: 'good',     payment: 0, discipline: 2, label: 'MEDIUM-C5' },
+    { attProfile: 'good',     gradeProfile: 'bad',      payment: 0, discipline: 0, label: 'MEDIUM-C6' },
+    // 6 LOW (barcha yaxshi)
+    { attProfile: 'good',     gradeProfile: 'good',     payment: 0, discipline: 0, label: 'LOW-D1' },
+    { attProfile: 'good',     gradeProfile: 'good',     payment: 0, discipline: 0, label: 'LOW-D2' },
+    { attProfile: 'good',     gradeProfile: 'good',     payment: 0, discipline: 0, label: 'LOW-D3' },
+    { attProfile: 'good',     gradeProfile: 'good',     payment: 0, discipline: 0, label: 'LOW-D4' },
+    { attProfile: 'good',     gradeProfile: 'good',     payment: 0, discipline: 0, label: 'LOW-D5' },
+    { attProfile: 'good',     gradeProfile: 'good',     payment: 0, discipline: 0, label: 'LOW-D6' },
+    // 3 FALSE-POSITIVE test (low_sample — GPADrop signal ishlamasligi kerak)
+    { attProfile: 'good',     gradeProfile: 'low_sample', payment: 0, discipline: 0, label: 'FP-E1' },
+    { attProfile: 'good',     gradeProfile: 'low_sample', payment: 0, discipline: 0, label: 'FP-E2' },
+    { attProfile: 'declining',gradeProfile: 'low_sample', payment: 0, discipline: 0, label: 'FP-E3' },
+    // 3 EDGE (chegara yaqin)
+    { attProfile: 'declining',gradeProfile: 'good',     payment: 0, discipline: 0, label: 'EDGE-F1' },
+    { attProfile: 'good',     gradeProfile: 'gpa_drop', payment: 0, discipline: 0, label: 'EDGE-F2' },
+    { attProfile: 'good',     gradeProfile: 'good',     payment: 2, discipline: 0, label: 'EDGE-F3' },
+  ];
+
+  for (let i = 0; i < Math.min(profiles.length, students.length); i++) {
+    const student = students[i];
+    const profile = profiles[i];
+    const classId  = student.studentClasses[0]?.class?.id;
+    const subjectId = student.studentClasses[0]?.class?.subjects?.[0]?.id;
+
+    if (!classId || !subjectId) {
+      console.log(`  ⚠️  ${profile.label}: ${student.firstName} ${student.lastName} — sinf/fan topilmadi, skip`);
+      continue;
+    }
+
+    await seedAttendance(student.id, classId, profile.attProfile);
+    await seedGrades(student.id, classId, subjectId, profile.gradeProfile);
+    if (profile.payment > 0) await seedOverduePayment(student.id, profile.payment);
+    if (profile.discipline > 0) await seedDiscipline(student.id, profile.discipline);
+
+    console.log(`  ✅ ${profile.label.padEnd(14)} | ${student.firstName} ${student.lastName}`);
+  }
+
+  console.log('\n✅ Test data kiritildi!\n');
+  console.log('Kutilayotgan natijalar:');
+  console.log('  CRITICAL: 6 ta (A profil)');
+  console.log('  HIGH:     6 ta (B profil)');
+  console.log('  MEDIUM:   6 ta (C profil)');
+  console.log('  LOW:      6 ta (D profil)');
+  console.log('  FP Test:  3 ta (E profil) — GPADrop alert CHIQMASLIGI kerak (low sample)');
+  console.log('  Edge:     3 ta (F profil) — chegara yaqin');
+  console.log('\nLogin: director@demo-school.uz | parol: Director123!');
+  console.log('URL: localhost:3000/dashboard/insights');
+}
+
+main().catch(console.error).finally(() => prisma.$disconnect());

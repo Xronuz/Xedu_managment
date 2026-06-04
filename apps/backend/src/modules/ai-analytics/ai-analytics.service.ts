@@ -189,6 +189,7 @@ export class AiAnalyticsService {
     homeworkCompletion:   number,
     disciplineIncidents:  number,
     overdueMonths:        number,
+    userRole:             string = 'director',
   ): TrendAlert[] {
     const raw: TrendAlert[] = [];
     const validAtt = weeklyTrend.filter(t => t.attendanceRate >= 0);
@@ -354,21 +355,26 @@ export class AiAnalyticsService {
       });
     }
 
-    // ─── Guard 2: Priority sort — critical→warning→info, then by type ────────
-    const SEV_WEIGHT: Record<TrendAlertSeverity, number>  = { critical: 100, warning: 50, info: 10 };
-    const TYPE_WEIGHT: Record<TrendAlertType, number> = {
-      payment_risk:       5,   // moliya — eng yuqori prioritet
-      gpa_decline:        4,
-      attendance_decline: 3,
-      homework_decline:   2,
-      discipline_spike:   1,
+
+    // -- Guard 2: Role-based priority sort ----------------------------------------
+    const SEV_WEIGHT: Record<TrendAlertSeverity, number> = { critical: 100, warning: 50, info: 10 };
+    // Role bo'yicha type prioriteti
+    const TYPE_PRIORITY: Partial<Record<string, Record<TrendAlertType, number>>> = {
+      director:      { payment_risk: 5, gpa_decline: 4, attendance_decline: 3, homework_decline: 2, discipline_spike: 1 },
+      vice_principal:{ gpa_decline: 5, attendance_decline: 4, discipline_spike: 3, homework_decline: 2, payment_risk: 1 },
+      class_teacher: { attendance_decline: 5, homework_decline: 4, gpa_decline: 3, discipline_spike: 2, payment_risk: 1 },
     };
-    return raw.sort((a, b) => {
-      const sevDiff = (SEV_WEIGHT[b.severity] + TYPE_WEIGHT[b.type]) -
-                      (SEV_WEIGHT[a.severity] + TYPE_WEIGHT[a.type]);
-      return sevDiff;
-    });
+    const DEFAULT_PRIORITY: Record<TrendAlertType, number> = {
+      payment_risk: 5, gpa_decline: 4, attendance_decline: 3, homework_decline: 2, discipline_spike: 1,
+    };
+    const TYPE_WEIGHT = TYPE_PRIORITY[userRole] ?? DEFAULT_PRIORITY;
+
+    return raw.sort((a, b) =>
+      (SEV_WEIGHT[b.severity] + TYPE_WEIGHT[b.type]) -
+      (SEV_WEIGHT[a.severity] + TYPE_WEIGHT[a.type])
+    );
   }
+
 
       private computeRiskScore(
     attendanceRate:        number,
@@ -739,6 +745,7 @@ export class AiAnalyticsService {
         homeworkCompletion,
         disciplineIncidents,
         overdueMonths,
+        user.role,        // role-based priority (Guard 2)
       );
 
       profiles.push({

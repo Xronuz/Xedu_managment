@@ -41,7 +41,7 @@ function useKeyboardShortcut(callback: () => void, keys: string[]) {
       if (e.metaKey || e.ctrlKey) pressed.add('cmd');
       if (e.shiftKey) pressed.add('shift');
       if (e.altKey) pressed.add('alt');
-      pressed.add(e.key.toLowerCase());
+      if (e.key) pressed.add(e.key.toLowerCase());
 
       if (
         keySet.size === pressed.size &&

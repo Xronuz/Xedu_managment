@@ -36,16 +36,39 @@ export function AuthShell({ children, className }: AuthShellProps) {
       {/* ── LEFT PANEL ─────────────────────────────────────────────────── */}
       <div
         className="hidden lg:flex lg:w-1/2 xl:w-[52%] flex-col justify-between relative overflow-hidden"
-        style={{ background: 'linear-gradient(140deg, #091510 0%, #122519 55%, #0c1e14 100%)' }}
+        style={{ background: 'linear-gradient(145deg, #07140F 0%, #0B1D14 45%, #0F241B 100%)' }}
       >
-        {/* glow orbs */}
+        {/* ── depth layer 1: primary glow orbs ── */}
         <div className="pointer-events-none absolute inset-0" aria-hidden>
-          <div className="absolute -top-32 -left-32 h-[480px] w-[480px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(15,123,83,0.20) 0%, transparent 70%)' }} />
-          <div className="absolute top-1/2 right-0 h-[360px] w-[360px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(79,196,122,0.07) 0%, transparent 70%)' }} />
-          <div className="absolute -bottom-32 -right-32 h-[400px] w-[400px] rounded-full"
-            style={{ background: 'radial-gradient(circle, rgba(15,123,83,0.14) 0%, transparent 70%)' }} />
+          {/* top-left — katta anchor glow */}
+          <div className="absolute -top-24 -left-24 h-[520px] w-[520px] rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(15,123,83,0.26) 0%, rgba(15,123,83,0.08) 45%, transparent 70%)' }} />
+          {/* center-right — o'rta depth */}
+          <div className="absolute top-[38%] right-[-80px] h-[420px] w-[420px] rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(15,123,83,0.16) 0%, transparent 65%)' }} />
+          {/* bottom — pastki glow */}
+          <div className="absolute -bottom-20 left-[20%] h-[360px] w-[360px] rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(15,123,83,0.20) 0%, transparent 65%)' }} />
+          {/* accent micro — feature grid yonida */}
+          <div className="absolute bottom-[25%] -left-10 h-[200px] w-[200px] rounded-full"
+            style={{ background: 'radial-gradient(circle, rgba(79,196,122,0.10) 0%, transparent 70%)' }} />
+
+          {/* ── depth layer 2: noise texture ── */}
+          <div
+            className="absolute inset-0"
+            style={{
+              opacity: 0.035,
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+              backgroundRepeat: 'repeat',
+              backgroundSize: '180px 180px',
+            }}
+          />
+
+          {/* ── depth layer 3: subtle emerald vignette top ── */}
+          <div
+            className="absolute inset-x-0 top-0 h-[2px]"
+            style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(15,123,83,0.45) 50%, transparent 100%)' }}
+          />
         </div>
 
         {/* top: logo + back link */}
@@ -79,7 +102,10 @@ export function AuthShell({ children, className }: AuthShellProps) {
           <div className="space-y-4 max-w-sm">
             <h1 className="text-[30px] xl:text-[34px] font-black tracking-tight text-white leading-tight">
               Ta&apos;lim guruhi uchun<br />
-              <span style={{ color: '#4ade95' }}>operatsion tizim</span>
+              <span style={{
+                color: '#4ade95',
+                textShadow: '0 0 32px rgba(74,222,149,0.35)',
+              }}>operatsion tizim</span>
             </h1>
             <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.48)' }}>
               Maktablar, filiallar, o&apos;quvchilar va xodimlarni — barchasi bir platformada boshqaring.
@@ -95,8 +121,9 @@ export function AuthShell({ children, className }: AuthShellProps) {
                   key={f.label}
                   className="rounded-xl p-3 space-y-2"
                   style={{
-                    background: 'rgba(255,255,255,0.07)',
-                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'linear-gradient(145deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
+                    border: '1px solid rgba(255,255,255,0.10)',
+                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
                   }}
                 >
                   <div

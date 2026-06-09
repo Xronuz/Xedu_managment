@@ -88,6 +88,16 @@ export function middleware(request: NextRequest) {
       const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host') ?? '';
       const proto = request.headers.get('x-forwarded-proto') ?? (host.includes('localhost') ? 'http' : 'https');
       const base = host ? `${proto}://${host}` : request.nextUrl.origin;
+
+      // If a token exists but is expired, redirect through /auth/clear first
+      // to clear the stale httpOnly cookie AND the stale Zustand localStorage,
+      // preventing the AuthLayout ↔ middleware redirect loop.
+      if (token) {
+        const clear = new URL('/auth/clear', base);
+        clear.searchParams.set('reason', 'session_expired');
+        return NextResponse.redirect(clear);
+      }
+
       const login = new URL('/login', base);
       login.searchParams.set('reason', 'session_expired');
       return NextResponse.redirect(login);

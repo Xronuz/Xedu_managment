@@ -1,6 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
+ * Resolve the canonical base URL for redirects.
+ * Mirrors the same helper in middleware.ts — must be kept in sync.
+ */
+function getBaseUrl(request: NextRequest): string {
+  const fwdHost = request.headers.get('x-forwarded-host');
+  const fwdProto = request.headers.get('x-forwarded-proto');
+  if (fwdHost && fwdProto) {
+    return `${fwdProto}://${fwdHost}`;
+  }
+
+  const envUrl = process.env.NEXT_PUBLIC_APP_URL;
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, '');
+  }
+
+  return request.nextUrl.origin;
+}
+
+/**
  * Clears auth cookies (access_token, refresh_token) and redirects to /login.
  *
  * Called by the API client when token refresh fails, because httpOnly cookies
@@ -12,13 +31,15 @@ import { NextRequest, NextResponse } from 'next/server';
  */
 export async function GET(request: NextRequest) {
   const reason = request.nextUrl.searchParams.get('reason') ?? '';
-  const loginUrl = new URL('/login', request.url);
+  const loginUrl = new URL('/login', getBaseUrl(request));
   if (reason) {
     loginUrl.searchParams.set('reason', reason);
   }
   const response = NextResponse.redirect(loginUrl);
 
-  const isHttps = request.url.startsWith('https');
+  // Determine HTTPS from x-forwarded-proto (trust proxy) or request URL scheme
+  const fwdProto = request.headers.get('x-forwarded-proto');
+  const isHttps = fwdProto ? fwdProto === 'https' : getBaseUrl(request).startsWith('https');
   const cookieOpts = {
     httpOnly: true,
     secure: isHttps,

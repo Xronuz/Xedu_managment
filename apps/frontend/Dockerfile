@@ -28,8 +28,10 @@ RUN mkdir -p /app/apps/frontend/public
 # Build args (injected at build time for SSG/ISR)
 ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
 ARG NEXT_PUBLIC_WS_URL=http://localhost:3001
+ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_WS_URL=$NEXT_PUBLIC_WS_URL
+ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 
 # Build types
 RUN pnpm --filter @eduplatform/types build

@@ -6,15 +6,19 @@ import {
   Users, FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAuthStore } from '@/store/auth.store';
 
 export function TeacherWelcome() {
   const router = useRouter();
+  const { user } = useAuthStore();
+  const isClassTeacher = user?.role === 'class_teacher';
 
   const actions = [
     { label: 'Dars jadvali', desc: 'Bugungi va haftalik darslar', icon: Calendar, href: '/dashboard/schedule' },
     { label: 'Uy vazifalari', desc: 'Topshiriqlarni boshqarish', icon: BookOpen, href: '/dashboard/homework' },
     { label: 'Davomat', desc: 'Sinf davomati', icon: ClipboardCheck, href: '/dashboard/attendance' },
-    { label: 'Mening sinfim', desc: 'Sinf ro‘yxati va ma‘lumotlari', icon: GraduationCap, href: '/dashboard/my-class' },
+    // "Mening sinfim" faqat sinf rahbari uchun — oddiy o'qituvchiga bu sahifa taqiqlangan
+    ...(isClassTeacher ? [{ label: 'Mening sinfim', desc: 'Sinf ro‘yxati va ma‘lumotlari', icon: GraduationCap, href: '/dashboard/my-class' }] : []),
     { label: 'Baholar', desc: 'Baholash jurnali', icon: FileText, href: '/dashboard/grades' },
     { label: 'Imtihonlar', desc: 'Yaqin imtihonlar', icon: Users, href: '/dashboard/exams' },
   ];

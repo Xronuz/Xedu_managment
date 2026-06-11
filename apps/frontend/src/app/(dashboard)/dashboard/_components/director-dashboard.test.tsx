@@ -85,53 +85,23 @@ describe('DirectorDashboard (Phase 3 executive redesign)', () => {
     expect(screen.getAllByText('Operatsion markaz').length).toBeGreaterThan(0);
   });
 
-  it('shows ZONE A — Executive Snapshot cards', () => {
+  it('shows executive snapshot cards (Umumiy ko\'rinish)', () => {
     render(React.createElement(DirectorDashboard), { wrapper: Wrapper });
-    expect(screen.getByText("Maktab tayyorgarligi")).toBeTruthy();
-    expect(screen.getByText("Tasdiqlash navbati")).toBeTruthy();
-    expect(screen.getByText("Moliya holati")).toBeTruthy();
-    expect(screen.getByText("Ta'lim holati")).toBeTruthy();
+    expect(screen.getByText("Umumiy ko'rinish")).toBeTruthy();
+    expect(screen.getByText('Maktab salomatligi')).toBeTruthy();
+    expect(screen.getByText('Tasdiqlashlar')).toBeTruthy();
+    expect(screen.getAllByText('Ogohlantirishlar').length).toBeGreaterThan(0);
   });
 
-  it('shows ZONE B — Delegated Operations section', () => {
+  it('shows key metrics section (Asosiy ko\'rsatkichlar)', () => {
     render(React.createElement(DirectorDashboard), { wrapper: Wrapper });
-    expect(screen.getByText("O'rinbosar (VP)")).toBeTruthy();
-    expect(screen.getByText('Filial admin')).toBeTruthy();
-    expect(screen.getAllByText("Moliya bo'limi").length).toBeGreaterThan(0);
+    expect(screen.getByText("Asosiy ko'rsatkichlar")).toBeTruthy();
   });
 
-  it('shows ZONE C — Strategic Visibility sections', () => {
+  it('shows operations and staff cards', () => {
     render(React.createElement(DirectorDashboard), { wrapper: Wrapper });
-    expect(screen.getByText("Muhim ogohlantirishlar")).toBeTruthy();
-    expect(screen.getByText('Bugun')).toBeTruthy();
-  });
-
-  it('shows ownership badges on executive cards', () => {
-    render(React.createElement(DirectorDashboard), { wrapper: Wrapper });
-    expect(screen.getAllByText("Sizning vazifangiz").length).toBeGreaterThan(0);
-    expect(screen.getAllByText("VP bajaradi").length).toBeGreaterThan(0);
-    expect(screen.getAllByText('Filial admin bajaradi').length).toBeGreaterThan(0);
-    expect(screen.getAllByText("Moliya bo'limi").length).toBeGreaterThan(0);
-  });
-
-  it('shows Quick Actions section with curated routes and ownership badges', () => {
-    render(React.createElement(DirectorDashboard), { wrapper: Wrapper });
-    expect(screen.getByText('Tezkor harakatlar')).toBeTruthy();
-
-    const expectedActions = [
-      'Tasdiqlash inbox',
-      'Filiallar',
-      'Xodimlar',
-      'Foydalanuvchilar',
-      'Ish haqi',
-      'Hisobotlar',
-      'Operatsion markaz',
-      'Sozlamalar',
-    ];
-
-    for (const label of expectedActions) {
-      expect(screen.getAllByText(label).length).toBeGreaterThan(0);
-    }
+    expect(screen.getByText("So'nggi operatsiyalar")).toBeTruthy();
+    expect(screen.getAllByText('Xodimlar').length).toBeGreaterThan(0);
   });
 
   it('does NOT show fake AI metric labels when data unavailable', () => {

@@ -3,48 +3,30 @@ import { DIRECTOR_NAV, getNavForRole, getFlatNavForRole } from './navigation';
 import { OPS_REDIRECT_ROLES } from './permissions';
 import { DIRECTOR_CMDK_ALLOWED } from '@/components/command-palette';
 
-describe('Director Navigation (Phase 1 curation)', () => {
+describe('Director Navigation (executive curation)', () => {
   const directorNav = getNavForRole('director');
   const flatItems = getFlatNavForRole('director');
 
-  it('should contain exactly 6 groups', () => {
-    expect(directorNav).toHaveLength(6);
+  it('should be a single flat group (no section chaos)', () => {
+    expect(directorNav).toHaveLength(1);
   });
 
-  it('should contain expected group titles', () => {
-    const titles = directorNav.map(g => g.title);
-    expect(titles).toEqual([
-      'Umumiy ko‘rinish',
-      'Filial & Jamoa',
-      "Ta'lim",
-      'Moliya',
-      'Analitika',
-      'Tizim',
-    ]);
+  it('should contain exactly 8 sidebar items', () => {
+    expect(flatItems).toHaveLength(8);
   });
 
-  it('should contain exactly 16 sidebar items', () => {
-    expect(flatItems).toHaveLength(16);
-  });
-
-  it('should contain all expected items', () => {
+  it('should contain only executive items', () => {
     const labels = flatItems.map(i => i.label);
-    expect(labels).toContain('Dashboard');
-    expect(labels).toContain('Operatsion markaz');
-    expect(labels).toContain('Tasdiqlash inbox');
-    expect(labels).toContain('Ogohlantirishlar');
-    expect(labels).toContain('Filiallar');
-    expect(labels).toContain('Xodimlar');
-    expect(labels).toContain('Foydalanuvchilar');
-    expect(labels).toContain('Dars jadvali');
-    expect(labels).toContain('Baholar');
-    expect(labels).toContain('Davomat');
-    expect(labels).toContain('Moliya');
-    expect(labels).toContain('Ish haqi');
-    expect(labels).toContain('Hisobotlar');
-    expect(labels).toContain('KPI Dashboard');
-    expect(labels).toContain('Sozlamalar');
-    expect(labels).toContain('Audit Log');
+    expect(labels).toEqual([
+      'Dashboard',
+      'Tasdiqlash inbox',
+      'Ogohlantirishlar',
+      'Xodimlar',
+      'Akademik kalendar',
+      'Hisobotlar',
+      'Maktab ekrani',
+      'Sozlamalar',
+    ]);
   });
 
   it('should NOT contain hidden operational items', () => {
@@ -53,16 +35,13 @@ describe('Director Navigation (Phase 1 curation)', () => {
     expect(labels).not.toContain('Sinflar');
     expect(labels).not.toContain('Fanlar');
     expect(labels).not.toContain('Imtihonlar');
-    expect(labels).not.toContain('Akademik kalendar');
+    expect(labels).not.toContain('Baholar');
+    expect(labels).not.toContain('Davomat');
     expect(labels).not.toContain("To'garaklar");
-    expect(labels).not.toContain("Ta'til so'rovlar");
     expect(labels).not.toContain('Intizom');
-    expect(labels).not.toContain("O'qituvchi almashtirish");
-    expect(labels).not.toContain("Do'kon boshqaruvi");
     expect(labels).not.toContain("O'quvchilar");
     expect(labels).not.toContain('CRM — Leadlar');
     expect(labels).not.toContain('Kommunikatsiya');
-    expect(labels).not.toContain('Bildirishnomalar');
     expect(labels).not.toContain('Jadval analitikasi');
   });
 });
@@ -127,7 +106,7 @@ describe('Other roles are NOT affected by Director curation', () => {
     expect(labels).toContain('Sinflar');
     expect(labels).toContain('Fanlar');
     expect(labels).toContain('Imtihonlar');
-    expect(labels).toContain("Ta'til so'rovlar");
+    expect(labels).toContain('Ta‘til so‘rovlar');
     expect(labels).toContain('Intizom');
   });
 
@@ -136,7 +115,7 @@ describe('Other roles are NOT affected by Director curation', () => {
     const labels = baNav.map(i => i.label);
     expect(labels).toContain('Sinflar');
     expect(labels).toContain('Intizom');
-    expect(labels).toContain("O'qituvchi almashtirish");
+    expect(labels).toContain('O‘qituvchi almashtirish');
   });
 
   it('Accountant nav still contains finance items', () => {

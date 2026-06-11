@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { useAuthStore } from '@/store/auth.store';
+import { canAccessRoute } from '@/config/permissions';
 
 const ANALYTICS_TABS = [
   { label: 'Hisobotlar',       href: '/dashboard/reports' },
@@ -14,10 +16,13 @@ const ANALYTICS_TABS = [
 
 export function AnalyticsSectionNav() {
   const pathname = usePathname();
+  const { user } = useAuthStore();
+  // Rolga ruxsat etilmagan tablar ko'rsatilmaydi (masalan, teacher uchun KPI/Marketing)
+  const visibleTabs = ANALYTICS_TABS.filter((tab) => !user || canAccessRoute(user.role, tab.href));
 
   return (
     <div className="mb-5 inline-flex items-center gap-1 overflow-x-auto no-scrollbar rounded-[18px] p-1.5 bg-xedu-slate-100 dark:bg-white/[0.06] shadow-[var(--xedu-shadow-inset)]">
-      {ANALYTICS_TABS.map((tab) => {
+      {visibleTabs.map((tab) => {
         const active = pathname === tab.href;
         return (
           <Link

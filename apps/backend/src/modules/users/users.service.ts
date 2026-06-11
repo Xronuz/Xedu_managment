@@ -79,6 +79,9 @@ export class UsersService {
     search?: string,
     role?: string,
   ) {
+    // DoS himoyasi: limit/page chegaralanadi (frontend staff sahifasi 500 ishlatadi)
+    page = Math.max(1, page);
+    limit = Math.min(Math.max(1, limit), 500);
     const skip = (page - 1) * limit;
 
     // director va vice_principal maktab bo'yicha ko'radi (branchId filter yo'q)

@@ -34,6 +34,11 @@ export function useSocket({ namespace = '/', enabled = true, handlers = {} }: Us
   const [isConnected, setIsConnected] = useState(false);
   const [authError, setAuthError] = useState<string | null>(null);
 
+  // Handlers ref orqali saqlanadi: har render'da yangilanadi, lekin socket qayta
+  // ulanmaydi — listener'lar doim eng so'nggi handler'ni chaqiradi (stale closure yo'q)
+  const handlersRef = useRef(handlers);
+  handlersRef.current = handlers;
+
   const connect = useCallback(() => {
     if (!accessToken || !enabled) {
       setIsConnected(false);
@@ -81,13 +86,13 @@ export function useSocket({ namespace = '/', enabled = true, handlers = {} }: Us
       }
     });
 
-    // Register all provided event handlers
-    Object.entries(handlers).forEach(([event, cb]) => {
-      socket.on(event, cb);
+    // Register all provided event handlers — ref orqali, doim eng yangi callback
+    Object.keys(handlersRef.current).forEach((event) => {
+      socket.on(event, (data: any) => handlersRef.current[event]?.(data));
     });
 
     socketRef.current = socket;
-  }, [accessToken, enabled, namespace]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [accessToken, enabled, namespace]);
 
   useEffect(() => {
     connect();

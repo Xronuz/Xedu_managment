@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Optional } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, Optional } from '@nestjs/common';
 import { IsString, IsUUID, IsNumber, IsDateString, IsOptional, IsArray, Min, Max, MaxLength, ValidateNested, IsInt } from 'class-validator';
 import { Type } from 'class-transformer';
 import { PrismaService } from '@/common/prisma/prisma.service';
@@ -51,6 +51,8 @@ export class BulkCreateExamDto {
 
 @Injectable()
 export class ExamsService {
+  private readonly logger = new Logger(ExamsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     @Optional() private readonly auditService: AuditService,
@@ -524,9 +526,13 @@ export class ExamsService {
       const CHUNK = 100;
       for (let i = 0; i < notifications.length; i += CHUNK) {
         const chunk = notifications.slice(i, i + CHUNK);
-        await this.prisma.notification.createMany({ data: chunk }).catch(() => {});
+        await this.prisma.notification.createMany({ data: chunk })
+          .catch((err) => this.logger.error('Imtihon bildirishnomalari saqlanmadi', err?.stack ?? err));
       }
-    } catch { /* Bildirishnoma yuborilmasa ham asosiy natija qaytariladi */ }
+    } catch (err: any) {
+      // Bildirishnoma yuborilmasa ham asosiy natija qaytariladi
+      this.logger.error('Imtihon natija bildirishnomalarida xato', err?.stack ?? err);
+    }
 
     return { saved: dto.results.length };
   }

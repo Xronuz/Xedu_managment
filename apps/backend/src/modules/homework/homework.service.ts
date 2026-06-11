@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ForbiddenException, Optional } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, ForbiddenException, Optional } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 import { CreateHomeworkDto, UpdateHomeworkDto, SubmitHomeworkDto, GradeSubmissionDto } from './dto/homework.dto';
@@ -10,6 +10,8 @@ import { assertParentOfChild } from '@/common/utils/parent-guard.util';
 
 @Injectable()
 export class HomeworkService {
+  private readonly logger = new Logger(HomeworkService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     @Optional() private readonly auditService: AuditService,
@@ -140,7 +142,9 @@ export class HomeworkService {
     });
 
     // ── Sinfning barcha o'quvchilariga bildirishnoma ──────────────────────────
-    this.notifyHomeworkCreated(homework, currentUser).catch(() => {});
+    this.notifyHomeworkCreated(homework, currentUser).catch((err) =>
+      this.logger.error(`Uy vazifasi bildirishnomasi yuborilmadi (homeworkId=${homework.id})`, err?.stack ?? err),
+    );
 
     return homework;
   }
@@ -259,10 +263,10 @@ export class HomeworkService {
     if (this.achievementService && currentUser.schoolId) {
       this.achievementService.checkAndProgress(
         currentUser.sub, currentUser.schoolId, 'homework_streak',
-      ).catch(() => {});
+      ).catch((err) => this.logger.error('Achievement progressi yangilanmadi (homework_streak)', err?.stack ?? err));
       this.achievementService.checkAndProgress(
         currentUser.sub, currentUser.schoolId, 'homework_count',
-      ).catch(() => {});
+      ).catch((err) => this.logger.error('Achievement progressi yangilanmadi (homework_count)', err?.stack ?? err));
     }
 
     return submission;
@@ -336,7 +340,7 @@ export class HomeworkService {
         title: `Uy vazifasi baholandi: ${homework.subject?.name ?? ''}`,
         body: `"${homework.title}" — ball: ${dto.score}`,
         type: 'in_app' as any,
-      }).catch(() => {});
+      }).catch((err) => this.logger.error(`Baholash bildirishnomasi yuborilmadi (homeworkId=${homeworkId})`, err?.stack ?? err));
     }
 
     return updated;

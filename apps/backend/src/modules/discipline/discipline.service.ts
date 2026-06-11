@@ -1,5 +1,5 @@
 import {
-  Injectable, NotFoundException, ForbiddenException, Optional,
+  Injectable, Logger, NotFoundException, ForbiddenException, Optional,
 } from '@nestjs/common';
 import {
   IsString, IsOptional, IsDateString, IsEnum, MaxLength, MinLength,
@@ -54,6 +54,8 @@ const MANAGER_ROLES = [
 
 @Injectable()
 export class DisciplineService {
+  private readonly logger = new Logger(DisciplineService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     @Optional() private readonly coinsService: CoinsService,
@@ -169,17 +171,17 @@ export class DisciplineService {
       this.coinsService?.earnCoins(
         dto.studentId, schoolId, COIN_RULES.DISCIPLINE_PRAISE, 'discipline_praise',
         { disciplineId: incident.id, action: 'praise' },
-      ).catch(() => {});
+      ).catch((err) => this.logger.error(`Coin mukofoti berilmadi (disciplineId=${incident.id})`, err?.stack ?? err));
 
       // ── Achievement progression for clean streak after deduction ───────────
       this.achievementService?.checkAndProgress(
         dto.studentId, schoolId, 'clean_streak_after_deduction',
-      ).catch(() => {});
+      ).catch((err) => this.logger.error(`Achievement progressi yangilanmadi (disciplineId=${incident.id})`, err?.stack ?? err));
     } else if (action === 'warning') {
       this.coinsService?.deductCoins(
         dto.studentId, schoolId, Math.abs(COIN_RULES.DISCIPLINE_WARNING), 'discipline_warning',
         { disciplineId: incident.id, action: 'warning' },
-      ).catch(() => {});
+      ).catch((err) => this.logger.error(`Coin jarima yozilmadi (disciplineId=${incident.id})`, err?.stack ?? err));
     }
 
     // ── Realtime event ────────────────────────────────────────────────────────

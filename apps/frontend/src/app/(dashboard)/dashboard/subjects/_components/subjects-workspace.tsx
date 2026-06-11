@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useConfirm } from '@/store/confirm.store';
@@ -9,7 +9,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { subjectsApi } from '@/lib/api/subjects';
 import { classesApi } from '@/lib/api/classes';
 import { usersApi } from '@/lib/api/users';
-import { formatDate, cn } from '@/lib/utils';
+import { formatDate, cn, getInitials } from '@/lib/utils';
 import Link from 'next/link';
 
 import {
@@ -126,7 +126,7 @@ function SubjectPanel({ subject, open, onClose, canManage, onEdit }: {
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-xedu-slate-100 flex items-center justify-center text-sm font-bold text-xedu-slate-500">
-                  {subject.teacher.firstName[0]}{subject.teacher.lastName[0]}
+                  {getInitials(subject.teacher.firstName, subject.teacher.lastName)}
                 </div>
                 <div>
                   <p className="text-sm font-bold">{subject.teacher.firstName} {subject.teacher.lastName}</p>
@@ -231,16 +231,21 @@ export function SubjectsWorkspace() {
   const [filterTeacher, setFilterTeacher] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
+  const searchTimerRef = useRef<number | undefined>(undefined);
+
   const handleSearch = useCallback((v: string) => {
     setSearch(v);
-    window.clearTimeout((handleSearch as any)._t);
-    (handleSearch as any)._t = window.setTimeout(() => setDebouncedSearch(v), 300);
+    window.clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = window.setTimeout(() => setDebouncedSearch(v), 300);
   }, []);
+
+  // Unmount'da kutilayotgan debounce timeri tozalanadi
+  useEffect(() => () => window.clearTimeout(searchTimerRef.current), []);
 
   // ── Data fetching ────────────────────────────────────────────────────────────
   const { data: subjects = [], isLoading } = useQuery<Subject[]>({
     queryKey: ['subjects', activeBranchId],
-    queryFn: () => subjectsApi.getAll(),
+    queryFn: () => subjectsApi.getAll(undefined, activeBranchId ?? undefined),
   });
 
   const { data: catalog = [] } = useQuery({
@@ -377,14 +382,30 @@ export function SubjectsWorkspace() {
     setSaving(true);
     try {
       if (editingSubject) {
+        // Mavjud yozuv birinchi tanlangan sinfga yangilanadi; qo'shimcha sinflar
+        // uchun alohida yozuvlar yaratiladi (backend nom+sinf bo'yicha upsert qiladi)
+        const [primaryClassId, ...extraClassIds] = form.classIds;
         await updateMutation.mutateAsync({
           id: editingSubject.id,
           payload: {
             name: form.name.trim(),
             teacherId: form.teacherId,
-            classId: form.classIds[0],
+            classId: primaryClassId,
           } as any,
         });
+        if (extraClassIds.length > 0) {
+          try {
+            await subjectsApi.create({
+              name: form.name.trim(),
+              classIds: extraClassIds,
+              teacherId: form.teacherId,
+            });
+          } catch (err: any) {
+            const msg = err?.response?.data?.message;
+            toast({ variant: 'destructive', title: "Qo'shimcha sinflar saqlanmadi", description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+          }
+          queryClient.invalidateQueries({ queryKey: ['subjects'] });
+        }
       } else {
         await createMutation.mutateAsync({
           name: form.name.trim(),

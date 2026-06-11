@@ -1,5 +1,5 @@
 import {
-  Injectable, NotFoundException, ForbiddenException,
+  Injectable, Logger, NotFoundException, ForbiddenException,
   BadRequestException, ConflictException, Optional,
 } from '@nestjs/common';
 import {
@@ -84,6 +84,8 @@ const TEACHER_ROLES = [
 
 @Injectable()
 export class OnlineExamService {
+  private readonly logger = new Logger(OnlineExamService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     @Optional() private readonly eventsGateway: EventsGateway,
@@ -529,7 +531,7 @@ export class OnlineExamService {
           maxScore: totalPossible,
           triggeredBy: currentUser.sub,
           sessionId: session.id,
-        }).catch(() => {});
+        }).catch((err) => this.logger.error(`Imtihon engagement baholanmadi (sessionId=${session.id})`, err?.stack ?? err));
       }
     }
 

@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useAuthStore } from '@/store/auth.store';
 import { usersApi } from '@/lib/api/users';
+import { notificationsApi } from '@/lib/api/notifications';
 import { systemConfigApi, SystemConfigMap } from '@/lib/api/system-config';
 import { useToast } from '@/components/ui/use-toast';
 import { UserRole, Language } from '@eduplatform/types';
@@ -108,6 +109,40 @@ export default function SettingsPage() {
     sms: false,
   });
   const [notifSaved, setNotifSaved] = useState(false);
+
+  // Server'dan saqlangan sozlamalarni yuklash
+  useQuery({
+    queryKey: ['notification-preferences'],
+    queryFn: async () => {
+      const { preferences } = await notificationsApi.getPreferences();
+      setNotifications({
+        inApp: (preferences.inApp ?? preferences.push_all ?? true) as boolean,
+        email: (preferences.email ?? preferences.email_grades ?? false) as boolean,
+        sms:   (preferences.sms ?? preferences.sms_attendance ?? false) as boolean,
+      });
+      return preferences;
+    },
+    enabled: !!user,
+    staleTime: 60_000,
+  });
+
+  const notifMutation = useMutation({
+    mutationFn: (prefs: Record<string, boolean>) => notificationsApi.updatePreferences(prefs),
+    onSuccess: () => {
+      setNotifSaved(true);
+      setTimeout(() => setNotifSaved(false), 2500);
+      toast({ title: 'Sozlamalar saqlandi', description: 'Bildirishnoma sozlamalaringiz yangilandi.' });
+      queryClient.invalidateQueries({ queryKey: ['notification-preferences'] });
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message;
+      toast({
+        variant: 'destructive',
+        title: 'Xato',
+        description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Sozlamalarni saqlashda xatolik yuz berdi',
+      });
+    },
+  });
 
   // ── Interface state ──
   const [language, setLanguage] = useState<Language>(Language.UZ);
@@ -237,9 +272,7 @@ export default function SettingsPage() {
   };
 
   const handleNotifSave = () => {
-    setNotifSaved(true);
-    setTimeout(() => setNotifSaved(false), 2500);
-    toast({ title: 'Sozlamalar saqlandi', description: 'Bildirishnoma sozlamalaringiz yangilandi.' });
+    notifMutation.mutate({ ...notifications });
   };
 
   const clearPwError = (field: string) =>
@@ -603,8 +636,8 @@ export default function SettingsPage() {
                 <Separator className="my-2" />
 
                 <div className="flex items-center justify-between mt-2">
-                  <p className="text-[12px] italic" style={{ color: DS.muted }}>Sozlamalar saqlanadi (mahalliy holat)</p>
-                  <Btn variant="primary" onClick={handleNotifSave}
+                  <p className="text-[12px] italic" style={{ color: DS.muted }}>Sozlamalar hisobingizga saqlanadi</p>
+                  <Btn variant="primary" loading={notifMutation.isPending} onClick={handleNotifSave}
                     icon={notifSaved ? <Check className="h-4 w-4" /> : <Save className="h-4 w-4" />}>
                     {notifSaved ? 'Saqlandi' : 'Saqlash'}
                   </Btn>

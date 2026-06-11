@@ -48,6 +48,13 @@ export class PaymentsService {
     const effectiveBranchId = currentUser.branchId!;
     const isCash = !dto.provider || dto.provider === 'cash';
 
+    // ── 0. Tenant guard: student shu maktabga tegishli bo'lishi shart ────────
+    const student = await this.prisma.user.findFirst({
+      where: { id: dto.studentId, schoolId, role: 'student' as any },
+      select: { id: true },
+    });
+    if (!student) throw new NotFoundException('O‘quvchi topilmadi');
+
     // ── 1. G'azna aniqlash ──────────────────────────────────────────────────
     const treasury = this.treasuryService
       ? await this.treasuryService.getEffectiveTreasury(schoolId, effectiveBranchId)

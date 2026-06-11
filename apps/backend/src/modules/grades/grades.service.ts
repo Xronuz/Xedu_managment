@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, BadRequestException, ForbiddenException, Optional, Inject } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, ForbiddenException, Optional, Inject } from '@nestjs/common';
 import { IsArray, IsDateString, IsEnum, IsNumber, IsOptional, IsString, IsUUID, Max, Min, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Queue } from 'bullmq';
@@ -38,6 +38,8 @@ export class BulkGradesDto {
 
 @Injectable()
 export class GradesService {
+  private readonly logger = new Logger(GradesService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
@@ -108,7 +110,9 @@ export class GradesService {
     }
 
     // ── O'quvchiga in-app bildirishnoma ──────────────────────────────────────
-    this.triggerGradeNotification(grade, currentUser).catch(() => {});
+    this.triggerGradeNotification(grade, currentUser).catch((err) =>
+      this.logger.error(`Baho bildirishnomasi yuborilmadi (gradeId=${grade.id})`, err?.stack ?? err),
+    );
 
     // ── Coin mukofot: score >= 90% → +10 coin ────────────────────────────────
     const pct = grade.maxScore > 0 ? (grade.score / grade.maxScore) * 100 : 0;
@@ -119,7 +123,7 @@ export class GradesService {
         COIN_RULES.GRADE_EXCELLENT,
         'grade_excellent',
         { gradeId: grade.id, score: grade.score, maxScore: grade.maxScore },
-      ).catch(() => {});
+      ).catch((err) => this.logger.error(`Coin mukofoti berilmadi (gradeId=${grade.id})`, err?.stack ?? err));
 
       // ── Achievement progression for subject mastery ────────────────────────
       this.achievementService?.checkAndProgress(
@@ -127,7 +131,7 @@ export class GradesService {
         currentUser.schoolId!,
         'subject_mastery',
         { score: pct, subjectId: grade.subjectId, gradeId: grade.id },
-      ).catch(() => {});
+      ).catch((err) => this.logger.error(`Achievement progressi yangilanmadi (gradeId=${grade.id})`, err?.stack ?? err));
     }
 
     return grade;
@@ -348,12 +352,12 @@ export class GradesService {
         this.coinsService.earnCoins(
           grade.studentId, currentUser.schoolId!, COIN_RULES.GRADE_EXCELLENT,
           'grade_excellent', { gradeId: id },
-        ).catch(() => {});
+        ).catch((err) => this.logger.error(`Coin mukofoti berilmadi (gradeId=${id})`, err?.stack ?? err));
       } else if (newPct < 90 && existing) {
         this.coinsService.deductCoins(
           grade.studentId, currentUser.schoolId!, existing.amount, 'discipline_warning',
           { gradeId: id, reason: 'score_dropped' },
-        ).catch(() => {});
+        ).catch((err) => this.logger.error(`Coin qaytarib olinmadi (gradeId=${id})`, err?.stack ?? err));
       }
     }
 
@@ -384,7 +388,7 @@ export class GradesService {
         this.coinsService.deductCoins(
           grade.studentId, grade.schoolId!, earnedTx.amount, 'discipline_warning',
           { gradeId: id, reason: 'grade_deleted' },
-        ).catch(() => {});
+        ).catch((err) => this.logger.error(`Coin qaytarib olinmadi (gradeId=${id})`, err?.stack ?? err));
       }
     }
 
@@ -569,8 +573,10 @@ export class GradesService {
   }
 
   private calculateGpa(grades: { score: number; maxScore: number }[]): number {
-    if (grades.length === 0) return 0;
-    const total = grades.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0);
-    return Math.round((total / grades.length) * 100) / 100;
+    // maxScore <= 0 yozuvlar Infinity/NaN keltirib chiqarmasligi uchun hisobga olinmaydi
+    const valid = grades.filter((g) => g.maxScore > 0);
+    if (valid.length === 0) return 0;
+    const total = valid.reduce((sum, g) => sum + (g.score / g.maxScore) * 100, 0);
+    return Math.round((total / valid.length) * 100) / 100;
   }
 }

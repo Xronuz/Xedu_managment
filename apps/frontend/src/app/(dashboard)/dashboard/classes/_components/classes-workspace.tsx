@@ -11,7 +11,7 @@ import {
   ChevronRight, TrendingUp, FileText,
 } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth.store';
 import {
@@ -376,7 +376,7 @@ export function ClassesWorkspace() {
         return (
           <div className="flex items-center gap-1.5 min-w-0">
             <div className="h-5 w-5 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center shrink-0 text-2xs font-bold text-xedu-slate-500">
-              {c.classTeacher.firstName[0]}{c.classTeacher.lastName[0]}
+              {getInitials(c.classTeacher.firstName, c.classTeacher.lastName)}
             </div>
             <span className="text-xs font-medium text-xedu-slate-700 truncate">
               {c.classTeacher.firstName} {c.classTeacher.lastName}
@@ -885,7 +885,7 @@ function ClassPanel({
               <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">Sinf rahbari</p>
               <div className="flex items-center gap-2 rounded-md border border-xedu-slate-100 px-2.5 py-2">
                 <div className="h-7 w-7 rounded-full bg-xedu-slate-100 flex items-center justify-center text-2xs font-bold text-xedu-slate-500">
-                  {cls.classTeacher.firstName[0]}{cls.classTeacher.lastName[0]}
+                  {getInitials(cls.classTeacher.firstName, cls.classTeacher.lastName)}
                 </div>
                 <span className="text-xs font-medium text-xedu-slate-700">
                   {cls.classTeacher.firstName} {cls.classTeacher.lastName}

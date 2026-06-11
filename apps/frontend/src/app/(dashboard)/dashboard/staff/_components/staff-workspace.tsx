@@ -11,7 +11,7 @@ import {
   Wallet, Filter, X, Calendar, UserCheck,
 } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth.store';
 import { useConfirm } from '@/store/confirm.store';
@@ -223,7 +223,7 @@ export function StaffWorkspace() {
       cell: (s: StaffRow) => (
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center shrink-0 text-2xs font-bold text-xedu-slate-500">
-            {s.firstName[0]}{s.lastName[0]}
+            {getInitials(s.firstName, s.lastName)}
           </div>
           <div className="min-w-0">
             <p className="font-semibold text-xedu-slate-900 dark:text-xedu-slate-100 truncate">
@@ -623,7 +623,7 @@ function StaffPanel({
         <div className="p-5 space-y-4">
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 rounded-xl bg-xedu-primary-light flex items-center justify-center text-lg font-bold text-xedu-primary">
-              {staff.firstName[0]}{staff.lastName[0]}
+              {getInitials(staff.firstName, staff.lastName)}
             </div>
             <div>
               <p className="text-base font-bold text-xedu-slate-900 dark:text-xedu-slate-100">

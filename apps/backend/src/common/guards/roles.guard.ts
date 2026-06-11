@@ -1,4 +1,4 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, Logger, CanActivate, ExecutionContext, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { UserRole, JwtPayload } from '@eduplatform/types';
 import { ROLES_KEY } from '../decorators/roles.decorator';
@@ -23,6 +23,8 @@ const BRANCH_ROLES = new Set<UserRole>([
 
 @Injectable()
 export class RolesGuard implements CanActivate {
+  private readonly logger = new Logger(RolesGuard.name);
+
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
@@ -58,9 +60,12 @@ export class RolesGuard implements CanActivate {
 
     // branch_admin va boshqa branch-scoped rollar uchun branchId majburiy
     if (BRANCH_ROLES.has(user.role as UserRole) && !user.branchId) {
-      // Ogoh qilish: branchId yo'q foydalanuvchi branch-scoped endpoint ga murojaat qilmoqda.
-      // Xato tashlamaymiz (backward-compatible), faqat log qilamiz.
-      // Service layer branchFilter() orqali schoolId bilan ishlaydi.
+      // Xato tashlamaymiz (backward-compatible) — service layer schoolId bilan ishlaydi,
+      // lekin kuzatuv uchun log qoldiramiz.
+      const req = context.switchToHttp().getRequest<{ method?: string; url?: string }>();
+      this.logger.warn(
+        `branchId yo'q foydalanuvchi branch-scoped endpointga murojaat qildi: userId=${user.sub} role=${user.role} ${req?.method ?? ''} ${req?.url ?? ''}`,
+      );
     }
 
     return true;

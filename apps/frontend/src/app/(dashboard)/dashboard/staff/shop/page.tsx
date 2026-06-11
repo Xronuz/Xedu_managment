@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getInitials } from '@/lib/utils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Pencil, Trash2, Loader2, Coins, ShoppingBag, Users, History, Package } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -217,7 +218,7 @@ export default function AdminShopPage() {
                       <div key={b.id} className="flex items-center justify-between p-3 rounded-lg border hover:bg-xedu-slate-50/80 dark:hover:bg-xedu-slate-700/30 transition-colors">
                         <div className="flex items-center gap-3">
                           <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary">
-                            {b.firstName[0]}{b.lastName[0]}
+                            {getInitials(b.firstName, b.lastName)}
                           </div>
                           <div>
                             <p className="text-sm font-medium">{b.firstName} {b.lastName}</p>

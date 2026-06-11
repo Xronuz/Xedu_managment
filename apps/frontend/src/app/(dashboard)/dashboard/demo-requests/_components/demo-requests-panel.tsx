@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getInitials } from '@/lib/utils';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Rocket, X, ChevronRight, Loader2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -126,7 +127,7 @@ export function DemoRequestsPanel() {
               <div className="flex items-center gap-3 min-w-0">
                 <div className="h-8 w-8 rounded-full flex items-center justify-center shrink-0 font-bold text-xs text-white"
                   style={{ background: C.primary }}>
-                  {r.firstName[0]}{r.lastName[0]}
+                  {getInitials(r.firstName, r.lastName)}
                 </div>
                 <div className="min-w-0">
                   <p className="font-semibold text-[13px] truncate" style={{ color: C.text }}>

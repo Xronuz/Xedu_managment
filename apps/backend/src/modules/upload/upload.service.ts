@@ -1,4 +1,4 @@
-import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as Minio from 'minio';
 import { v4 as uuidv4 } from 'uuid';
@@ -119,13 +119,13 @@ export class UploadService {
     const allAllowed = [...ALLOWED_IMAGE_TYPES, ...ALLOWED_DOC_TYPES];
 
     if (!allAllowed.includes(file.mimetype)) {
-      throw new InternalServerErrorException(
+      throw new BadRequestException(
         `Ruxsat etilmagan fayl turi: ${file.mimetype}. Ruxsat: ${allAllowed.join(', ')}`,
       );
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      throw new InternalServerErrorException(
+      throw new BadRequestException(
         `Fayl hajmi ${MAX_FILE_SIZE / 1024 / 1024}MB dan oshmasligi kerak`,
       );
     }

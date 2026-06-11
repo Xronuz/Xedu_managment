@@ -10,7 +10,7 @@ import {
   Loader2, MessageSquare,
 } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth.store';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -825,7 +825,7 @@ function PaymentPanel({
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-xedu-slate-100 flex items-center justify-center text-sm font-bold text-xedu-slate-500">
-                  {payment.student.firstName[0]}{payment.student.lastName[0]}
+                  {getInitials(payment.student.firstName, payment.student.lastName)}
                 </div>
                 <div>
                   <p className="text-sm font-bold">{payment.student.firstName} {payment.student.lastName}</p>

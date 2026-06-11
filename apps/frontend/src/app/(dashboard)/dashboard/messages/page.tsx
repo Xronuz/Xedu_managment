@@ -253,7 +253,9 @@ export default function MessagesPage() {
   // ── Mark as read on select ────────────────────────────────────────────────
   useEffect(() => {
     if (selectedUserId) {
-      messagingApi.markAsRead(selectedUserId).catch(() => {});
+      messagingApi.markAsRead(selectedUserId).catch((err) =>
+        console.error('[Messages] markAsRead xatosi:', err),
+      );
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     }
   }, [selectedUserId, queryClient]);

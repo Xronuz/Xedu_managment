@@ -10,7 +10,7 @@ import {
   Clock, Calendar, UserCheck, HeartHandshake,
 } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuthStore } from '@/store/auth.store';
 import { formatDate } from '@/lib/utils';
@@ -917,7 +917,7 @@ function IncidentPanel({
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-xedu-slate-100 flex items-center justify-center text-sm font-bold text-xedu-slate-500">
-                  {incident.student.firstName[0]}{incident.student.lastName[0]}
+                  {getInitials(incident.student.firstName, incident.student.lastName)}
                 </div>
                 <div>
                   <p className="text-sm font-bold">{incident.student.firstName} {incident.student.lastName}</p>
@@ -950,7 +950,7 @@ function IncidentPanel({
           {incident.reportedBy ? (
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-xedu-slate-100 flex items-center justify-center text-sm font-bold text-xedu-slate-500">
-                {incident.reportedBy.firstName[0]}{incident.reportedBy.lastName[0]}
+                {getInitials(incident.reportedBy.firstName, incident.reportedBy.lastName)}
               </div>
               <div>
                 <p className="text-sm font-bold">{incident.reportedBy.firstName} {incident.reportedBy.lastName}</p>

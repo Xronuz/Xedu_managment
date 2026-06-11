@@ -21,8 +21,8 @@ export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOpt
   }).format(new Date(date));
 }
 
-export function getInitials(firstName: string, lastName: string) {
-  return `${firstName[0] ?? ''}${lastName[0] ?? ''}`.toUpperCase();
+export function getInitials(firstName?: string | null, lastName?: string | null) {
+  return `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || '—';
 }
 
 export function getRoleLabel(role: string): string {

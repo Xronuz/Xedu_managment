@@ -1,4 +1,4 @@
-import { Injectable, Optional, ConflictException } from '@nestjs/common';
+import { Injectable, Logger, Optional, ConflictException } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { RedisService } from '@/common/redis/redis.service';
 import { JwtPayload, ScheduleStatus } from '@eduplatform/types';
@@ -15,6 +15,8 @@ const HISTORY_TTL   = 5 * 60;   // 5 min — o'quvchi tarixi
 
 @Injectable()
 export class AttendanceService {
+  private readonly logger = new Logger(AttendanceService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly redis: RedisService,
@@ -166,12 +168,31 @@ export class AttendanceService {
       );
       const dateStr = date.toLocaleDateString('uz-UZ', { year: 'numeric', month: 'long', day: 'numeric' });
 
+      // ─── Dedup: bir ota-onaga bitta (o'quvchi, kun, holat) uchun faqat bir marta alert ───
+      // Davomat qayta belgilansa (tuzatish) SMS qayta ketmasligi kerak.
+      const dayKey = date.toISOString().slice(0, 10);
+      const allowedPairs = new Set<string>();
+      for (const entry of alertEntries) {
+        const student = studentMap.get(entry.studentId);
+        if (!student) continue;
+        for (const rel of student.childParents) {
+          const dedupKey = `attn_alert:${schoolId}:${entry.studentId}:${rel.parent.id}:${dayKey}:${entry.status}`;
+          try {
+            const fresh = await this.redis.set(dedupKey, '1', 'EX', 86400, 'NX');
+            if (fresh === 'OK') allowedPairs.add(`${entry.studentId}:${rel.parent.id}`);
+          } catch {
+            // Redis ishlamasa alert yuborilaveradi — dedup faqat optimallashtirish
+            allowedPairs.add(`${entry.studentId}:${rel.parent.id}`);
+          }
+        }
+      }
+
       const queueJobs = alertEntries.flatMap((entry) => {
         const student = studentMap.get(entry.studentId);
         if (!student) return [];
         const statusText = entry.status === 'absent' ? 'darsga kelmadi' : 'darsga kech qoldi';
         return student.childParents
-          .filter((rel) => !!rel.parent.phone)
+          .filter((rel) => !!rel.parent.phone && allowedPairs.has(`${entry.studentId}:${rel.parent.id}`))
           .map((rel) => this.notificationQueue!.queueAttendanceAlert({
             parentPhone: rel.parent.phone!,
             parentEmail: rel.parent.email ?? undefined,
@@ -191,6 +212,7 @@ export class AttendanceService {
           if (!student) continue;
           const statusText = entry.status === 'absent' ? 'darsga kelmadi' : 'darsga kech qoldi';
           for (const rel of student.childParents) {
+            if (!allowedPairs.has(`${entry.studentId}:${rel.parent.id}`)) continue;
             this.eventsGateway.emitToUser(rel.parent.id, 'attendance:alert', {
               studentId:   entry.studentId,
               studentName: `${student.firstName} ${student.lastName}`,
@@ -202,8 +224,9 @@ export class AttendanceService {
           }
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       // Alert xatosi asosiy jarayonni to'xtatmasligi kerak
+      this.logger.error('Davomat alertlarini yuborishda xato', err?.stack ?? err);
     }
   }
 

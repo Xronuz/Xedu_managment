@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getInitials } from '@/lib/utils';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -155,7 +156,7 @@ export function ParentLinkModal({
                     className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg text-left transition-colors ${selectedParentId === p.id ? 'bg-xedu-primary-light border border-xedu-primary' : 'hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 border border-transparent'}`}
                   >
                     <div className="h-7 w-7 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center text-2xs font-bold text-xedu-slate-500">
-                      {p.firstName[0]}{p.lastName[0]}
+                      {getInitials(p.firstName, p.lastName)}
                     </div>
                     <div className="min-w-0">
                       <p className="text-xs font-semibold text-xedu-slate-800 dark:text-xedu-slate-200 truncate">{p.firstName} {p.lastName}</p>

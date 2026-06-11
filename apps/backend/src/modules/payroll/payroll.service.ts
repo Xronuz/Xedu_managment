@@ -428,13 +428,22 @@ export class PayrollService {
     }
 
     const newStatus = dto.action === 'approve' ? 'approved' : 'rejected';
-    return this.prisma.salaryAdvance.update({
-      where: { id },
+    // Atomik status o'tish: parallel ikki marta approve bo'lmasligi uchun
+    // update sharti ham status='pending' ni tekshiradi (compare-and-set)
+    const result = await this.prisma.salaryAdvance.updateMany({
+      where: { id, schoolId: currentUser.schoolId!, status: 'pending' as any },
       data: {
         status: newStatus as any,
         approvedById: currentUser.sub,
         approvedAt: new Date(),
       },
+    });
+    if (result.count === 0) {
+      throw new BadRequestException("Faqat kutilayotgan so'rovni ko'rib chiqish mumkin");
+    }
+
+    return this.prisma.salaryAdvance.findUnique({
+      where: { id },
       include: {
         user: { select: { id: true, firstName: true, lastName: true, role: true } },
         approvedBy: { select: { id: true, firstName: true, lastName: true } },
@@ -447,14 +456,17 @@ export class PayrollService {
       where: { id, schoolId: currentUser.schoolId! },
     });
     if (!advance) throw new NotFoundException("Avans so'rovi topilmadi");
-    if (advance.status !== 'approved') {
+
+    // Atomik o'tish: approved → paid (parallel ikki marta to'lash oldini oladi)
+    const result = await this.prisma.salaryAdvance.updateMany({
+      where: { id, schoolId: currentUser.schoolId!, status: 'approved' as any },
+      data: { status: 'paid' as any, paidAt: new Date() },
+    });
+    if (result.count === 0) {
       throw new BadRequestException("Faqat tasdiqlangan avansni to'landi deb belgilash mumkin");
     }
 
-    return this.prisma.salaryAdvance.update({
-      where: { id },
-      data: { status: 'paid' as any, paidAt: new Date() },
-    });
+    return this.prisma.salaryAdvance.findUnique({ where: { id } });
   }
 
   // ── Schedule → Hours bridge (Phase 5A.3) ──────────────────────────────────

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { getInitials } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import {
   BarChart2, BookOpen, AlertTriangle, AlertCircle, Users,
@@ -81,7 +82,7 @@ export default function WorkloadPage() {
     .sort((a, b) => b.plannedWeeklyHours - a.plannedWeeklyHours)
     .slice(0, 14)
     .map(t => ({
-      name: `${t.firstName[0]}. ${t.lastName}`,
+      name: `${t.firstName?.[0] ?? ''}. ${t.lastName}`,
       planned: t.plannedWeeklyHours,
       contract: t.contractualWeeklyHours,
       status: t.status,
@@ -271,7 +272,7 @@ export default function WorkloadPage() {
                         <div className="flex items-center gap-2">
                           <Avatar className="h-7 w-7">
                             <AvatarFallback className="text-xs bg-primary/10 text-primary">
-                              {t.firstName[0]}{t.lastName[0]}
+                              {getInitials(t.firstName, t.lastName)}
                             </AvatarFallback>
                           </Avatar>
                           <span className="font-medium">{t.firstName} {t.lastName}</span>

@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, Logger, BadRequestException, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload } from '@eduplatform/types';
@@ -33,6 +33,8 @@ export const COIN_RULES_FALLBACK = {
 
 @Injectable()
 export class CoinsService {
+  private readonly logger = new Logger(CoinsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly engagementConfig: EngagementConfigService,
@@ -80,7 +82,8 @@ export class CoinsService {
       });
 
       // Reputation improvement
-      await this.recoveryService.improveReputation(userId, schoolId, 1).catch(() => {});
+      await this.recoveryService.improveReputation(userId, schoolId, 1)
+        .catch((err) => this.logger.error(`Reputatsiya yangilanmadi (userId=${userId})`, err?.stack ?? err));
 
       return updated;
     });
@@ -603,7 +606,7 @@ export class CoinsService {
               title:       "Farzandingizning natijalari pasaymoqda",
               body:        `${student.firstName} ${student.lastName}ning bu haftadagi o'rtacha ko'rsatkichi ${thisAvg.toFixed(0)}% (o'tgan hafta: ${lastAvg.toFixed(0)}%). E'tibor qarating!`,
             })),
-          }).catch(() => {});
+          }).catch((err) => this.logger.error('Ota-onaga trend bildirishnomasi yuborilmadi', err?.stack ?? err));
         }
       }
     }
@@ -656,7 +659,7 @@ export class CoinsService {
             weeklyBonus,
             'attendance_weekly',
             { weekStart: monday.toISOString().slice(0, 10) },
-          ).catch(() => {});
+          ).catch((err) => this.logger.error(`Haftalik davomat bonusi berilmadi (studentId=${student.id})`, err?.stack ?? err));
         }
       }
     }

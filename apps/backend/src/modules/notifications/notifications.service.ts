@@ -126,11 +126,9 @@ export class NotificationsService {
     });
     const where: any = { recipientId: userId };
     // For non-school-wide roles, filter notifications by branch
+    // (Notification.branchId is required in the schema, so a null check is invalid)
     if (user?.branchId && !['super_admin', 'director'].includes(user.role)) {
-      where.OR = [
-        { branchId: user.branchId },
-        { branchId: null }, // school-wide notifications
-      ];
+      where.branchId = user.branchId;
     }
     const [notifications, total, unreadCount] = await this.prisma.$transaction([
       this.prisma.notification.findMany({

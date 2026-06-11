@@ -4,6 +4,8 @@ import { GradesService, BulkGradesDto } from './grades.service';
 import { CreateGradeDto } from './dto/create-grade.dto';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { ModuleAccessGuard } from '@/common/guards/module-access.guard';
+import { RequiresModule } from '@/common/decorators/requires-module.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
@@ -11,7 +13,8 @@ import { recordGradePublish } from '@/common/telemetry/pilot-telemetry';
 
 @ApiTags('grades')
 @ApiBearerAuth('JWT')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@RequiresModule('grades')
+@UseGuards(JwtAuthGuard, RolesGuard, ModuleAccessGuard)
 @Controller({ path: 'grades', version: '1' })
 export class GradesController {
   constructor(private readonly gradesService: GradesService) {}

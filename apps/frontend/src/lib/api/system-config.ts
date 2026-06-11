@@ -27,6 +27,10 @@ export const systemConfigApi = {
   getAll: (): Promise<SystemConfigMap> =>
     apiClient.get('/system-config').then(r => r.data),
 
+  /** Joriy maktab uchun o'chirilgan modullar — sidebar filtri uchun */
+  getDisabledModules: (): Promise<{ disabled: string[] }> =>
+    apiClient.get('/system-config/modules').then(r => r.data),
+
   update: (payload: Partial<SystemConfigMap>): Promise<SystemConfigMap> =>
     apiClient.patch('/system-config', payload).then(r => r.data),
 

@@ -6,6 +6,8 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { ModuleAccessGuard } from '@/common/guards/module-access.guard';
+import { RequiresModule } from '@/common/decorators/requires-module.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
@@ -22,7 +24,8 @@ const TEACHER_ROLES = [UserRole.TEACHER, UserRole.CLASS_TEACHER, ...ADMIN_ROLES]
 
 @ApiTags('engagement')
 @ApiBearerAuth('JWT')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@RequiresModule('engagement')
+@UseGuards(JwtAuthGuard, RolesGuard, ModuleAccessGuard)
 @Controller({ path: 'engagement', version: '1' })
 export class EngagementController {
   constructor(

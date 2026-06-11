@@ -27,6 +27,8 @@ import { useAuthStore } from '@/store/auth.store';
 import { usersApi } from '@/lib/api/users';
 import { classesApi } from '@/lib/api/classes';
 import { ROUTE_PERMISSIONS } from '@/config/permissions';
+import { getModuleForRoute } from '@/config/navigation';
+import { useDisabledModules } from '@/hooks/use-disabled-modules';
 
 // ── Recent pages helpers ───────────────────────────────────────────────────────
 const RECENT_KEY = 'command_recent_pages';
@@ -137,10 +139,13 @@ export function CommandPalette({ open, onOpenChange }: CommandPaletteProps) {
     if (open) setRecentPages(getRecentPages());
   }, [open]);
 
-  // Filter nav items by user role, with Director curation
+  // Filter nav items by user role, with Director curation + module flags
+  const disabledModules = useDisabledModules();
   const navItems = NAV_ITEMS.filter(item => {
     if (!user?.role || !item.roles?.includes(user.role as any)) return false;
     if (user.role === 'director' && !DIRECTOR_CMDK_ALLOWED.has(item.href)) return false;
+    const mod = getModuleForRoute(item.href);
+    if (mod && disabledModules.includes(mod)) return false;
     return true;
   });
 

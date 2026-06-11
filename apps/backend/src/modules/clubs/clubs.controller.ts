@@ -9,6 +9,8 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { ModuleAccessGuard } from '@/common/guards/module-access.guard';
+import { RequiresModule } from '@/common/decorators/requires-module.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 
 const ALL_SCHOOL = [
@@ -20,7 +22,8 @@ const ALL_SCHOOL = [
 
 @ApiTags('clubs')
 @ApiBearerAuth('JWT')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@RequiresModule('clubs')
+@UseGuards(JwtAuthGuard, RolesGuard, ModuleAccessGuard)
 @Controller({ path: 'clubs', version: '1' })
 export class ClubsController {
   constructor(private readonly clubsService: ClubsService) {}

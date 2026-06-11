@@ -6,11 +6,14 @@ import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { ModuleAccessGuard } from '@/common/guards/module-access.guard';
+import { RequiresModule } from '@/common/decorators/requires-module.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 
 @ApiTags('library')
 @ApiBearerAuth('JWT')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@RequiresModule('library')
+@UseGuards(JwtAuthGuard, RolesGuard, ModuleAccessGuard)
 @Controller({ path: 'library', version: '1' })
 export class LibraryController {
   constructor(private readonly libraryService: LibraryService) {}

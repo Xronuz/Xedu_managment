@@ -7,6 +7,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { pinoConfig } from './common/logger/logger.config';
 import { PrismaModule } from './common/prisma/prisma.module';
 import { RedisModule } from './common/redis/redis.module';
+import { ModuleFlagsModule } from './common/module-flags/module-flags.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { ClassesModule } from './modules/classes/classes.module';
@@ -101,6 +102,7 @@ import { envValidationSchema } from './common/config/env.validation';
     // Core infrastructure
     PrismaModule,
     RedisModule,
+    ModuleFlagsModule, // Global — maktab modullari holati (enforcement + kesh)
     AuditModule,    // Global — barcha modulda AuditService inject qilinadi
     QueueModule,    // Global — barcha modulda NOTIFICATION_QUEUE inject qilinadi
     AppCronModule,  // Cron jobs — scheduled tasks

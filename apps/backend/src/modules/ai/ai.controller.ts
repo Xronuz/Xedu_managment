@@ -5,6 +5,8 @@ import {
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { ModuleAccessGuard } from '@/common/guards/module-access.guard';
+import { RequiresModule } from '@/common/decorators/requires-module.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
@@ -19,7 +21,8 @@ const ADMIN_ROLES = [
 
 @ApiTags('ai')
 @ApiBearerAuth('JWT')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@RequiresModule('ai')
+@UseGuards(JwtAuthGuard, RolesGuard, ModuleAccessGuard)
 @Controller({ path: 'ai', version: '1' })
 export class AiController {
   constructor(

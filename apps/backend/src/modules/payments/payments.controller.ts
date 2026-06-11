@@ -2,6 +2,8 @@ import { Controller, Get, Post, Put, Body, Param, Query, Headers, UseGuards } fr
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { ModuleAccessGuard } from '@/common/guards/module-access.guard';
+import { RequiresModule } from '@/common/decorators/requires-module.decorator';
 import { PaymentsService, CreatePaymentDto } from './payments.service';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
@@ -10,7 +12,8 @@ import { JwtPayload, UserRole } from '@eduplatform/types';
 
 @ApiTags('payments')
 @ApiBearerAuth('JWT')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@RequiresModule('payments')
+@UseGuards(JwtAuthGuard, RolesGuard, ModuleAccessGuard)
 @Controller({ path: 'payments', version: '1' })
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}

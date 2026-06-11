@@ -7,11 +7,14 @@ import { recordHomeworkSubmission } from '@/common/telemetry/pilot-telemetry';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { ModuleAccessGuard } from '@/common/guards/module-access.guard';
+import { RequiresModule } from '@/common/decorators/requires-module.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 
 @ApiTags('homework')
 @ApiBearerAuth('JWT')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@RequiresModule('homework')
+@UseGuards(JwtAuthGuard, RolesGuard, ModuleAccessGuard)
 @Controller({ path: 'homework', version: '1' })
 export class HomeworkController {
   constructor(private readonly homeworkService: HomeworkService) {}

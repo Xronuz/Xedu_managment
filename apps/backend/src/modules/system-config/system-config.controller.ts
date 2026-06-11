@@ -7,6 +7,7 @@ import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { ModuleFlagsService } from '@/common/module-flags/module-flags.service';
 import { recordSetupComplete } from '@/common/telemetry/pilot-telemetry';
 import { SystemConfigService, SystemConfigMap } from './system-config.service';
 
@@ -47,7 +48,21 @@ export class SystemConfigController {
   constructor(
     private readonly service: SystemConfigService,
     private readonly prisma: PrismaService,
+    private readonly moduleFlags: ModuleFlagsService,
   ) {}
+
+  /**
+   * GET /system-config/modules — joriy maktab uchun O'CHIRILGAN modullar.
+   * Frontend sidebar shu ro'yxat bo'yicha bo'limlarni yashiradi.
+   */
+  @Get('modules')
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER, UserRole.ACCOUNTANT, UserRole.LIBRARIAN, UserRole.STUDENT, UserRole.PARENT)
+  async getDisabledModules(@CurrentUser() user: JwtPayload) {
+    const disabled = user.schoolId
+      ? await this.moduleFlags.getDisabledModules(user.schoolId)
+      : [];
+    return { disabled };
+  }
 
   /** GET /system-config — barcha konfiguratsiyalarni olish */
   @Get()

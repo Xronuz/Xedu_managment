@@ -7,6 +7,8 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { ModuleAccessGuard } from '@/common/guards/module-access.guard';
+import { RequiresModule } from '@/common/decorators/requires-module.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
@@ -18,7 +20,8 @@ import {
   SubmitAnswerDto,
 } from './online-exam.service';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@RequiresModule('exams')
+@UseGuards(JwtAuthGuard, RolesGuard, ModuleAccessGuard)
 @Controller({ path: 'online-exam', version: '1' })
 export class OnlineExamController {
   constructor(private readonly service: OnlineExamService) {}

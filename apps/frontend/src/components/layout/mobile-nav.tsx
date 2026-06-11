@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { getNavForRole } from '@/config/navigation';
+import { useDisabledModules } from '@/hooks/use-disabled-modules';
 
 export function MobileNav() {
   const [open, setOpen] = useState(false);
@@ -17,7 +18,8 @@ export function MobileNav() {
   const { user } = useAuthStore();
 
   const role = user?.role ?? '';
-  const navGroups = getNavForRole(role);
+  const disabledModules = useDisabledModules();
+  const navGroups = getNavForRole(role, disabledModules);
 
   return (
     <>

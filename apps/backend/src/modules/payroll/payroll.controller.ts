@@ -6,6 +6,8 @@ import { Response } from 'express';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { ModuleAccessGuard } from '@/common/guards/module-access.guard';
+import { RequiresModule } from '@/common/decorators/requires-module.decorator';
 import {
   PayrollService,
   CreateStaffSalaryDto,
@@ -30,7 +32,8 @@ const ALL_STAFF = [
 
 @ApiTags('payroll')
 @ApiBearerAuth('JWT')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@RequiresModule('finance_dashboard')
+@UseGuards(JwtAuthGuard, RolesGuard, ModuleAccessGuard)
 @Controller({ path: 'payroll', version: '1' })
 export class PayrollController {
   constructor(private readonly service: PayrollService) {}

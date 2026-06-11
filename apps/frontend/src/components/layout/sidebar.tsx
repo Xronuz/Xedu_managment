@@ -10,6 +10,7 @@ import { useBranchStore } from '@/store/branch.store';
 import { useUIStore } from '@/store/ui.store';
 import { getNavForRole } from '@/config/navigation';
 import type { NavItem } from '@/config/navigation';
+import { useDisabledModules } from '@/hooks/use-disabled-modules';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
@@ -165,8 +166,13 @@ export function Sidebar() {
   const { user } = useAuthStore();
   const { sidebarCollapsed, toggleSidebar } = useUIStore();
 
-  const role      = user?.role ?? '';
-  const navGroups = useMemo(() => getNavForRole(role), [role]);
+  const role = user?.role ?? '';
+  // Maktab uchun o'chirilgan modullar — tegishli bo'limlar sidebar'da ko'rinmaydi
+  const disabledModules = useDisabledModules();
+  const navGroups = useMemo(
+    () => getNavForRole(role, disabledModules),
+    [role, disabledModules],
+  );
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
     const set = new Set<string>();
@@ -190,11 +196,17 @@ export function Sidebar() {
 
   useEffect(() => {
     setExpandedGroups((prev) => {
+      // O'zgarish bo'lmasa eski reference qaytariladi — keraksiz re-render
+      // va potensial setState siklining oldini oladi
+      let changed = false;
       const next = new Set(prev);
       navGroups.forEach((g) => {
-        if (g.items.some((item) => isNavActive(item, pathname))) next.add(g.title);
+        if (!next.has(g.title) && g.items.some((item) => isNavActive(item, pathname))) {
+          next.add(g.title);
+          changed = true;
+        }
       });
-      return next;
+      return changed ? next : prev;
     });
   }, [pathname, navGroups]);
 

@@ -233,17 +233,14 @@ export const ACCOUNTANT_NAV: NavGroup[] = [
   {
     title: 'Analitika',
     items: [
+      // Jadval analitikasi moliyachi ish oqimiga tegishli emas — nav'dan olib tashlandi
+      // (route ruxsati saqlanadi, to'g'ridan-to'g'ri kirish mumkin)
       { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, roles: ROUTE_PERMISSIONS['/dashboard/reports'], matchPaths: ['/dashboard/kpi', '/dashboard/insights', '/dashboard/marketing', '/dashboard/analytics'] },
-      { label: 'Jadval analitikasi', href: '/dashboard/analytics/timetable', icon: Activity, roles: ROUTE_PERMISSIONS['/dashboard/analytics/timetable'] },
       { label: 'Eksport markazi', href: '/dashboard/export-center', icon: Download, roles: ROUTE_PERMISSIONS['/dashboard/export-center'] },
     ],
   },
-  {
-    title: 'Tizim',
-    items: [
-      { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
-    ],
-  },
+  // 'Sozlamalar' olib tashlandi: ROUTE_PERMISSIONS accountant'ga ruxsat bermaydi
+  // (o'lik link edi). Shaxsiy sozlamalar — sidebar foydalanuvchi menyusidagi Profil.
 ];
 
 // ── LIBRARIAN ─────────────────────────────────────────────────────────────────
@@ -261,12 +258,8 @@ export const LIBRARIAN_NAV: NavGroup[] = [
       { label: 'Resurslar', href: '/dashboard/resources', icon: Package, roles: ROUTE_PERMISSIONS['/dashboard/resources'] },
     ],
   },
-  {
-    title: 'Tizim',
-    items: [
-      { label: 'Sozlamalar', href: '/dashboard/settings', icon: Settings, roles: ROUTE_PERMISSIONS['/dashboard/settings'] },
-    ],
-  },
+  // 'Sozlamalar' olib tashlandi: ROUTE_PERMISSIONS librarian'ga ruxsat bermaydi
+  // (o'lik link edi). Shaxsiy sozlamalar — sidebar foydalanuvchi menyusidagi Profil.
 ];
 
 // ── STUDENT ───────────────────────────────────────────────────────────────────
@@ -322,12 +315,9 @@ export const PARENT_NAV: NavGroup[] = [
       { label: 'Uy vazifalari', href: '/dashboard/homework', icon: BookMarked, roles: ROUTE_PERMISSIONS['/dashboard/homework'] },
     ],
   },
-  {
-    title: 'Moliya',
-    items: [
-      { label: "To'lovlar", href: '/dashboard/payments', icon: CreditCard, roles: ROUTE_PERMISSIONS['/dashboard/payments'] },
-    ],
-  },
+  // 'Moliya → To'lovlar' olib tashlandi: ROUTE_PERMISSIONS parent'ga /dashboard/payments
+  // ga ruxsat bermaydi (o'lik konfiguratsiya edi). To'lovlar parent portal ichidagi
+  // "To'lovlar" tabida ko'rsatiladi (/dashboard/parent).
   {
     title: 'Aloqa',
     items: [
@@ -345,6 +335,7 @@ export const SUPER_ADMIN_NAV: NavGroup[] = [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
       { label: 'Maktablar', href: '/dashboard/schools', icon: School, roles: ROUTE_PERMISSIONS['/dashboard/schools'] },
       { label: 'Demo So\'rovlar', href: '/dashboard/demo-requests', icon: Rocket, roles: ROUTE_PERMISSIONS['/dashboard/demo-requests'] },
+      { label: "E'lonlar", href: '/dashboard/broadcast', icon: Megaphone, roles: ROUTE_PERMISSIONS['/dashboard/broadcast'] },
       { label: 'Tizim holati', href: '/dashboard/system-health', icon: TrendingUp, roles: ROUTE_PERMISSIONS['/dashboard/system-health'] },
       { label: 'Audit Log', href: '/dashboard/audit-log', icon: Shield, roles: ROUTE_PERMISSIONS['/dashboard/audit-log'] },
     ],
@@ -356,6 +347,41 @@ export const SUPER_ADMIN_NAV: NavGroup[] = [
     ],
   },
 ];
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   ROUTE → MODUL XARITASI
+   Maktab uchun modul o'chirilgan bo'lsa, shu route'lar sidebar'da ko'rinmaydi
+   (backend ham ModuleAccessGuard bilan 403 qaytaradi).
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+export const ROUTE_MODULES: Record<string, string> = {
+  '/dashboard/attendance':      'attendance',
+  '/dashboard/grades':          'grades',
+  '/dashboard/payments':        'payments',
+  '/dashboard/fee-structures':  'payments',
+  '/dashboard/exams':           'exams',
+  '/dashboard/homework':        'homework',
+  '/dashboard/finance':         'finance_dashboard',
+  '/dashboard/payroll':         'finance_dashboard',
+  '/dashboard/canteen':         'canteen',
+  '/dashboard/library':         'library',
+  '/dashboard/transport':       'transport',
+  '/dashboard/learning-center': 'learning_center',
+  '/dashboard/clubs':           'clubs',
+  '/dashboard/kpi':             'kpi',
+  '/dashboard/coins':           'engagement',
+  '/dashboard/student/shop':    'engagement',
+  '/dashboard/staff/shop':      'engagement',
+  '/dashboard/display':         'display',
+};
+
+/** Route uchun modul nomini qaytaradi (prefix bo'yicha), topilmasa null */
+export function getModuleForRoute(href: string): string | null {
+  for (const [route, mod] of Object.entries(ROUTE_MODULES)) {
+    if (href === route || href.startsWith(route + '/')) return mod;
+  }
+  return null;
+}
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    NAVIGATION RESOLVER
@@ -377,16 +403,22 @@ const ROLE_NAV_MAP: Record<string, NavGroup[]> = {
 /**
  * Returns navigation groups for a given role.
  * Items are filtered by the role's route permissions automatically.
+ *
+ * @param disabledModules — maktab uchun o'chirilgan modullar; shu modullarga
+ *   tegishli bo'limlar sidebar'dan yashiriladi (super_admin uchun bo'sh).
  */
-export function getNavForRole(role: string): NavGroup[] {
+export function getNavForRole(role: string, disabledModules: string[] = []): NavGroup[] {
   const groups = ROLE_NAV_MAP[role] ?? [];
-  // Filter each group's items by role permissions
+  const disabledSet = new Set(disabledModules);
   return groups
     .map(group => ({
       ...group,
-      items: group.items.filter(item =>
-        !item.roles || item.roles.includes(role),
-      ),
+      items: group.items.filter(item => {
+        if (item.roles && !item.roles.includes(role)) return false;
+        const mod = getModuleForRoute(item.href);
+        if (mod && disabledSet.has(mod)) return false;
+        return true;
+      }),
     }))
     .filter(group => group.items.length > 0);
 }

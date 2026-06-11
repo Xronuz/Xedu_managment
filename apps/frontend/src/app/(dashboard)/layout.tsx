@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Header } from '@/components/layout/header';
+import { ImpersonationBanner } from '@/components/layout/impersonation-banner';
 import { BreadcrumbNav } from '@/components/layout/breadcrumb-nav';
 import { MobileFab } from '@/components/layout/mobile-fab';
 import { useAuthStore } from '@/store/auth.store';
@@ -128,6 +129,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             <div className="flex flex-1 min-w-0 flex-col overflow-hidden">
               <div className="flex flex-1 min-h-0 flex-col overflow-hidden rounded-tl-2xl bg-xedu-bg-canvas border-l border-t border-xedu-slate-100 dark:border-xedu-slate-800">
+                <ImpersonationBanner />
                 <Header />
                 <main
                   className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg-canvas dark:bg-xedu-bg-canvas p-6"

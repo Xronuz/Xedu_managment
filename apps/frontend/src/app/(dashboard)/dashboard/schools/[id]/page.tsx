@@ -10,7 +10,7 @@ import {
   Utensils, Library, Bus, Package, UserPlus, Loader2,
   BarChart2, FileText, ClipboardCheck, DollarSign,
   TrendingUp, MessageSquare, BookCopy, Trash2, AlertTriangle,
-  KeyRound, Copy, Check,
+  KeyRound, Copy, Check, LogIn, PauseCircle, PlayCircle,
 } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,6 +31,14 @@ import { superAdminApi } from '@/lib/api/super-admin';
 import { usersApi } from '@/lib/api/users';
 import { formatDate } from '@/lib/utils';
 import { useToast } from '@/components/ui/use-toast';
+import { useAuthStore } from '@/store/auth.store';
+
+const PLAN_LABELS: Record<string, string> = {
+  free: 'Free', basic: 'Basic', standard: 'Standard', premium: 'Premium', enterprise: 'Enterprise',
+};
+const SUB_STATUS_LABELS: Record<string, string> = {
+  active: 'Faol', trial: 'Sinov', expired: 'Muddati tugagan', cancelled: 'Bekor qilingan', inactive: 'Nofaol',
+};
 
 const MODULE_META: Record<string, { icon: React.ElementType; label: string; description: string; category: string }> = {
   // 1. Strategiya va Boshqaruv
@@ -38,20 +46,18 @@ const MODULE_META: Record<string, { icon: React.ElementType; label: string; desc
   // 2. Akademik Tizim
   classes:      { icon: GraduationCap, label: 'Sinflar',         description: 'Sinf boshqaruvi va o‘quvchilar taqsimoti',       category: '2. Akademik' },
   schedule:     { icon: Calendar,     label: 'Dars jadvali',    description: 'Haftalik jadval va zal band qilish',              category: '2. Akademik' },
-  subjects:     { icon: BookOpen,     label: 'Fanlar',          description: 'O‘quv fanlari va dasturlar',                     category: '2. Akademik' },
   exams:        { icon: FileText,     label: 'Imtihonlar',      description: 'Imtihon rejalashtirish va natijalar',             category: '2. Akademik' },
   homework:     { icon: ClipboardCheck, label: 'Uy vazifalari', description: 'Vazifalar berish va tekshirish',                  category: '2. Akademik' },
   grades:       { icon: BookOpen,     label: 'Baholar & Jurnal', description: 'Elektron jurnal, baholar va GPA',                category: '2. Akademik' },
   // 3. O‘qituvchi Tizimi
   users:        { icon: Users,        label: 'Xodimlar',        description: 'O‘qituvchi va xodimlar boshqaruvi',              category: '3. O‘qituvchi' },
-  payroll:      { icon: DollarSign,   label: 'Ish haqi',        description: 'Maosh hisoblash va avanslar',                     category: '3. O‘qituvchi' },
   // 4. O‘quvchi Boshqaruvi
   attendance:   { icon: CheckCircle2, label: 'Davomat',         description: 'Kunlik davomat belgilash va hisobotlar',          category: '4. O‘quvchi' },
   // 5. Marketing & Sales
   // (leads CRM — hozircha alohida yo‘nalish sifatida ko‘rsatilmagan)
   // 6. Moliya Tizimi
-  payments:     { icon: CreditCard,   label: 'To‘lovlar',      description: 'Payme/Click integratsiyasi, qarzdorlik',          category: '6. Moliya' },
-  finance_dashboard: { icon: TrendingUp, label: 'Moliya Dashboard', description: 'Kirim-chiqim va g‘azna nazorati',           category: '6. Moliya' },
+  payments:     { icon: CreditCard,   label: 'To‘lovlar',      description: 'Payme/Click integratsiyasi, qarzdorlik, tariflar', category: '6. Moliya' },
+  finance_dashboard: { icon: TrendingUp, label: 'Moliya Dashboard', description: 'Kirim-chiqim, g‘azna, smenalar va ish haqi', category: '6. Moliya' },
   // 7. Operatsiya Tizimi
   transport:    { icon: Bus,          label: 'Transport',       description: 'Avtobus marshrut va tracking',                    category: '7. Operatsiya' },
   canteen:      { icon: Utensils,     label: 'Oshxona',         description: 'Haftalik menyu va ovqatlanish',                   category: '7. Operatsiya' },
@@ -75,9 +81,14 @@ export default function SchoolDetailPage() {
 
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState<'info' | 'modules'>('info');
+  const [activeTab, setActiveTab] = useState<'info' | 'modules' | 'subscription'>('info');
   const [showAdminDialog, setShowAdminDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showSuspendDialog, setShowSuspendDialog] = useState(false);
+  const [confirmImpersonate, setConfirmImpersonate] = useState<any>(null);
+  const [subForm, setSubForm] = useState<{
+    plan: string; status: string; billingCycle: string; trialEndsAt: string; nextBilling: string;
+  } | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [confirmReset, setConfirmReset] = useState<any>(null);
   const [resetResult, setResetResult] = useState<{ temporaryPassword: string; message: string } | null>(null);
@@ -122,6 +133,77 @@ export default function SchoolDetailPage() {
       superAdminApi.toggleModule(id, moduleName, isEnabled),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['school-modules', id] });
+    },
+  });
+
+  const suspendMutation = useMutation({
+    mutationFn: () => superAdminApi.suspendSchool(id),
+    onSuccess: (data) => {
+      toast({ title: 'Maktab to‘xtatildi', description: data.message });
+      setShowSuspendDialog(false);
+      queryClient.invalidateQueries({ queryKey: ['school', id] });
+      queryClient.invalidateQueries({ queryKey: ['schools'] });
+    },
+    onError: (err: any) => {
+      toast({
+        title: 'Xatolik',
+        description: err?.response?.data?.message || 'Maktabni to‘xtatishda xatolik',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const reactivateMutation = useMutation({
+    mutationFn: () => superAdminApi.reactivateSchool(id),
+    onSuccess: (data) => {
+      toast({ title: 'Maktab faollashtirildi', description: data.message });
+      queryClient.invalidateQueries({ queryKey: ['school', id] });
+      queryClient.invalidateQueries({ queryKey: ['schools'] });
+    },
+    onError: (err: any) => {
+      toast({
+        title: 'Xatolik',
+        description: err?.response?.data?.message || 'Faollashtirishda xatolik',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const subscriptionMutation = useMutation({
+    mutationFn: (payload: any) => superAdminApi.updateSubscription(id, payload),
+    onSuccess: () => {
+      toast({ title: 'Obuna yangilandi', description: 'Obuna ma‘lumotlari saqlandi.' });
+      queryClient.invalidateQueries({ queryKey: ['school', id] });
+      queryClient.invalidateQueries({ queryKey: ['schools'] });
+    },
+    onError: (err: any) => {
+      toast({
+        title: 'Xatolik',
+        description: err?.response?.data?.message || 'Obunani saqlashda xatolik',
+        variant: 'destructive',
+      });
+    },
+  });
+
+  const impersonateMutation = useMutation({
+    mutationFn: (userId: string) => superAdminApi.impersonate(id, userId),
+    onSuccess: (res) => {
+      const { setAuth, setImpersonation } = useAuthStore.getState();
+      // Joriy super admin sessiyasi query keshini tozalash
+      window.dispatchEvent(new CustomEvent('xedu:logout'));
+      localStorage.removeItem('branch-storage');
+      setAuth(res.user as any, res.tokens as any);
+      setImpersonation(res.impersonation);
+      // To'liq reload — middleware yangi cookie'ni o'qishi shart
+      window.location.assign('/dashboard');
+    },
+    onError: (err: any) => {
+      setConfirmImpersonate(null);
+      toast({
+        title: 'Xatolik',
+        description: err?.response?.data?.message || 'Impersonation amalga oshmadi',
+        variant: 'destructive',
+      });
     },
   });
 
@@ -257,18 +339,29 @@ export default function SchoolDetailPage() {
             <UserPlus className="mr-1.5 h-3.5 w-3.5" />
             Foydalanuvchi qo‘shish
           </Button>
-          <Button
-            variant={school.isActive ? 'destructive' : 'default'}
-            size="sm"
-            onClick={() => updateMutation.mutate({ isActive: !school.isActive })}
-            disabled={updateMutation.isPending}
-          >
-            {school.isActive ? (
-              <><XCircle className="mr-1.5 h-3.5 w-3.5" />Bloklash</>
-            ) : (
-              <><CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />Faollashtirish</>
-            )}
-          </Button>
+          {school.isActive ? (
+            <Button
+              variant="destructive"
+              size="sm"
+              onClick={() => setShowSuspendDialog(true)}
+              disabled={suspendMutation.isPending}
+            >
+              <PauseCircle className="mr-1.5 h-3.5 w-3.5" />
+              To‘xtatish
+            </Button>
+          ) : (
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => reactivateMutation.mutate()}
+              disabled={reactivateMutation.isPending}
+            >
+              {reactivateMutation.isPending
+                ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                : <PlayCircle className="mr-1.5 h-3.5 w-3.5" />}
+              Faollashtirish
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -322,7 +415,7 @@ export default function SchoolDetailPage() {
 
       {/* Tabs */}
       <div className="flex gap-1 border-b">
-        {(['info', 'modules'] as const).map((tab) => (
+        {(['info', 'modules', 'subscription'] as const).map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -332,7 +425,7 @@ export default function SchoolDetailPage() {
                 : 'border-transparent text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground'
             }`}
           >
-            {tab === 'info' ? 'Ma‘lumotlar' : 'Modullar'}
+            {tab === 'info' ? 'Ma‘lumotlar' : tab === 'modules' ? 'Modullar' : 'Obuna'}
           </button>
         ))}
       </div>
@@ -478,14 +571,25 @@ export default function SchoolDetailPage() {
                         {director.isActive ? 'Aktiv' : 'Bloklangan'}
                       </Badge>
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setConfirmReset(director)}
-                    >
-                      <KeyRound className="mr-1.5 h-3.5 w-3.5" />
-                      Parolni tiklash
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={!director.isActive || !school.isActive}
+                        onClick={() => setConfirmImpersonate(director)}
+                      >
+                        <LogIn className="mr-1.5 h-3.5 w-3.5" />
+                        Kirish
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setConfirmReset(director)}
+                      >
+                        <KeyRound className="mr-1.5 h-3.5 w-3.5" />
+                        Parolni tiklash
+                      </Button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -516,7 +620,8 @@ export default function SchoolDetailPage() {
                   <CardContent className="space-y-1 pt-0">
                     {catModules.map(([name, meta]) => {
                       const mod = modulesMap[name];
-                      const isEnabled = mod?.isEnabled ?? false;
+                      // Default-allow: yozuv yo'q = modul yoqilgan (enforcement bilan bir xil semantika)
+                      const isEnabled = mod?.isEnabled ?? true;
                       const Icon = meta.icon;
                       return (
                         <div
@@ -554,6 +659,204 @@ export default function SchoolDetailPage() {
           )}
         </div>
       )}
+
+      {/* Tab: Subscription */}
+      {activeTab === 'subscription' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Obuna boshqaruvi</CardTitle>
+            <CardDescription>Tarif rejasi, holati va billing sanalari</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            {/* Joriy holat */}
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="flex items-start gap-3 rounded-lg bg-muted/40 p-3">
+                <CreditCard className="h-4 w-4 text-xedu-slate-500 mt-0.5" />
+                <div>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Joriy reja</p>
+                  <p className="text-sm font-medium capitalize">
+                    {PLAN_LABELS[school.subscription?.plan ?? school.subscriptionTier ?? 'basic']}
+                    {' · '}
+                    <Badge variant={school.subscription?.status === 'active' ? 'success' : 'secondary'} className="text-[10px] align-middle">
+                      {SUB_STATUS_LABELS[school.subscription?.status ?? 'trial'] ?? school.subscription?.status}
+                    </Badge>
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 rounded-lg bg-muted/40 p-3">
+                <Calendar className="h-4 w-4 text-xedu-slate-500 mt-0.5" />
+                <div>
+                  <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Sanalar</p>
+                  <p className="text-sm font-medium">
+                    Sinov: {school.subscription?.trialEndsAt ? formatDate(school.subscription.trialEndsAt) : '—'}
+                    {' · '}Keyingi billing: {school.subscription?.nextBilling ? formatDate(school.subscription.nextBilling) : '—'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tahrirlash formasi */}
+            {!subForm ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSubForm({
+                  plan: school.subscription?.plan ?? school.subscriptionTier ?? 'basic',
+                  status: school.subscription?.status ?? 'trial',
+                  billingCycle: school.subscription?.billingCycle ?? 'monthly',
+                  trialEndsAt: school.subscription?.trialEndsAt ? String(school.subscription.trialEndsAt).slice(0, 10) : '',
+                  nextBilling: school.subscription?.nextBilling ? String(school.subscription.nextBilling).slice(0, 10) : '',
+                })}
+              >
+                Tahrirlash
+              </Button>
+            ) : (
+              <div className="space-y-4 rounded-lg border p-4">
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="space-y-1.5">
+                    <Label>Reja</Label>
+                    <Select value={subForm.plan} onValueChange={(v) => setSubForm((f) => f && ({ ...f, plan: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(PLAN_LABELS).map(([v, l]) => (
+                          <SelectItem key={v} value={v}>{l}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Holat</Label>
+                    <Select value={subForm.status} onValueChange={(v) => setSubForm((f) => f && ({ ...f, status: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(SUB_STATUS_LABELS).map(([v, l]) => (
+                          <SelectItem key={v} value={v}>{l}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Billing davri</Label>
+                    <Select value={subForm.billingCycle} onValueChange={(v) => setSubForm((f) => f && ({ ...f, billingCycle: v }))}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="monthly">Oylik</SelectItem>
+                        <SelectItem value="yearly">Yillik</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label>Sinov tugash sanasi</Label>
+                    <Input
+                      type="date"
+                      value={subForm.trialEndsAt}
+                      onChange={(e) => setSubForm((f) => f && ({ ...f, trialEndsAt: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label>Keyingi billing sanasi</Label>
+                    <Input
+                      type="date"
+                      value={subForm.nextBilling}
+                      onChange={(e) => setSubForm((f) => f && ({ ...f, nextBilling: e.target.value }))}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => setSubForm(null)} disabled={subscriptionMutation.isPending}>
+                    Bekor
+                  </Button>
+                  <Button
+                    size="sm"
+                    disabled={subscriptionMutation.isPending}
+                    onClick={() =>
+                      subscriptionMutation.mutate(
+                        {
+                          plan: subForm.plan,
+                          status: subForm.status,
+                          billingCycle: subForm.billingCycle,
+                          ...(subForm.trialEndsAt ? { trialEndsAt: subForm.trialEndsAt } : {}),
+                          ...(subForm.nextBilling ? { nextBilling: subForm.nextBilling } : {}),
+                        },
+                        { onSuccess: () => setSubForm(null) },
+                      )
+                    }
+                  >
+                    {subscriptionMutation.isPending
+                      ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+                      : <Save className="mr-1.5 h-3.5 w-3.5" />}
+                    Saqlash
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Suspend confirmation dialog */}
+      <Dialog open={showSuspendDialog} onOpenChange={(v) => { if (!v) setShowSuspendDialog(false); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xedu-ruby">
+              <PauseCircle className="h-5 w-5" />
+              Maktab faoliyatini to‘xtatish
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              <span className="font-semibold text-foreground">{school.name}</span> faoliyati to‘xtatiladi.
+              Barcha foydalanuvchilar tizimdan chiqariladi va qayta kira olmaydi.
+              Keyinroq «Faollashtirish» bilan qaytarish mumkin.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 pt-2">
+            <Button variant="secondary" onClick={() => setShowSuspendDialog(false)}>Bekor qilish</Button>
+            <Button
+              variant="destructive"
+              disabled={suspendMutation.isPending}
+              onClick={() => suspendMutation.mutate()}
+            >
+              {suspendMutation.isPending ? 'To‘xtatilmoqda...' : 'To‘xtatish'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Impersonation confirmation dialog */}
+      <Dialog open={!!confirmImpersonate} onOpenChange={(v) => { if (!v) setConfirmImpersonate(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <LogIn className="h-5 w-5 text-primary" />
+              Maktabga kirishni tasdiqlang
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              Siz{' '}
+              <span className="font-semibold text-foreground">
+                {confirmImpersonate?.firstName} {confirmImpersonate?.lastName}
+              </span>{' '}
+              (direktor) sifatida tizimga kirasiz. Sessiya <strong>30 daqiqadan</strong> so‘ng tugaydi
+              va joriy super admin sessiyangiz yopiladi — qaytish uchun qayta login qilasiz.
+              Har bir kirish audit jurnaliga yoziladi.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 pt-2">
+            <Button variant="secondary" onClick={() => setConfirmImpersonate(null)} disabled={impersonateMutation.isPending}>
+              Bekor qilish
+            </Button>
+            <Button
+              disabled={impersonateMutation.isPending}
+              onClick={() => impersonateMutation.mutate(confirmImpersonate?.id)}
+            >
+              {impersonateMutation.isPending
+                ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                : <LogIn className="mr-1.5 h-4 w-4" />}
+              Kirish
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Password reset confirmation */}
       <Dialog open={!!confirmReset} onOpenChange={(v) => { if (!v) setConfirmReset(null); }}>

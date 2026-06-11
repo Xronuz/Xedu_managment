@@ -18,6 +18,7 @@ import { RolesGuard } from '@/common/guards/roles.guard';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
+import { buildCookieOptions } from '@/common/utils/cookie-options.util';
 
 @ApiTags('auth')
 @Controller({ path: 'auth', version: '1' })
@@ -28,13 +29,7 @@ export class AuthController {
   ) {}
 
   private get cookieOptions() {
-    const isHttps = this.config.get('APP_URL', '').startsWith('https://');
-    return {
-      httpOnly: true,
-      secure: isHttps,
-      sameSite: isHttps ? ('none' as const) : ('lax' as const),
-      path: '/',
-    };
+    return buildCookieOptions(this.config);
   }
 
   @Public()

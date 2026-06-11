@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { SuperAdminController } from './super-admin.controller';
 import { SuperAdminService } from './super-admin.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
@@ -36,6 +37,7 @@ describe('SuperAdminController', () => {
         { provide: PrismaService, useValue: {} },
         { provide: AuditService, useValue: { log: jest.fn() } },
         { provide: AuthService, useValue: { logoutAll: jest.fn() } },
+        { provide: ConfigService, useValue: { get: jest.fn(() => '') } },
       ],
     })
       .overrideGuard(JwtAuthGuard)

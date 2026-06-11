@@ -23,9 +23,19 @@ export const superAdminApi = {
     phone?: string;
     email?: string;
     subscriptionTier?: string;
+    financeType?: string;
+    timezone?: string;
+    directorFirstName?: string;
+    directorLastName?: string;
+    directorEmail?: string;
   }) => {
     const { data } = await apiClient.post('/super-admin/schools', payload);
-    return data;
+    return data as {
+      id: string;
+      name: string;
+      mainBranchId: string;
+      director: { id: string; email: string; temporaryPassword: string } | null;
+    };
   },
 
   updateSchool: async (id: string, payload: object) => {
@@ -49,6 +59,47 @@ export const superAdminApi = {
   deleteSchool: async (id: string) => {
     const { data } = await apiClient.delete(`/super-admin/schools/${id}`);
     return data as { message: string; schoolId: string };
+  },
+
+  suspendSchool: async (id: string) => {
+    const { data } = await apiClient.post(`/super-admin/schools/${id}/suspend`);
+    return data as { message: string; schoolId: string };
+  },
+
+  reactivateSchool: async (id: string) => {
+    const { data } = await apiClient.post(`/super-admin/schools/${id}/reactivate`);
+    return data as { message: string; schoolId: string };
+  },
+
+  updateSubscription: async (
+    schoolId: string,
+    payload: {
+      plan?: string;
+      status?: string;
+      billingCycle?: string;
+      nextBilling?: string;
+      trialEndsAt?: string;
+    },
+  ) => {
+    const { data } = await apiClient.patch(`/super-admin/schools/${schoolId}/subscription`, payload);
+    return data;
+  },
+
+  impersonate: async (schoolId: string, userId: string) => {
+    const { data } = await apiClient.post(`/super-admin/schools/${schoolId}/impersonate`, { userId });
+    return data as {
+      user: {
+        id: string; email: string; firstName: string; lastName: string;
+        role: string; schoolId: string; branchId: string | null; isFirstLogin: boolean;
+      };
+      tokens: { accessToken: string; refreshToken: string; expiresIn: number };
+      impersonation: { schoolId: string; schoolName: string; expiresAt: string };
+    };
+  },
+
+  broadcast: async (payload: { title: string; body: string; schoolId?: string; priority?: string }) => {
+    const { data } = await apiClient.post('/super-admin/broadcast', payload);
+    return data as { sent: number; skipped: number; message: string };
   },
 
   getSchoolUsers: async (schoolId: string, role?: string) => {

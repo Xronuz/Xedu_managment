@@ -73,6 +73,8 @@ export interface JwtPayload {
   assignedBranchIds?: string[];
   isSuperAdmin: boolean;
   isFirstLogin?: boolean;
+  /** Impersonation: super admin shu foydalanuvchi sifatida vaqtinchalik kirgan (super admin id) */
+  impersonatedBy?: string;
 }
 
 export interface TokenPair {

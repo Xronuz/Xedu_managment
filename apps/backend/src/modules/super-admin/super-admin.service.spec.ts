@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { NotFoundException, ConflictException } from '@nestjs/common';
+import { NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { SuperAdminService } from './super-admin.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { AuditService } from '@/common/audit/audit.service';
@@ -35,9 +35,16 @@ const mockPrisma = {
     findMany: jest.fn(),
     updateMany: jest.fn(),
     count: jest.fn(),
+    create: jest.fn(),
+    findUnique: jest.fn(),
+    findFirst: jest.fn(),
   },
   subscription: {
     count: jest.fn(),
+    upsert: jest.fn(),
+  },
+  notification: {
+    createMany: jest.fn(),
   },
   $transaction: jest.fn((ops: any[]) => Promise.all(ops)),
 };
@@ -48,6 +55,9 @@ const mockAudit = {
 
 const mockAuth = {
   logoutAll: jest.fn(() => Promise.resolve()),
+  generateImpersonationTokens: jest.fn(() =>
+    Promise.resolve({ accessToken: 'imp-token', refreshToken: '', expiresIn: 1800 }),
+  ),
 };
 
 // ── Test Suite ─────────────────────────────────────────────────────────────
@@ -326,6 +336,208 @@ describe('SuperAdminService', () => {
       expect(mockPrisma.school.count).toHaveBeenCalledWith({
         where: { isActive: true, deletedAt: null },
       });
+    });
+  });
+
+  // ── suspendSchool / reactivateSchool ───────────────────────────────────────
+
+  describe('suspendSchool()', () => {
+    const superAdmin = { sub: 'admin-1', role: 'super_admin' } as any;
+
+    it('suspends school, revokes sessions, logs audit, does NOT deactivate users', async () => {
+      mockPrisma.school.findUnique.mockResolvedValueOnce({
+        id: 'school-1', name: 'Test', isActive: true, deletedAt: null,
+      });
+      mockPrisma.school.update.mockResolvedValueOnce({ id: 'school-1', isActive: false });
+      mockPrisma.user.findMany.mockResolvedValueOnce([{ id: 'u1' }, { id: 'u2' }]);
+
+      const result = await service.suspendSchool('school-1', superAdmin);
+
+      expect(mockPrisma.school.update).toHaveBeenCalledWith({
+        where: { id: 'school-1' },
+        data: { isActive: false },
+      });
+      expect(mockPrisma.user.updateMany).not.toHaveBeenCalled();
+      expect(mockAuth.logoutAll).toHaveBeenCalledTimes(2);
+      expect(mockAudit.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entity: 'School',
+          newData: expect.objectContaining({ event: 'school_suspended', revokedUsers: 2 }),
+        }),
+      );
+      expect(result.schoolId).toBe('school-1');
+    });
+
+    it('throws Conflict when already suspended', async () => {
+      mockPrisma.school.findUnique.mockResolvedValueOnce({
+        id: 'school-1', name: 'Test', isActive: false, deletedAt: null,
+      });
+      await expect(service.suspendSchool('school-1', superAdmin)).rejects.toThrow(ConflictException);
+    });
+
+    it('throws 404 for deleted school', async () => {
+      mockPrisma.school.findUnique.mockResolvedValueOnce({
+        id: 'school-1', name: 'Test', isActive: true, deletedAt: new Date(),
+      });
+      await expect(service.suspendSchool('school-1', superAdmin)).rejects.toThrow(NotFoundException);
+    });
+  });
+
+  describe('reactivateSchool()', () => {
+    const superAdmin = { sub: 'admin-1', role: 'super_admin' } as any;
+
+    it('reactivates suspended school without touching sessions', async () => {
+      mockPrisma.school.findUnique.mockResolvedValueOnce({
+        id: 'school-1', name: 'Test', isActive: false, deletedAt: null,
+      });
+      mockPrisma.school.update.mockResolvedValueOnce({ id: 'school-1', isActive: true });
+
+      await service.reactivateSchool('school-1', superAdmin);
+
+      expect(mockPrisma.school.update).toHaveBeenCalledWith({
+        where: { id: 'school-1' },
+        data: { isActive: true },
+      });
+      expect(mockAuth.logoutAll).not.toHaveBeenCalled();
+    });
+
+    it('throws Conflict when already active', async () => {
+      mockPrisma.school.findUnique.mockResolvedValueOnce({
+        id: 'school-1', name: 'Test', isActive: true, deletedAt: null,
+      });
+      await expect(service.reactivateSchool('school-1', superAdmin)).rejects.toThrow(ConflictException);
+    });
+  });
+
+  // ── updateSubscription ─────────────────────────────────────────────────────
+
+  describe('updateSubscription()', () => {
+    const superAdmin = { sub: 'admin-1', role: 'super_admin' } as any;
+
+    it('upserts subscription and syncs subscriptionTier when plan present', async () => {
+      mockPrisma.school.findUnique.mockResolvedValueOnce({ id: 'school-1', deletedAt: null });
+      mockPrisma.subscription.upsert.mockResolvedValueOnce({ id: 'sub-1', plan: 'premium' });
+      mockPrisma.school.update.mockResolvedValueOnce({ id: 'school-1' });
+
+      await service.updateSubscription('school-1', { plan: 'premium', status: 'active' } as any, superAdmin);
+
+      expect(mockPrisma.subscription.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { schoolId: 'school-1' },
+          update: expect.objectContaining({ plan: 'premium', status: 'active' }),
+        }),
+      );
+      // plan berilgani uchun school.subscriptionTier ham yangilanadi
+      expect(mockPrisma.school.update).toHaveBeenCalledWith({
+        where: { id: 'school-1' },
+        data: { subscriptionTier: 'premium' },
+      });
+    });
+
+    it('does not touch school tier when plan absent', async () => {
+      mockPrisma.school.findUnique.mockResolvedValueOnce({ id: 'school-1', deletedAt: null });
+      mockPrisma.subscription.upsert.mockResolvedValueOnce({ id: 'sub-1' });
+
+      await service.updateSubscription('school-1', { status: 'expired' } as any, superAdmin);
+
+      expect(mockPrisma.school.update).not.toHaveBeenCalled();
+    });
+  });
+
+  // ── impersonate ────────────────────────────────────────────────────────────
+
+  describe('impersonate()', () => {
+    const superAdmin = { sub: 'admin-1', email: 'super@x.uz', role: 'super_admin' } as any;
+    const activeSchool = { id: 'school-1', name: 'Test', isActive: true, deletedAt: null };
+
+    it('issues impersonation tokens for active director and logs audit', async () => {
+      mockPrisma.school.findUnique.mockResolvedValueOnce(activeSchool);
+      mockPrisma.user.findFirst.mockResolvedValueOnce({
+        id: 'dir-1', email: 'dir@x.uz', firstName: 'D', lastName: 'I',
+        role: 'director', schoolId: 'school-1', branchId: 'b1', isActive: true,
+      });
+
+      const result = await service.impersonate('school-1', { userId: 'dir-1' }, superAdmin);
+
+      expect(mockAuth.generateImpersonationTokens).toHaveBeenCalledWith('dir-1', superAdmin);
+      expect(mockAudit.log).toHaveBeenCalledWith(
+        expect.objectContaining({ entity: 'Impersonation', action: 'login', entityId: 'dir-1' }),
+      );
+      expect(result.tokens.accessToken).toBe('imp-token');
+      expect(result.impersonation.schoolName).toBe('Test');
+      expect((result.user as any).isFirstLogin).toBe(false);
+    });
+
+    it('rejects target from another school (404)', async () => {
+      mockPrisma.school.findUnique.mockResolvedValueOnce(activeSchool);
+      mockPrisma.user.findFirst.mockResolvedValueOnce(null);
+      await expect(
+        service.impersonate('school-1', { userId: 'other' }, superAdmin),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('rejects non-leadership roles (403)', async () => {
+      mockPrisma.school.findUnique.mockResolvedValueOnce(activeSchool);
+      mockPrisma.user.findFirst.mockResolvedValueOnce({
+        id: 't1', role: 'teacher', isActive: true,
+      });
+      await expect(
+        service.impersonate('school-1', { userId: 't1' }, superAdmin),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('rejects suspended school (403)', async () => {
+      mockPrisma.school.findUnique.mockResolvedValueOnce({ ...activeSchool, isActive: false });
+      await expect(
+        service.impersonate('school-1', { userId: 'dir-1' }, superAdmin),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  // ── broadcastToDirectors ───────────────────────────────────────────────────
+
+  describe('broadcastToDirectors()', () => {
+    const superAdmin = { sub: 'admin-1', role: 'super_admin' } as any;
+
+    it('creates notifications for directors with branch fallback', async () => {
+      mockPrisma.user.findMany.mockResolvedValueOnce([
+        { id: 'd1', schoolId: 's1', branchId: 'b1' },
+        { id: 'd2', schoolId: 's2', branchId: null }, // fallback kerak
+      ]);
+      mockPrisma.branch.findMany.mockResolvedValueOnce([
+        { id: 'b2-first', schoolId: 's2' },
+      ]);
+      mockPrisma.notification.createMany.mockResolvedValueOnce({ count: 2 });
+
+      const result = await service.broadcastToDirectors(
+        { title: 'Yangilik', body: 'Matn' } as any,
+        superAdmin,
+      );
+
+      expect(mockPrisma.notification.createMany).toHaveBeenCalledWith({
+        data: expect.arrayContaining([
+          expect.objectContaining({ recipientId: 'd1', branchId: 'b1', category: 'announcement' }),
+          expect.objectContaining({ recipientId: 'd2', branchId: 'b2-first' }),
+        ]),
+      });
+      expect(result.sent).toBe(2);
+      expect(result.skipped).toBe(0);
+    });
+
+    it('skips directors whose school has no branch', async () => {
+      mockPrisma.user.findMany.mockResolvedValueOnce([
+        { id: 'd1', schoolId: 's1', branchId: null },
+      ]);
+      mockPrisma.branch.findMany.mockResolvedValueOnce([]);
+
+      const result = await service.broadcastToDirectors(
+        { title: 'Yangilik', body: 'Matn' } as any,
+        superAdmin,
+      );
+
+      expect(mockPrisma.notification.createMany).not.toHaveBeenCalled();
+      expect(result.sent).toBe(0);
+      expect(result.skipped).toBe(1);
     });
   });
 });

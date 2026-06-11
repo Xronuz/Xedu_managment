@@ -16,6 +16,12 @@ export interface AuthUser {
   assignedBranchIds?: string[];
 }
 
+export interface ImpersonationInfo {
+  schoolId: string;
+  schoolName: string;
+  expiresAt: string;
+}
+
 interface AuthState {
   user: AuthUser | null;
   accessToken: string | null;
@@ -29,6 +35,9 @@ interface AuthState {
    */
   activeBranchId: string | null;
 
+  /** Super admin impersonation sessiyasi — banner ko'rsatish uchun */
+  impersonation: ImpersonationInfo | null;
+
   setAuth: (user: AuthUser, tokens: TokenPair) => void;
   restoreAuth: (user: AuthUser) => void;
   updateUser: (user: Partial<AuthUser>) => void;
@@ -36,6 +45,7 @@ interface AuthState {
   setHasHydrated: (state: boolean) => void;
   /** Director/admin uchun aktiv filialga switch qilish */
   switchBranch: (branchId: string | null) => void;
+  setImpersonation: (info: ImpersonationInfo | null) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -47,6 +57,7 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       _hasHydrated: false,
       activeBranchId: null,
+      impersonation: null,
 
       setHasHydrated: (state) => set({ _hasHydrated: state }),
 
@@ -60,8 +71,12 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: true,
           // Login bo'lganda activeBranchId ni user.branchId ga set qil
           activeBranchId: user.branchId ?? null,
+          // Oddiy login impersonation holatini tozalaydi
+          impersonation: null,
         });
       },
+
+      setImpersonation: (info) => set({ impersonation: info }),
 
       restoreAuth: (user) => {
         set({
@@ -88,6 +103,7 @@ export const useAuthStore = create<AuthState>()(
           refreshToken: null,
           isAuthenticated: false,
           activeBranchId: null,
+          impersonation: null,
         });
         if (typeof window !== 'undefined') {
           localStorage.removeItem('auth-storage');
@@ -105,6 +121,7 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
         activeBranchId: state.activeBranchId,
+        impersonation: state.impersonation,
         // Tokens are stored in httpOnly cookies — do NOT persist them in localStorage
       }),
       onRehydrateStorage: () => (state) => {

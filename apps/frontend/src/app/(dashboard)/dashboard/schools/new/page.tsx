@@ -3,14 +3,25 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
-import { Building2, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Building2, ArrowLeft, CheckCircle2, UserPlus, Copy, Check } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
 import { superAdminApi } from '@/lib/api/super-admin';
+
+const TIMEZONES = [
+  'Asia/Tashkent', 'Asia/Samarkand', 'Asia/Almaty', 'Asia/Bishkek',
+  'Asia/Dushanbe', 'Asia/Ashgabat', 'Europe/Moscow', 'Asia/Dubai',
+];
 
 const TIERS = [
   {
@@ -58,22 +69,47 @@ export default function NewSchoolPage() {
     phone: '',
     email: '',
     subscriptionTier: 'standard',
+    financeType: 'CENTRALIZED',
+    timezone: 'Asia/Tashkent',
+    directorFirstName: '',
+    directorLastName: '',
+    directorEmail: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [directorResult, setDirectorResult] = useState<{
+    schoolId: string; email: string; temporaryPassword: string;
+  } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const mutation = useMutation({
     mutationFn: superAdminApi.createSchool,
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ['schools'] });
       queryClient.invalidateQueries({ queryKey: ['super-admin', 'stats'] });
-      router.push(`/dashboard/schools/${data.id}`);
+      if (data.director) {
+        // Temp parol bir marta ko'rsatiladi — dialog yopilgach maktab sahifasiga o'tiladi
+        setDirectorResult({
+          schoolId: data.id,
+          email: data.director.email,
+          temporaryPassword: data.director.temporaryPassword,
+        });
+      } else {
+        router.push(`/dashboard/schools/${data.id}`);
+      }
     },
     onError: (err: any) => {
       const data = err?.response?.data;
       const status = err?.response?.status;
-      // 409 Conflict = slug taken
+      // 409 Conflict = slug yoki direktor email band
       if (status === 409) {
-        setErrors({ slug: 'Bu slug allaqachon band, boshqasini tanlang' });
+        const msg = typeof data?.message === 'string' ? data.message : '';
+        if (msg.includes('email')) {
+          setErrors({ directorEmail: msg });
+        } else if (msg.includes('Direktor')) {
+          setErrors({ _form: msg });
+        } else {
+          setErrors({ slug: 'Bu slug allaqachon band, boshqasini tanlang' });
+        }
         return;
       }
       const msg = typeof data?.message === 'string' ? data.message : JSON.stringify(data?.message ?? 'Xatolik yuz berdi');
@@ -98,6 +134,15 @@ export default function NewSchoolPage() {
     if (!form.slug.trim()) e.slug = 'Slug majburiy';
     if (!/^[a-z0-9-]+$/.test(form.slug)) e.slug = 'Slug faqat kichik harf, raqam va defis bo‘lishi kerak';
     if (form.email && !/\S+@\S+\.\S+/.test(form.email)) e.email = 'Email noto‘g‘ri';
+    // Direktor: hammasi-yoki-hech-biri
+    const dFields = [form.directorFirstName.trim(), form.directorLastName.trim(), form.directorEmail.trim()];
+    const dProvided = dFields.some(Boolean);
+    if (dProvided && !dFields.every(Boolean)) {
+      e.director = 'Direktor uchun ism, familiya va email uchchalasi ham kiritilishi kerak';
+    }
+    if (form.directorEmail && !/\S+@\S+\.\S+/.test(form.directorEmail)) {
+      e.directorEmail = 'Direktor emaili noto‘g‘ri';
+    }
     return e;
   };
 
@@ -215,6 +260,92 @@ export default function NewSchoolPage() {
                 />
               </div>
             </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Moliya rejimi</Label>
+                <Select
+                  value={form.financeType}
+                  onValueChange={(v) => setForm((f) => ({ ...f, financeType: v }))}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="CENTRALIZED">Markazlashgan moliya</SelectItem>
+                    <SelectItem value="DECENTRALIZED">Filiallar mustaqil moliya</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-xedu-slate-500">
+                  Mustaqil rejimda har bir filial naqd to‘lovlar uchun o‘z smenasini ochadi
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Vaqt mintaqasi</Label>
+                <Select
+                  value={form.timezone}
+                  onValueChange={(v) => setForm((f) => ({ ...f, timezone: v }))}
+                >
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {TIMEZONES.map((tz) => (
+                      <SelectItem key={tz} value={tz}>{tz}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* First director (optional) */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <UserPlus className="h-4 w-4 text-primary" />
+              Birinchi direktor (ixtiyoriy)
+            </CardTitle>
+            <CardDescription>
+              To‘ldirilsa direktor darhol yaratiladi va unga vaqtinchalik parol beriladi.
+              Bo‘sh qoldirsangiz keyinroq maktab sahifasidan qo‘shasiz.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {errors.director && (
+              <div className="rounded-lg bg-xedu-ruby/10 border border-xedu-ruby/30 px-4 py-3 text-sm text-xedu-ruby">
+                {errors.director}
+              </div>
+            )}
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="directorFirstName">Ism</Label>
+                <Input
+                  id="directorFirstName"
+                  placeholder="Ali"
+                  value={form.directorFirstName}
+                  onChange={(e) => { setForm((f) => ({ ...f, directorFirstName: e.target.value })); setErrors({}); }}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="directorLastName">Familiya</Label>
+                <Input
+                  id="directorLastName"
+                  placeholder="Valiyev"
+                  value={form.directorLastName}
+                  onChange={(e) => { setForm((f) => ({ ...f, directorLastName: e.target.value })); setErrors({}); }}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="directorEmail">Email</Label>
+                <Input
+                  id="directorEmail"
+                  type="email"
+                  placeholder="direktor@school.uz"
+                  value={form.directorEmail}
+                  onChange={(e) => { setForm((f) => ({ ...f, directorEmail: e.target.value })); setErrors({}); }}
+                  className={errors.directorEmail ? 'border-destructive' : ''}
+                />
+                {errors.directorEmail && <p className="text-xs text-xedu-ruby">{errors.directorEmail}</p>}
+              </div>
+            </div>
           </CardContent>
         </Card>
 
@@ -279,6 +410,73 @@ export default function NewSchoolPage() {
           </Button>
         </div>
       </form>
+
+      {/* Direktor temp-parol dialogi — bir marta ko'rsatiladi */}
+      <Dialog
+        open={!!directorResult}
+        onOpenChange={(v) => {
+          if (!v && directorResult) {
+            const schoolId = directorResult.schoolId;
+            setDirectorResult(null);
+            router.push(`/dashboard/schools/${schoolId}`);
+          }
+        }}
+      >
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Check className="h-5 w-5 text-xedu-emerald" />
+              Maktab va direktor yaratildi
+            </DialogTitle>
+            <DialogDescription className="pt-1">
+              Vaqtinchalik parol faqat bir marta ko‘rsatiladi. Direktorga yuboring —
+              u birinchi kirishda yangi parol o‘rnatadi.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 pt-1">
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input readOnly value={directorResult?.email ?? ''} className="font-mono text-sm" />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Vaqtinchalik parol</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  readOnly
+                  value={directorResult?.temporaryPassword ?? ''}
+                  className="font-mono text-sm"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(directorResult?.temporaryPassword ?? '');
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                >
+                  {copied ? <Check className="h-4 w-4 text-xedu-emerald" /> : <Copy className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+            <p className="text-xs text-xedu-ruby">
+              Diqqat: Bu parolni hech qayerda saqlamang.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={() => {
+                const schoolId = directorResult?.schoolId;
+                setDirectorResult(null);
+                if (schoolId) router.push(`/dashboard/schools/${schoolId}`);
+              }}
+            >
+              Tushundim
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -46,18 +46,25 @@ export class JwtAuthGuard implements CanActivate {
         throw new UnauthorizedException('Token bekor qilingan');
       }
 
-      // Check global session revocation (logout-all)
-      const allRevoked = await this.areAllSessionsRevoked(payload.sub);
-      if (allRevoked) {
+      // Check global session revocation (logout-all / suspend)
+      // Marker vaqtidan OLDIN chiqarilgan tokenlar rad etiladi; keyingi
+      // yangi loginlar (yangi iat) ishlayveradi.
+      const revokedByMarker = await this.isRevokedByGlobalMarker(payload);
+      if (revokedByMarker) {
         throw new UnauthorizedException('Barcha sessiyalar bekor qilingan');
       }
 
+      // School relation shu so'rovga qo'shilgan (LEFT JOIN) — qo'shimcha so'rov emas.
+      // Suspend qilinganda sessiyalar ham bekor qilinadi; bu defense-in-depth.
       const user = await this.prisma.user.findUnique({
         where: { id: payload.sub, isActive: true },
-        select: { id: true },
+        select: { id: true, school: { select: { isActive: true, deletedAt: true } } },
       });
       if (!user) {
         throw new UnauthorizedException('Foydalanuvchi topilmadi yoki bloklangan');
+      }
+      if (user.school && (!user.school.isActive || user.school.deletedAt)) {
+        throw new UnauthorizedException('Maktab faoliyati to‘xtatilgan. Administratsiya bilan bog‘laning.');
       }
 
       request['user'] = payload;
@@ -99,10 +106,25 @@ export class JwtAuthGuard implements CanActivate {
     }
   }
 
-  private async areAllSessionsRevoked(userId: string): Promise<boolean> {
+  /**
+   * Global revoke marker (logout-all/suspend) tekshiruvi.
+   * Marker qiymati — bekor qilish vaqti (Date.now()). Token shu vaqtdan
+   * OLDIN chiqarilgan bo'lsa (iat <= marker) — rad etiladi. Yangi loginlar
+   * yangi iat bilan chiqadi va ishlayveradi. Aks holda foydalanuvchi
+   * logout-all'dan keyin 24 soat tizimga kira olmay qolardi.
+   */
+  private async isRevokedByGlobalMarker(payload: { sub: string; iat?: number }): Promise<boolean> {
     try {
-      const revoked = await this.redis.get(`${USER_SESSIONS_PREFIX}${userId}:revoked`);
-      return !!revoked;
+      const marker = await this.redis.get(`${USER_SESSIONS_PREFIX}${payload.sub}:revoked`);
+      if (!marker) return false;
+      const revokedAtMs = parseInt(marker, 10);
+      if (Number.isNaN(revokedAtMs)) return true; // noma'lum format — xavfsiz tomonga
+      // JWT iat soniyagacha kesilgan — taqqoslash ham soniya darajasida:
+      // marker soniyasida yoki undan oldin chiqarilgan tokenlar o'ladi,
+      // keyingi soniyadan boshlab yangi loginlar ishlaydi.
+      const revokedAtSec = Math.floor(revokedAtMs / 1000);
+      const issuedAtSec = payload.iat ?? 0;
+      return issuedAtSec <= revokedAtSec;
     } catch {
       return false;
     }

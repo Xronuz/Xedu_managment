@@ -29,6 +29,7 @@ const USER_SESSIONS_PREFIX = 'user_sessions:';
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOGIN_BLOCK_TTL = 15 * 60; // 15 minutes in seconds
 const ACCESS_TOKEN_TTL = 24 * 60 * 60; // 24 hours
+const IMPERSONATION_TTL = 30 * 60; // 30 minutes — impersonation sessiyasi
 const REFRESH_TOKEN_TTL = 7 * 24 * 60 * 60; // 7 days
 const PASSWORD_RESET_TTL = 30 * 60; // 30 minutes
 const TOKEN_DENYLIST_TTL = 24 * 60 * 60; // 24 hours (matches access token TTL)
@@ -76,15 +77,20 @@ export class AuthService {
       throw new UnauthorizedException('Email yoki parol noto‘g‘ri');
     }
 
-    // Check if user's school has been deleted
+    // Check if user's school has been deleted or suspended
     if (user.schoolId) {
       const school = await this.prisma.school.findUnique({
         where: { id: user.schoolId },
-        select: { deletedAt: true },
+        select: { deletedAt: true, isActive: true },
       });
       if (school?.deletedAt) {
         await this.incrementLoginAttempts(attemptsKey).catch(() => null);
         throw new UnauthorizedException('Email yoki parol noto‘g‘ri');
+      }
+      // Suspended school: aniq xabar, login-attempt hisoblagichsiz
+      // (credentials to'g'ri bo'lishi mumkin — bu foydalanuvchining aybi emas)
+      if (school && !school.isActive) {
+        throw new ForbiddenException('Maktab faoliyati to‘xtatilgan. Administratsiya bilan bog‘laning.');
       }
     }
 
@@ -128,14 +134,29 @@ export class AuthService {
         throw new UnauthorizedException('Refresh token yaroqsiz yoki muddati o‘tgan');
       }
       // Backward compatibility: stored value may be plain userId (old sessions) or JSON
+      let sessionCreatedAt: number | null = null;
       try {
         const parsed = JSON.parse(stored);
         userId = parsed.userId;
+        sessionCreatedAt = parsed.createdAt ? Date.parse(parsed.createdAt) : null;
       } catch {
         userId = stored;
       }
       // Delete old token (rotation)
       await this.redis.del(redisKey);
+
+      // Global revoke marker (logout-all/suspend): markerdan OLDIN yaratilgan
+      // sessiyaning refresh tokeni yangi access token ololmasligi kerak —
+      // aks holda yangi iat bilan guard tekshiruvini chetlab o'tib ketardi.
+      const marker = await this.redis.get(`${USER_SESSIONS_PREFIX}${userId}:revoked`);
+      if (marker) {
+        const revokedAtMs = parseInt(marker, 10);
+        const createdBeforeRevoke =
+          sessionCreatedAt === null || Number.isNaN(revokedAtMs) || sessionCreatedAt <= revokedAtMs;
+        if (createdBeforeRevoke) {
+          throw new UnauthorizedException('Barcha sessiyalar bekor qilingan');
+        }
+      }
     } catch (err: any) {
       if (err instanceof UnauthorizedException) throw err;
       // Redis mavjud emas — refresh token UUID bo'lgani uchun JWT verify ishlamaydi.
@@ -151,14 +172,17 @@ export class AuthService {
 
     if (!user) throw new UnauthorizedException('Foydalanuvchi topilmadi');
 
-    // Check if user's school has been deleted
+    // Check if user's school has been deleted or suspended
     if (user.schoolId) {
       const school = await this.prisma.school.findUnique({
         where: { id: user.schoolId },
-        select: { deletedAt: true },
+        select: { deletedAt: true, isActive: true },
       });
       if (school?.deletedAt) {
         throw new UnauthorizedException('Foydalanuvchi topilmadi');
+      }
+      if (school && !school.isActive) {
+        throw new ForbiddenException('Maktab faoliyati to‘xtatilgan. Administratsiya bilan bog‘laning.');
       }
     }
 
@@ -337,6 +361,12 @@ export class AuthService {
    * - Boshqa rollar → 403
    */
   async switchBranch(dto: SwitchBranchDto, currentUser: JwtPayload): Promise<TokenPair> {
+    // Impersonation sessiyasida filial almashtirish taqiqlanadi — aks holda
+    // impersonatedBy claim'siz to'liq muddatli (24h) token olish mumkin bo'lardi.
+    if (currentUser.impersonatedBy) {
+      throw new ForbiddenException('Vaqtinchalik sessiyada filial almashtirish mumkin emas');
+    }
+
     const targetBranchId = dto.branchId;
 
     // School-wide view: faqat director va super_admin uchun ruxsat
@@ -459,6 +489,53 @@ export class AuthService {
     const tokens = await this.generateTokens({ ...user, isFirstLogin: false });
     this.logger.log(`Foydalanuvchi birinchi parolni o'zgartirdi: ${userId}`);
     return { message: 'Parol muvaffaqiyatli yangilandi', tokens };
+  }
+
+  /**
+   * Impersonation: super admin target foydalanuvchi sifatida QISQA muddatli
+   * (30 daqiqa) sessiya oladi. Refresh token YO'Q — refresh oqimi custom
+   * claim'larni yo'qotib to'liq muddatli token berib qo'ygan bo'lardi.
+   * Token jti bilan chiqariladi — logout/logoutAll deny-list ishlайди.
+   */
+  async generateImpersonationTokens(
+    targetUserId: string,
+    impersonator: JwtPayload,
+  ): Promise<TokenPair> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: targetUserId, isActive: true },
+      select: { id: true, email: true, role: true, schoolId: true, branchId: true },
+    });
+    if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
+
+    const assignments = await this.prisma.userBranchAssignment.findMany({
+      where: { userId: user.id, isActive: true, branchId: { not: user.branchId ?? undefined } },
+      select: { branchId: true },
+    });
+
+    const payload: JwtPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role as UserRole,
+      schoolId: user.schoolId,
+      branchId: user.branchId,
+      assignedBranchIds: assignments.map((a) => a.branchId),
+      isSuperAdmin: false,
+      // Majburiy false: aks holda yangi direktorni impersonate qilganda
+      // middleware /first-login sahifasiga qamab qo'yadi
+      isFirstLogin: false,
+      impersonatedBy: impersonator.sub,
+    };
+
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: IMPERSONATION_TTL,
+      jwtid: uuidv4(),
+    });
+
+    this.logger.warn(
+      `IMPERSONATION: super admin ${impersonator.email} (${impersonator.sub}) → ${user.email} (${user.id}), TTL=${IMPERSONATION_TTL}s`,
+    );
+
+    return { accessToken, refreshToken: '', expiresIn: IMPERSONATION_TTL };
   }
 
   private async generateTokens(user: {

@@ -285,7 +285,6 @@ services:
       options: { max-size: "10m", max-file: "3" }
     command: >
       sh -c "
-        chmod +x /usr/local/bin/backup.sh &&
         echo '0 2 * * * /usr/local/bin/backup.sh >> /var/log/backup.log 2>&1' | crontab - &&
         mkdir -p /var/log &&
         touch /var/log/backup.log &&

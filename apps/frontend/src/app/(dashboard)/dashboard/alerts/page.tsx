@@ -16,6 +16,7 @@ import { usersApi } from '@/lib/api/users';
 import { disciplineApi } from '@/lib/api/discipline';
 import { leaveRequestsApi } from '@/lib/api/leave-requests';
 import { aiAnalyticsApi } from '@/lib/api/ai-analytics';
+import { kpiApi } from '@/lib/api/kpi';
 import {
   SplitView, SplitViewListHeader, SplitViewListBody,
 } from '@/components/director-workspace/split-view';
@@ -89,6 +90,11 @@ export default function AlertCenterPage() {
     queryKey: ['ai-analytics'],
     queryFn: () => aiAnalyticsApi.getDashboard(),
   });
+  const { data: kpiData } = useQuery({
+    queryKey: ['kpi', 'dashboard'],
+    queryFn: () => kpiApi.getDashboard(),
+    staleTime: 60_000,
+  });
 
   const branches: any[] = (branchesData as any)?.data ?? [];
   const classList: any[] = (classesData as any)?.data ?? [];
@@ -160,7 +166,46 @@ export default function AlertCenterPage() {
       });
     });
 
-    // 4. Low branch attendance
+    // 4. KPI qizil zonasi va kechikkan qiymatlar
+    const kpiMetrics: any[] = (kpiData as any)?.metrics ?? [];
+    const kpiCategory = (cat: string): AlertCategory =>
+      cat === 'FINANCE' ? 'financial' :
+      ['ACADEMIC', 'TEACHER', 'STUDENT'].includes(cat) ? 'academic' : 'system';
+    kpiMetrics.forEach((m: any) => {
+      if (m.status === 'bad') {
+        items.push({
+          id: `kpi-bad-${m.metricId}`,
+          severity: (m.progress ?? 0) < 60 ? 'critical' : 'warning',
+          category: kpiCategory(m.category),
+          title: `KPI qizil zonada: ${m.name}`,
+          description: `Joriy qiymat ${m.latestValue}${m.unit} (maqsad: ${m.direction === 'LOWER_IS_BETTER' ? '≤ ' : ''}${m.targetValue}${m.unit}) — bajarilish ${m.progress}%`,
+          source: 'KPI monitoring',
+          createdAt: m.latestPeriod ?? new Date().toISOString(),
+          link: '/dashboard/kpi',
+          linkLabel: 'KPI dashboardga o‘tish',
+          acknowledged: false,
+          rawKey: `kpi-bad-${m.metricId}`,
+        });
+      } else if (m.awaitingValue) {
+        items.push({
+          id: `kpi-awaiting-${m.metricId}`,
+          severity: 'info',
+          category: 'system',
+          title: `KPI qiymati kechikkan: ${m.name}`,
+          description: m.owner
+            ? `O'tgan oy qiymati hali kiritilmagan — mas'ul: ${m.owner.name}`
+            : "O'tgan oy qiymati hali kiritilmagan (mas'ul belgilanmagan)",
+          source: 'KPI monitoring',
+          createdAt: new Date().toISOString(),
+          link: '/dashboard/kpi',
+          linkLabel: 'KPI dashboardga o‘tish',
+          acknowledged: false,
+          rawKey: `kpi-awaiting-${m.metricId}`,
+        });
+      }
+    });
+
+    // 5. Low branch attendance
     branches.forEach((b: any) => {
       const rate = b.attendanceRate ?? b.stats?.attendanceRate;
       if (typeof rate === 'number' && rate < 0.8) {
@@ -187,7 +232,7 @@ export default function AlertCenterPage() {
       if (diff !== 0) return diff;
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-  }, [discList, leaveList, aiOverview, branches]);
+  }, [discList, leaveList, aiOverview, branches, kpiData]);
 
   const effectiveAlerts = useMemo(() => {
     return alerts.map((a) => ({

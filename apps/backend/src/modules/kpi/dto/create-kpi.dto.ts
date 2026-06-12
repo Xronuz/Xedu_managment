@@ -1,9 +1,9 @@
 import {
   IsString, IsOptional, IsNumber, IsBoolean, IsEnum,
-  IsUUID, MinLength, MaxLength, Min, Max,
+  IsUUID, MinLength, MaxLength, Min, Max, ValidateIf, IsDateString,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { KpiCategory, KpiPeriod } from '@prisma/client';
+import { KpiCategory, KpiDirection, KpiPeriod, KpiSourceType } from '@prisma/client';
 
 export class CreateKpiMetricDto {
   @ApiPropertyOptional({ description: 'Maktab ID (super_admin uchun)' })
@@ -11,7 +11,24 @@ export class CreateKpiMetricDto {
   @IsUUID()
   schoolId?: string;
 
-  @ApiProperty({ example: 'Davomat foizi' })
+  @ApiPropertyOptional({ enum: KpiSourceType, default: 'MANUAL' })
+  @IsOptional()
+  @IsEnum(KpiSourceType)
+  sourceType?: KpiSourceType;
+
+  @ApiPropertyOptional({ description: 'SYSTEM metrika uchun katalog kaliti', example: 'attendance_rate' })
+  @ValidateIf((o) => o.sourceType === 'SYSTEM')
+  @IsString()
+  sourceKey?: string;
+
+  @ApiPropertyOptional({ enum: KpiDirection, default: 'HIGHER_IS_BETTER' })
+  @IsOptional()
+  @IsEnum(KpiDirection)
+  direction?: KpiDirection;
+
+  // SYSTEM metrikada nom/kategoriya katalogdan olinadi — shu sabab ixtiyoriy
+  @ApiProperty({ example: 'Davomat foizi', required: false })
+  @ValidateIf((o) => o.sourceType !== 'SYSTEM')
   @IsString()
   @MinLength(2)
   @MaxLength(100)
@@ -22,7 +39,8 @@ export class CreateKpiMetricDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ enum: KpiCategory, example: 'ACADEMIC' })
+  @ApiProperty({ enum: KpiCategory, example: 'ACADEMIC', required: false })
+  @ValidateIf((o) => o.sourceType !== 'SYSTEM')
   @IsEnum(KpiCategory)
   category: KpiCategory;
 
@@ -52,6 +70,11 @@ export class CreateKpiMetricDto {
   @IsOptional()
   @IsUUID()
   branchId?: string | null;
+
+  @ApiPropertyOptional({ description: "Mas'ul xodim (davr yopilganda eslatma oladi)" })
+  @IsOptional()
+  @IsUUID()
+  ownerId?: string | null;
 }
 
 export class UpdateKpiMetricDto {
@@ -59,6 +82,15 @@ export class UpdateKpiMetricDto {
   @IsOptional()
   @IsString()
   name?: string;
+
+  @ApiPropertyOptional({ enum: KpiDirection })
+  @IsOptional()
+  @IsEnum(KpiDirection)
+  direction?: KpiDirection;
+
+  @ApiPropertyOptional({ description: "Mas'ul xodim (null = olib tashlash)" })
+  @IsOptional()
+  ownerId?: string | null;
 
   @ApiPropertyOptional()
   @IsOptional()
@@ -91,6 +123,16 @@ export class UpdateKpiMetricDto {
   isActive?: boolean;
 }
 
+export class RunKpiSnapshotDto {
+  @ApiPropertyOptional({
+    description: "Davr (YYYY-MM). Berilmasa — o'tgan kalendar oy",
+    example: '2026-05',
+  })
+  @IsOptional()
+  @IsString()
+  period?: string;
+}
+
 export class CreateKpiRecordDto {
   @ApiProperty({ example: 'metric-uuid' })
   @IsUUID()
@@ -102,9 +144,11 @@ export class CreateKpiRecordDto {
   actualValue: number;
 
   @ApiProperty({ example: '2026-05-01T00:00:00.000Z' })
+  @IsDateString()
   periodStart: string;
 
   @ApiProperty({ example: '2026-05-07T23:59:59.000Z' })
+  @IsDateString()
   periodEnd: string;
 
   @ApiPropertyOptional()

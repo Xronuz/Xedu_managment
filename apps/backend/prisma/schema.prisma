@@ -765,7 +765,8 @@ model User {
   entitlement      UserEntitlement?
 
   // KPI
-  kpiRecords KpiRecord[]
+  kpiRecords      KpiRecord[]
+  kpiMetricsOwned KpiMetric[] @relation("KpiMetricOwner")
 
   // Export jobs
   exportJobs ExportJob[]
@@ -2430,22 +2431,39 @@ enum KpiPeriod {
   YEARLY
 }
 
+// Metrika qiymati qayerdan keladi
+enum KpiSourceType {
+  MANUAL // qo'lda kiritiladi (KpiRecord POST)
+  SYSTEM // tizim ma'lumotidan avtomatik hisoblanadi (kpi-catalog sourceKey)
+}
+
+// Qiymat yo'nalishi — progress hisoblashda ishlatiladi
+enum KpiDirection {
+  HIGHER_IS_BETTER // davomat %, yig'ilish % — ko'p bo'lsa yaxshi
+  LOWER_IS_BETTER  // qarzdorlik — kam bo'lsa yaxshi
+}
+
 model KpiMetric {
-  id          String      @id @default(uuid())
+  id          String        @id @default(uuid())
   schoolId    String
   branchId    String?
   name        String
   description String?
   category    KpiCategory
-  targetValue Float       @default(0)
-  unit        String      @default("%") // %, sum, count, score
-  period      KpiPeriod   @default(MONTHLY)
-  isActive    Boolean     @default(true)
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
+  targetValue Float         @default(0)
+  unit        String        @default("%") // %, sum, count, score
+  period      KpiPeriod     @default(MONTHLY)
+  sourceType  KpiSourceType @default(MANUAL)
+  sourceKey   String? // SYSTEM metrikada kpi-catalog.ts dagi kalit
+  direction   KpiDirection  @default(HIGHER_IS_BETTER)
+  ownerId     String? // MANUAL metrika qiymatini kiritishga mas'ul xodim
+  isActive    Boolean       @default(true)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 
   school  School      @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   branch  Branch?     @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  owner   User?       @relation("KpiMetricOwner", fields: [ownerId], references: [id], onDelete: SetNull)
   records KpiRecord[]
 
   @@index([schoolId])
@@ -2461,6 +2479,7 @@ model KpiRecord {
   periodStart DateTime
   periodEnd   DateTime
   notes       String?
+  isAuto      Boolean  @default(false) // snapshot cron tomonidan yozilgan
   createdById String?
   createdAt   DateTime @default(now())
 

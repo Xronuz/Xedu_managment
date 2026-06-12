@@ -6,7 +6,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Target, Plus, Loader2 } from 'lucide-react';
+import { ArrowLeft, Target, Plus, Loader2, Zap, PencilLine, Check } from 'lucide-react';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,9 +15,15 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/components/ui/use-toast';
-import { kpiApi } from '@/lib/api/kpi';
+import { kpiApi, type KpiCatalogItem } from '@/lib/api/kpi';
 import { branchesApi } from '@/lib/api/branches';
+import { usersApi } from '@/lib/api/users';
 import { useAuthStore } from '@/store/auth.store';
+import { cn } from '@/lib/utils';
+
+// Mas'ul sifatida faqat KPI sahifasiga kira oladigan rollar tanlanadi —
+// aks holda eslatma olgan xodim qiymatni kirita olmaydi
+const OWNER_ROLES = new Set(['director', 'vice_principal', 'branch_admin']);
 
 const CATEGORY_OPTIONS = [
   { value: 'STRATEGY', label: 'Strategiya' },
@@ -39,6 +45,11 @@ const PERIOD_OPTIONS = [
   { value: 'YEARLY', label: 'Yillik' },
 ];
 
+const DIRECTION_OPTIONS = [
+  { value: 'HIGHER_IS_BETTER', label: "Ko'p bo'lsa yaxshi (davomat %, yig'ilish %)" },
+  { value: 'LOWER_IS_BETTER', label: "Kam bo'lsa yaxshi (qarzdorlik, shikoyatlar)" },
+];
+
 const schema = z.object({
   name: z.string().min(2, 'Kamida 2 ta belgi').max(100, 'Ko‘pi bilan 100 ta belgi'),
   description: z.string().optional(),
@@ -46,7 +57,9 @@ const schema = z.object({
   targetValue: z.coerce.number().min(0).optional(),
   unit: z.string().optional(),
   period: z.string().optional(),
+  direction: z.string().optional(),
   branchId: z.string().optional(),
+  ownerId: z.string().optional(),
   isActive: z.boolean().optional(),
 });
 
@@ -60,6 +73,12 @@ export default function NewKpiMetricPage() {
   const [mounted, setMounted] = useState(false);
 
   const canManage = ['vice_principal', 'super_admin'].includes(user?.role ?? '');
+
+  // Metrika turi: SYSTEM (katalogdan, avtomatik) yoki MANUAL (qo'lda kiritiladigan)
+  const [mode, setMode] = useState<'SYSTEM' | 'MANUAL'>('SYSTEM');
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [systemTarget, setSystemTarget] = useState<string>('');
+  const [systemBranchId, setSystemBranchId] = useState<string>('');
 
   useEffect(() => {
     setMounted(true);
@@ -86,6 +105,7 @@ export default function NewKpiMetricPage() {
       targetValue: 0,
       unit: '%',
       period: 'MONTHLY',
+      direction: 'HIGHER_IS_BETTER',
       isActive: true,
     },
   });
@@ -97,6 +117,23 @@ export default function NewKpiMetricPage() {
     enabled: canManage && !!user?.schoolId,
   });
   const branchesList = Array.isArray(branchesData) ? branchesData : (branchesData as any)?.data ?? [];
+
+  // Tizim metrikalari katalogi
+  const { data: catalog, isLoading: catalogLoading } = useQuery({
+    queryKey: ['kpi', 'catalog'],
+    queryFn: () => kpiApi.getCatalog(),
+    enabled: canManage,
+  });
+  const selectedItem: KpiCatalogItem | undefined = catalog?.find((c) => c.key === selectedKey);
+
+  // Mas'ul xodim tanlovi uchun xodimlar ro'yxati (qo'lda metrika)
+  const { data: staffData } = useQuery({
+    queryKey: ['kpi', 'staff-options'],
+    queryFn: () => usersApi.getAll({ limit: 200 }),
+    enabled: canManage && mode === 'MANUAL',
+  });
+  const staffList = ((staffData as any)?.data ?? (Array.isArray(staffData) ? staffData : []))
+    .filter((u: any) => OWNER_ROLES.has(u.role));
 
   const mutation = useMutation({
     mutationFn: kpiApi.createMetric,
@@ -123,8 +160,20 @@ export default function NewKpiMetricPage() {
       targetValue: values.targetValue,
       unit: values.unit?.trim() || undefined,
       period: values.period,
+      direction: (values.direction as any) || 'HIGHER_IS_BETTER',
       branchId: values.branchId || undefined,
+      ownerId: values.ownerId || undefined,
       isActive: values.isActive,
+    });
+  };
+
+  const onSubmitSystem = () => {
+    if (!selectedItem) return;
+    mutation.mutate({
+      sourceType: 'SYSTEM',
+      sourceKey: selectedItem.key,
+      targetValue: systemTarget !== '' ? Number(systemTarget) : undefined,
+      branchId: systemBranchId || undefined,
     });
   };
 
@@ -156,6 +205,175 @@ export default function NewKpiMetricPage() {
         </div>
       </div>
 
+      {/* Metrika turi */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <button
+          type="button"
+          onClick={() => setMode('SYSTEM')}
+          className={cn(
+            'rounded-xl border p-4 text-left transition-all',
+            mode === 'SYSTEM'
+              ? 'border-xedu-primary bg-xedu-primary/5 ring-1 ring-xedu-primary/30'
+              : 'border-xedu-border hover:border-xedu-border-hover',
+          )}
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <Zap className="h-4 w-4 text-xedu-violet-600" />
+            <span className="text-sm font-semibold">Tizim metrikasi</span>
+          </div>
+          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
+            Qiymati Xedu ma&apos;lumotidan avtomatik hisoblanadi — davomat, baholar, to&apos;lovlar, CRM
+          </p>
+        </button>
+        <button
+          type="button"
+          onClick={() => setMode('MANUAL')}
+          className={cn(
+            'rounded-xl border p-4 text-left transition-all',
+            mode === 'MANUAL'
+              ? 'border-xedu-primary bg-xedu-primary/5 ring-1 ring-xedu-primary/30'
+              : 'border-xedu-border hover:border-xedu-border-hover',
+          )}
+        >
+          <div className="flex items-center gap-2 mb-1">
+            <PencilLine className="h-4 w-4 text-xedu-slate-500" />
+            <span className="text-sm font-semibold">Qo&apos;lda metrika</span>
+          </div>
+          <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
+            Qiymati har davrda mas&apos;ul xodim tomonidan kiritiladi — NPS, olimpiadalar va h.k.
+          </p>
+        </button>
+      </div>
+
+      {mode === 'SYSTEM' && (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Zap className="h-4 w-4 text-xedu-violet-600" />
+                Katalogdan tanlang
+              </CardTitle>
+              <CardDescription>Har bir shablon qaysi ma&apos;lumotdan hisoblanishi tavsifda ko&apos;rsatilgan</CardDescription>
+            </CardHeader>
+            <CardContent>
+              {catalogLoading ? (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="h-24 rounded-xl bg-black/5 dark:bg-white/5 animate-pulse" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {(catalog ?? []).map((item) => {
+                    const selected = selectedKey === item.key;
+                    return (
+                      <button
+                        key={item.key}
+                        type="button"
+                        disabled={item.alreadyAdded}
+                        onClick={() => {
+                          setSelectedKey(item.key);
+                          setSystemTarget(String(item.defaultTarget));
+                        }}
+                        className={cn(
+                          'relative rounded-xl border p-3.5 text-left transition-all',
+                          item.alreadyAdded && 'opacity-50 cursor-not-allowed',
+                          selected
+                            ? 'border-xedu-primary bg-xedu-primary/5 ring-1 ring-xedu-primary/30'
+                            : 'border-xedu-border hover:border-xedu-border-hover',
+                        )}
+                      >
+                        {selected && (
+                          <span className="absolute right-2.5 top-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-xedu-primary">
+                            <Check className="h-3 w-3 text-white" />
+                          </span>
+                        )}
+                        <p className="text-sm font-semibold pr-6">{item.name}</p>
+                        <p className="mt-1 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 leading-relaxed">{item.description}</p>
+                        <p className="mt-1.5 text-[11px] text-xedu-slate-500 dark:text-xedu-slate-400">
+                          {item.alreadyAdded
+                            ? 'Allaqachon qo‘shilgan'
+                            : `Standart maqsad: ${item.direction === 'LOWER_IS_BETTER' ? '≤ ' : ''}${item.defaultTarget.toLocaleString()}${item.unit}`}
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {selectedItem && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Maqsad va qamrov</CardTitle>
+                <CardDescription>
+                  {selectedItem.direction === 'LOWER_IS_BETTER'
+                    ? 'Bu metrikada qiymat maqsaddan PAST bo‘lsa yaxshi hisoblanadi'
+                    : 'Bu metrikada qiymat maqsaddan YUQORI bo‘lsa yaxshi hisoblanadi'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="systemTarget">Maqsad qiymat ({selectedItem.unit})</Label>
+                    <Input
+                      id="systemTarget"
+                      type="number"
+                      min={0}
+                      step="any"
+                      value={systemTarget}
+                      onChange={(e) => setSystemTarget(e.target.value)}
+                    />
+                  </div>
+                  {branchesList.length > 0 && (
+                    <div className="space-y-1.5">
+                      <Label>Filial</Label>
+                      <Select value={systemBranchId || undefined} onValueChange={setSystemBranchId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Maktab bo'yicha (ixtiyoriy)..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {branchesList.map((b: any) => (
+                            <SelectItem key={b.id} value={b.id}>{b.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Tanlanmasa, butun maktab bo&apos;yicha hisoblanadi</p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <div className="flex items-center gap-3 justify-end">
+            <Button type="button" variant="outline" asChild>
+              <Link href="/dashboard/kpi">Bekor qilish</Link>
+            </Button>
+            <Button
+              type="button"
+              disabled={!selectedItem || mutation.isPending}
+              onClick={onSubmitSystem}
+              className="min-w-32"
+            >
+              {mutation.isPending ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Saqlanmoqda...
+                </span>
+              ) : (
+                <>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Qo&apos;shish
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {mode === 'MANUAL' && (
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Asosiy ma'lumotlar */}
         <Card>
@@ -262,6 +480,29 @@ export default function NewKpiMetricPage() {
                 />
               </div>
             </div>
+
+            <div className="space-y-1.5">
+              <Label>Yo&apos;nalish</Label>
+              <Controller
+                name="direction"
+                control={control}
+                render={({ field }) => (
+                  <Select value={field.value || 'HIGHER_IS_BETTER'} onValueChange={field.onChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DIRECTION_OPTIONS.map((d) => (
+                        <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+              <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
+                Bajarilish foizi shu yo&apos;nalishga qarab hisoblanadi
+              </p>
+            </div>
           </CardContent>
         </Card>
 
@@ -292,6 +533,33 @@ export default function NewKpiMetricPage() {
                   )}
                 />
                 <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">Tanlanmasa, maktab bo&apos;yicha KPI hisoblanadi</p>
+              </div>
+            )}
+
+            {staffList.length > 0 && (
+              <div className="space-y-1.5">
+                <Label>Mas&apos;ul xodim</Label>
+                <Controller
+                  name="ownerId"
+                  control={control}
+                  render={({ field }) => (
+                    <Select value={field.value || undefined} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Xodim tanlang (ixtiyoriy)..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {staffList.map((u: any) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.firstName} {u.lastName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
+                  Oy yopilganda qiymat kiritilmagan bo&apos;lsa, mas&apos;ulga eslatma boradi
+                </p>
               </div>
             )}
 
@@ -334,6 +602,7 @@ export default function NewKpiMetricPage() {
           </Button>
         </div>
       </form>
+      )}
     </div>
   );
 }

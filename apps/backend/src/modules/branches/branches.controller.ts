@@ -11,11 +11,14 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 
-/** Filialga kirish huquqi bor barcha rollar */
+/** Filialga kirish huquqi bor barcha rollar — frontend'dagi
+    BranchSwitcher SWITCHER_ROLES ro'yxati bilan sinxron bo'lishi shart */
 const BRANCH_READERS = [
   UserRole.DIRECTOR,
   UserRole.BRANCH_ADMIN, UserRole.VICE_PRINCIPAL,
   UserRole.ACCOUNTANT,
+  UserRole.TEACHER, UserRole.CLASS_TEACHER,
+  UserRole.LIBRARIAN,
 ];
 
 /** Filialni yaratish / tahrirlash / o'chirish — faqat school-wide */

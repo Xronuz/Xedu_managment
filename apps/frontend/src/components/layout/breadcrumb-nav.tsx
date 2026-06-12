@@ -72,18 +72,19 @@ function getLabel(segment: string): string {
 
 export function BreadcrumbNav() {
   const pathname = usePathname();
+  const { user } = useAuthStore();
 
   // Split and build crumbs
   const segments = pathname.split('/').filter(Boolean);
 
-  // Skip breadcrumb for dashboard root (single crumb isn't useful)
-  if (segments.length <= 1) return null;
+  // Birinchi darajadagi sahifalarda (Dashboard > X) breadcrumb sidebar va
+  // sahifa sarlavhasini takrorlaydi — faqat chuqurroq yo'llarda ko'rsatiladi
+  if (segments.length <= 2) return null;
 
   // Hide breadcrumb on reports page
   if (pathname.startsWith('/dashboard/reports')) return null;
 
   // Hide breadcrumb for director
-  const { user } = useAuthStore();
   if (user?.role === 'director') return null;
 
   interface Crumb {

@@ -534,7 +534,7 @@ function ConvertDialog({
                 <p className="text-sm text-green-600 dark:text-green-400">Sinf: {result.className}</p>
               </div>
             </div>
-            <div className="rounded-lg border bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-3 space-y-2 text-sm">
+            <div className="rounded-lg border bg-xedu-slate-50 dark:bg-xedu-slate-800 p-3 space-y-2 text-sm">
               <p><span className="text-xedu-slate-500 dark:text-xedu-slate-400">Email:</span> <strong>{result.student.email}</strong></p>
               <div className="flex items-center gap-2">
                 <span className="text-xedu-slate-500 dark:text-xedu-slate-400">Parol:</span>
@@ -654,7 +654,7 @@ function LeadDetailDialog({
         <div className="space-y-4 pt-1">
           {/* Info grid */}
           <div className="grid grid-cols-2 gap-3 text-sm">
-            <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5">
+            <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800 p-2.5">
               <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-0.5">Manba</p>
               <div className="flex items-center gap-1.5">
                 <SourceIcon source={displayLead.source} />
@@ -662,19 +662,19 @@ function LeadDetailDialog({
               </div>
             </div>
             {displayLead.expectedClass && (
-              <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5">
+              <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800 p-2.5">
                 <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-0.5">Mo'ljallangan sinf</p>
                 <p>{displayLead.expectedClass.name}</p>
               </div>
             )}
             {displayLead.assignedTo && (
-              <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5">
+              <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800 p-2.5">
                 <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-0.5">Mas'ul xodim</p>
                 <p>{displayLead.assignedTo.firstName} {displayLead.assignedTo.lastName}</p>
               </div>
             )}
             {displayLead.branch && (
-              <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5">
+              <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800 p-2.5">
                 <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-0.5">Filial</p>
                 <p>{displayLead.branch.name}</p>
               </div>
@@ -735,7 +735,7 @@ function LeadDetailDialog({
             ) : (
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {(fullLead?.comments ?? []).map((c: any) => (
-                  <div key={c.id} className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5 text-xs">
+                  <div key={c.id} className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800 p-2.5 text-xs">
                     <div className="flex items-center justify-between mb-1">
                       <span className="font-medium">
                         {c.author ? `${c.author.firstName} ${c.author.lastName}` : 'Tizim'}

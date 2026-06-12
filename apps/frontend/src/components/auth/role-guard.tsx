@@ -45,7 +45,7 @@ export function RoleGuard({ children, allowedRoles, fallback }: RoleGuardProps) 
     return (
       fallback ?? (
         <div className="flex flex-col items-center justify-center h-[60vh] text-xedu-slate-500 dark:text-xedu-slate-400 px-4">
-          <div className="h-16 w-16 rounded-2xl bg-xedu-slate-100 dark:bg-xedu-slate-800/60 flex items-center justify-center mb-5">
+          <div className="h-16 w-16 rounded-2xl bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center mb-5">
             <ShieldAlert className="h-8 w-8 text-xedu-slate-400 dark:text-xedu-slate-500" />
           </div>
           <p className="text-lg font-bold text-xedu-slate-800 dark:text-xedu-slate-100 mb-1">Ruxsat yo'q</p>

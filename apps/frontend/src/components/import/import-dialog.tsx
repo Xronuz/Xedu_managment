@@ -210,7 +210,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
         {step === 'upload' && (
           <div className="space-y-4 py-2">
             {/* Namuna fayl */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 border">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800 border">
               <div className="text-sm">
                 <div className="font-medium">Namuna fayl yuklab oling</div>
                 <div className="text-xedu-slate-500 dark:text-xedu-slate-400 text-xs mt-0.5">
@@ -311,7 +311,7 @@ export function ImportDialog({ open, onOpenChange, type, onSuccess }: ImportDial
             {/* Yaroqli qatorlar preview */}
             {validRows.length > 0 && (
               <div className="border rounded-lg overflow-hidden">
-                <div className="p-2 bg-xedu-slate-50 dark:bg-xedu-slate-800/60 text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1.5">
+                <div className="p-2 bg-xedu-slate-50 dark:bg-xedu-slate-800 text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-xedu-primary" />
                   Quyidagi {Math.min(validRows.length, 5)} ta yozuv saqlanadi (jami {validRows.length}):
                 </div>

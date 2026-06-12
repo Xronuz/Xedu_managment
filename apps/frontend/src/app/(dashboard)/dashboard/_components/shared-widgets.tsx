@@ -53,24 +53,24 @@ export const C = {
   primary:     'var(--xedu-primary)',
   primaryMid:  'var(--xedu-primary-hover)',
   primaryLight:'var(--xedu-primary-light)',
-  text:        'var(--xedu-slate-900)',
-  muted:       'var(--xedu-slate-500)',
-  border:      'var(--xedu-slate-200)',
-  bg:          'var(--xedu-slate-50)',
-  card:        '#FFFFFF',
+  text:        'var(--xedu-text)',
+  muted:       'var(--xedu-text-muted)',
+  border:      'var(--xedu-border)',
+  bg:          'var(--xedu-bg-subtle)',
+  card:        'var(--xedu-bg-panel)',
   shadow:      'var(--xedu-shadow-xs)',
 } as const;
 
 // ── Icon bubble color configs ─────────────────────────────────────────────────
 export const ICON_CFG = {
-  emerald: { bg: 'var(--xedu-primary-light)', icon: 'var(--xedu-primary)' },
-  blue:    { bg: '#DBEAFE', icon: '#2563EB' },
-  violet:  { bg: '#EDE9FE', icon: '#7C3AED' },
-  amber:   { bg: '#FEF3C7', icon: '#D97706' },
-  red:     { bg: '#FEE2E2', icon: '#DC2626' },
-  indigo:  { bg: '#E0E7FF', icon: '#4338CA' },
-  cyan:    { bg: '#CFFAFE', icon: '#0891B2' },
-  rose:    { bg: '#FFE4E6', icon: '#E11D48' },
+  emerald: { bg: 'var(--xedu-emerald-100)', icon: 'var(--xedu-emerald-600)' },
+  blue:    { bg: 'var(--xedu-sky-100)',     icon: 'var(--xedu-sky-600)' },
+  violet:  { bg: 'var(--xedu-violet-100)',  icon: 'var(--xedu-violet-600)' },
+  amber:   { bg: 'var(--xedu-amber-100)',   icon: 'var(--xedu-amber-600)' },
+  red:     { bg: 'var(--xedu-ruby-100)',    icon: 'var(--xedu-ruby-600)' },
+  indigo:  { bg: 'var(--xedu-violet-100)',  icon: 'var(--xedu-violet-700)' },
+  cyan:    { bg: 'var(--xedu-sky-100)',     icon: 'var(--xedu-sky-500)' },
+  rose:    { bg: 'var(--xedu-ruby-100)',    icon: 'var(--xedu-ruby-500)' },
 } as const;
 type IconColor = keyof typeof ICON_CFG;
 

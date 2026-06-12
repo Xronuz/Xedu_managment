@@ -202,7 +202,7 @@ export function TableShell({ children, className }: { children: React.ReactNode;
 export function THead({ children }: { children: React.ReactNode }) {
   return (
     <thead>
-      <tr className="border-b border-xedu-border dark:border-white/[0.06] bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
+      <tr className="border-b border-xedu-border dark:border-white/[0.06] bg-xedu-slate-50 dark:bg-xedu-slate-800">
         {children}
       </tr>
     </thead>
@@ -452,7 +452,7 @@ export function TableEmpty({ icon: Icon, title, description, action }: {
   return (
     <div className="flex flex-col items-center justify-center text-center py-12 px-4">
       {Icon ? (
-        <div className="h-12 w-12 rounded-2xl flex items-center justify-center mb-3 bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
+        <div className="h-12 w-12 rounded-2xl flex items-center justify-center mb-3 bg-xedu-slate-50 dark:bg-xedu-slate-800">
           <Icon className="h-6 w-6 text-xedu-slate-400" />
         </div>
       ) : null}

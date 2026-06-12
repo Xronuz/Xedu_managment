@@ -119,8 +119,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <HeaderActionsProvider>
       <WorkspaceProvider>
         <HelpProvider>
-          {/* White sidebar + header, gray content with rounded-tl-2xl inner corner */}
-          <div className="flex h-screen bg-xedu-bg-canvas dark:bg-xedu-bg-canvas overflow-hidden">
+          {/* Jobie uslubi: sidebar foni butun sahna ortida, kontent esa uning
+              ustida suzuvchi yumaloq burchakli "varaq" — aktiv nav element
+              teskari burchaklar bilan shu varaqqa ulanadi */}
+          <div className="flex h-screen bg-xedu-bg-sidebar overflow-hidden">
             <RealtimeProvider />
 
             <div className="hidden md:flex shrink-0">
@@ -128,7 +130,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
 
             <div className="flex flex-1 min-w-0 flex-col overflow-hidden">
-              <div className="flex flex-1 min-h-0 flex-col overflow-hidden rounded-tl-2xl bg-xedu-bg-canvas border-l border-t border-xedu-slate-100 dark:border-xedu-slate-800">
+              <div className="flex flex-1 min-h-0 flex-col overflow-hidden md:rounded-tl-[28px] bg-xedu-bg-canvas">
                 <ImpersonationBanner />
                 <Header />
                 <main

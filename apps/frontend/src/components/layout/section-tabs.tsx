@@ -36,6 +36,9 @@ export function SectionTabs({ tabs, defaultTab }: SectionTabsProps) {
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  // Bitta tab tanlov bermaydi — tab-bar faqat 2+ bo'lim borida ko'rsatiladi
+  if (visibleTabs.length <= 1) return null;
+
   return (
     <div className="mb-6 inline-flex items-center gap-1 overflow-x-auto no-scrollbar rounded-[18px] p-1.5 bg-xedu-slate-100 dark:bg-white/[0.06] shadow-[var(--xedu-shadow-inset)]">
       {visibleTabs.map((tab) => {

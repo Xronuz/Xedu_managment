@@ -64,7 +64,7 @@ function MiniGrid({
 
   return (
     <div className="border rounded-lg overflow-hidden">
-      <div className="px-2 py-1.5 bg-xedu-slate-50 dark:bg-xedu-slate-800/60 text-xs font-medium text-xedu-slate-600 dark:text-xedu-slate-300 flex items-center gap-1.5">
+      <div className="px-2 py-1.5 bg-xedu-slate-50 dark:bg-xedu-slate-800 text-xs font-medium text-xedu-slate-600 dark:text-xedu-slate-300 flex items-center gap-1.5">
         {icon}
         {title}
       </div>

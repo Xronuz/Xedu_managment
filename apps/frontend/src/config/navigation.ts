@@ -246,16 +246,13 @@ export const ACCOUNTANT_NAV: NavGroup[] = [
 // ── LIBRARIAN ─────────────────────────────────────────────────────────────────
 export const LIBRARIAN_NAV: NavGroup[] = [
   {
+    // Item kam bo'lgani uchun alohida 'Kutubxona' guruhi shart emas —
+    // hammasi bitta guruhda. 'Resurslar' yo'q: kutubxonachi uchun u
+    // /dashboard/library bilan aynan bir xil kontentni ochadi (yagona tab).
     title: 'Umumiy ko‘rinish',
     items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, exact: true },
-    ],
-  },
-  {
-    title: 'Kutubxona',
-    items: [
       { label: 'Kutubxona', href: '/dashboard/library', icon: Library, roles: ROUTE_PERMISSIONS['/dashboard/library'] },
-      { label: 'Resurslar', href: '/dashboard/resources', icon: Package, roles: ROUTE_PERMISSIONS['/dashboard/resources'] },
     ],
   },
   // 'Sozlamalar' olib tashlandi: ROUTE_PERMISSIONS librarian'ga ruxsat bermaydi

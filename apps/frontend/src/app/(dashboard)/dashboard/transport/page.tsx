@@ -278,7 +278,7 @@ export default function TransportPage() {
                   </div>
                 </div>
                 {(myRoute.driverName || myRoute.vehicleNumber) && (
-                  <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-3 space-y-1.5">
+                  <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800 p-3 space-y-1.5">
                     {myRoute.driverName && (
                       <div className="flex items-center gap-2 text-sm">
                         <Users className="h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400" />

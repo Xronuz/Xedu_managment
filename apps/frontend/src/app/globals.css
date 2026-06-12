@@ -43,7 +43,7 @@
     /* ── Surface — Elevation Ladder (light) ── */
     --xedu-bg:          #F4F6F5;
     --xedu-bg-canvas:   #EDEFF2;
-    --xedu-bg-sidebar:  #EAEDEC;
+    --xedu-bg-sidebar:  #0f2318;
     --xedu-bg-rail:     #F5F7F6;
     --xedu-bg-panel:    #FFFFFF;
     --xedu-bg-elevated: #FFFFFF;
@@ -211,15 +211,28 @@
   }
 
   .dark {
-    /* ── Xedu dark overrides ── */
-    --xedu-bg:            #0B1320;
-    --xedu-bg-canvas:     #0B1320;
-    --xedu-bg-sidebar:    #080F1A;
-    --xedu-bg-rail:       #101a2b;
-    --xedu-bg-panel:      #1E293B;
-    --xedu-bg-elevated:   #1E293B;
-    --xedu-bg-subtle:     #1a2235;
-    --xedu-bg-floating:   #1E293B;
+    /* ── Xedu dark overrides — yagona yashil-neytral oila ── */
+    --xedu-bg:            #0E1612;
+    --xedu-bg-canvas:     #0C1310;
+    --xedu-bg-sidebar:    #0f2318;
+    --xedu-bg-rail:       #101D17;
+    --xedu-bg-panel:      #16201B;
+    --xedu-bg-elevated:   #16201B;
+    --xedu-bg-subtle:     #111A15;
+    --xedu-bg-floating:   #18241E;
+
+    /* ── Neutrals (slate → yashil-neytral, dark) ── */
+    --xedu-slate-50:  #F2F7F4;
+    --xedu-slate-100: #E7F0EA;
+    --xedu-slate-200: #D4E2DA;
+    --xedu-slate-300: #B2C5BA;
+    --xedu-slate-400: #8BA396;
+    --xedu-slate-500: #607A6C;
+    --xedu-slate-600: #46594F;
+    --xedu-slate-700: #32413A;
+    --xedu-slate-800: #1E2A24;
+    --xedu-slate-900: #131D17;
+    --xedu-slate-950: #0A120D;
 
     /* ── Material highlights (dark) ── */
     --xedu-highlight-top:        rgba(255,255,255,0.04);
@@ -227,9 +240,9 @@
 
     /* ── Overlay (dark) ── */
     --xedu-overlay: rgba(0,0,0,0.50);
-    --xedu-text:          #F1F5F9;
-    --xedu-text-secondary:#CBD5E1;
-    --xedu-text-muted:    #94A3B8;
+    --xedu-text:          #EFF5F1;
+    --xedu-text-secondary:#C6D4CB;
+    --xedu-text-muted:    #91A89A;
     --xedu-border:        rgba(255,255,255,0.10);
     --xedu-border-hover:  rgba(255,255,255,0.14);
     --xedu-border-strong: rgba(255,255,255,0.18);
@@ -328,25 +341,25 @@
     --xedu-gold-900: #F9F0DB;
     --xedu-gold-950: #FDF9F0;
 
-    /* ── shadcn/ui dark overrides ── */
-    --background:         222 47% 5%;
-    --foreground:         210 40% 96%;
-    --card:               222 40% 8%;
-    --card-foreground:    210 40% 96%;
-    --popover:            222 40% 8%;
-    --popover-foreground: 210 40% 96%;
+    /* ── shadcn/ui dark overrides (yashil-neytral) ── */
+    --background:         155 23% 6%;
+    --foreground:         150 14% 95%;
+    --card:               150 19% 11%;
+    --card-foreground:    150 14% 95%;
+    --popover:            150 19% 11%;
+    --popover-foreground: 150 14% 95%;
     --primary:            158 79% 32%;
     --primary-foreground: 0 0% 100%;
-    --secondary:          217 33% 14%;
-    --secondary-foreground: 210 40% 96%;
-    --muted:              217 33% 13%;
-    --muted-foreground:   215 20% 55%;
-    --accent:             217 33% 17%;
-    --accent-foreground:  210 40% 96%;
+    --secondary:          152 16% 14%;
+    --secondary-foreground: 150 14% 95%;
+    --muted:              152 16% 13%;
+    --muted-foreground:   150 12% 56%;
+    --accent:             152 17% 17%;
+    --accent-foreground:  150 14% 95%;
     --destructive:        0 63% 31%;
-    --destructive-foreground: 210 40% 98%;
-    --border:             217 33% 16%;
-    --input:              217 33% 16%;
+    --destructive-foreground: 150 14% 98%;
+    --border:             152 15% 16%;
+    --input:              152 15% 16%;
     --ring:               158 79% 32%;
 
     --shadow-xs:       var(--xedu-shadow-xs);
@@ -729,7 +742,7 @@
     backdrop-filter: blur(8px);
   }
   .dark .workspace-header-sticky {
-    background: rgba(15, 23, 42, 0.9);
+    background: rgba(12, 19, 16, 0.9);
   }
 
   .workspace-divider {
@@ -807,7 +820,7 @@
     -webkit-backdrop-filter: blur(6px);
   }
   .dark .xedu-frosted {
-    background: rgba(15,23,42,0.80);
+    background: rgba(12,19,16,0.85);
   }
 
   /* ── Material header (top nav bar) — solid, not frosted ── */
@@ -857,13 +870,13 @@
 
   /* ── Dark variants for existing premium surfaces ── */
   .dark .surface-premium {
-    background: linear-gradient(180deg, #1a2235 0%, #141d2e 100%);
+    background: linear-gradient(180deg, #18241E 0%, #131D17 100%);
   }
   .dark .surface-atmospheric {
-    background: linear-gradient(180deg, #161f2e 0%, #101829 100%);
+    background: linear-gradient(180deg, #141F19 0%, #0F1813 100%);
   }
   .dark .surface-warm {
-    background: linear-gradient(180deg, #1a1f2e 0%, #141a25 100%);
+    background: linear-gradient(180deg, #161F1A 0%, #121913 100%);
   }
   .dark .surface-elevated {
     background: var(--xedu-bg-elevated);
@@ -1026,7 +1039,7 @@
     opacity: 0.7;
   }
   .dark .xedu-floating-executive {
-    background: linear-gradient(180deg, rgba(30,41,59,0.98) 0%, rgba(20,29,46,0.99) 100%);
+    background: linear-gradient(180deg, rgba(24,36,30,0.98) 0%, rgba(16,25,20,0.99) 100%);
     border-color: rgba(15,123,83,0.26);
     box-shadow: 0 2px 4px rgba(0,0,0,0.15), 0 8px 24px rgba(0,0,0,0.30), 0 16px 48px rgba(0,0,0,0.20);
   }
@@ -1208,15 +1221,17 @@
     pointer-events: none;
   }
 
-  /* ── Sticky executive header wrapper ── */
+  /* ── Sticky toolbar wrapper — canvas rangidagi frosted yuza ──
+     Qattiq panel foni canvas ustida "oq quti" bo'lib ajralib turardi;
+     shaffof variant tepada ko'rinmaydi, scroll'da esa kontentni xiralaydi */
   .xedu-sticky-executive {
-    background: var(--xedu-bg-panel);
-    border-bottom: 1px solid rgba(15,123,83,0.12);
+    background: color-mix(in srgb, var(--xedu-bg-canvas) 88%, transparent);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     will-change: transform;
   }
   .dark .xedu-sticky-executive {
-    background: var(--xedu-bg-panel);
-    border-bottom-color: rgba(15,123,83,0.18);
+    background: color-mix(in srgb, var(--xedu-bg-canvas) 90%, transparent);
   }
 
   /* ── Intelligence column surface (right rail) ── */
@@ -1226,7 +1241,7 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.03), 0 4px 16px rgba(15,123,83,0.06);
   }
   .dark .xedu-intelligence-surface {
-    background: linear-gradient(180deg, #0A1A14 0%, #0B1320 25%, #0B1320 100%);
+    background: linear-gradient(180deg, #0A1A14 0%, #0C1310 25%, #0C1310 100%);
     border-color: rgba(15,123,83,0.18);
     box-shadow: 0 1px 3px rgba(0,0,0,0.10), 0 4px 16px rgba(0,0,0,0.14);
   }
@@ -1237,7 +1252,7 @@
     border-bottom: 1px solid rgba(15,123,83,0.10);
   }
   .dark .xedu-section-header-intel {
-    background: linear-gradient(180deg, rgba(15,123,83,0.12) 0%, rgba(8,15,26,0.80) 100%);
+    background: linear-gradient(180deg, rgba(15,123,83,0.12) 0%, rgba(10,18,14,0.80) 100%);
     border-bottom-color: rgba(15,123,83,0.16);
   }
 
@@ -1354,7 +1369,7 @@
 
 /* ── Sidebar — Jobie+Emerald style ── */
 aside.group\/sidebar {
-  background-color: #0f2318 !important;
+  background-color: var(--xedu-bg-sidebar) !important;
   border-right: none !important;
 }
 
@@ -1379,10 +1394,10 @@ aside.group\/sidebar a:not([class*="bg-xedu-emerald"]):hover {
   color: #ffffff !important;
 }
 
-/* Active nav item — Jobie inverted corner */
+/* Active nav item — Jobie inverted corner (canvas rangiga ulanadi) */
 aside.group\/sidebar a[class*="bg-xedu-emerald"] {
-  background-color: #EDEFF2 !important;
-  color: #0f2318 !important;
+  background-color: var(--xedu-bg-canvas) !important;
+  color: var(--xedu-text) !important;
   border: none !important;
   border-top-left-radius: 16px !important;
   border-bottom-left-radius: 16px !important;
@@ -1410,7 +1425,7 @@ aside.group\/sidebar a[class*="bg-xedu-emerald"]::before {
   right: 0 !important;
   width: 16px !important;
   height: 16px !important;
-  background: radial-gradient(circle at top left, transparent 16px, #EDEFF2 16px) !important;
+  background: radial-gradient(circle at top left, transparent 16px, var(--xedu-bg-canvas) 16px) !important;
   z-index: -1 !important;
 }
 
@@ -1421,7 +1436,7 @@ aside.group\/sidebar a[class*="bg-xedu-emerald"]::after {
   right: 0 !important;
   width: 16px !important;
   height: 16px !important;
-  background: radial-gradient(circle at bottom left, transparent 16px, #EDEFF2 16px) !important;
+  background: radial-gradient(circle at bottom left, transparent 16px, var(--xedu-bg-canvas) 16px) !important;
   z-index: -1 !important;
 }
 

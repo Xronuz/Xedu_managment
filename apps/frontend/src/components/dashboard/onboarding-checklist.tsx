@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge';
 const C = {
   primary: 'var(--xedu-primary)',
   primaryLight: 'var(--xedu-primary-light)',
-  text: 'var(--xedu-slate-900)',
-  muted: 'var(--xedu-slate-500)',
+  text: 'var(--xedu-text)',
+  muted: 'var(--xedu-text-muted)',
 };
 
 export function OnboardingChecklist() {
@@ -70,7 +70,7 @@ export function OnboardingChecklist() {
   const nextIncomplete = steps.find(s => !s.done);
 
   return (
-    <div className="rounded-xl border border-l-4 bg-white dark:bg-slate-900 p-5 shadow-sm" style={{ borderLeftColor: C.primary }}>
+    <div className="rounded-xl border border-l-4 bg-xedu-bg-panel p-5 shadow-sm" style={{ borderLeftColor: C.primary }}>
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div className="h-9 w-9 rounded-xl flex items-center justify-center" style={{ background: C.primaryLight }}>
@@ -83,13 +83,13 @@ export function OnboardingChecklist() {
         </div>
         <button
           onClick={() => { localStorage.setItem('onboarding_dismissed', '1'); setDismissed(true); }}
-          className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-slate-100 transition-colors"
+          className="h-7 w-7 rounded-full flex items-center justify-center hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
         >
           <X className="h-3.5 w-3.5" style={{ color: C.muted }} />
         </button>
       </div>
 
-      <div className="h-1.5 w-full rounded-full bg-slate-100 mb-5">
+      <div className="h-1.5 w-full rounded-full bg-black/5 dark:bg-white/10 mb-5">
         <div
           className="h-1.5 rounded-full transition-all"
           style={{ width: `${(doneCount / steps.length) * 100}%`, background: C.primary }}
@@ -99,7 +99,7 @@ export function OnboardingChecklist() {
       {isLoading ? (
         <div className="grid gap-2 sm:grid-cols-2">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-16 rounded-[14px] bg-slate-100 animate-pulse" />
+            <div key={i} className="h-16 rounded-[14px] bg-black/5 dark:bg-white/5 animate-pulse" />
           ))}
         </div>
       ) : (
@@ -119,7 +119,7 @@ export function OnboardingChecklist() {
             >
               <div
                 className="h-7 w-7 shrink-0 rounded-full flex items-center justify-center text-xs font-bold"
-                style={step.done ? { background: 'var(--xedu-primary)', color: '#fff' } : { background: 'var(--xedu-slate-100)', color: 'var(--xedu-slate-500)' }}
+                style={step.done ? { background: 'var(--xedu-primary)', color: '#fff' } : { background: 'var(--xedu-bg-subtle)', color: 'var(--xedu-text-muted)' }}
               >
                 {step.done ? <CheckCircle2 className="h-4 w-4" /> : idx + 1}
               </div>

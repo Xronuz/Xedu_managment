@@ -9,7 +9,7 @@ interface InvitationStatusBadgeProps {
 const styles: Record<InvitationStatus, string> = {
   PENDING:  'bg-xedu-amber/10 text-xedu-amber border-xedu-amber/20',
   ACCEPTED: 'bg-xedu-primary-light/40 text-xedu-primary border-xedu-primary/20',
-  EXPIRED:  'bg-xedu-slate-100 text-xedu-slate-500 border-xedu-slate-200 dark:bg-xedu-slate-800/60 dark:text-xedu-slate-400 dark:border-xedu-slate-700',
+  EXPIRED:  'bg-xedu-slate-100 text-xedu-slate-500 border-xedu-slate-200 dark:bg-xedu-slate-800 dark:text-xedu-slate-400 dark:border-xedu-slate-700',
   REVOKED:  'bg-xedu-ruby/10 text-xedu-ruby border-xedu-ruby/20',
 };
 

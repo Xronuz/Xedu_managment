@@ -345,7 +345,7 @@ function BulkGradeDialog({ open, onClose }: { open: boolean; onClose: () => void
           ) : (
             <div className="rounded-lg border overflow-hidden">
               <table className="w-full text-sm">
-                <thead className="bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
+                <thead className="bg-xedu-slate-50 dark:bg-xedu-slate-800">
                   <tr>
                     <th className="text-left py-2 px-3 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">#</th>
                     <th className="text-left py-2 px-3 font-medium text-xedu-slate-500 dark:text-xedu-slate-400 text-xs">O'quvchi</th>

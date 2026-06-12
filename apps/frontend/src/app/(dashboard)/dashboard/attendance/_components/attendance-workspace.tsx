@@ -82,7 +82,7 @@ type Status = keyof typeof STATUS_CONFIG;
 
 // ── Heat-map cell ──────────────────────────────────────────────────────────────
 function HeatCell({ pct }: { pct: number | null }) {
-  if (pct === null) return <div className="w-5 h-5 rounded-sm bg-xedu-slate-100 dark:bg-xedu-slate-800/60" title="Ma'lumot yo'q" />;
+  if (pct === null) return <div className="w-5 h-5 rounded-sm bg-xedu-slate-100 dark:bg-xedu-slate-800" title="Ma'lumot yo'q" />;
   const bg =
     pct >= 95 ? 'bg-xedu-emerald-500' :
     pct >= 80 ? 'bg-xedu-emerald-300 dark:bg-xedu-emerald-700' :

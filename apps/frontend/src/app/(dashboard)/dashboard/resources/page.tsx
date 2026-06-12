@@ -70,14 +70,9 @@ function ResourcesContent() {
 
   return (
     <div>
-      <div className="mb-1">
-        <h1 className="text-2xl font-bold text-foreground">Resurslar</h1>
-        <p className="text-sm text-xedu-slate-500 dark:text-xedu-slate-400">Kutubxona, o&apos;quv markazi, EduCoin va boshqalar</p>
-      </div>
-
-      <div className="mt-4">
-        <SectionTabs tabs={TABS} defaultTab="library" />
-      </div>
+      {/* Sahifa sarlavhasi yo'q — har bir bo'lim o'z sarlavhasiga ega,
+          tab-bar (2+ bo'limda) kontekstni o'zi beradi */}
+      <SectionTabs tabs={TABS} defaultTab="library" />
 
       <Suspense fallback={<TabFallback />}>
         <TabContent tab={tab} />

@@ -12,7 +12,7 @@ export default function LeaveRequestsLoading() {
         <Skeleton className="h-9 w-32" />
       </div>
       <div className="rounded-xl border bg-xedu-bg-elevated divide-y">
-        <div className="flex items-center gap-4 p-4 bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
+        <div className="flex items-center gap-4 p-4 bg-xedu-slate-50 dark:bg-xedu-slate-800">
           {[...Array(5)].map((_, i) => (
             <Skeleton key={i} className="h-4 w-24" />
           ))}

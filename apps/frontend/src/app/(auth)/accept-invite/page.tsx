@@ -262,7 +262,7 @@ function InvalidState({ reason }: { reason: 'missing' | 'invalid' | 'expired' | 
 
   return (
     <div className="text-center py-4 space-y-4">
-      <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800/60">
+      <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800">
         {c.icon}
       </div>
       <div className="space-y-1">

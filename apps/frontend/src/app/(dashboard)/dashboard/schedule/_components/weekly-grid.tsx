@@ -222,7 +222,7 @@ export function WeeklyGrid({
                   'text-center py-2 rounded-lg text-sm font-semibold',
                   key === todayKey
                     ? 'bg-primary text-primary-foreground'
-                    : 'bg-xedu-slate-50 dark:bg-xedu-slate-800/60 text-xedu-slate-500 dark:text-xedu-slate-400'
+                    : 'bg-xedu-slate-50 dark:bg-xedu-slate-800 text-xedu-slate-500 dark:text-xedu-slate-400'
                 )}
               >
                 <span className="hidden sm:block">{label}</span>

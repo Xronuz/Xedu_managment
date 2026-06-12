@@ -293,7 +293,7 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
               ))}
             </div>
 
-            <div className="p-3 rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 border text-sm text-xedu-slate-600 dark:text-xedu-slate-400">
+            <div className="p-3 rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800 border text-sm text-xedu-slate-600 dark:text-xedu-slate-400">
               <p className="font-medium text-xedu-slate-700 dark:text-xedu-slate-300 mb-1">Qoidalari:</p>
               <ul className="list-disc list-inside space-y-0.5 text-xs">
                 <li>O&apos;qituvchi bir vaqtda faqat 1 ta dars olib borishi mumkin</li>
@@ -365,7 +365,7 @@ export function GeneratorDialog({ open, onOpenChange, branchId, onSuccess }: Gen
             {/* Proposed slots preview */}
             {report.proposedSlots.length > 0 && (
               <div className="border rounded-lg overflow-hidden">
-                <div className="p-2 bg-xedu-slate-50 dark:bg-xedu-slate-800/60 text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1.5">
+                <div className="p-2 bg-xedu-slate-50 dark:bg-xedu-slate-800 text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400 flex items-center gap-1.5">
                   <CheckCircle2 className="h-3.5 w-3.5 text-xedu-primary" />
                   Taklif qilingan slotlar ({report.proposedSlots.length}):
                 </div>

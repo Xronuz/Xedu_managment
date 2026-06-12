@@ -108,7 +108,7 @@ export function AssignBranchDialog({
         <div className="space-y-3 py-1">
           {/* Biriktirilgan filiallar */}
           {uniqueBranches.length > 0 && (
-            <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800/60 p-2.5 space-y-1">
+            <div className="rounded-lg bg-xedu-slate-50 dark:bg-xedu-slate-800 p-2.5 space-y-1">
               <p className="text-[11px] font-bold uppercase tracking-wide text-xedu-slate-400">Hozirgi filiallar</p>
               <div className="flex flex-wrap gap-1">
                 {uniqueBranches.map((name, i) => (

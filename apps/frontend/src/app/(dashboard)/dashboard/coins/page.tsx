@@ -389,7 +389,7 @@ function AdminShopTab() {
           {(items as ShopItem[]).map(item => (
             <div key={item.id} className={cn(
               'flex items-center gap-3 rounded-xl border px-4 py-3',
-              !item.isActive && 'opacity-50 bg-xedu-slate-50 dark:bg-xedu-slate-800/60',
+              !item.isActive && 'opacity-50 bg-xedu-slate-50 dark:bg-xedu-slate-800',
             )}>
               <span className="text-xl w-8 text-center">{item.emoji ?? '🎁'}</span>
               <div className="flex-1 min-w-0">

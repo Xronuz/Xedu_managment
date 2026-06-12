@@ -920,7 +920,7 @@ export function ScheduleWorkspace() {
       {/* Alerts */}
       {crossBranchCount > 0 && (
         <div className="w-full lg:col-span-2">
-          <div className="flex items-center gap-3 rounded-lg border border-muted bg-xedu-slate-50 dark:bg-xedu-slate-800/60 px-4 py-2.5">
+          <div className="flex items-center gap-3 rounded-lg border border-muted bg-xedu-slate-50 dark:bg-xedu-slate-800 px-4 py-2.5">
             <div className="h-3 w-3 rounded-sm bg-muted-foreground/30 border border-muted-foreground/30 shrink-0" />
             <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
               <span className="font-medium">{crossBranchCount} ta dars</span> boshqa filiallardan ko&apos;rsatilmoqda

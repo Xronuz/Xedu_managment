@@ -57,7 +57,7 @@ export function SetupStepper({ current, completed, onSelect, compact }: SetupSte
                   ? 'bg-xedu-primary text-white shadow-sm'
                   : isDone
                   ? 'bg-xedu-primary-light/60 text-xedu-primary dark:bg-xedu-primary/15 dark:text-xedu-primary'
-                  : 'bg-xedu-slate-100 text-xedu-slate-500 dark:bg-xedu-slate-800/60 dark:text-xedu-slate-400',
+                  : 'bg-xedu-slate-100 text-xedu-slate-500 dark:bg-xedu-slate-800 dark:text-xedu-slate-400',
                 onSelect && !isActive && 'hover:opacity-80 cursor-pointer',
                 !onSelect && 'cursor-default'
               )}
@@ -74,7 +74,7 @@ export function SetupStepper({ current, completed, onSelect, compact }: SetupSte
                 className={cn(
                   'mx-0.5 transition-colors',
                   compact ? 'h-0.5 w-2' : 'h-0.5 w-3 sm:w-6',
-                  isDone ? 'bg-xedu-primary/40' : 'bg-xedu-slate-100 dark:bg-xedu-slate-800/60'
+                  isDone ? 'bg-xedu-primary/40' : 'bg-xedu-slate-100 dark:bg-xedu-slate-800'
                 )}
               />
             )}

@@ -123,7 +123,7 @@ function MySubmissionDialog({ homeworkId, homeworkTitle, open, onClose }: {
             {submission.content && (
               <div className="space-y-1">
                 <p className="text-xs font-medium text-xedu-slate-500 dark:text-xedu-slate-400">Javob:</p>
-                <p className="text-sm bg-xedu-slate-50 dark:bg-xedu-slate-800/60 rounded-md p-3 whitespace-pre-wrap">{submission.content}</p>
+                <p className="text-sm bg-xedu-slate-50 dark:bg-xedu-slate-800 rounded-md p-3 whitespace-pre-wrap">{submission.content}</p>
               </div>
             )}
 
@@ -284,7 +284,7 @@ function SubmissionsDialog({ homework, open, onClose }: {
                         : 'Sana noma‘lum'}
                     </p>
                     {sub.content && (
-                      <p className="text-sm mt-2 bg-xedu-slate-50 dark:bg-xedu-slate-800/60 rounded-md p-2 whitespace-pre-wrap">
+                      <p className="text-sm mt-2 bg-xedu-slate-50 dark:bg-xedu-slate-800 rounded-md p-2 whitespace-pre-wrap">
                         {sub.content}
                       </p>
                     )}
@@ -704,7 +704,7 @@ export default function HomeworkPage() {
                                       onChange={e => setSubmitFile(e.target.files?.[0] ?? null)}
                                     />
                                     {submitFile ? (
-                                      <div className="flex items-center gap-1.5 text-xs rounded-md border px-2.5 py-1.5 bg-xedu-slate-50 dark:bg-xedu-slate-800/60 flex-1 min-w-0">
+                                      <div className="flex items-center gap-1.5 text-xs rounded-md border px-2.5 py-1.5 bg-xedu-slate-50 dark:bg-xedu-slate-800 flex-1 min-w-0">
                                         <Paperclip className="h-3.5 w-3.5 text-xedu-slate-500 dark:text-xedu-slate-400 shrink-0" />
                                         <span className="truncate">{submitFile.name}</span>
                                         <button

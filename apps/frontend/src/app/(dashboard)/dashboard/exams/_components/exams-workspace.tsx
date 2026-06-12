@@ -320,7 +320,7 @@ function ExamDetailDialog({ exam, open, onClose, canManage }: {
             )}
 
             {canManage && addingQ && (
-              <div className="rounded-lg border p-4 space-y-3 bg-xedu-slate-50 dark:bg-xedu-slate-800/60">
+              <div className="rounded-lg border p-4 space-y-3 bg-xedu-slate-50 dark:bg-xedu-slate-800">
                 <p className="text-sm font-medium">Yangi savol</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-1.5">

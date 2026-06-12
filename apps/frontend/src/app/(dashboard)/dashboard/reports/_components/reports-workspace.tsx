@@ -1156,9 +1156,9 @@ export function ReportsWorkspace() {
         <AnalyticsSectionNav />
       </div>
 
-      {/* Toolbar: tabs + filters */}
-      <div className="w-full">
-        <WorkspaceToolbar sticky>
+      {/* Toolbar: tabs + filters — sticky ishlashi uchun to'g'ridan-to'g'ri
+          shell farzandi (balandligi cheklangan o'ramda sticky harakatlanolmaydi) */}
+      <WorkspaceToolbar sticky className="w-full">
           {/* Tab switcher */}
           <div className="flex gap-1 bg-muted/40 rounded-xl p-1">
             {tabs.map(({ key, label, icon: Icon, premium }) => (
@@ -1261,8 +1261,7 @@ export function ReportsWorkspace() {
               </div>
             </>
           )}
-        </WorkspaceToolbar>
-      </div>
+      </WorkspaceToolbar>
 
       {/* Main content */}
       <WorkspaceMain>

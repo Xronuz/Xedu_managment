@@ -15,7 +15,7 @@ export function Header() {
     <header
       className={cn(
         'flex h-[60px] shrink-0 items-center justify-between gap-4 px-5',
-        'bg-white dark:bg-xedu-slate-950 border-b border-xedu-slate-100 dark:border-xedu-slate-800',
+        'bg-transparent',
       )}
     >
       {/* Left: mobile nav + search */}

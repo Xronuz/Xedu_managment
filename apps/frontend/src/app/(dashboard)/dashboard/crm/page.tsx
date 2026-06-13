@@ -8,6 +8,7 @@ import {
   Instagram, Send, Globe, Share2, PhoneCall, Footprints,
   GraduationCap, ArrowRight, AlertTriangle, Copy, CheckCircle,
   PencilLine, Trash2, CalendarClock, Link2, RotateCcw, Check,
+  ChevronLeft, ChevronRight, Trophy,
 } from 'lucide-react';
 import QRCode from 'qrcode';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -39,6 +40,11 @@ import {
 
 // Lead'ga mas'ul sifatida biriktirilishi mumkin bo'lgan (CRM'ga kira oladigan) rollar
 const ASSIGNEE_ROLES = new Set(['director', 'vice_principal', 'branch_admin', 'accountant']);
+
+// Faol pipeline bosqichlari (kunlik ish) — board kenglikni shular to'ldiradi
+const ACTIVE_STAGES: LeadStatus[] = ['NEW', 'CONTACTED', 'TEST_LESSON', 'WAITING_PAYMENT'];
+// Yakuniy natijalar — yon rail (yig'iladi), gorizontal scroll bo'lmasligi uchun
+const OUTCOME_STAGES: LeadStatus[] = ['CONVERTED', 'CLOSED'];
 
 /** Keyingi bog'lanish sanasi holati: o'tib ketgan / bugun / kelgusi */
 function contactDateState(iso?: string | null): 'overdue' | 'today' | 'future' | null {
@@ -214,10 +220,11 @@ function LeadCard({
 
 // ─── Kanban Column ────────────────────────────────────────────────────────────
 function KanbanColumn({
-  status, leads, onStatusChange, onConvert, onOpenDetail, onAddLead,
+  status, leads, active, onStatusChange, onConvert, onOpenDetail, onAddLead,
 }: {
   status:        LeadStatus;
   leads:         Lead[];
+  active:        boolean;   // faol pipeline ustuni (kenglikni to'ldiradi) vs natija raili
   onStatusChange: (id: string, status: LeadStatus) => void;
   onConvert:     (lead: Lead) => void;
   onOpenDetail:  (lead: Lead) => void;
@@ -225,35 +232,80 @@ function KanbanColumn({
 }) {
   const cfg = LEAD_STATUS_CONFIG[status];
   const [dragOver, setDragOver] = useState(false);
+  const isOutcome = !active;
+  // Natija ustunlari sukut bo'yicha yig'ilgan — gorizontal scroll'ni yo'qotadi
+  const [collapsed, setCollapsed] = useState(isOutcome);
   // CONVERTED'ga sudrab bo'lmaydi — konvertatsiya alohida oqim (tranzaksiya)
   const droppable = status !== 'CONVERTED';
 
+  const dropHandlers = {
+    onDragOver: (e: React.DragEvent) => { if (droppable) { e.preventDefault(); setDragOver(true); } },
+    onDragLeave: () => setDragOver(false),
+    onDrop: (e: React.DragEvent) => {
+      setDragOver(false);
+      if (!droppable) return;
+      const leadId = e.dataTransfer.getData('text/lead-id');
+      const fromStatus = e.dataTransfer.getData('text/lead-status');
+      if (leadId && fromStatus !== status) onStatusChange(leadId, status);
+    },
+  };
+
+  // ── Yig'ilgan natija raili (CONVERTED / CLOSED) ──
+  if (isOutcome && collapsed) {
+    return (
+      <div
+        {...dropHandlers}
+        role="button"
+        tabIndex={0}
+        title={`${cfg.label} — ochish`}
+        onClick={() => setCollapsed(false)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setCollapsed(false); }}
+        className={`flex flex-col items-center gap-2.5 rounded-xl border ${cfg.borderColor} ${cfg.bgColor} w-[52px] shrink-0 py-3 cursor-pointer hover:shadow-sm transition-all ${
+          dragOver ? 'ring-2 ring-xedu-primary/40 shadow-md w-16' : ''
+        }`}
+      >
+        {status === 'CONVERTED'
+          ? <Trophy className={`h-4 w-4 ${cfg.color}`} />
+          : <span className={`h-2 w-2 rounded-full ${cfg.dotColor}`} />}
+        <span className={`[writing-mode:vertical-rl] rotate-180 text-[11px] font-semibold ${cfg.color}`}>
+          {cfg.label}
+        </span>
+        <span className={`text-base font-bold tabular-nums ${cfg.color}`}>{leads.length}</span>
+        <ChevronLeft className="h-3.5 w-3.5 text-xedu-slate-400 mt-auto" />
+      </div>
+    );
+  }
+
+  // ── To'liq ustun ──
   return (
     <div
-      onDragOver={(e) => { if (droppable) { e.preventDefault(); setDragOver(true); } }}
-      onDragLeave={() => setDragOver(false)}
-      onDrop={(e) => {
-        setDragOver(false);
-        if (!droppable) return;
-        const leadId = e.dataTransfer.getData('text/lead-id');
-        const fromStatus = e.dataTransfer.getData('text/lead-status');
-        if (leadId && fromStatus !== status) onStatusChange(leadId, status);
-      }}
-      className={`flex flex-col rounded-xl border ${cfg.borderColor} ${cfg.bgColor} min-w-[240px] max-w-[280px] flex-shrink-0 transition-shadow ${
-        dragOver ? 'ring-2 ring-xedu-primary/40 shadow-md' : ''
-      }`}
+      {...dropHandlers}
+      className={`flex flex-col overflow-hidden rounded-xl border ${cfg.borderColor} ${cfg.bgColor} transition-shadow ${
+        active ? 'flex-1 min-w-[200px]' : 'w-[260px] shrink-0'
+      } ${dragOver ? 'ring-2 ring-xedu-primary/40 shadow-md' : ''}`}
     >
+      {/* Rangli aksent (pipeline hissi) */}
+      <div className={`h-1 shrink-0 ${cfg.dotColor}`} />
+
       {/* Column header */}
       <div className={`flex items-center justify-between px-3 py-2.5 border-b ${cfg.borderColor}`}>
-        <div className="flex items-center gap-2">
-          <span className={`h-2 w-2 rounded-full ${cfg.dotColor}`} />
-          <span className={`text-xs font-semibold ${cfg.color}`}>{cfg.label}</span>
+        <div className="flex items-center gap-2 min-w-0">
+          <span className={`text-xs font-semibold ${cfg.color} truncate`}>{cfg.label}</span>
+          <Badge variant="secondary" className="h-4 text-[10px] px-1.5 shrink-0">{leads.length}</Badge>
         </div>
-        <Badge variant="secondary" className="h-4 text-[10px] px-1.5">{leads.length}</Badge>
+        {isOutcome && (
+          <button
+            onClick={() => setCollapsed(true)}
+            title="Yig'ish"
+            className="text-xedu-slate-400 hover:text-foreground transition-colors shrink-0"
+          >
+            <ChevronRight className="h-3.5 w-3.5" />
+          </button>
+        )}
       </div>
 
       {/* Cards */}
-      <div className="flex flex-col gap-2 p-2 flex-1 min-h-[80px] overflow-y-auto max-h-[calc(100vh-260px)]">
+      <div className="flex flex-col gap-2 p-2 flex-1 min-h-[80px] overflow-y-auto max-h-[calc(100vh-330px)]">
         {leads.map(lead => (
           <LeadCard
             key={lead.id}
@@ -265,7 +317,10 @@ function KanbanColumn({
         ))}
 
         {leads.length === 0 && (
-          <p className="text-[11px] text-xedu-slate-500 dark:text-xedu-slate-400 text-center py-4 opacity-60">Bo'sh</p>
+          <div className="flex flex-col items-center justify-center gap-1.5 flex-1 py-6 text-center">
+            <div className={`h-8 w-8 rounded-full border-2 border-dashed ${cfg.borderColor} opacity-60`} />
+            <p className="text-[11px] text-xedu-slate-400">Bo'sh</p>
+          </div>
         )}
       </div>
 
@@ -273,11 +328,49 @@ function KanbanColumn({
       {status === 'NEW' && (
         <button
           onClick={() => onAddLead(status)}
-          className="flex items-center gap-1.5 px-3 py-2 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-700/30 transition-colors border-t border-xedu-slate-200 dark:border-xedu-slate-700/40 rounded-b-xl"
+          className="flex items-center gap-1.5 px-3 py-2 text-xs text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-700/30 transition-colors border-t border-xedu-slate-200 dark:border-xedu-slate-700/40"
         >
           <Plus className="h-3 w-3" /> Lead qo'shish
         </button>
       )}
+    </div>
+  );
+}
+
+// ─── Pipeline xulosa lentasi (funnel) ─────────────────────────────────────────
+function PipelineSummary({ grouped }: { grouped: Record<LeadStatus, Lead[]> }) {
+  const active = ACTIVE_STAGES.reduce((s, k) => s + grouped[k].length, 0);
+  const converted = grouped.CONVERTED.length;
+  const closed = grouped.CLOSED.length;
+  const finished = converted + closed;
+  // Konversiya = yutilgan / (yutilgan + yo'qotilgan)
+  const convRate = finished > 0 ? Math.round((converted / finished) * 100) : 0;
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
+      {[...ACTIVE_STAGES, ...OUTCOME_STAGES].map((s) => {
+        const cfg = LEAD_STATUS_CONFIG[s];
+        return (
+          <div
+            key={s}
+            className={`rounded-xl border ${cfg.borderColor} ${cfg.bgColor} px-3 py-2`}
+          >
+            <div className="flex items-center gap-1.5">
+              <span className={`h-2 w-2 rounded-full ${cfg.dotColor} shrink-0`} />
+              <span className={`text-[11px] font-semibold ${cfg.color} truncate`}>{cfg.label}</span>
+            </div>
+            <p className="text-xl font-bold tabular-nums mt-0.5">{grouped[s].length}</p>
+          </div>
+        );
+      })}
+      {/* Konversiya darajasi — yakuniy hujayra */}
+      <div className="rounded-xl border border-xedu-primary/30 bg-xedu-primary/5 px-3 py-2">
+        <div className="flex items-center gap-1.5">
+          <TrendingUp className="h-3 w-3 text-xedu-primary shrink-0" />
+          <span className="text-[11px] font-semibold text-xedu-primary truncate">Konversiya</span>
+        </div>
+        <p className="text-xl font-bold tabular-nums mt-0.5 text-xedu-primary">{convRate}%</p>
+      </div>
     </div>
   );
 }
@@ -1483,30 +1576,50 @@ export default function CrmPage() {
           : <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-24" />)}</div>
       ) : (
         /* ── KANBAN BOARD ── */
-        isLoading ? (
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {KANBAN_COLUMNS.map(s => (
-              <div key={s} className="min-w-[240px] space-y-2">
-                <Skeleton className="h-8 rounded-xl" />
-                {[1,2,3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex gap-3 overflow-x-auto pb-3">
-            {KANBAN_COLUMNS.map(status => (
-              <KanbanColumn
-                key={status}
-                status={status}
-                leads={grouped[status]}
-                onStatusChange={handleStatusChange}
-                onConvert={setConvertLead}
-                onOpenDetail={setDetailLead}
-                onAddLead={(s) => { setCreateStatus(s); setCreateOpen(true); }}
-              />
-            ))}
-          </div>
-        )
+        <div className="space-y-4">
+          <PipelineSummary grouped={grouped} />
+
+          {isLoading ? (
+            <div className="flex gap-3 overflow-x-auto pb-2 items-start">
+              {ACTIVE_STAGES.map(s => (
+                <div key={s} className="flex-1 min-w-[200px] space-y-2">
+                  <Skeleton className="h-8 rounded-xl" />
+                  {[1,2,3].map(i => <Skeleton key={i} className="h-24 rounded-xl" />)}
+                </div>
+              ))}
+              {OUTCOME_STAGES.map(s => (
+                <Skeleton key={s} className="w-[52px] h-48 rounded-xl shrink-0" />
+              ))}
+            </div>
+          ) : (
+            <div className="flex gap-3 overflow-x-auto pb-3 items-start">
+              {ACTIVE_STAGES.map(status => (
+                <KanbanColumn
+                  key={status}
+                  status={status}
+                  active
+                  leads={grouped[status]}
+                  onStatusChange={handleStatusChange}
+                  onConvert={setConvertLead}
+                  onOpenDetail={setDetailLead}
+                  onAddLead={(s) => { setCreateStatus(s); setCreateOpen(true); }}
+                />
+              ))}
+              {OUTCOME_STAGES.map(status => (
+                <KanbanColumn
+                  key={status}
+                  status={status}
+                  active={false}
+                  leads={grouped[status]}
+                  onStatusChange={handleStatusChange}
+                  onConvert={setConvertLead}
+                  onOpenDetail={setDetailLead}
+                  onAddLead={(s) => { setCreateStatus(s); setCreateOpen(true); }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       {/* Dialogs */}

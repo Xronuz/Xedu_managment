@@ -66,6 +66,7 @@ import { InvitationsModule } from './modules/invitations/invitations.module';
 import { OpsCommandCenterModule } from './modules/ops-command-center/ops-command-center.module';
 import { ExportModule } from './modules/export/export.module';
 import { DemoRequestsModule } from './modules/demo-requests/demo-requests.module';
+import { PortfolioModule } from './modules/portfolio/portfolio.module';
 import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { CorrelationIdMiddleware } from './common/middleware/correlation-id.middleware';
 import { QueryTimingInterceptor } from './common/interceptors/query-timing.interceptor';
@@ -163,6 +164,7 @@ import { envValidationSchema } from './common/config/env.validation';
     OpsCommandCenterModule,      // Operatsion boshqaruv markazi (Phase 6A)
     ExportModule,                // Async data export (Phase 6B)
     DemoRequestsModule,          // Landing page demo so'rovlari
+    PortfolioModule,             // O'quvchi portfoliosi (yutuqlar, sertifikatlar)
   ],
   providers: [
     // Global rate limiting — barcha endpointlarga qo'llaniladi

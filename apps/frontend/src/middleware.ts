@@ -68,6 +68,12 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Public lead-capture forma (/r/<token>) — auth holatidan qat'i nazar ochiq:
+  // ota-ona ham, linkni tekshirayotgan maktab xodimi ham ko'ra olishi kerak
+  if (pathname === '/r' || pathname.startsWith('/r/')) {
+    return NextResponse.next();
+  }
+
   const token = request.cookies.get('access_token')?.value;
   const payload = token ? decodeJwtPayload(token) : null;
   const isAuthenticated = !!payload && typeof payload.exp === 'number' && payload.exp * 1000 > Date.now();

@@ -1,13 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus, Search, UserCheck, Phone, MessageSquare, RefreshCw,
   TrendingUp, Users, Star, BarChart3, X, ChevronDown, Loader2,
   Instagram, Send, Globe, Share2, PhoneCall, Footprints,
   GraduationCap, ArrowRight, AlertTriangle, Copy, CheckCircle,
+  PencilLine, Trash2, CalendarClock, Link2, RotateCcw, Check,
 } from 'lucide-react';
+import QRCode from 'qrcode';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,13 +27,39 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/components/ui/use-toast';
+import { useConfirm } from '@/store/confirm.store';
 import { useAuthStore } from '@/store/auth.store';
 import { classesApi } from '@/lib/api/classes';
 import { branchesApi } from '@/lib/api/branches';
+import { usersApi } from '@/lib/api/users';
 import {
   leadsApi, KANBAN_COLUMNS, LEAD_STATUS_CONFIG, LEAD_SOURCE_CONFIG,
   type Lead, type LeadStatus, type LeadSource, type LeadAnalytics,
 } from '@/lib/api/leads';
+
+// Lead'ga mas'ul sifatida biriktirilishi mumkin bo'lgan (CRM'ga kira oladigan) rollar
+const ASSIGNEE_ROLES = new Set(['director', 'vice_principal', 'branch_admin', 'accountant']);
+
+/** Keyingi bog'lanish sanasi holati: o'tib ketgan / bugun / kelgusi */
+function contactDateState(iso?: string | null): 'overdue' | 'today' | 'future' | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  const now = new Date();
+  const day = (x: Date) => Math.floor(x.getTime() / 86400000);
+  if (day(d) < day(now)) return 'overdue';
+  if (day(d) === day(now)) return 'today';
+  return 'future';
+}
+
+function formatContactDate(iso: string) {
+  return new Date(iso).toLocaleDateString('uz-UZ', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+/** ISO sanani <input type="date"> qiymatiga (YYYY-MM-DD) o'tkazish */
+function toDateInputValue(iso?: string | null): string {
+  if (!iso) return '';
+  return new Date(iso).toISOString().slice(0, 10);
+}
 
 // ─── Source Icon ──────────────────────────────────────────────────────────────
 function SourceIcon({ source }: { source: LeadSource }) {
@@ -67,8 +95,14 @@ function LeadCard({
 
   return (
     <div
+      draggable={!isConverted}
+      onDragStart={(e) => {
+        e.dataTransfer.setData('text/lead-id', lead.id);
+        e.dataTransfer.setData('text/lead-status', lead.status);
+        e.dataTransfer.effectAllowed = 'move';
+      }}
       className={`rounded-xl border bg-xedu-bg-elevated p-3 shadow-sm hover:shadow-sm transition-shadow cursor-pointer group ${
-        isConverted ? 'opacity-70' : ''
+        isConverted ? 'opacity-70' : 'active:cursor-grabbing'
       }`}
       onClick={() => onOpenDetail(lead)}
     >
@@ -96,6 +130,22 @@ function LeadCard({
           📚 {lead.expectedClass.name}
         </div>
       )}
+
+      {/* Keyingi bog'lanish sanasi */}
+      {lead.nextContactDate && !isConverted && lead.status !== 'CLOSED' && (() => {
+        const state = contactDateState(lead.nextContactDate);
+        return (
+          <div className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 mb-2 text-[10px] font-semibold ${
+            state === 'overdue' ? 'bg-xedu-ruby-100 text-xedu-ruby-700' :
+            state === 'today'   ? 'bg-xedu-amber-100 text-xedu-amber-700' :
+                                  'bg-xedu-slate-100 dark:bg-xedu-slate-800 text-xedu-slate-500 dark:text-xedu-slate-400'
+          }`}>
+            <CalendarClock className="h-2.5 w-2.5" />
+            {state === 'overdue' ? "Bog'lanish o'tib ketgan: " : state === 'today' ? 'Bugun: ' : ''}
+            {formatContactDate(lead.nextContactDate)}
+          </div>
+        );
+      })()}
 
       {/* Note preview */}
       {lead.note && (
@@ -174,9 +224,25 @@ function KanbanColumn({
   onAddLead:     (status: LeadStatus) => void;
 }) {
   const cfg = LEAD_STATUS_CONFIG[status];
+  const [dragOver, setDragOver] = useState(false);
+  // CONVERTED'ga sudrab bo'lmaydi — konvertatsiya alohida oqim (tranzaksiya)
+  const droppable = status !== 'CONVERTED';
 
   return (
-    <div className={`flex flex-col rounded-xl border ${cfg.borderColor} ${cfg.bgColor} min-w-[240px] max-w-[280px] flex-shrink-0`}>
+    <div
+      onDragOver={(e) => { if (droppable) { e.preventDefault(); setDragOver(true); } }}
+      onDragLeave={() => setDragOver(false)}
+      onDrop={(e) => {
+        setDragOver(false);
+        if (!droppable) return;
+        const leadId = e.dataTransfer.getData('text/lead-id');
+        const fromStatus = e.dataTransfer.getData('text/lead-status');
+        if (leadId && fromStatus !== status) onStatusChange(leadId, status);
+      }}
+      className={`flex flex-col rounded-xl border ${cfg.borderColor} ${cfg.bgColor} min-w-[240px] max-w-[280px] flex-shrink-0 transition-shadow ${
+        dragOver ? 'ring-2 ring-xedu-primary/40 shadow-md' : ''
+      }`}
+    >
       {/* Column header */}
       <div className={`flex items-center justify-between px-3 py-2.5 border-b ${cfg.borderColor}`}>
         <div className="flex items-center gap-2">
@@ -285,8 +351,19 @@ function AnalyticsPanel({ analytics }: { analytics: LeadAnalytics }) {
 // ─── Create Lead Dialog ───────────────────────────────────────────────────────
 const EMPTY_FORM = {
   firstName: '', lastName: '', phone: '', source: 'INSTAGRAM' as LeadSource,
-  note: '', branchId: '', expectedClassId: '',
+  note: '', branchId: '', expectedClassId: '', assignedToId: '', nextContactDate: '',
 };
+
+/** Mas'ul xodim tanlovi uchun xodimlar (CRM rollari) */
+function useAssigneeOptions(enabled: boolean) {
+  const { data } = useQuery({
+    queryKey: ['crm', 'assignee-options'],
+    queryFn: () => usersApi.getAll({ limit: 200 }),
+    enabled,
+    staleTime: 5 * 60_000,
+  });
+  return ((data as any)?.data ?? []).filter((u: any) => ASSIGNEE_ROLES.has(u.role));
+}
 
 function CreateLeadDialog({
   open, onOpenChange, defaultStatus, onSuccess,
@@ -314,6 +391,7 @@ function CreateLeadDialog({
     select:   (d: any) => (Array.isArray(d) ? d : d?.data ?? []),
   });
   const branchesList = (branchesData as any[]) ?? [];
+  const assignees = useAssigneeOptions(open);
 
   const mutation = useMutation({
     mutationFn: leadsApi.create,
@@ -411,6 +489,29 @@ function CreateLeadDialog({
             </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Mas&apos;ul xodim</Label>
+              <Select value={form.assignedToId || '__none__'} onValueChange={set('assignedToId')}>
+                <SelectTrigger><SelectValue placeholder="Tanlang..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">—</SelectItem>
+                  {assignees.map((u: any) => (
+                    <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Keyingi bog&apos;lanish</Label>
+              <Input
+                type="date"
+                value={form.nextContactDate}
+                onChange={e => set('nextContactDate')(e.target.value)}
+              />
+            </div>
+          </div>
+
           <div className="space-y-1.5">
             <Label>Izoh</Label>
             <Textarea
@@ -449,11 +550,378 @@ function CreateLeadDialog({
               note:            form.note || undefined,
               expectedClassId: (form.expectedClassId && form.expectedClassId !== '__none__') ? form.expectedClassId : undefined,
               branchId:        (form.branchId && form.branchId !== '__auto__') ? form.branchId : undefined,
+              assignedToId:    (form.assignedToId && form.assignedToId !== '__none__') ? form.assignedToId : undefined,
+              nextContactDate: form.nextContactDate ? new Date(form.nextContactDate + 'T09:00:00').toISOString() : undefined,
             })}
             disabled={mutation.isPending || !form.firstName || !form.lastName || !form.phone || !!dupError}
           >
             {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Qo'shish
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Share Form Dialog — public lead-capture linklari ─────────────────────────
+const SHARE_SOURCES: { src: LeadSource; label: string; emoji: string }[] = [
+  { src: 'INSTAGRAM', label: 'Instagram target / bio', emoji: '📸' },
+  { src: 'TELEGRAM',  label: 'Telegram kanal / reklama', emoji: '✈️' },
+  { src: 'FACEBOOK',  label: 'Facebook reklama', emoji: '👥' },
+  { src: 'WEBSITE',   label: 'Sayt / umumiy link', emoji: '🌐' },
+];
+
+function ShareFormDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const { toast } = useToast();
+  const confirm = useConfirm();
+  const { user } = useAuthStore();
+  const queryClient = useQueryClient();
+  const [copied, setCopied] = useState<string | null>(null);
+  const [qr, setQr] = useState<string | null>(null);
+
+  const canRotate = ['director', 'branch_admin'].includes(user?.role ?? '');
+
+  const { data, isLoading } = useQuery({
+    queryKey: ['leads', 'capture-form'],
+    queryFn: () => leadsApi.getCaptureForm(),
+    enabled: open,
+  });
+
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+  const linkFor = (src: LeadSource) => `${baseUrl}/r/${data?.token}?src=${src.toLowerCase()}`;
+
+  // Umumiy link uchun QR (banner/flayerga)
+  useEffect(() => {
+    if (data?.token && open) {
+      QRCode.toDataURL(linkFor('WEBSITE'), { width: 240, margin: 1 })
+        .then(setQr)
+        .catch(() => setQr(null));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data?.token, open]);
+
+  const copy = async (src: LeadSource) => {
+    await navigator.clipboard.writeText(linkFor(src));
+    setCopied(src);
+    setTimeout(() => setCopied(null), 1500);
+  };
+
+  const rotateMutation = useMutation({
+    mutationFn: () => leadsApi.rotateCaptureForm(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['leads', 'capture-form'] });
+      toast({ title: 'Link yangilandi', description: 'Eski link endi ishlamaydi.' });
+    },
+  });
+
+  const handleRotate = async () => {
+    const ok = await confirm({
+      title: 'Linkni yangilash',
+      description: "Hozirgi link bekor bo'ladi — reklamalarda ulashilgan eski linklar ishlamay qoladi. Spam bo'lganda ishlating.",
+      confirmText: 'Yangilash',
+    });
+    if (ok) rotateMutation.mutate();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Link2 className="h-4 w-4 text-xedu-primary" />
+            Ro&apos;yxatdan o&apos;tish formasi
+          </DialogTitle>
+          <DialogDescription>
+            Linkni reklamada ulashing — to&apos;ldirilgan formalar to&apos;g&apos;ridan-to&apos;g&apos;ri CRM&apos;ga lead bo&apos;lib tushadi,
+            manbasi avtomatik belgilanadi.
+          </DialogDescription>
+        </DialogHeader>
+
+        {isLoading || !data ? (
+          <div className="space-y-2 py-2">
+            {[1, 2, 3].map((i) => <Skeleton key={i} className="h-10" />)}
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {SHARE_SOURCES.map(({ src, label, emoji }) => (
+              <div key={src} className="flex items-center gap-2 rounded-xl border border-xedu-border p-2.5">
+                <span className="text-base">{emoji}</span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-semibold">{label}</p>
+                  <p className="truncate text-[11px] text-xedu-slate-500 dark:text-xedu-slate-400">{linkFor(src)}</p>
+                </div>
+                <Button size="sm" variant="outline" className="h-7 px-2 shrink-0" onClick={() => copy(src)}>
+                  {copied === src ? <Check className="h-3.5 w-3.5 text-xedu-primary" /> : <Copy className="h-3.5 w-3.5" />}
+                </Button>
+              </div>
+            ))}
+
+            {qr && (
+              <div className="flex items-center gap-3 rounded-xl border border-xedu-border p-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={qr} alt="QR kod" className="h-24 w-24 rounded-lg" />
+                <div className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400">
+                  <p className="font-semibold text-foreground mb-1">QR-kod (banner / flayer uchun)</p>
+                  <p>Skaner qilgan ota-ona to&apos;g&apos;ridan-to&apos;g&apos;ri formaga tushadi.</p>
+                  <a href={qr} download="xedu-forma-qr.png" className="text-xedu-primary font-medium hover:underline mt-1 inline-block">
+                    Yuklab olish
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {canRotate && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="w-full text-xs text-xedu-slate-500 dark:text-xedu-slate-400"
+                disabled={rotateMutation.isPending}
+                onClick={handleRotate}
+              >
+                <RotateCcw className="h-3 w-3 mr-1.5" />
+                Linkni yangilash (spam bo&apos;lsa)
+              </Button>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Edit Lead Dialog ─────────────────────────────────────────────────────────
+function EditLeadDialog({
+  lead, open, onOpenChange, onSuccess,
+}: {
+  lead:         Lead | null;
+  open:         boolean;
+  onOpenChange: (v: boolean) => void;
+  onSuccess:    () => void;
+}) {
+  const { toast } = useToast();
+  const { activeBranchId } = useAuthStore();
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [dupError, setDupError] = useState<any>(null);
+
+  // Dialog ochilganda formani lead qiymatlari bilan to'ldirish
+  const leadId = lead?.id;
+  useEffect(() => {
+    if (lead && open) {
+      setForm({
+        firstName:       lead.firstName,
+        lastName:        lead.lastName,
+        phone:           lead.phone,
+        source:          lead.source,
+        note:            lead.note ?? '',
+        branchId:        '',
+        expectedClassId: lead.expectedClassId ?? '',
+        assignedToId:    lead.assignedToId ?? '',
+        nextContactDate: toDateInputValue(lead.nextContactDate),
+      });
+      setDupError(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [leadId, open]);
+
+  const { data: classesData } = useQuery({
+    queryKey: ['classes', activeBranchId],
+    queryFn:  classesApi.getAll,
+    enabled:  open,
+    select:   (d: any) => (Array.isArray(d) ? d : d?.data ?? []),
+  });
+  const assignees = useAssigneeOptions(open);
+
+  const mutation = useMutation({
+    mutationFn: () =>
+      leadsApi.update(lead!.id, {
+        firstName:       form.firstName,
+        lastName:        form.lastName,
+        phone:           form.phone,
+        source:          form.source,
+        note:            form.note,
+        expectedClassId: form.expectedClassId && form.expectedClassId !== '__none__' ? form.expectedClassId : undefined,
+        assignedToId:    form.assignedToId && form.assignedToId !== '__none__' ? form.assignedToId : undefined,
+        nextContactDate: form.nextContactDate ? new Date(form.nextContactDate + 'T09:00:00').toISOString() : ('' as any),
+      }),
+    onSuccess: () => {
+      toast({ title: 'Lead yangilandi' });
+      onSuccess();
+      onOpenChange(false);
+    },
+    onError: (err: any) => {
+      const body = err?.response?.data;
+      if (body?.isDuplicate) setDupError(body);
+      else toast({ variant: 'destructive', title: 'Xato', description: body?.message ?? 'Xatolik yuz berdi' });
+    },
+  });
+
+  const set = (k: string) => (v: string) => {
+    setForm(f => ({ ...f, [k]: v }));
+    if (k === 'phone') setDupError(null);
+  };
+
+  if (!lead) return null;
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Leadni tahrirlash</DialogTitle>
+          <DialogDescription>{lead.firstName} {lead.lastName} ma&apos;lumotlarini yangilash</DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-3 py-1">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Ism <span className="text-xedu-ruby">*</span></Label>
+              <Input value={form.firstName} onChange={e => set('firstName')(e.target.value)} />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Familiya <span className="text-xedu-ruby">*</span></Label>
+              <Input value={form.lastName} onChange={e => set('lastName')(e.target.value)} />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Telefon <span className="text-xedu-ruby">*</span></Label>
+            <Input
+              value={form.phone}
+              onChange={e => set('phone')(e.target.value)}
+              className={dupError ? 'border-amber-500' : ''}
+            />
+            {dupError && (
+              <p className="text-xs text-xedu-amber-600">
+                Bu raqam boshqa leadda ({dupError.existingLead?.firstName} {dupError.existingLead?.lastName}) ishlatilmoqda.
+              </p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Manba</Label>
+              <Select value={form.source} onValueChange={set('source')}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(LEAD_SOURCE_CONFIG).map(([src, cfg]) => (
+                    <SelectItem key={src} value={src}>{cfg.emoji} {cfg.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Sinf/Guruh</Label>
+              <Select value={form.expectedClassId || '__none__'} onValueChange={set('expectedClassId')}>
+                <SelectTrigger><SelectValue placeholder="Tanlang..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">—</SelectItem>
+                  {((classesData as any[]) ?? []).map((c: any) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1.5">
+              <Label>Mas&apos;ul xodim</Label>
+              <Select value={form.assignedToId || '__none__'} onValueChange={set('assignedToId')}>
+                <SelectTrigger><SelectValue placeholder="Tanlang..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">—</SelectItem>
+                  {assignees.map((u: any) => (
+                    <SelectItem key={u.id} value={u.id}>{u.firstName} {u.lastName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Keyingi bog&apos;lanish</Label>
+              <Input
+                type="date"
+                value={form.nextContactDate}
+                onChange={e => set('nextContactDate')(e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Izoh</Label>
+            <Textarea
+              value={form.note}
+              onChange={e => set('note')(e.target.value)}
+              rows={2}
+              className="resize-none"
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Bekor qilish</Button>
+          <Button
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending || !form.firstName || !form.lastName || !form.phone}
+          >
+            {mutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Saqlash
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── Close Reason Dialog ──────────────────────────────────────────────────────
+// CLOSED statusiga o'tishda yo'qotish sababini so'raydi — keyin tahlil uchun
+function CloseReasonDialog({
+  open, onOpenChange, onSubmit, pending,
+}: {
+  open:         boolean;
+  onOpenChange: (v: boolean) => void;
+  onSubmit:     (reason: string) => void;
+  pending:      boolean;
+}) {
+  const [reason, setReason] = useState('');
+  const PRESETS = ['Narx to‘g‘ri kelmadi', 'Boshqa maktabni tanladi', "Aloqa yo'q (javob bermadi)", 'Hozircha kerak emas'];
+
+  return (
+    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) setReason(''); }}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Leadni yopish</DialogTitle>
+          <DialogDescription>Nega yo&apos;qotildi? Bu tahlil uchun saqlanadi.</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-1.5">
+            {PRESETS.map((p) => (
+              <button
+                key={p}
+                type="button"
+                onClick={() => setReason(p)}
+                className={`rounded-lg border px-2.5 py-1 text-xs transition-colors ${
+                  reason === p
+                    ? 'border-xedu-primary bg-xedu-primary/10 text-xedu-primary font-semibold'
+                    : 'border-xedu-border text-xedu-slate-500 dark:text-xedu-slate-400 hover:border-xedu-border-hover'
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+          <Textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Yoki sababni o'zingiz yozing..."
+            rows={2}
+            className="resize-none"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>Bekor qilish</Button>
+          <Button variant="destructive" disabled={pending} onClick={() => onSubmit(reason.trim())}>
+            {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Yopish
           </Button>
         </DialogFooter>
       </DialogContent>
@@ -614,7 +1082,7 @@ function ConvertDialog({
 
 // ─── Lead Detail Drawer ───────────────────────────────────────────────────────
 function LeadDetailDialog({
-  lead, open, onOpenChange, onStatusChange, onConvert, onCommentAdd,
+  lead, open, onOpenChange, onStatusChange, onConvert, onCommentAdd, onEdit, onDelete,
 }: {
   lead:           Lead | null;
   open:           boolean;
@@ -622,9 +1090,13 @@ function LeadDetailDialog({
   onStatusChange: (id: string, status: LeadStatus) => void;
   onConvert:      (lead: Lead) => void;
   onCommentAdd:   (leadId: string, text: string) => void;
+  onEdit:         (lead: Lead) => void;
+  onDelete:       (lead: Lead) => void;
 }) {
   const [commentText, setCommentText] = useState('');
   const { user } = useAuthStore();
+  const canEdit   = ['director', 'branch_admin', 'vice_principal', 'accountant'].includes(user?.role ?? '');
+  const canDelete = ['director', 'branch_admin'].includes(user?.role ?? '');
 
   const { data: fullLead, isLoading } = useQuery({
     queryKey: ['lead', lead?.id],
@@ -650,6 +1122,32 @@ function LeadDetailDialog({
             </Badge>
           </DialogTitle>
         </DialogHeader>
+
+        {/* Tahrirlash / o'chirish */}
+        {(canEdit || canDelete) && (
+          <div className="flex gap-2 -mt-1">
+            {canEdit && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs"
+                onClick={() => { onOpenChange(false); onEdit(displayLead); }}
+              >
+                <PencilLine className="h-3 w-3 mr-1.5" /> Tahrirlash
+              </Button>
+            )}
+            {canDelete && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="h-7 text-xs text-xedu-ruby-600 hover:text-xedu-ruby-700"
+                onClick={() => onDelete(displayLead)}
+              >
+                <Trash2 className="h-3 w-3 mr-1.5" /> O&apos;chirish
+              </Button>
+            )}
+          </div>
+        )}
 
         <div className="space-y-4 pt-1">
           {/* Info grid */}
@@ -679,7 +1177,28 @@ function LeadDetailDialog({
                 <p>{displayLead.branch.name}</p>
               </div>
             )}
+            {displayLead.nextContactDate && (
+              <div className={`rounded-lg p-2.5 ${
+                contactDateState(displayLead.nextContactDate) === 'overdue'
+                  ? 'bg-xedu-ruby-50 dark:bg-xedu-ruby-100'
+                  : 'bg-xedu-slate-50 dark:bg-xedu-slate-800'
+              }`}>
+                <p className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 mb-0.5">Keyingi bog&apos;lanish</p>
+                <p className={contactDateState(displayLead.nextContactDate) === 'overdue' ? 'text-xedu-ruby-700 font-semibold' : ''}>
+                  {formatContactDate(displayLead.nextContactDate)}
+                  {contactDateState(displayLead.nextContactDate) === 'overdue' && " — o'tib ketgan!"}
+                </p>
+              </div>
+            )}
           </div>
+
+          {/* Yopilish sababi */}
+          {displayLead.status === 'CLOSED' && displayLead.closedReason && (
+            <div className="rounded-lg border border-xedu-ruby-200 bg-xedu-ruby-50 dark:bg-xedu-ruby-100 p-3 text-sm">
+              <p className="text-xs text-xedu-ruby-600 mb-1 font-semibold">Yopilish sababi</p>
+              <p className="text-xedu-ruby-700">{displayLead.closedReason}</p>
+            </div>
+          )}
 
           {/* Note */}
           {displayLead.note && (
@@ -786,6 +1305,7 @@ function LeadDetailDialog({
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function CrmPage() {
   const { toast }       = useToast();
+  const confirm         = useConfirm();
   const queryClient     = useQueryClient();
   const { user, activeBranchId } = useAuthStore();
   const [search,        setSearch]        = useState('');
@@ -795,6 +1315,9 @@ export default function CrmPage() {
   const [createStatus,  setCreateStatus]  = useState<LeadStatus>('NEW');
   const [convertLead,   setConvertLead]   = useState<Lead | null>(null);
   const [detailLead,    setDetailLead]    = useState<Lead | null>(null);
+  const [editLead,      setEditLead]      = useState<Lead | null>(null);
+  const [closeTargetId, setCloseTargetId] = useState<string | null>(null);
+  const [shareOpen,     setShareOpen]     = useState(false);
 
   // ── Queries ─────────────────────────────────────────────────────────────
   const { data: listData, isLoading } = useQuery({
@@ -815,11 +1338,43 @@ export default function CrmPage() {
   };
 
   const statusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: LeadStatus }) =>
-      leadsApi.updateStatus(id, status),
-    onSuccess: () => { toast({ title: 'Status yangilandi' }); invalidate(); },
+    mutationFn: ({ id, status, closedReason }: { id: string; status: LeadStatus; closedReason?: string }) =>
+      leadsApi.updateStatus(id, status, closedReason),
+    onSuccess: () => {
+      toast({ title: 'Status yangilandi' });
+      invalidate();
+      queryClient.invalidateQueries({ queryKey: ['lead'] });
+      setCloseTargetId(null);
+    },
     onError:   () => toast({ variant: 'destructive', title: 'Xato', description: 'Status yangilanmadi' }),
   });
+
+  // CLOSED'ga o'tishda sabab so'raladi, qolgan statuslar to'g'ridan-to'g'ri
+  const handleStatusChange = (id: string, status: LeadStatus) => {
+    if (status === 'CLOSED') {
+      setDetailLead(null);
+      setCloseTargetId(id);
+    } else {
+      statusMutation.mutate({ id, status });
+    }
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => leadsApi.remove(id),
+    onSuccess: () => { toast({ title: 'Lead o‘chirildi' }); invalidate(); },
+    onError:   () => toast({ variant: 'destructive', title: 'Xato', description: 'O‘chirishda xatolik' }),
+  });
+
+  const handleDelete = async (lead: Lead) => {
+    setDetailLead(null);
+    const ok = await confirm({
+      title: 'Leadni o‘chirish',
+      description: `${lead.firstName} ${lead.lastName} (${lead.phone}) va uning barcha muloqot tarixi o'chiriladi.`,
+      confirmText: "O'chirish",
+      variant: 'destructive',
+    });
+    if (ok) deleteMutation.mutate(lead.id);
+  };
 
   const commentMutation = useMutation({
     mutationFn: ({ leadId, text }: { leadId: string; text: string }) =>
@@ -869,9 +1424,14 @@ export default function CrmPage() {
             <RefreshCw className="h-4 w-4" />
           </Button>
           {canManage && (
-            <Button onClick={() => { setCreateStatus('NEW'); setCreateOpen(true); }}>
-              <Plus className="mr-2 h-4 w-4" /> Lead qo'shish
-            </Button>
+            <>
+              <Button variant="outline" size="sm" onClick={() => setShareOpen(true)}>
+                <Link2 className="mr-2 h-4 w-4" /> Forma linki
+              </Button>
+              <Button onClick={() => { setCreateStatus('NEW'); setCreateOpen(true); }}>
+                <Plus className="mr-2 h-4 w-4" /> Lead qo'shish
+              </Button>
+            </>
           )}
         </div>
       </div>
@@ -939,7 +1499,7 @@ export default function CrmPage() {
                 key={status}
                 status={status}
                 leads={grouped[status]}
-                onStatusChange={(id, s) => statusMutation.mutate({ id, status: s })}
+                onStatusChange={handleStatusChange}
                 onConvert={setConvertLead}
                 onOpenDetail={setDetailLead}
                 onAddLead={(s) => { setCreateStatus(s); setCreateOpen(true); }}
@@ -968,10 +1528,30 @@ export default function CrmPage() {
         lead={detailLead}
         open={!!detailLead}
         onOpenChange={(v) => { if (!v) setDetailLead(null); }}
-        onStatusChange={(id, s) => statusMutation.mutate({ id, status: s })}
+        onStatusChange={handleStatusChange}
         onConvert={(l) => { setDetailLead(null); setConvertLead(l); }}
         onCommentAdd={(leadId, text) => commentMutation.mutate({ leadId, text })}
+        onEdit={setEditLead}
+        onDelete={handleDelete}
       />
+
+      <EditLeadDialog
+        lead={editLead}
+        open={!!editLead}
+        onOpenChange={(v) => { if (!v) setEditLead(null); }}
+        onSuccess={() => { invalidate(); queryClient.invalidateQueries({ queryKey: ['lead'] }); }}
+      />
+
+      <CloseReasonDialog
+        open={!!closeTargetId}
+        onOpenChange={(v) => { if (!v) setCloseTargetId(null); }}
+        pending={statusMutation.isPending}
+        onSubmit={(reason) =>
+          statusMutation.mutate({ id: closeTargetId!, status: 'CLOSED', closedReason: reason || undefined })
+        }
+      />
+
+      <ShareFormDialog open={shareOpen} onOpenChange={setShareOpen} />
     </div>
   );
 }

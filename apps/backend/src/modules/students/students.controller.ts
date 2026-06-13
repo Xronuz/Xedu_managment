@@ -57,6 +57,16 @@ export class StudentsController {
     return this.studentsService.findOne(id, user);
   }
 
+  @Get(':id/profile')
+  @Roles(
+    UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL,
+    UserRole.BRANCH_ADMIN, UserRole.TEACHER, UserRole.CLASS_TEACHER,
+  )
+  @ApiOperation({ summary: "O'quvchining to'liq profili (akademik, davomat, intizom, ...)" })
+  getProfile(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
+    return this.studentsService.getProfile(id, user);
+  }
+
   @Patch(':id')
   @Roles(
     UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL,

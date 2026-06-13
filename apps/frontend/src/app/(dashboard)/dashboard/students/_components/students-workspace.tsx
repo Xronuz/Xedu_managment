@@ -17,6 +17,7 @@ import { useAuthStore } from '@/store/auth.store';
 import { useConfirm } from '@/store/confirm.store';
 
 import { usersApi } from '@/lib/api/users';
+import { studentsApi } from '@/lib/api/students';
 import { branchesApi } from '@/lib/api/branches';
 import { classesApi } from '@/lib/api/classes';
 import { StudentCreateModal } from '@/components/students/student-create-modal';
@@ -558,7 +559,15 @@ function StudentPanel({
   onClose: () => void;
   onLinkParent?: (student: StudentRow) => void;
 }) {
+  const { data: profile } = useQuery({
+    queryKey: ['student-profile', student?.id],
+    queryFn: () => studentsApi.getProfile(student!.id),
+    enabled: open && !!student?.id,
+  });
+
   if (!student) return null;
+
+  const profileHref = `/dashboard/students/${student.id}`;
 
   const tabs = [
     {
@@ -589,12 +598,16 @@ function StudentPanel({
 
           {/* Quick actions */}
           <div className="flex flex-wrap gap-2 pt-2">
-            <SecondaryAction icon={<Eye className="h-3.5 w-3.5" />} onClick={() => {}}>
-              Ko'rish
-            </SecondaryAction>
-            <SecondaryAction icon={<MessageSquare className="h-3.5 w-3.5" />} onClick={() => {}}>
-              Xabar
-            </SecondaryAction>
+            <Link href={profileHref}>
+              <SecondaryAction icon={<Eye className="h-3.5 w-3.5" />} onClick={() => {}}>
+                To'liq profil
+              </SecondaryAction>
+            </Link>
+            <Link href="/dashboard/messages">
+              <SecondaryAction icon={<MessageSquare className="h-3.5 w-3.5" />} onClick={() => {}}>
+                Xabar
+              </SecondaryAction>
+            </Link>
             {onLinkParent && (
               <SecondaryAction
                 icon={<Users className="h-3.5 w-3.5" />}
@@ -611,14 +624,32 @@ function StudentPanel({
       id: 'academic',
       label: "Akademik",
       content: (
-        <div className="p-5">
-          <div className="flex flex-col items-center py-8 gap-2">
-            <GraduationCap className="h-6 w-6 text-xedu-slate-300" />
-            <p className="text-sm text-xedu-slate-500">Akademik ma'lumotlar mavjud emas</p>
-            <Link href="/dashboard/grades" className="text-xs font-semibold text-xedu-primary hover:underline">
-              Baholarga o'tish →
-            </Link>
-          </div>
+        <div className="p-5 space-y-3">
+          {!profile ? (
+            <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-xedu-slate-300" /></div>
+          ) : (
+            <>
+              <div className="grid grid-cols-3 gap-2">
+                <StatPill label="O'rt. baho" value={profile.academic.gpa.toFixed(1)} tone="success" />
+                <StatPill label="Foiz" value={`${profile.academic.gpaPct}%`} />
+                <StatPill label="Baholar" value={profile.academic.gradeCount} />
+              </div>
+              <div className="divide-y">
+                {profile.academic.recentGrades.slice(0, 5).map((g: any) => (
+                  <div key={g.id} className="flex items-center justify-between py-2 text-xs">
+                    <span className="font-medium text-xedu-slate-700 dark:text-xedu-slate-200">{g.subject?.name ?? '—'}</span>
+                    <span className="text-xedu-slate-500">{g.score}/{g.maxScore}</span>
+                  </div>
+                ))}
+                {profile.academic.recentGrades.length === 0 && (
+                  <p className="text-xs text-xedu-slate-400 py-3 text-center">Baholar yo'q</p>
+                )}
+              </div>
+              <Link href={`${profileHref}`} className="text-xs font-semibold text-xedu-primary hover:underline">
+                To'liq profil →
+              </Link>
+            </>
+          )}
         </div>
       ),
     },
@@ -626,14 +657,22 @@ function StudentPanel({
       id: 'attendance',
       label: 'Davomat',
       content: (
-        <div className="p-5">
-          <div className="flex flex-col items-center py-8 gap-2">
-            <ClipboardCheck className="h-6 w-6 text-xedu-slate-300" />
-            <p className="text-sm text-xedu-slate-500">Davomat ma'lumotlari mavjud emas</p>
-            <Link href="/dashboard/attendance" className="text-xs font-semibold text-xedu-primary hover:underline">
-              Davomatga o'tish →
-            </Link>
-          </div>
+        <div className="p-5 space-y-3">
+          {!profile ? (
+            <div className="flex justify-center py-8"><Loader2 className="h-5 w-5 animate-spin text-xedu-slate-300" /></div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-2">
+                <StatPill label="Kelish %" value={`${profile.attendance.presentRate}%`} tone={profile.attendance.presentRate >= 90 ? 'success' : 'attention'} />
+                <StatPill label="Jami yozuv" value={profile.attendance.total} />
+                <StatPill label="Keldi" value={profile.attendance.present} tone="success" />
+                <StatPill label="Kelmadi" value={profile.attendance.absent} tone="urgent" />
+              </div>
+              <Link href={`${profileHref}`} className="text-xs font-semibold text-xedu-primary hover:underline">
+                To'liq profil →
+              </Link>
+            </>
+          )}
         </div>
       ),
     },

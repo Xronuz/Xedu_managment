@@ -1,18 +1,20 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '@/store/auth.store';
 import { classesApi } from '@/lib/api/classes';
 import { attendanceApi } from '@/lib/api/attendance';
 import { subjectsApi } from '@/lib/api/subjects';
 import { gradesApi } from '@/lib/api/grades';
+import { portfolioApi } from '@/lib/api/portfolio';
 import { format } from 'date-fns';
 import { uz } from 'date-fns/locale';
 import {
   School, Users, ClipboardCheck, BarChart2,
   BookOpen, CheckCircle2, XCircle, Clock,
-  AlertCircle, ChevronRight, Loader2, UserCircle,
+  AlertCircle, ChevronRight, Loader2, UserCircle, Trophy,
 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -67,9 +69,36 @@ export default function MyClassPage() {
     staleTime: 60_000,
   });
 
+  // ─── My portfolio-KPI points ──────────────────────────────────────────────
+  const { data: kpiPoints } = useQuery({
+    queryKey: ['portfolio', 'teacher-points', 'me'],
+    queryFn: () => portfolioApi.teacherPoints(),
+    enabled: user?.role === 'class_teacher',
+    staleTime: 60_000,
+  });
+
   // ─── Attendance state ─────────────────────────────────────────────────────
   const [attStatus, setAttStatus] = useState<Record<string, AttStatus>>({});
   const [attDate, setAttDate] = useState(today);
+
+  // Preload already-saved attendance for the selected date
+  const { data: existingAtt } = useQuery({
+    queryKey: ['attendance', 'report', cls?.id, attDate],
+    queryFn: () => attendanceApi.getReport({ classId: cls!.id, startDate: attDate, endDate: attDate }),
+    enabled: user?.role === 'class_teacher' && !!cls?.id,
+    staleTime: 30_000,
+  });
+
+  // Seed the marking grid from saved records so reopening/changing date isn't blank
+  useEffect(() => {
+    const seed: Record<string, AttStatus> = {};
+    if (Array.isArray(existingAtt)) {
+      for (const rec of existingAtt as any[]) {
+        if (rec?.studentId && rec?.status) seed[rec.studentId] = rec.status as AttStatus;
+      }
+    }
+    setAttStatus(seed);
+  }, [existingAtt]);
 
   const markAttMutation = useMutation({
     mutationFn: (entries: { studentId: string; status: AttStatus }[]) =>
@@ -143,6 +172,7 @@ export default function MyClassPage() {
 
   const presentCount = Object.values(attStatus).filter((s) => s === 'present').length;
   const absentCount  = Object.values(attStatus).filter((s) => s === 'absent').length;
+  const markedCount  = students.filter((s) => attStatus[s.id]).length;
   const allMarked    = students.length > 0 && students.every((s) => attStatus[s.id]);
 
   const handleAllPresent = () => {
@@ -227,6 +257,37 @@ export default function MyClassPage() {
         </Card>
       </div>
 
+      {/* Portfolio KPI points */}
+      {kpiPoints && (kpiPoints.count > 0 || kpiPoints.total > 0) && (
+        <Card className="border-amber-200 bg-amber-50/40 dark:bg-amber-500/5">
+          <CardContent className="pt-4">
+            <div className="flex items-center gap-3 flex-wrap">
+              <div className="rounded-lg bg-amber-100 p-2 shrink-0"><Trophy className="h-5 w-5 text-amber-600" /></div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold">Yutuq ballari (KPI)</p>
+                <p className="text-xs text-xedu-slate-500">
+                  O'quvchilaringizning tasdiqlangan yutuqlari uchun yig'ilgan ballar
+                </p>
+              </div>
+              <div className="flex items-center gap-5 text-center">
+                <div>
+                  <p className="text-2xl font-bold text-amber-600 tabular-nums">{kpiPoints.total}</p>
+                  <p className="text-2xs text-xedu-slate-500">Jami ball</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold tabular-nums">{kpiPoints.thisMonth}</p>
+                  <p className="text-2xs text-xedu-slate-500">Shu oy</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold tabular-nums">{kpiPoints.count}</p>
+                  <p className="text-2xs text-xedu-slate-500">Yutuqlar</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Tabs */}
       <Tabs defaultValue="attendance">
         <TabsList className="grid w-full grid-cols-3 max-w-md">
@@ -265,10 +326,10 @@ export default function MyClassPage() {
                   <Button
                     size="sm"
                     onClick={handleSaveAttendance}
-                    disabled={markAttMutation.isPending || !allMarked}
+                    disabled={markAttMutation.isPending || markedCount === 0}
                   >
                     {markAttMutation.isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-                    Saqlash
+                    Saqlash{markedCount > 0 && allMarked === false ? ` (${markedCount}/${students.length})` : ''}
                   </Button>
                 </div>
               </div>
@@ -342,11 +403,15 @@ export default function MyClassPage() {
                       <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                         <UserCircle className="h-5 w-5 text-primary" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">
+                      <Link
+                        href={`/dashboard/students/${student.id}`}
+                        className="flex-1 min-w-0 group"
+                      >
+                        <p className="font-medium text-sm truncate group-hover:text-primary group-hover:underline">
                           {student.firstName} {student.lastName}
                         </p>
-                      </div>
+                        <p className="text-xs text-xedu-slate-400">Profilni ochish →</p>
+                      </Link>
                       <Button
                         variant="ghost"
                         size="sm"

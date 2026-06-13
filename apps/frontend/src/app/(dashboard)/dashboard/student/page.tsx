@@ -16,9 +16,10 @@ import {
   FileText,
   Download,
   ShoppingBag,
-  Sparkles, Brain, BarChart3,
+  Sparkles, Brain, BarChart3, Trophy,
 } from 'lucide-react';
 import { AiPlaceholderCard } from '@/components/ai/ai-placeholder-card';
+import { StudentPortfolioTab } from './portfolio-tab';
 import {
   Card,
   CardContent,
@@ -959,7 +960,7 @@ export default function StudentPortalPage() {
 
       {/* Tabs */}
       <Tabs defaultValue="schedule" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="schedule" className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
             <span className="hidden sm:inline">Dars jadvali</span>
@@ -974,6 +975,11 @@ export default function StudentPortalPage() {
             <ClipboardList className="h-4 w-4" />
             <span className="hidden sm:inline">Uy vazifalari</span>
             <span className="sm:hidden">Vazifalar</span>
+          </TabsTrigger>
+          <TabsTrigger value="portfolio" className="flex items-center gap-1.5">
+            <Trophy className="h-4 w-4" />
+            <span className="hidden sm:inline">Portfolio</span>
+            <span className="sm:hidden">Yutuq</span>
           </TabsTrigger>
         </TabsList>
 
@@ -1015,6 +1021,20 @@ export default function StudentPortalPage() {
             </CardHeader>
             <CardContent>
               <HomeworkTab studentId={studentId} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="portfolio">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <Trophy className="h-5 w-5 text-primary" />
+                Mening yutuqlarim
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <StudentPortfolioTab studentId={studentId} />
             </CardContent>
           </Card>
         </TabsContent>

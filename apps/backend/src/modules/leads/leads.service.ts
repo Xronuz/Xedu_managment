@@ -17,14 +17,16 @@
 
 import {
   Injectable, NotFoundException, ConflictException,
-  BadRequestException, ForbiddenException,
+  BadRequestException, ForbiddenException, Optional,
 } from '@nestjs/common';
 import {
   IsString, IsNotEmpty, IsOptional, IsEnum, IsUUID, IsDateString, MaxLength, Matches,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { NotificationsService } from '@/modules/notifications/notifications.service';
 import { JwtPayload } from '@eduplatform/types';
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
@@ -144,12 +146,55 @@ export class UpdateLeadDto {
   @IsOptional()
   @IsDateString()
   nextContactDate?: string;
+
+  @ApiPropertyOptional({ description: 'CLOSED uchun yo‘qotish sababi' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  closedReason?: string;
 }
 
 export class AddCommentDto {
   @ApiProperty({ example: 'Qo‘ng‘iroq qildim, sinov darsiga kelishga rozi bo‘ldi.' })
   @IsString() @IsNotEmpty() @MaxLength(2000)
   text: string;
+}
+
+/** Public lead-capture forma (autentifikatsiyasiz) */
+export class PublicLeadDto {
+  @ApiProperty({ example: 'Jasur' })
+  @IsString() @IsNotEmpty() @MaxLength(100)
+  firstName: string;
+
+  @ApiProperty({ example: 'Toshmatov' })
+  @IsString() @IsNotEmpty() @MaxLength(100)
+  lastName: string;
+
+  @ApiProperty({ example: '+998901234567' })
+  @IsString() @MaxLength(20)
+  @Matches(/^[+\d][\d\s\-().]{5,18}$/, { message: 'Telefon raqam noto‘g‘ri formatda' })
+  phone: string;
+
+  @ApiPropertyOptional({ description: 'Filial (ko‘p filialli maktabda)' })
+  @IsOptional()
+  @IsUUID()
+  branchId?: string;
+
+  @ApiPropertyOptional({ description: 'Link parametridan keladigan manba (?src=)' })
+  @IsOptional()
+  @IsString() @MaxLength(20)
+  source?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString() @MaxLength(500)
+  note?: string;
+
+  // Honeypot — odam ko'rmaydi, bot to'ldiradi
+  @ApiPropertyOptional({ description: 'Bo‘sh qoldiring' })
+  @IsOptional()
+  @IsString() @MaxLength(200)
+  website?: string;
 }
 
 export class ConvertToStudentDto {
@@ -185,7 +230,42 @@ function normalizePhone(phone: string): string {
 
 @Injectable()
 export class LeadsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly notifications?: NotificationsService,
+  ) {}
+
+  /**
+   * Mas'ulga "sizga lead biriktirildi" xabari. O'ziga o'zi biriktirsa
+   * yuborilmaydi; xabar xatosi asosiy operatsiyani to'xtatmaydi.
+   */
+  private async notifyAssigned(
+    lead: { id: string; firstName: string; lastName: string; phone: string; schoolId: string; branchId: string },
+    assigneeId: string,
+    actor: JwtPayload,
+  ) {
+    if (!this.notifications || assigneeId === actor.sub) return;
+    try {
+      const assignee = await this.prisma.user.findUnique({
+        where: { id: assigneeId },
+        select: { branchId: true, isActive: true },
+      });
+      if (!assignee?.isActive) return;
+      await this.notifications.createInApp({
+        schoolId: lead.schoolId,
+        branchId: assignee.branchId ?? lead.branchId,
+        recipientId: assigneeId,
+        senderId: actor.sub,
+        title: 'Sizga yangi lead biriktirildi',
+        body: `${lead.firstName} ${lead.lastName} — ${lead.phone}. CRM bo'limida ko'ring.`,
+        type: 'in_app',
+        category: 'operational',
+        metadata: { leadId: lead.id },
+      });
+    } catch {
+      // xabar yuborilmasa ham lead operatsiyasi muvaffaqiyatli qoladi
+    }
+  }
 
   // ── Duplicate tekshirish ──────────────────────────────────────────────────
 
@@ -212,6 +292,7 @@ export class LeadsService {
 
     // Branch-scoped xodim faqat o'z filialida lead yarata oladi
     const branchId = dto.branchId ?? currentUser.branchId!;
+    this.assertBranchAccess(currentUser, branchId);
 
     // ─ DUPLICATE CHECK ────────────────────────────────────────────────────
     const { normalized, existing } = await this.checkDuplicate(schoolId, dto.phone);
@@ -235,7 +316,7 @@ export class LeadsService {
       });
     }
 
-    return this.prisma.lead.create({
+    const created = await this.prisma.lead.create({
       data: {
         schoolId,
         branchId,
@@ -252,6 +333,11 @@ export class LeadsService {
       },
       include: this.defaultInclude(),
     });
+
+    if (dto.assignedToId) {
+      await this.notifyAssigned(created, dto.assignedToId, currentUser);
+    }
+    return created;
   }
 
   async findAll(
@@ -273,10 +359,16 @@ export class LeadsService {
 
     const where: any = { schoolId };
 
-    // Branch izolyatsiyasi
-    if (filters.branchId) {
+    // Branch izolyatsiyasi:
+    // - filial-scoped rol (branch_admin, VP, accountant) — HAR DOIM faqat o'z
+    //   filiali; query param bilan boshqa filialni so'rab bo'lmaydi
+    // - school-wide rol (director) — filial kontekstida bo'lsa (JWT branchId)
+    //   shu filial, aks holda param yoki butun maktab
+    if (!SCHOOL_WIDE_ROLES.has(currentUser.role)) {
+      if (currentUser.branchId) where.branchId = currentUser.branchId;
+    } else if (filters.branchId) {
       where.branchId = filters.branchId;
-    } else if (!SCHOOL_WIDE_ROLES.has(currentUser.role) && currentUser.branchId) {
+    } else if (currentUser.branchId) {
       where.branchId = currentUser.branchId;
     }
 
@@ -362,12 +454,23 @@ export class LeadsService {
     if (dto.nextContactDate !== undefined) {
       data.nextContactDate = dto.nextContactDate ? new Date(dto.nextContactDate) : null;
     }
+    if (dto.closedReason !== undefined) data.closedReason = dto.closedReason || null;
+    // CLOSED'dan boshqa statusga qaytarilsa, eski yo'qotish sababi tozalanadi
+    if (dto.status && dto.status !== 'CLOSED' && lead.status === 'CLOSED' && dto.closedReason === undefined) {
+      data.closedReason = null;
+    }
 
-    return this.prisma.lead.update({
+    const updated = await this.prisma.lead.update({
       where: { id },
       data,
       include: this.defaultInclude(),
     });
+
+    // Yangi mas'ulga xabar — faqat haqiqatan o'zgarganda
+    if (dto.assignedToId && dto.assignedToId !== lead.assignedToId) {
+      await this.notifyAssigned(updated, dto.assignedToId, currentUser);
+    }
+    return updated;
   }
 
   async remove(id: string, currentUser: JwtPayload) {
@@ -536,10 +639,111 @@ export class LeadsService {
 
   // ── Analytics ─────────────────────────────────────────────────────────────
 
+  // ── Public lead-capture forma ─────────────────────────────────────────────
+
+  /** Maktabning forma tokeni — yo'q bo'lsa yaratiladi */
+  async getCaptureForm(currentUser: JwtPayload) {
+    const schoolId = currentUser.schoolId!;
+    const school = await this.prisma.school.findUnique({
+      where: { id: schoolId },
+      select: { crmFormToken: true },
+    });
+    if (!school) throw new NotFoundException('Maktab topilmadi');
+
+    if (school.crmFormToken) return { token: school.crmFormToken };
+    return this.rotateCaptureForm(currentUser);
+  }
+
+  /** Tokenni yangilash — eski link ishlamay qoladi (spam bo'lsa) */
+  async rotateCaptureForm(currentUser: JwtPayload) {
+    const token = randomBytes(12).toString('hex'); // 24 belgi, taxmin qilib bo'lmaydi
+    await this.prisma.school.update({
+      where: { id: currentUser.schoolId! },
+      data: { crmFormToken: token },
+    });
+    return { token };
+  }
+
+  /** Public: forma sahifasi uchun maktab nomi va filiallar */
+  async publicFormInfo(token: string) {
+    const school = await this.prisma.school.findUnique({
+      where: { crmFormToken: token },
+      select: {
+        id: true, name: true, logoUrl: true, isActive: true,
+        branches: { where: { isActive: true }, select: { id: true, name: true }, orderBy: { name: 'asc' } },
+      },
+    });
+    if (!school || !school.isActive) throw new NotFoundException('Forma topilmadi');
+    return { schoolName: school.name, logoUrl: school.logoUrl, branches: school.branches };
+  }
+
+  /**
+   * Public: forma yuborilishi. Duplikat telefon — xato emas: mavjud leadga
+   * "qayta murojaat" komment qo'shiladi (qiziqish signali), javob bir xil
+   * (lead mavjudligini tashqariga oshkor qilmaymiz).
+   */
+  async publicSubmit(token: string, dto: PublicLeadDto) {
+    // Honeypot — botlar to'ldiradigan ko'rinmas maydon
+    if (dto.website) return { ok: true };
+
+    const school = await this.prisma.school.findUnique({
+      where: { crmFormToken: token },
+      select: {
+        id: true, isActive: true,
+        branches: { where: { isActive: true }, select: { id: true }, orderBy: { createdAt: 'asc' } },
+      },
+    });
+    if (!school || !school.isActive) throw new NotFoundException('Forma topilmadi');
+
+    const branchId =
+      (dto.branchId && school.branches.some(b => b.id === dto.branchId))
+        ? dto.branchId
+        : school.branches[0]?.id;
+    if (!branchId) throw new BadRequestException('Maktabda aktiv filial yo‘q');
+
+    const source: LeadSource = (Object.values(LeadSource) as string[]).includes(dto.source ?? '')
+      ? (dto.source as LeadSource)
+      : LeadSource.WEBSITE;
+
+    const normalized = normalizePhone(dto.phone);
+    const existing = await this.prisma.lead.findFirst({
+      where: { schoolId: school.id, phone: normalized },
+      select: { id: true },
+    });
+
+    if (existing) {
+      await this.prisma.leadComment.create({
+        data: {
+          leadId: existing.id,
+          schoolId: school.id,
+          text: `Qayta murojaat qildi (forma orqali, manba: ${source})${dto.note ? ` — "${dto.note}"` : ''}`,
+        },
+      });
+      return { ok: true };
+    }
+
+    await this.prisma.lead.create({
+      data: {
+        schoolId: school.id,
+        branchId,
+        firstName: dto.firstName.trim(),
+        lastName: dto.lastName.trim(),
+        phone: normalized,
+        source,
+        status: 'NEW',
+        note: dto.note?.trim() || undefined,
+      },
+    });
+    return { ok: true };
+  }
+
   async getAnalytics(currentUser: JwtPayload, branchId?: string) {
-    const schoolId   = currentUser.schoolId!;
-    const viewBranch = branchId
-      ?? (!SCHOOL_WIDE_ROLES.has(currentUser.role) ? currentUser.branchId ?? undefined : undefined);
+    const schoolId = currentUser.schoolId!;
+    // findAll bilan bir xil izolyatsiya: filial-scoped rol param bilan
+    // boshqa filialni ko'ra olmaydi; director filial kontekstini hurmat qiladi
+    const viewBranch = !SCHOOL_WIDE_ROLES.has(currentUser.role)
+      ? currentUser.branchId ?? undefined
+      : branchId ?? currentUser.branchId ?? undefined;
 
     const where: any = { schoolId };
     if (viewBranch) where.branchId = viewBranch;

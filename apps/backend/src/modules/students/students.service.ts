@@ -103,6 +103,17 @@ export class StudentsService {
     if (dto.lastName !== undefined) updateData.lastName = dto.lastName;
     if (dto.phone !== undefined) updateData.phone = dto.phone;
     if (dto.avatarUrl !== undefined) updateData.avatarUrl = dto.avatarUrl;
+    // Student profile fields
+    if (dto.dateOfBirth !== undefined) updateData.dateOfBirth = dto.dateOfBirth ? new Date(dto.dateOfBirth) : null;
+    if (dto.gender !== undefined) updateData.gender = dto.gender;
+    if (dto.address !== undefined) updateData.address = dto.address;
+    if (dto.studentIdNumber !== undefined) updateData.studentIdNumber = dto.studentIdNumber;
+    if (dto.enrollmentDate !== undefined) updateData.enrollmentDate = dto.enrollmentDate ? new Date(dto.enrollmentDate) : null;
+    if (dto.emergencyContactName !== undefined) updateData.emergencyContactName = dto.emergencyContactName;
+    if (dto.emergencyContactPhone !== undefined) updateData.emergencyContactPhone = dto.emergencyContactPhone;
+    if (dto.bloodType !== undefined) updateData.bloodType = dto.bloodType;
+    if (dto.medicalNotes !== undefined) updateData.medicalNotes = dto.medicalNotes;
+    if (dto.teacherNotes !== undefined) updateData.teacherNotes = dto.teacherNotes;
 
     const updated = await this.prisma.user.update({
       where: { id },
@@ -110,6 +121,9 @@ export class StudentsService {
       select: {
         id: true, firstName: true, lastName: true, email: true, phone: true,
         avatarUrl: true, isActive: true, role: true, branchId: true, schoolId: true,
+        dateOfBirth: true, gender: true, address: true, studentIdNumber: true,
+        enrollmentDate: true, emergencyContactName: true, emergencyContactPhone: true,
+        bloodType: true, medicalNotes: true, teacherNotes: true,
       },
     });
 
@@ -160,5 +174,129 @@ export class StudentsService {
     );
 
     return this.usersService.linkParentStudent(parent.id, studentId, currentUser);
+  }
+
+  /**
+   * Aggregated student profile for the teacher/class-teacher view:
+   * identity + academic (GPA, recent grades) + attendance summary +
+   * discipline + homework + gamification + clubs. Self-contained queries —
+   * access is gated by findOne() (tenant + branch scope).
+   */
+  async getProfile(id: string, currentUser: JwtPayload) {
+    const student = await this.findOne(id, currentUser);
+    const tenant = buildTenantWhere(currentUser);
+
+    const [grades, attendance, discipline, homeworkSubs, coinTx, clubs, portfolio] = await Promise.all([
+      // Academic — grades with subject
+      this.prisma.grade.findMany({
+        where: { studentId: id, ...tenant, deletedAt: null },
+        include: { subject: { select: { id: true, name: true } } },
+        orderBy: { date: 'desc' },
+        take: 40,
+      }),
+      // Attendance — full history for rate calc (recent slice returned)
+      this.prisma.attendance.findMany({
+        where: { studentId: id, ...tenant },
+        include: { schedule: { include: { subject: { select: { id: true, name: true } } } } },
+        orderBy: { date: 'desc' },
+        take: 200,
+      }),
+      // Discipline incidents
+      this.prisma.disciplineIncident.findMany({
+        where: { studentId: id, ...tenant },
+        include: { reportedBy: { select: { id: true, firstName: true, lastName: true } } },
+        orderBy: { date: 'desc' },
+        take: 30,
+      }),
+      // Homework submissions
+      this.prisma.homeworkSubmission.findMany({
+        where: { studentId: id },
+        orderBy: { submittedAt: 'desc' },
+        take: 50,
+      }),
+      // Gamification — coin transactions (school-scoped)
+      this.prisma.coinTransaction.findMany({
+        where: { userId: id, schoolId: currentUser.schoolId ?? undefined },
+        orderBy: { createdAt: 'desc' },
+        take: 15,
+      }),
+      // Clubs
+      this.prisma.clubMember.findMany({
+        where: { studentId: id },
+        include: { club: { select: { id: true, name: true } } },
+        orderBy: { joinedAt: 'desc' },
+      }),
+      // Portfolio achievements
+      this.prisma.studentAchievement.findMany({
+        where: { studentId: id, ...tenant },
+        include: {
+          verifiedBy: { select: { id: true, firstName: true, lastName: true } },
+          subject: { select: { id: true, name: true } },
+        },
+        orderBy: [{ achievedAt: 'desc' }, { createdAt: 'desc' }],
+      }),
+    ]);
+
+    // GPA (percentage scale 0–100, then /20 → 5-point for display by frontend)
+    const gpaPct =
+      grades.length > 0
+        ? grades.reduce((s, g) => s + (g.maxScore > 0 ? (g.score / g.maxScore) * 100 : 0), 0) / grades.length
+        : 0;
+
+    // Attendance summary
+    const attCounts = { present: 0, absent: 0, late: 0, excused: 0 };
+    for (const a of attendance) {
+      if (a.status in attCounts) attCounts[a.status as keyof typeof attCounts]++;
+    }
+    const attTotal = attendance.length;
+    const presentRate = attTotal > 0
+      ? Math.round(((attCounts.present + attCounts.late) / attTotal) * 100)
+      : 0;
+
+    // Homework summary
+    const gradedSubs = homeworkSubs.filter((h) => h.score != null);
+    const hwAvg = gradedSubs.length > 0
+      ? Math.round((gradedSubs.reduce((s, h) => s + (h.score ?? 0), 0) / gradedSubs.length) * 10) / 10
+      : null;
+
+    return {
+      student,
+      academic: {
+        gpa: Math.round((gpaPct / 20) * 100) / 100, // 5-point scale
+        gpaPct: Math.round(gpaPct * 10) / 10,
+        gradeCount: grades.length,
+        recentGrades: grades.slice(0, 10),
+      },
+      attendance: {
+        ...attCounts,
+        total: attTotal,
+        presentRate,
+        recent: attendance.slice(0, 15),
+      },
+      discipline: {
+        total: discipline.length,
+        unresolved: discipline.filter((d) => !d.resolved).length,
+        incidents: discipline,
+      },
+      homework: {
+        submitted: homeworkSubs.length,
+        graded: gradedSubs.length,
+        avgScore: hwAvg,
+      },
+      gamification: {
+        coins: (student as any).coins ?? 0,
+        recentTransactions: coinTx,
+      },
+      clubs: clubs.map((c) => ({ id: c.club.id, name: c.club.name, joinedAt: c.joinedAt })),
+      portfolio: {
+        total: portfolio.length,
+        verified: portfolio.filter((p) => p.verified).length,
+        byCategory: portfolio.reduce((acc, p) => {
+          acc[p.category] = (acc[p.category] ?? 0) + 1;
+          return acc;
+        }, {} as Record<string, number>),
+        items: portfolio,
+      },
+    };
   }
 }

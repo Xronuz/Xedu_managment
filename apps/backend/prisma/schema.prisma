@@ -386,6 +386,28 @@ enum Language {
   ru
 }
 
+enum Gender {
+  male
+  female
+}
+
+enum PortfolioCategory {
+  sport // Sport musobaqalari
+  language_certificate // Til sertifikatlari (IELTS, CEFR, ...)
+  olympiad // Fan olimpiadalari
+  academic // Akademik yutuqlar (konferensiya, loyiha)
+  arts // San'at, musiqa, ijod
+  other
+}
+
+enum PortfolioLevel {
+  school // Maktab
+  district // Tuman
+  region // Viloyat
+  republic // Respublika
+  international // Xalqaro
+}
+
 // ─── Schools ──────────────────────────────────────────────────────────────
 
 model School {
@@ -405,6 +427,7 @@ model School {
   onboardingCompletedAt DateTime?
   readinessScore     Int              @default(0)
   lastTimetablePublishAt DateTime?
+  crmFormToken       String?          @unique // Public lead-capture forma tokeni (rotatsiya qilinadi)
   deletedAt          DateTime?
   deletedById        String?
   createdAt          DateTime         @default(now())
@@ -457,6 +480,8 @@ model School {
   courseMaterials     CourseMaterial[] // Markaziy o'quv materiallari
   leads               Lead[] // CRM leadlar
   leadComments        LeadComment[]
+  studentAchievements StudentAchievement[] // Portfolio yutuqlari
+  teacherKpiPoints    TeacherKpiPoint[] // O'qituvchi KPI ballari
   coinTransactions    CoinTransaction[]
   coinShopItems       CoinShopItem[]
   achievements        Achievement[]
@@ -501,6 +526,8 @@ model Branch {
   transportRoutes     TransportRoute[]
   modules             BranchModule[]
   userAssignments     UserBranchAssignment[]
+  studentAchievements StudentAchievement[] // Portfolio yutuqlari
+  teacherKpiPoints    TeacherKpiPoint[] // O'qituvchi KPI ballari
   treasuries          Treasury[]
   financialShifts     FinancialShift[]
   rooms               Room[]
@@ -653,6 +680,18 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  // Student profile (o'quvchi shaxsiy/pedagogik ma'lumotlari — barchasi ixtiyoriy)
+  dateOfBirth           DateTime? @db.Date
+  gender                Gender?
+  address               String?
+  studentIdNumber       String?   // Maktab jurnali / ID raqami
+  enrollmentDate        DateTime? @db.Date
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  bloodType             String?
+  medicalNotes          String?   // Allergiya, surunkali kasallik va h.k.
+  teacherNotes          String?   // Sinf rahbari pedagogik kuzatuvlari
+
   school School? @relation(fields: [schoolId], references: [id], onDelete: Cascade)
   branch Branch? @relation(fields: [branchId], references: [id], onDelete: Cascade)
 
@@ -729,6 +768,12 @@ model User {
   ledClubs         Club[]            @relation("ClubLeader")
   clubMembers      ClubMember[]      @relation("ClubMembers")
   clubJoinRequests ClubJoinRequest[] @relation("ClubJoinRequests")
+
+  // Portfolio (yutuqlar)
+  portfolioAchievements StudentAchievement[] @relation("PortfolioStudent")
+  portfolioVerified     StudentAchievement[] @relation("PortfolioVerifier")
+  portfolioCreated      StudentAchievement[] @relation("PortfolioCreator")
+  teacherKpiPoints      TeacherKpiPoint[]    @relation("TeacherKpiPoints")
 
   // Notification preferences (stored as JSON)
   notifPreferences Json?
@@ -868,6 +913,7 @@ model Subject {
   grades        Grade[]
   exams         Exam[]
   homeworks     Homework[]
+  portfolioAchievements StudentAchievement[] @relation("PortfolioSubject")
 
   @@index([schoolId, branchId])
   @@index([branchId])
@@ -2189,6 +2235,71 @@ model ClubMember {
   @@map("club_members")
 }
 
+// ─── Student Portfolio (yutuqlar: sport, sertifikat, olimpiada) ─────────────
+model StudentAchievement {
+  id           String            @id @default(uuid())
+  schoolId     String
+  branchId     String?
+  studentId    String
+  subjectId    String? // Mas'ul fan — KPI ballini fan o'qituvchisiga biriktirish uchun
+  category     PortfolioCategory @default(other)
+  title        String // Masalan: "IELTS", "Respublika matematika olimpiadasi"
+  level        PortfolioLevel? // Musobaqa darajasi
+  result       String? // "1-o'rin", "Oltin medal", "7.5", "B2"
+  issuer       String? // Tashkilot / imtihon markazi
+  achievedAt   DateTime          @db.Date
+  expiresAt    DateTime?         @db.Date // Sertifikat amal qilish muddati (IELTS ~2 yil)
+  fileUrl      String? // Diplom/sertifikat skani
+  description  String?
+  coinReward   Int               @default(0) // Tasdiqlanganda beriladigan coin
+  verified     Boolean           @default(false)
+  verifiedById String?
+  verifiedAt   DateTime?
+  createdById  String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  school     School  @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch     Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  student    User     @relation("PortfolioStudent", fields: [studentId], references: [id], onDelete: Cascade)
+  subject    Subject? @relation("PortfolioSubject", fields: [subjectId], references: [id], onDelete: SetNull)
+  verifiedBy User?    @relation("PortfolioVerifier", fields: [verifiedById], references: [id], onDelete: SetNull)
+  createdBy  User?    @relation("PortfolioCreator", fields: [createdById], references: [id], onDelete: SetNull)
+  kpiPoint   TeacherKpiPoint? // Tasdiqlanganda o'qituvchiga beriladigan ball (1:1)
+
+  @@index([studentId])
+  @@index([studentId, category])
+  @@index([schoolId, branchId])
+  @@index([verified])
+  @@map("student_achievements")
+}
+
+// O'quvchi yutug'i tasdiqlanganda fan o'qituvchisiga beriladigan KPI ball
+model TeacherKpiPoint {
+  id            String          @id @default(uuid())
+  schoolId      String
+  branchId      String?
+  teacherId     String
+  studentId     String
+  subjectId     String?
+  achievementId String          @unique // Bitta yutuq = bitta ball yozuvi (idempotent)
+  points        Int
+  level         PortfolioLevel?
+  awardedById   String?
+  createdAt     DateTime        @default(now())
+
+  school      School             @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  branch      Branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  teacher     User               @relation("TeacherKpiPoints", fields: [teacherId], references: [id], onDelete: Cascade)
+  achievement StudentAchievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@index([schoolId, branchId])
+  @@index([teacherId])
+  @@index([teacherId, createdAt])
+  @@index([schoolId, createdAt])
+  @@map("teacher_kpi_points")
+}
+
 model ClubJoinRequest {
   id        String            @id @default(uuid())
   clubId    String
@@ -2323,6 +2434,7 @@ model Lead {
   convertedStudentId String? // convertToStudent() dan keyin to'ldiriladi
   expectedClassId    String? // Qaysi sinfga/guruhga mo'ljallangan
   nextContactDate    DateTime? // Keyingi bog'lanish sanasi (reminder uchun)
+  closedReason       String? // CLOSED bo'lganda — yo'qotish sababi (tahlil uchun)
   createdAt          DateTime   @default(now())
   updatedAt          DateTime   @updatedAt
 

@@ -32,6 +32,7 @@ export interface Lead {
   convertedStudentId?: string | null;
   expectedClassId?:    string | null;
   nextContactDate?:    string | null;
+  closedReason?:       string | null;
   createdAt:           string;
   updatedAt:           string;
   branch?:             { id: string; name: string; code?: string } | null;
@@ -121,13 +122,14 @@ export const leadsApi = {
     branchId:        string;
     expectedClassId: string;
     nextContactDate: string;
+    closedReason:    string;
   }>): Promise<Lead> => {
     const { data } = await apiClient.put(`/leads/${id}`, payload);
     return data;
   },
 
-  updateStatus: async (id: string, status: LeadStatus): Promise<Lead> => {
-    const { data } = await apiClient.patch(`/leads/${id}/status`, { status });
+  updateStatus: async (id: string, status: LeadStatus, closedReason?: string): Promise<Lead> => {
+    const { data } = await apiClient.patch(`/leads/${id}/status`, { status, ...(closedReason ? { closedReason } : {}) });
     return data;
   },
 
@@ -148,6 +150,16 @@ export const leadsApi = {
 
   removeComment: async (leadId: string, commentId: string): Promise<{ message: string }> => {
     const { data } = await apiClient.delete(`/leads/${leadId}/comments/${commentId}`);
+    return data;
+  },
+
+  getCaptureForm: async (): Promise<{ token: string }> => {
+    const { data } = await apiClient.get('/leads/capture-form');
+    return data;
+  },
+
+  rotateCaptureForm: async (): Promise<{ token: string }> => {
+    const { data } = await apiClient.post('/leads/capture-form/rotate');
     return data;
   },
 

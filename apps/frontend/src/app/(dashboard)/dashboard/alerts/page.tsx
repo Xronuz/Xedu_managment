@@ -17,6 +17,7 @@ import { disciplineApi } from '@/lib/api/discipline';
 import { leaveRequestsApi } from '@/lib/api/leave-requests';
 import { aiAnalyticsApi } from '@/lib/api/ai-analytics';
 import { kpiApi } from '@/lib/api/kpi';
+import { leadsApi } from '@/lib/api/leads';
 import {
   SplitView, SplitViewListHeader, SplitViewListBody,
 } from '@/components/director-workspace/split-view';
@@ -93,6 +94,11 @@ export default function AlertCenterPage() {
   const { data: kpiData } = useQuery({
     queryKey: ['kpi', 'dashboard'],
     queryFn: () => kpiApi.getDashboard(),
+    staleTime: 60_000,
+  });
+  const { data: leadsData } = useQuery({
+    queryKey: ['leads', 'alerts'],
+    queryFn: () => leadsApi.getAll({ limit: 200 }),
     staleTime: 60_000,
   });
 
@@ -205,7 +211,47 @@ export default function AlertCenterPage() {
       }
     });
 
-    // 5. Low branch attendance
+    // 5. CRM: muddati o'tgan bog'lanishlar va eskirgan yangi leadlar
+    const crmLeads: any[] = (leadsData as any)?.data ?? [];
+    const dayMs = 86400000;
+    crmLeads.forEach((l: any) => {
+      if (l.status === 'CONVERTED' || l.status === 'CLOSED') return;
+      const name = `${l.firstName} ${l.lastName}`;
+
+      if (l.nextContactDate && new Date(l.nextContactDate).getTime() < Date.now() - dayMs) {
+        const daysLate = Math.floor((Date.now() - new Date(l.nextContactDate).getTime()) / dayMs);
+        items.push({
+          id: `lead-overdue-${l.id}`,
+          severity: daysLate > 3 ? 'critical' : 'warning',
+          category: 'system',
+          title: `Lead bog'lanishi o'tib ketgan: ${name}`,
+          description: `Belgilangan sanadan ${daysLate} kun o'tdi (${l.phone})${l.assignedTo ? ` — mas'ul: ${l.assignedTo.firstName} ${l.assignedTo.lastName}` : ''}`,
+          source: 'CRM',
+          createdAt: l.nextContactDate,
+          link: '/dashboard/crm',
+          linkLabel: "CRM'ga o'tish",
+          acknowledged: false,
+          rawKey: `lead-overdue-${l.id}`,
+        });
+      } else if (l.status === 'NEW' && Date.now() - new Date(l.createdAt).getTime() > 3 * dayMs) {
+        const daysOld = Math.floor((Date.now() - new Date(l.createdAt).getTime()) / dayMs);
+        items.push({
+          id: `lead-stale-${l.id}`,
+          severity: 'warning',
+          category: 'system',
+          title: `Yangi lead ${daysOld} kundan beri tegilmagan: ${name}`,
+          description: `${l.phone} — hali hech kim bog'lanmagan${l.assignedTo ? ` (mas'ul: ${l.assignedTo.firstName} ${l.assignedTo.lastName})` : ' va mas’ul ham belgilanmagan'}`,
+          source: 'CRM',
+          createdAt: l.createdAt,
+          link: '/dashboard/crm',
+          linkLabel: "CRM'ga o'tish",
+          acknowledged: false,
+          rawKey: `lead-stale-${l.id}`,
+        });
+      }
+    });
+
+    // 6. Low branch attendance
     branches.forEach((b: any) => {
       const rate = b.attendanceRate ?? b.stats?.attendanceRate;
       if (typeof rate === 'number' && rate < 0.8) {
@@ -232,7 +278,7 @@ export default function AlertCenterPage() {
       if (diff !== 0) return diff;
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-  }, [discList, leaveList, aiOverview, branches, kpiData]);
+  }, [discList, leaveList, aiOverview, branches, kpiData, leadsData]);
 
   const effectiveAlerts = useMemo(() => {
     return alerts.map((a) => ({

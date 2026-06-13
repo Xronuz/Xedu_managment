@@ -71,6 +71,15 @@ export const KPI_CATALOG: KpiCatalogItem[] = [
     direction: KpiDirection.HIGHER_IS_BETTER,
     defaultTarget: 0,
   },
+  {
+    key: 'achievement_points',
+    name: "O'quvchi yutuqlari ballari",
+    description: "Davr ichida tasdiqlangan o'quvchi yutuqlari uchun fan o'qituvchilariga berilgan KPI ballar yig'indisi",
+    category: KpiCategory.TEACHER,
+    unit: 'ball',
+    direction: KpiDirection.HIGHER_IS_BETTER,
+    defaultTarget: 0,
+  },
 ];
 
 export const KPI_CATALOG_KEYS = new Set(KPI_CATALOG.map((i) => i.key));

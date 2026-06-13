@@ -345,6 +345,15 @@ export class KpiSnapshotService {
         });
       }
 
+      case 'achievement_points': {
+        // Davrda tasdiqlangan yutuqlar uchun o'qituvchilarga berilgan ballar yig'indisi
+        const agg = await this.prisma.teacherKpiPoint.aggregate({
+          where: { ...scope, createdAt: { gte: start, lte: end } },
+          _sum: { points: true },
+        });
+        return round2(agg._sum.points ?? 0);
+      }
+
       default:
         this.logger.warn(`Noma'lum sourceKey: ${metric.sourceKey}`);
         return null;

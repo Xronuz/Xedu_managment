@@ -4,14 +4,16 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard }  from '@/common/guards/jwt-auth.guard';
+import { Public }        from '@/common/decorators/public.decorator';
 import { RolesGuard }    from '@/common/guards/roles.guard';
 import { Roles }         from '@/common/decorators/roles.decorator';
 import { CurrentUser }   from '@/common/decorators/current-user.decorator';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 import {
   LeadsService, CreateLeadDto, UpdateLeadDto,
-  AddCommentDto, ConvertToStudentDto,
+  AddCommentDto, ConvertToStudentDto, PublicLeadDto,
 } from './leads.service';
+import { Throttle } from '@nestjs/throttler';
 
 // Rollar:
 //   CRM_READ:    barcha CRM rollar — leads ro'yxati + tafsilot
@@ -52,6 +54,22 @@ export class LeadsController {
   }
 
   // ── CRUD ─────────────────────────────────────────────────────────────────
+
+  // ── Public lead-capture forma boshqaruvi ─────────────────────────────────
+
+  @Get('capture-form')
+  @Roles(...CRM_WRITE)
+  @ApiOperation({ summary: 'Public forma tokenini olish (yo‘q bo‘lsa yaratiladi)' })
+  getCaptureForm(@CurrentUser() user: JwtPayload) {
+    return this.leadsService.getCaptureForm(user);
+  }
+
+  @Post('capture-form/rotate')
+  @Roles(...CRM_CONVERT)
+  @ApiOperation({ summary: 'Forma tokenini yangilash (eski link bekor bo‘ladi)' })
+  rotateCaptureForm(@CurrentUser() user: JwtPayload) {
+    return this.leadsService.rotateCaptureForm(user);
+  }
 
   @Get()
   @Roles(...CRM_READ)
@@ -117,8 +135,13 @@ export class LeadsController {
     @Param('id') id: string,
     @Body('status') status: string,
     @CurrentUser() user: JwtPayload,
+    @Body('closedReason') closedReason?: string,
   ) {
-    return this.leadsService.update(id, { status: status as any }, user);
+    return this.leadsService.update(
+      id,
+      { status: status as any, ...(closedReason !== undefined ? { closedReason } : {}) },
+      user,
+    );
   }
 
   // ── Assignment ────────────────────────────────────────────────────────────
@@ -162,17 +185,37 @@ export class LeadsController {
 
   @Post(':id/convert')
   @Roles(...CRM_CONVERT)
-  @ApiOperation({
-    summary: 'Lead → O‘quvchi konvertatsiyasi',
-    description:
-      'Prisma.$transaction ichida: User(student) yaratish + ClassStudent + Lead.status=CONVERTED. ' +
-      'Natijada yangi o‘quvchi ma‘lumotlari va vaqtinchalik parol qaytariladi.',
-  })
-  convertToStudent(
-    @Param('id') leadId: string,
+  @ApiOperation({ summary: 'Leadni o‘quvchiga aylantirish' })
+  convert(
+    @Param('id') id: string,
     @Body() dto: ConvertToStudentDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    return this.leadsService.convertToStudent(leadId, dto, user);
+    return this.leadsService.convertToStudent(id, dto, user);
   }
 }
+
+// ─── Public forma (autentifikatsiyasiz) ─────────────────────────────────────
+// Maktab linkni Instagram/Telegram targetda ulashadi; throttler global guard
+// sifatida ishlaydi, POST uchun qattiqroq limit.
+@ApiTags('public-lead-form')
+@Controller({ path: 'public/lead-form', version: '1' })
+export class PublicLeadFormController {
+  constructor(private readonly leadsService: LeadsService) {}
+
+  @Public()
+  @Get(':token')
+  @ApiOperation({ summary: 'Forma sahifasi ma‘lumotlari (maktab nomi, filiallar)' })
+  info(@Param('token') token: string) {
+    return this.leadsService.publicFormInfo(token);
+  }
+
+  @Public()
+  @Post(':token')
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
+  @ApiOperation({ summary: 'Forma yuborish — yangi lead yoki duplikatga komment' })
+  submit(@Param('token') token: string, @Body() dto: PublicLeadDto) {
+    return this.leadsService.publicSubmit(token, dto);
+  }
+}
+

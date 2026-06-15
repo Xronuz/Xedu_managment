@@ -1156,62 +1156,70 @@ export function ReportsWorkspace() {
         <AnalyticsSectionNav />
       </div>
 
-      {/* Toolbar: tabs + filters — to'liq kenglikdagi o'ram ichida (boshqa
+      {/* Tab switcher — alohida, o'z skroll qatori (mobil uchun fade bilan) */}
+      <div className="w-full mb-2">
+        <div className="flex gap-1 bg-muted/40 rounded-xl p-1 overflow-x-auto no-scrollbar [mask-image:linear-gradient(to_right,black,black_calc(100%-20px),transparent)] md:[mask-image:none] md:inline-flex">
+          {tabs.map(({ key, label, icon: Icon, premium }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key)}
+              className={`flex shrink-0 items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+                activeTab === key
+                  ? 'bg-white dark:bg-background shadow text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              {label}
+              {premium && (
+                <span className="ml-0.5 text-[10px] font-bold text-violet-500 bg-violet-500/10 rounded px-1 py-0.5 leading-none">
+                  PRO
+                </span>
+              )}
+            </button>
+          ))}
+          <span className="shrink-0 w-1 md:hidden" aria-hidden />
+        </div>
+      </div>
+
+      {/* Toolbar: filters — to'liq kenglikdagi o'ram ichida (boshqa
           workspace'lar kabi), shunda yondagi main 0px ga siqilib qolmaydi.
           w-full div balandlikni cheklamaydi, sticky ishlayveradi. */}
       <div className="w-full">
-        <WorkspaceToolbar sticky>
-          {/* Tab switcher */}
-          <div className="flex gap-1 bg-muted/40 rounded-xl p-1">
-            {tabs.map(({ key, label, icon: Icon, premium }) => (
-              <button
-                key={key}
-                onClick={() => setActiveTab(key)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                  activeTab === key
-                    ? 'bg-white dark:bg-background shadow text-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {label}
-                {premium && (
-                  <span className="ml-0.5 text-[10px] font-bold text-violet-500 bg-violet-500/10 rounded px-1 py-0.5 leading-none">
-                    PRO
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-
+        <WorkspaceToolbar
+          sticky
+          className="flex-col items-stretch overflow-visible sm:flex-row sm:items-center"
+        >
           {/* Analytics-specific filters */}
           {activeTab === 'analytics' && (
             <>
-              <select
-                value={branchFilter}
-                onChange={(e) => setBranchFilter(e.target.value)}
-                className="h-8 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-              >
-                <option value="">Barcha filiallar</option>
-                {(branchList ?? []).map((b) => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-              </select>
-              <select
-                value={months}
-                onChange={(e) => setMonths(Number(e.target.value))}
-                className="h-8 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-              >
-                <option value={3}>3 oy</option>
-                <option value={6}>6 oy</option>
-                <option value={12}>12 oy</option>
-              </select>
-              {branchFilter && (
-                <button onClick={() => setBranchFilter('')} className="text-xs text-xedu-slate-500 hover:text-foreground underline">
-                  Tozalash
-                </button>
-              )}
-              <div className="flex gap-1 ml-auto flex-wrap">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <select
+                  value={branchFilter}
+                  onChange={(e) => setBranchFilter(e.target.value)}
+                  className="h-9 flex-1 sm:flex-none sm:h-8 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                >
+                  <option value="">Barcha filiallar</option>
+                  {(branchList ?? []).map((b) => (
+                    <option key={b.id} value={b.id}>{b.name}</option>
+                  ))}
+                </select>
+                <select
+                  value={months}
+                  onChange={(e) => setMonths(Number(e.target.value))}
+                  className="h-9 flex-1 sm:flex-none sm:h-8 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                >
+                  <option value={3}>3 oy</option>
+                  <option value={6}>6 oy</option>
+                  <option value={12}>12 oy</option>
+                </select>
+                {branchFilter && (
+                  <button onClick={() => setBranchFilter('')} className="shrink-0 text-xs text-xedu-slate-500 hover:text-foreground underline">
+                    Tozalash
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-3 gap-2 w-full sm:flex sm:w-auto sm:ml-auto sm:gap-1.5">
                 {(['students', 'payments', 'attendance'] as const).map((t) => {
                   const labels = { students: "O'quvchilar", payments: "To'lovlar", attendance: 'Davomat' };
                   return (
@@ -1221,10 +1229,10 @@ export function ReportsWorkspace() {
                       size="sm"
                       disabled={exporting === t}
                       onClick={() => handleExportExcel(t)}
-                      className="h-8 gap-1.5 text-xs"
+                      className="h-9 sm:h-8 gap-1.5 text-xs px-2 sm:px-3"
                     >
-                      <FileSpreadsheet className="h-3.5 w-3.5" />
-                      {exporting === t ? 'Yuklanmoqda...' : labels[t]}
+                      <FileSpreadsheet className="h-3.5 w-3.5 shrink-0" />
+                      <span className="truncate">{exporting === t ? '...' : labels[t]}</span>
                     </Button>
                   );
                 })}
@@ -1235,27 +1243,34 @@ export function ReportsWorkspace() {
           {/* Date range for non-analytics */}
           {activeTab !== 'analytics' && (
             <>
-              <span className="text-xs text-xedu-slate-500 dark:text-xedu-slate-400 font-medium">Sana:</span>
-              <input
-                type="date" value={dateRange.from}
-                onChange={(e) => setDateRange(r => ({ ...r, from: e.target.value }))}
-                className="h-8 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
-              <span className="text-xedu-slate-500 text-sm">—</span>
-              <input
-                type="date" value={dateRange.to}
-                onChange={(e) => setDateRange(r => ({ ...r, to: e.target.value }))}
-                className="h-8 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-              />
-              <Button variant="default" size="sm" onClick={() => setDateKey(k => k + 1)} className="h-8">
-                <RefreshCw className="mr-1.5 h-3.5 w-3.5" /> Qo'llash
-              </Button>
-              <div className="flex gap-1 ml-auto flex-wrap">
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <span className="hidden sm:inline text-xs text-xedu-slate-500 dark:text-xedu-slate-400 font-medium shrink-0">Sana:</span>
+                <input
+                  type="date" value={dateRange.from}
+                  onChange={(e) => setDateRange(r => ({ ...r, from: e.target.value }))}
+                  className="h-9 sm:h-8 flex-1 sm:flex-none min-w-0 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+                <span className="text-xedu-slate-500 text-sm shrink-0">—</span>
+                <input
+                  type="date" value={dateRange.to}
+                  onChange={(e) => setDateRange(r => ({ ...r, to: e.target.value }))}
+                  className="h-9 sm:h-8 flex-1 sm:flex-none min-w-0 rounded-lg border bg-white dark:bg-xedu-slate-950 px-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+                />
+                <Button
+                  variant="default" size="sm" onClick={() => setDateKey(k => k + 1)}
+                  className="h-9 w-9 sm:h-8 sm:w-auto px-0 sm:px-4 shrink-0"
+                  aria-label="Qo'llash"
+                >
+                  <RefreshCw className="h-3.5 w-3.5 sm:mr-1.5" />
+                  <span className="hidden sm:inline">Qo'llash</span>
+                </Button>
+              </div>
+              <div className="grid grid-cols-4 gap-1.5 w-full sm:flex sm:w-auto sm:ml-auto sm:gap-1">
                 {(['this_month', 'last_month', 'this_quarter', 'this_year'] as const).map((key) => (
                   <button
                     key={key}
                     onClick={() => applyPreset(key)}
-                    className="text-xs px-2.5 py-1 rounded-lg border hover:bg-accent transition-colors text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground"
+                    className="text-xs px-2 py-1.5 sm:py-1 rounded-lg border hover:bg-accent transition-colors text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground truncate"
                   >
                     {key === 'this_month' ? 'Bu oy' : key === 'last_month' ? "O'tgan oy" : key === 'this_quarter' ? 'Chorak' : 'Bu yil'}
                   </button>

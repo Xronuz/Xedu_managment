@@ -186,7 +186,7 @@ export function DirectorDashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="gap-1.5"
+              className="gap-1.5 hidden md:inline-flex"
               onClick={() => router.push('/dashboard/ops')}
             >
               <Zap className="h-4 w-4" />
@@ -203,7 +203,7 @@ export function DirectorDashboard() {
              ZONE A — EXECUTIVE SNAPSHOT (3 cards)
              ═══════════════════════════════════════════════════════════════════ */}
           <SectionLabel title="Umumiy ko'rinish" icon={BarChart3} />
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {/* 1. School Health */}
             <ExecCard
               title="Maktab salomatligi"
@@ -272,6 +272,7 @@ export function DirectorDashboard() {
               href="/dashboard/alerts"
               owner="director"
               isLoading={alertsLoading}
+              className="col-span-2 sm:col-span-1"
             >
               {alertsLoading ? (
                 <Skeleton className="h-10 w-20" />
@@ -296,14 +297,14 @@ export function DirectorDashboard() {
           {/* ═══════════════════════════════════════════════════════════════════
              ZONE B — UPCOMING EVENTS + ACTIVITY FEED
              ═══════════════════════════════════════════════════════════════════ */}
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
             {/* Qism 1 — Academic Calendar (60%) */}
             <div className="lg:col-span-3 rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
-                <Calendar className="h-4 w-4 text-xedu-slate-500" />
-                <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">Yaqin tadbirlar</h3>
+              <div className="flex items-center gap-2 px-3 md:px-4 py-3 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
+                <Calendar className="h-4 w-4 text-xedu-slate-500 shrink-0" />
+                <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 truncate">Yaqin tadbirlar</h3>
               </div>
-              <div className="px-4 py-3">
+              <div className="px-3 md:px-4 py-3">
                 {eventsLoading ? (
                   <div className="space-y-2">
                     <Skeleton className="h-8 w-full" />
@@ -330,7 +331,7 @@ export function DirectorDashboard() {
                   </div>
                 )}
               </div>
-              <div className="px-4 pb-3">
+              <div className="px-3 md:px-4 pb-3">
                 <Link href="/dashboard/academic-calendar" className="text-xs font-medium text-xedu-primary hover:underline">
                   Barchasi →
                 </Link>
@@ -339,29 +340,29 @@ export function DirectorDashboard() {
 
             {/* Qism 2 — Activity Feed (40%) */}
             <div className="lg:col-span-2 rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden">
-              <div className="flex items-center gap-2 px-4 py-3 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
-                <Clock className="h-4 w-4 text-xedu-slate-500" />
-                <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">Faoliyat</h3>
+              <div className="flex items-center gap-2 px-3 md:px-4 py-3 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
+                <Clock className="h-4 w-4 text-xedu-slate-500 shrink-0" />
+                <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 truncate">Faoliyat</h3>
               </div>
-              <div className="px-4 py-3 space-y-3">
+              <div className="px-3 md:px-4 py-3 space-y-3">
                 <div className="flex items-start gap-2.5">
                   <div className="h-2 w-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                  <div>
-                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200">Jadval nashr qilindi</p>
+                  <div className="min-w-0">
+                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200 truncate">Jadval nashr qilindi</p>
                     <p className="text-xs text-xedu-slate-500">Bugun</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <div className="h-2 w-2 rounded-full bg-red-500 mt-1.5 shrink-0" />
-                  <div>
-                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200">5 ta ogohlantirish</p>
+                  <div className="min-w-0">
+                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200 truncate">5 ta ogohlantirish</p>
                     <p className="text-xs text-xedu-slate-500">Yangi</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <div className="h-2 w-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
-                  <div>
-                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200">Ish haqi loyihasi</p>
+                  <div className="min-w-0">
+                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200 truncate">Ish haqi loyihasi</p>
                     <p className="text-xs text-xedu-slate-500">Kutilmoqda</p>
                   </div>
                 </div>
@@ -471,6 +472,7 @@ function ExecCard({
   isLoading,
   children,
   footer,
+  className,
 }: {
   title: string;
   href: string;
@@ -478,23 +480,27 @@ function ExecCard({
   isLoading?: boolean;
   children: React.ReactNode;
   footer?: React.ReactNode;
+  className?: string;
 }) {
   return (
     <Link
       href={href}
-      className="group block rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden transition-all hover:shadow-sm hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700"
+      className={cn(
+        "group block rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden transition-all hover:shadow-sm hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700",
+        className
+      )}
     >
-      <div className="flex items-center justify-between px-4 py-2.5 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">{title}</h3>
+      <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-2.5 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
+        <div className="flex items-center gap-2 min-w-0">
+          <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 truncate">{title}</h3>
         </div>
-        <ArrowUpRight className="h-3.5 w-3.5 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors" />
+        <ArrowUpRight className="h-3.5 w-3.5 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors shrink-0" />
       </div>
-      <div className="px-4 py-3">
+      <div className="px-3 md:px-4 py-3">
         {children}
       </div>
       {footer && (
-        <div className="px-4 pb-2">
+        <div className="px-3 md:px-4 pb-2">
           {footer}
         </div>
       )}

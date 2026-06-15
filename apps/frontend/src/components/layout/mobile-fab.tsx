@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import {
   Plus, X, ClipboardCheck, BookOpen, MessageSquare,
   Calendar, GraduationCap, BookMarked, CreditCard, Users,
-  FileText, Home,
+  FileText, Home, UserCheck,
 } from 'lucide-react';
 import { useAuthStore } from '@/store/auth.store';
 
@@ -31,14 +31,14 @@ const FAB_ACTIONS: FabAction[] = [
     icon: BookOpen,
     href: '/dashboard/grades',
     color: 'bg-blue-500 hover:bg-blue-600',
-    roles: ['director', 'vice_principal', 'teacher', 'class_teacher'],
+    roles: ['vice_principal', 'teacher', 'class_teacher'],
   },
   {
     label: 'Imtihon',
     icon: GraduationCap,
     href: '/dashboard/exams',
     color: 'bg-orange-500 hover:bg-orange-600',
-    roles: ['director', 'vice_principal', 'teacher', 'class_teacher'],
+    roles: ['vice_principal', 'teacher', 'class_teacher'],
   },
   {
     label: 'Vazifa',
@@ -46,6 +46,20 @@ const FAB_ACTIONS: FabAction[] = [
     href: '/dashboard/homework',
     color: 'bg-violet-500 hover:bg-violet-600',
     roles: ['teacher', 'class_teacher'],
+  },
+  {
+    label: 'Tasdiqlash',
+    icon: UserCheck,
+    href: '/dashboard/approvals',
+    color: 'bg-amber-500 hover:bg-amber-600',
+    roles: ['director'],
+  },
+  {
+    label: 'Xodimlar',
+    icon: Users,
+    href: '/dashboard/staff',
+    color: 'bg-indigo-500 hover:bg-indigo-600',
+    roles: ['director'],
   },
   {
     label: 'Jadval',
@@ -146,7 +160,7 @@ export function MobileFab() {
 
       {/* Action buttons — stacked above the FAB */}
       <div
-        className={`fixed bottom-20 right-4 z-50 flex flex-col-reverse gap-3 transition-all duration-200 md:hidden ${
+        className={`fixed bottom-[calc(env(safe-area-inset-bottom)+9rem)] right-4 z-50 flex flex-col-reverse gap-3 transition-all duration-200 md:hidden ${
           open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       >
@@ -169,7 +183,7 @@ export function MobileFab() {
       {/* Main FAB button — dark premium emphasis */}
       <button
         onClick={() => setOpen(prev => !prev)}
-        className={`fixed bottom-5 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-lg text-white transition-all duration-200 active:scale-95 md:hidden ${
+        className={`fixed bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full shadow-lg text-white transition-all duration-200 active:scale-95 md:hidden ${
           open ? 'bg-xedu-slate-700 rotate-45' : 'bg-xedu-slate-900 hover:bg-xedu-slate-800'
         }`}
         aria-label="Tezkor amallar"

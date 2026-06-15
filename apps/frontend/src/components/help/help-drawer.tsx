@@ -16,7 +16,7 @@ export function HelpDrawer() {
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => { if (!open) closeHelp(); }}>
-      <SheetContent hideClose className="w-[420px] sm:w-[460px] overflow-y-auto p-0">
+      <SheetContent hideClose className="w-full sm:w-[420px] lg:w-[460px] overflow-y-auto p-0">
         <SheetHeader className="flex flex-row items-center justify-between px-5 py-3 border-b border-border/50 shrink-0">
           <SheetTitle className="text-base font-semibold">Yordam</SheetTitle>
           <SheetClose className="h-8 w-8 rounded-md hover:bg-muted flex items-center justify-center">

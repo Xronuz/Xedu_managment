@@ -8,7 +8,8 @@ import {
   Briefcase, Search, Users, Phone, Mail, MapPin, GraduationCap,
   CheckCircle2, XCircle, AlertTriangle, ArrowRight, Clock,
   MessageSquare, Eye, Send, BookOpen, Shield, BarChart3,
-  Wallet, Filter, X, Calendar, UserCheck,
+  Wallet, Filter, X, Calendar, UserCheck, ChevronRight,
+  Square, CheckSquare,
 } from 'lucide-react';
 import Link from 'next/link';
 import { cn, getInitials } from '@/lib/utils';
@@ -446,6 +447,72 @@ export function StaffWorkspace() {
           selectedIds={selectedIds}
           onSelect={toggleSelect}
           onSelectAll={selectAll}
+          renderMobileCard={(s) => {
+            const roleCfg = STAFF_ROLES.find((r) => r.value === s.role);
+            const isSelected = selectedIds.includes(s.id);
+            return (
+              <div
+                className="flex items-start gap-3 p-3 active:bg-xedu-slate-50 dark:active:bg-xedu-slate-800/40 transition-colors"
+                onClick={() => setPanelStaff(s)}
+              >
+                <button
+                  onClick={(e) => { e.stopPropagation(); toggleSelect(s.id); }}
+                  className="flex h-9 w-9 -m-1.5 shrink-0 items-center justify-center"
+                  aria-label={isSelected ? "Belgini olib tashlash" : 'Tanlash'}
+                >
+                  {isSelected ? (
+                    <CheckSquare className="h-4 w-4 text-xedu-primary" />
+                  ) : (
+                    <Square className="h-4 w-4 text-xedu-slate-300" />
+                  )}
+                </button>
+
+                <div className="h-9 w-9 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center shrink-0 text-2xs font-bold text-xedu-slate-500">
+                  {getInitials(s.firstName, s.lastName)}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-sm text-xedu-slate-900 dark:text-xedu-slate-100 truncate">
+                      {s.firstName} {s.lastName}
+                    </p>
+                    <div className={cn('h-2 w-2 rounded-full shrink-0', s.isActive ? 'bg-xedu-primary' : 'bg-xedu-ruby-400')} />
+                  </div>
+                  <p className="text-2xs text-xedu-slate-400 truncate">{s.email}</p>
+
+                  <div className="flex items-center gap-1.5 mt-2 flex-wrap">
+                    <span className={cn(
+                      'inline-flex items-center gap-1 text-2xs font-bold px-1.5 py-0.5 rounded border',
+                      s.role === 'teacher' ? 'bg-xedu-sky-50 text-xedu-sky-600 border-xedu-sky-100' :
+                      s.role === 'class_teacher' ? 'bg-xedu-violet-50 text-xedu-violet-600 border-xedu-violet-100' :
+                      s.role === 'director' ? 'bg-xedu-slate-100 text-xedu-slate-700 border-xedu-slate-200' :
+                      'bg-xedu-slate-50 text-xedu-slate-600 border-xedu-slate-100'
+                    )}>
+                      {roleCfg?.label ?? s.role}
+                    </span>
+                    {s.branch?.name && (
+                      <span className="inline-flex items-center gap-1 text-2xs text-xedu-slate-500">
+                        <MapPin className="h-3 w-3" /> {s.branch.name}
+                      </span>
+                    )}
+                    {(s.assignedClasses?.length ?? 0) > 0 && (
+                      <span className="text-2xs font-bold text-xedu-slate-600">{s.assignedClasses!.length} sinf</span>
+                    )}
+                    {(s.assignedSubjects?.length ?? 0) > 0 && (
+                      <span className="text-2xs font-bold text-xedu-slate-600">{s.assignedSubjects!.length} fan</span>
+                    )}
+                    {s.phone && (
+                      <span className="inline-flex items-center gap-1 text-2xs text-xedu-slate-500">
+                        <Phone className="h-3 w-3" /> {s.phone}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <ChevronRight className="h-4 w-4 text-xedu-slate-300 shrink-0 mt-1.5" />
+              </div>
+            );
+          }}
           rowTone={(s) => {
             if (!s.isActive) return 'muted';
             if (s.role === 'teacher' && (!s.assignedClasses || s.assignedClasses.length === 0)) return 'attention';
@@ -556,6 +623,18 @@ export function StaffWorkspace() {
         staff={panelStaff}
         open={!!panelStaff}
         onClose={() => setPanelStaff(null)}
+        canManage={canManage}
+        onToggleActive={async (s) => {
+          if (s.isActive) {
+            if (await ask({ title: "Xodimni bloklashni tasdiqlang", description: "Xodim bloklanadi.", variant: 'destructive', confirmText: 'Bloklash' })) {
+              blockMutation.mutate(s.id);
+              setPanelStaff(null);
+            }
+          } else {
+            restoreMutation.mutate(s.id);
+            setPanelStaff(null);
+          }
+        }}
       />
 
       {/* Bulk toolbar */}
@@ -606,10 +685,14 @@ function StaffPanel({
   staff,
   open,
   onClose,
+  canManage,
+  onToggleActive,
 }: {
   staff: StaffRow | null;
   open: boolean;
   onClose: () => void;
+  canManage?: boolean;
+  onToggleActive?: (staff: StaffRow) => void;
 }) {
   if (!staff) return null;
 
@@ -678,6 +761,15 @@ function StaffPanel({
             <SecondaryAction icon={<Calendar className="h-3.5 w-3.5" />} onClick={() => { window.location.href = '/dashboard/schedule'; }}>
               Jadval
             </SecondaryAction>
+            {canManage && (
+              <SecondaryAction
+                icon={staff.isActive ? <XCircle className="h-3.5 w-3.5" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+                onClick={() => onToggleActive?.(staff)}
+                className={staff.isActive ? 'text-xedu-ruby-500 border-xedu-ruby-100 hover:bg-xedu-ruby-50 dark:hover:bg-xedu-ruby-900/20' : 'text-xedu-primary border-xedu-primary/20 hover:bg-xedu-primary-light'}
+              >
+                {staff.isActive ? 'Bloklash' : 'Faollashtirish'}
+              </SecondaryAction>
+            )}
           </div>
         </div>
       ),

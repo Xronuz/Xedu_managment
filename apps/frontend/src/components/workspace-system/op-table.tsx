@@ -54,6 +54,8 @@ export interface OpTableProps<T> {
   emptyState?: React.ReactNode;
   className?: string;
   maxHeight?: string;
+  /** Render a card for each row on mobile (<md) instead of the horizontally-scrolling table */
+  renderMobileCard?: (row: T, index: number) => React.ReactNode;
 }
 
 /* ── Static lookup tables (never recreated) ───────────────────────────────── */
@@ -108,6 +110,7 @@ export function OpTable<T>({
   emptyState,
   className,
   maxHeight,
+  renderMobileCard,
 }: OpTableProps<T>) {
   const [hoveredRow, setHoveredRow] = useState<string | null>(null);
 
@@ -147,7 +150,14 @@ export function OpTable<T>({
 
   return (
     <div className={cn('rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 overflow-hidden bg-xedu-bg-elevated', className)}>
-      <div className={cn('overflow-x-auto', maxHeight && 'overflow-y-auto')} style={maxHeight ? { maxHeight } : undefined}>
+      {renderMobileCard && (
+        <div className="md:hidden divide-y divide-xedu-slate-100 dark:divide-xedu-slate-800">
+          {rows.map((row, idx) => (
+            <div key={rowKey(row)}>{renderMobileCard(row, idx)}</div>
+          ))}
+        </div>
+      )}
+      <div className={cn(renderMobileCard && 'hidden md:block', 'overflow-x-auto', maxHeight && 'overflow-y-auto')} style={maxHeight ? { maxHeight } : undefined}>
         <table className="w-full text-left">
           <thead className="sticky top-0 z-10 bg-xedu-slate-50 dark:bg-xedu-slate-800">
             <tr className="border-b border-xedu-slate-100 dark:border-xedu-slate-800">

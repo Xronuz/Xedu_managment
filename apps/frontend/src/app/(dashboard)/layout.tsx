@@ -6,6 +6,7 @@ import { Header } from '@/components/layout/header';
 import { ImpersonationBanner } from '@/components/layout/impersonation-banner';
 import { BreadcrumbNav } from '@/components/layout/breadcrumb-nav';
 import { MobileFab } from '@/components/layout/mobile-fab';
+import { BottomNav } from '@/components/layout/bottom-nav';
 import { useAuthStore } from '@/store/auth.store';
 import { useUIStore } from '@/store/ui.store';
 import { PageErrorBoundary } from '@/components/providers/error-boundary';
@@ -134,7 +135,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 <ImpersonationBanner />
                 <Header />
                 <main
-                  className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg-canvas dark:bg-xedu-bg-canvas p-6"
+                  className="flex-1 min-h-0 overflow-y-auto bg-xedu-bg-canvas dark:bg-xedu-bg-canvas p-4 pb-24 md:p-6 md:pb-6"
                   style={{ isolation: 'isolate' }}
                 >
                   <BreadcrumbNav />
@@ -150,6 +151,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <MobileFab />
             <HelpDrawer />
             <HelpButton />
+            <BottomNav />
           </div>
         </HelpProvider>
       </WorkspaceProvider>

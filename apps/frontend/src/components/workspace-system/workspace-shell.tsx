@@ -100,11 +100,11 @@ export function WorkspaceHeader({
           ))}
         </nav>
       )}
-      <div className="flex items-start justify-between gap-3 flex-wrap">
+      <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             {icon && <span className="shrink-0">{icon}</span>}
-            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-none text-xedu-slate-900 dark:text-xedu-slate-100">
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-none text-xedu-slate-900 dark:text-xedu-slate-100 truncate">
               {title}
             </h1>
           </div>

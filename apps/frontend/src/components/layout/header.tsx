@@ -1,7 +1,6 @@
 'use client';
 
 import { Moon, Sun, Search } from 'lucide-react';
-import { MobileNav } from '@/components/layout/mobile-nav';
 import { NotificationDrawer } from '@/components/layout/notification-drawer';
 import { BranchSwitcher } from '@/components/layout/branch-switcher';
 import { useTheme } from 'next-themes';
@@ -18,9 +17,8 @@ export function Header() {
         'bg-transparent',
       )}
     >
-      {/* Left: mobile nav + search */}
+      {/* Left: search */}
       <div className="flex items-center gap-3">
-        <MobileNav />
         <button
           onClick={() => document.dispatchEvent(new CustomEvent('open-command-palette'))}
           aria-label="Qidiruv panelini ochish"
@@ -35,6 +33,21 @@ export function Header() {
           <Search className="h-4 w-4 shrink-0 text-xedu-slate-400 dark:text-xedu-slate-500" />
           <span className="flex-1 text-left text-[13px] text-xedu-slate-400 dark:text-xedu-slate-500">Qidiruv: o'quvchi, to'lov, sinf...</span>
           <kbd className="hidden sm:inline-flex h-5 select-none items-center rounded-md bg-xedu-slate-200/80 dark:bg-xedu-slate-700/80 px-1.5 font-mono text-[10px] text-xedu-slate-500 dark:text-xedu-slate-400 tracking-tight">⌘K</kbd>
+        </button>
+
+        {/* Mobile: icon-only search trigger (full bar hidden below md) */}
+        <button
+          onClick={() => document.dispatchEvent(new CustomEvent('open-command-palette'))}
+          aria-label="Qidiruv panelini ochish"
+          className={cn(
+            'md:hidden flex h-[42px] w-[42px] items-center justify-center rounded-full transition-all duration-150',
+            'text-xedu-slate-500 dark:text-xedu-slate-400',
+            'bg-xedu-slate-50 dark:bg-xedu-slate-900',
+            'hover:bg-xedu-slate-100 dark:hover:bg-xedu-slate-800',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-xedu-primary/20'
+          )}
+        >
+          <Search className="h-4 w-4 shrink-0" />
         </button>
       </div>
 

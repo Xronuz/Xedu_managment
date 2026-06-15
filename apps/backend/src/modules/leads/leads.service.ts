@@ -577,7 +577,7 @@ export class LeadsService {
 
     // Email generatsiyasi: agar berilmagan bo'lsa — telefon asosida
     const phoneDigits = lead.phone.replace(/[^\d]/g, '');
-    const email       = dto.email ?? `student${phoneDigits}@school.local`;
+    const email       = dto.email?.toLowerCase().trim() ?? `student${phoneDigits}@school.local`;
 
     // Email allaqachon bandmi?
     const emailExists = await this.prisma.user.findUnique({ where: { email } });

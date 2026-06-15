@@ -112,9 +112,16 @@ export class SuperAdminController {
 
   @Delete('schools/:id')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: "Maktabni o'chirish (soft delete)" })
+  @ApiOperation({ summary: "Maktabni o'chirish (soft delete — arxivlash)" })
   deleteSchool(@Param('id') id: string, @CurrentUser() user: any) {
     return this.superAdminService.deleteSchool(id, user);
+  }
+
+  @Delete('schools/:id/permanent')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: "Maktabni butunlay o'chirish (hard delete — cascade)" })
+  hardDeleteSchool(@Param('id') id: string, @CurrentUser() user: any) {
+    return this.superAdminService.hardDeleteSchool(id, user);
   }
 
   @Get('schools/:id/users')

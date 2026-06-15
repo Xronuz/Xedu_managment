@@ -61,6 +61,11 @@ export const superAdminApi = {
     return data as { message: string; schoolId: string };
   },
 
+  hardDeleteSchool: async (id: string) => {
+    const { data } = await apiClient.delete(`/super-admin/schools/${id}/permanent`);
+    return data as { message: string; schoolId: string };
+  },
+
   suspendSchool: async (id: string) => {
     const { data } = await apiClient.post(`/super-admin/schools/${id}/suspend`);
     return data as { message: string; schoolId: string };

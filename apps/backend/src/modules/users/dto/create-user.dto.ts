@@ -2,6 +2,7 @@ import {
   IsEmail, IsEnum, IsNotEmpty, IsOptional,
   IsString, IsUUID, MinLength, Matches,
 } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '@eduplatform/types';
 
@@ -17,6 +18,7 @@ export class CreateUserDto {
   lastName: string;
 
   @ApiProperty({ example: 'ali@school.uz' })
+  @Transform(({ value }) => value?.toLowerCase?.()?.trim())
   @IsEmail({}, { message: 'Email noto‘g‘ri formatda' })
   email: string;
 

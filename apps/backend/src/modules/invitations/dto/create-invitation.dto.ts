@@ -1,9 +1,11 @@
 import { IsString, IsNotEmpty, IsOptional, IsEmail, IsUUID, IsEnum } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '@eduplatform/types';
 
 export class CreateInvitationDto {
   @ApiProperty({ example: 'sardor@maktab.uz' })
+  @Transform(({ value }) => value?.toLowerCase?.()?.trim())
   @IsEmail()
   @IsNotEmpty()
   email: string;

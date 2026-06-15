@@ -45,6 +45,7 @@ export default function SchoolsPage() {
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<any>(null);
+  const [deleteMode, setDeleteMode] = useState<'soft' | 'hard'>('soft');
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
 
   const { data, isLoading, error } = useQuery({
@@ -59,9 +60,10 @@ export default function SchoolsPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => superAdminApi.deleteSchool(id),
-    onSuccess: () => {
-      toast({ title: 'Maktab o\'chirildi', description: 'Maktab muvaffaqiyatli o\'chirildi.' });
+    mutationFn: ({ id, mode }: { id: string; mode: 'soft' | 'hard' }) =>
+      mode === 'hard' ? superAdminApi.hardDeleteSchool(id) : superAdminApi.deleteSchool(id),
+    onSuccess: (res) => {
+      toast({ title: 'Bajarildi', description: res?.message ?? 'Maktab o\'chirildi.' });
       setConfirmDelete(null);
       setDeleteConfirmText('');
       queryClient.invalidateQueries({ queryKey: ['schools'] });
@@ -74,6 +76,12 @@ export default function SchoolsPage() {
       });
     },
   });
+
+  const openDelete = (school: any, mode: 'soft' | 'hard') => {
+    setDeleteMode(mode);
+    setDeleteConfirmText('');
+    setConfirmDelete(school);
+  };
 
   const schools = data?.data ?? [];
   const meta = data?.meta;
@@ -88,7 +96,8 @@ export default function SchoolsPage() {
     updateMutation.mutate({ id: school.id, payload: { isActive: !school.isActive } });
   };
 
-  const canSubmitDelete = deleteConfirmText === "O'CHIRISH";
+  const requiredWord = deleteMode === 'hard' ? 'BUTUNLAY' : "O'CHIRISH";
+  const canSubmitDelete = deleteConfirmText === requiredWord;
 
   return (
     <div className="space-y-6">
@@ -253,11 +262,18 @@ export default function SchoolsPage() {
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem
-                          onClick={() => setConfirmDelete(school)}
+                          onClick={() => openDelete(school, 'soft')}
+                          className="text-xedu-amber"
+                        >
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Arxivlash (vaqtincha)
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => openDelete(school, 'hard')}
                           className="text-xedu-ruby"
                         >
                           <Trash2 className="mr-2 h-4 w-4" />
-                          O'chirish
+                          Butunlay o'chirish
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
@@ -300,18 +316,20 @@ export default function SchoolsPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-xedu-ruby">
               <AlertTriangle className="h-5 w-5" />
-              Maktabni o'chirishni tasdiqlang
+              {deleteMode === 'hard' ? "Maktabni butunlay o'chirish" : 'Maktabni arxivlash'}
             </DialogTitle>
             <DialogDescription className="pt-1">
-              Bu maktab tizimdan o'chiriladi va uning foydalanuvchilari tizimga kira olmaydi. Bu amalni ehtiyotkorlik bilan bajaring.
+              {deleteMode === 'hard'
+                ? "Maktab va uning BARCHA ma'lumotlari (foydalanuvchilar, filiallar, baholar...) butunlay o'chiriladi. Tiklab bo'lmaydi."
+                : "Maktab arxivlanadi va foydalanuvchilari tizimga kira olmaydi. Nom va email'lar bo'shatiladi — keyinroq xuddi shu nom bilan qayta yaratishingiz mumkin."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-2">
             <div className="rounded-md bg-xedu-ruby/10 border border-xedu-ruby/20 p-3 text-sm text-xedu-ruby">
-              <strong>{confirmDelete?.name}</strong> maktabini o'chirish uchun quyidagi maydonga <code className="font-mono bg-white/50 px-1 rounded">O'CHIRISH</code> so'zini yozing.
+              <strong>{confirmDelete?.name}</strong> uchun tasdiqlash maydoniga <code className="font-mono bg-white/50 px-1 rounded">{requiredWord}</code> so'zini yozing.
             </div>
             <Input
-              placeholder="O'CHIRISH"
+              placeholder={requiredWord}
               value={deleteConfirmText}
               onChange={(e) => setDeleteConfirmText(e.target.value)}
             />
@@ -323,9 +341,11 @@ export default function SchoolsPage() {
             <Button
               variant="destructive"
               disabled={!canSubmitDelete || deleteMutation.isPending}
-              onClick={() => deleteMutation.mutate(confirmDelete?.id)}
+              onClick={() => deleteMutation.mutate({ id: confirmDelete?.id, mode: deleteMode })}
             >
-              {deleteMutation.isPending ? "O'chirilmoqda..." : "O'chirish"}
+              {deleteMutation.isPending
+                ? 'Bajarilmoqda...'
+                : deleteMode === 'hard' ? "Butunlay o'chirish" : 'Arxivlash'}
             </Button>
           </DialogFooter>
         </DialogContent>

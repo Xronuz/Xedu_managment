@@ -1,5 +1,6 @@
 import { Injectable, Logger, NotFoundException, ConflictException, ForbiddenException, Optional } from '@nestjs/common';
 import { IsString, IsOptional, IsEmail, IsBoolean, IsIn, IsUUID, IsDateString, Matches, MaxLength, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '@/common/prisma/prisma.service';
@@ -31,6 +32,7 @@ export class CreateSchoolDto {
   phone?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.toLowerCase?.()?.trim())
   @IsEmail()
   email?: string;
 
@@ -59,6 +61,7 @@ export class CreateSchoolDto {
   directorLastName?: string;
 
   @IsOptional()
+  @Transform(({ value }) => value?.toLowerCase?.()?.trim())
   @IsEmail()
   directorEmail?: string;
 }
@@ -185,11 +188,15 @@ export class SuperAdminService {
     if (directorProvided && !directorFields.every(Boolean)) {
       throw new ConflictException('Direktor uchun ism, familiya va email uchchalasi ham kiritilishi kerak');
     }
+    // Email login bilan bir xil normalizatsiya qilinadi (lowercase + trim) —
+    // aks holda saqlangan email login lookup bilan mos kelmay, direktor
+    // hech qachon tizimga kira olmaydi (login.dto email'ni lowercase qiladi).
+    const directorEmail = dto.directorEmail?.toLowerCase().trim();
     // Email unikalligi MAKTAB YARATILISHIDAN OLDIN tekshiriladi —
     // aks holda direktorsiz "yetim" maktab yaratilib qolardi
     if (directorProvided) {
       const emailTaken = await this.prisma.user.findUnique({
-        where: { email: dto.directorEmail! },
+        where: { email: directorEmail! },
         select: { id: true },
       });
       if (emailTaken) throw new ConflictException('Bu email allaqachon ro‘yxatdan o‘tgan');
@@ -254,7 +261,7 @@ export class SuperAdminService {
           schoolId: school.id,
           branchId: mainBranch.id,
           role: 'director' as any,
-          email: dto.directorEmail!,
+          email: directorEmail!,
           firstName: dto.directorFirstName!,
           lastName: dto.directorLastName!,
           passwordHash,
@@ -317,7 +324,7 @@ export class SuperAdminService {
   async deleteSchool(id: string, currentUser: JwtPayload) {
     const school = await this.prisma.school.findUnique({
       where: { id },
-      select: { id: true, name: true, deletedAt: true },
+      select: { id: true, name: true, slug: true, deletedAt: true },
     });
 
     if (!school) throw new NotFoundException('Maktab topilmadi');
@@ -325,16 +332,24 @@ export class SuperAdminService {
       throw new ConflictException('Maktab allaqachon o‘chirilgan');
     }
 
-    // Soft delete school and deactivate all users
+    // Soft delete: maktab arxivlanadi va foydalanuvchilar bloklanadi.
+    // MUHIM: slug va foydalanuvchi email'lari unikal (global) — o'chirilgan
+    // yozuv ularni band qilib turadi. Soft-delete'dan keyin maktab tiklanmaydi
+    // (restore yo'q), shu sababli slug + email'larga "__del<ts>" qo'shib bo'shatamiz —
+    // aks holda xuddi shu nom/email bilan qayta yaratish "band" xatosini berardi.
+    const marker = `__del${Date.now()}`;
     await this.prisma.$transaction([
       this.prisma.school.update({
         where: { id },
-        data: { deletedAt: new Date(), deletedById: currentUser.sub, isActive: false },
+        data: {
+          deletedAt: new Date(),
+          deletedById: currentUser.sub,
+          isActive: false,
+          slug: `${school.slug}${marker}`,
+        },
       }),
-      this.prisma.user.updateMany({
-        where: { schoolId: id },
-        data: { isActive: false },
-      }),
+      // Email'larni concat bilan suffikslash (updateMany concat'ni qo'llamaydi)
+      this.prisma.$executeRaw`UPDATE "users" SET "email" = "email" || ${marker}, "isActive" = false WHERE "schoolId" = ${id}`,
     ]);
 
     // Revoke all sessions for school users
@@ -350,7 +365,41 @@ export class SuperAdminService {
     });
 
     return {
-      message: "Maktab muvaffaqiyatli o‘chirildi. Barcha foydalanuvchilar bloklandi.",
+      message: "Maktab arxivlandi. Nom va email'lar bo‘shatildi — qayta yaratish mumkin.",
+      schoolId: id,
+    };
+  }
+
+  /**
+   * Maktabni BUTUNLAY o'chirish (hard delete) — barcha bog'liq ma'lumotlar
+   * (foydalanuvchilar, filiallar, baholar va h.k.) DB cascade orqali o'chiriladi.
+   * Audit loglar saqlanadi (schoolId SetNull). Tiklab bo'lmaydi.
+   */
+  async hardDeleteSchool(id: string, currentUser: JwtPayload) {
+    const school = await this.prisma.school.findUnique({
+      where: { id },
+      select: { id: true, name: true },
+    });
+    if (!school) throw new NotFoundException('Maktab topilmadi');
+
+    // Sessiyalarni o'chirishdan OLDIN bekor qilamiz (keyin foydalanuvchilar yo'qoladi)
+    await this.revokeSchoolUserSessions(id);
+
+    // Cascade delete — barcha bog'liq yozuvlar o'chadi
+    await this.prisma.school.delete({ where: { id } });
+
+    // schoolId BERILMAYDI — maktab o'chgani uchun FK null bo'ladi
+    await this.auditService.log({
+      userId: currentUser.sub,
+      action: 'school_deleted',
+      entity: 'School',
+      entityId: id,
+      newData: { name: school.name, hardDelete: true, deletedById: currentUser.sub },
+    });
+    this.logger.warn(`Maktab BUTUNLAY o'chirildi: ${school.name} (${id})`);
+
+    return {
+      message: "Maktab va barcha ma'lumotlari butunlay o‘chirildi.",
       schoolId: id,
     };
   }

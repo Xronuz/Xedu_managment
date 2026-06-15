@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth.store';
 import { ROLE_HOME, type UserRole } from '@/config/permissions';
 import { AuthLoadingGate } from './_components/auth-shell';
@@ -9,6 +9,7 @@ import { AuthLoadingGate } from './_components/auth-shell';
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const reason = searchParams.get('reason');
   const { isAuthenticated, _hasHydrated, user, logout } = useAuthStore();
   // Session-expired tozalash faqat BIR MARTA (kelganda) ishlashi kerak.
@@ -30,12 +31,20 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       return;
     }
 
+    // First-login foydalanuvchi parolni o'zgartirmaguncha /first-login sahifasida
+    // qolishi kerak. Bu yerda bosh sahifaga yo'naltirsak, middleware (isFirstLogin
+    // tekshiruvi) uni /first-login'ga qaytaradi → cheksiz redirect loop.
+    if (isAuthenticated && user?.isFirstLogin) {
+      if (pathname !== '/first-login') router.replace('/first-login');
+      return;
+    }
+
     // Oddiy holat: tizimda bo'lsa — rolga mos bosh sahifaga yo'naltirish.
     if (isAuthenticated && user) {
       const home = ROLE_HOME[user.role as UserRole] ?? '/dashboard';
       router.replace(home);
     }
-  }, [isAuthenticated, _hasHydrated, user, router, reason, logout]);
+  }, [isAuthenticated, _hasHydrated, user, router, reason, logout, pathname]);
 
   // Show branded loading while store hydrates to avoid form flicker
   if (!_hasHydrated) {

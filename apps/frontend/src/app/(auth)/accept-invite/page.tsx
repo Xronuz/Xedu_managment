@@ -79,7 +79,11 @@ function AcceptInviteForm() {
     }
     invitationsApi.validateToken(token)
       .then((res) => setValidation(res))
-      .catch(() => setValidation({ valid: false, reason: 'invalid' }))
+      .catch((err: any) => {
+        // Network error vs server error — give appropriate feedback
+        const isNetworkError = !err?.response;
+        setValidation({ valid: false, reason: isNetworkError ? 'network' : 'invalid' });
+      })
       .finally(() => setValidating(false));
   }, [token]);
 
@@ -224,7 +228,7 @@ function AcceptInviteForm() {
 }
 
 // ── Invalid states ─────────────────────────────────────────────────────────────
-function InvalidState({ reason }: { reason: 'missing' | 'invalid' | 'expired' | 'accepted' | 'revoked' }) {
+function InvalidState({ reason }: { reason: 'missing' | 'invalid' | 'expired' | 'accepted' | 'revoked' | 'network' }) {
   const config: Record<string, { icon: React.ReactNode; title: string; desc: string; action?: React.ReactNode }> = {
     missing: {
       icon: <XCircle className="h-7 w-7 text-xedu-ruby" />,
@@ -235,6 +239,16 @@ function InvalidState({ reason }: { reason: 'missing' | 'invalid' | 'expired' | 
       icon: <XCircle className="h-7 w-7 text-xedu-ruby" />,
       title: "Taklif havolasi noto'g'ri",
       desc: "Bu havola yaroqsiz yoki noto'g'ri formatda. Iltimos, administratoringizdan yangi taklif so'rang.",
+    },
+    network: {
+      icon: <AlertTriangle className="h-7 w-7 text-xedu-amber" />,
+      title: "Tarmoq xatosi",
+      desc: "Serverga ulanib bo'lmadi. Internet aloqangizni tekshiring va qayta urinib ko'ring.",
+      action: (
+        <Button className="w-full h-11 font-semibold mt-4" size="lg" onClick={() => window.location.reload()}>
+          Qayta urinish <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      ),
     },
     expired: {
       icon: <Clock className="h-7 w-7 text-xedu-amber" />,

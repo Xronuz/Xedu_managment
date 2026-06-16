@@ -274,17 +274,24 @@ export class ClassesService {
   }
 
   async addStudent(classId: string, studentId: string, currentUser: JwtPayload) {
-    await this.findOne(classId, currentUser);
+    const classData = await this.findOne(classId, currentUser);
 
     // Verify the target user is actually a student
     const student = await this.prisma.user.findFirst({
       where: { id: studentId, schoolId: currentUser.schoolId! },
-      select: { role: true, firstName: true, lastName: true },
+      select: { role: true, firstName: true, lastName: true, branchId: true },
     });
     if (!student) throw new NotFoundException('O‘quvchi topilmadi');
     if (student.role !== 'student') {
       throw new BadRequestException(
-        `${student.firstName} ${student.lastName} o'quvchi emas. Uning roli: ${student.role}`,
+        `${student.firstName} ${student.lastName} o‘quvchi emas. Uning roli: ${student.role}`,
+      );
+    }
+
+    // Branch compatibility check: student must belong to the same branch as the class
+    if (classData.branchId && student.branchId && classData.branchId !== student.branchId) {
+      throw new BadRequestException(
+        `O‘quvchi boshqa filialga tegishli. O‘quvchini avval ushbu filialga o‘tkazing.`,
       );
     }
 
@@ -294,7 +301,7 @@ export class ClassesService {
     });
     if (existing) {
       throw new ConflictException(
-        `O'quvchi allaqachon "${(existing as any).class?.name ?? 'boshqa'}" sinfida ro'yxatda.`,
+        `O‘quvchi allaqachon "${(existing as any).class?.name ?? 'boshqa'}" sinfida ro'yxatda.`,
       );
     }
     const result = await this.prisma.classStudent.create({ data: { classId, studentId } });

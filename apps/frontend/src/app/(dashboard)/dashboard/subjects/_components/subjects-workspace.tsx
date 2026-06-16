@@ -699,7 +699,7 @@ export function SubjectsWorkspace() {
             <StatPill label="Jami" value={totalSubjects} />
             <StatPill label="Noyob fanlar" value={uniqueSubjects} />
             <StatPill label="O'qituvchilar" value={new Set(subjects.map(s => s.teacherId).filter(Boolean)).size} />
-            <StatPill label="Biiktirilmagan" value={subjectsWithoutTeacher} tone={subjectsWithoutTeacher > 0 ? 'urgent' : 'calm'} />
+            <StatPill label="Biriktirilmagan" value={subjectsWithoutTeacher} tone={subjectsWithoutTeacher > 0 ? 'urgent' : 'calm'} />
           </div>
         </WorkspaceSection>
 

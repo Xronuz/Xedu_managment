@@ -100,8 +100,6 @@ export function useSwitchBranch() {
             queryClient.invalidateQueries({ queryKey: [key], exact: false }),
           ),
         );
-        // 5. Kuchli cache reset — yangi branchId bilan eski ma'lumotlar aralashmasin
-        queryClient.clear();
 
         toast({
           title: `Filial almashtirildi: ${branchMeta?.name ?? branchId}`,

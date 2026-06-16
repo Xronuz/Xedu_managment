@@ -320,6 +320,7 @@ export default function UsersPage() {
       }
 
       queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['classes'] });
       setTeacherSubjects([]);
       setOpen(false);
       reset();

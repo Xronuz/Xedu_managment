@@ -718,6 +718,7 @@ model User {
   receivedMessages         Message[]                 @relation("MessageReceiver")
   notifications            Notification[]            @relation("NotificationRecipient")
   sentNotifications        Notification[]            @relation("NotificationSender")
+  deviceTokens             DeviceToken[]
   conversationsCreated     Conversation[]            @relation("ConversationCreator")
   conversationParticipants ConversationParticipant[]
   groupMessages            GroupMessage[]            @relation("GroupMessageSender")
@@ -1288,6 +1289,21 @@ model Notification {
   @@index([category])
   @@index([priority])
   @@map("notifications")
+}
+
+// ─── Push device tokens (mobil ilova) ───────────────────────────────────────
+model DeviceToken {
+  id         String   @id @default(uuid())
+  userId     String
+  token      String   @unique // Expo push token: ExponentPushToken[...]
+  platform   String   @default("unknown") // ios | android | unknown
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("device_tokens")
 }
 
 // ─── Messages ─────────────────────────────────────────────────────────────

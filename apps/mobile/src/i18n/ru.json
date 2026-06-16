@@ -1,0 +1,185 @@
+{
+  "common": {
+    "appName": "Xedu",
+    "loading": "Загрузка...",
+    "retry": "Повторить",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "submit": "Отправить",
+    "error": "Ошибка",
+    "success": "Успешно",
+    "empty": "Нет данных",
+    "networkError": "Не удалось подключиться к серверу. Проверьте интернет."
+  },
+  "auth": {
+    "loginTitle": "Вход в систему",
+    "email": "Email",
+    "password": "Пароль",
+    "login": "Войти",
+    "loggingIn": "Вход...",
+    "forgotPassword": "Забыли пароль?",
+    "invalidCredentials": "Неверный email или пароль",
+    "firstLoginTitle": "Смените пароль",
+    "firstLoginHint": "Первый вход — установите новый пароль",
+    "currentPassword": "Текущий пароль",
+    "newPassword": "Новый пароль",
+    "confirmPassword": "Подтвердите пароль",
+    "passwordsDontMatch": "Пароли не совпадают",
+    "logout": "Выйти"
+  },
+  "tabs": {
+    "home": "Главная",
+    "children": "Дети",
+    "notifications": "Уведомления",
+    "notificationsTab": "Увед.",
+    "profile": "Профиль"
+  },
+  "home": {
+    "welcome": "Добро пожаловать",
+    "comingSoon": "Скоро",
+    "myChildren": "Мои дети",
+    "noChildren": "Дети не привязаны",
+    "noChildrenSub": "Как только администрация школы привяжет ребёнка к вашему аккаунту, он появится здесь.",
+    "openCard": "Открыть",
+    "notImplemented": "Мобильные экраны для этой роли в разработке."
+  },
+  "notifications": {
+    "title": "Уведомления",
+    "empty": "Нет уведомлений",
+    "emptySub": "Новые объявления и сообщения появятся здесь.",
+    "markAllRead": "Прочитано"
+  },
+  "profile": {
+    "account": "Аккаунт",
+    "language": "Язык",
+    "appearance": "Тема",
+    "about": "О приложении",
+    "version": "Версия",
+    "logoutConfirmTitle": "Подтвердите выход",
+    "logoutConfirmBody": "Выйти из системы?"
+  },
+  "theme": {
+    "system": "Системная",
+    "light": "Светлая",
+    "dark": "Тёмная"
+  },
+  "child": {
+    "attendance": "Посещаемость",
+    "grades": "Оценки",
+    "schedule": "Расписание",
+    "payments": "Платежи",
+    "coins": "Монеты",
+    "leave": "Заявки на отпуск",
+    "noClass": "Класс не назначен"
+  },
+  "me": {
+    "todaySchedule": "Уроки сегодня",
+    "homework": "Домашние задания",
+    "menu": "Разделы"
+  },
+  "student": {
+    "hi": "Привет",
+    "level": "Уровень",
+    "levelN": "Уровень {{n}}",
+    "toNext": "до след. уровня",
+    "coins": "Монеты",
+    "courses": "Курсы",
+    "games": "Игры",
+    "badges": "Значки",
+    "comingSoon": "Скоро",
+    "noBadges": "Пока нет значков — учись, копи монеты и открывай их!",
+    "progress": "Прогресс",
+    "heroTitle": "Путь к знаниям",
+    "heroSubtitle": "Учись каждый день и копи монеты!"
+  },
+  "homework": {
+    "title": "Домашние задания",
+    "empty": "Нет домашних заданий",
+    "due": "Срок",
+    "submit": "Сдать",
+    "yourAnswer": "Ваш ответ",
+    "answerHint": "Напишите текст ответа",
+    "submitted": "Задание отправлено"
+  },
+  "teach": {
+    "todayLessons": "Уроки сегодня",
+    "myClasses": "Мои классы",
+    "markAttendance": "Отметить посещаемость",
+    "attendance": "Посещаемость",
+    "grade": "Оценка",
+    "gradeEntry": "Поставить оценку",
+    "noLessons": "Сегодня уроков нет",
+    "noClasses": "Нет классов",
+    "noStudents": "Нет учеников",
+    "attendanceSaved": "Посещаемость сохранена",
+    "gradeSaved": "Оценка сохранена",
+    "score": "Балл",
+    "maxScore": "Макс. балл",
+    "comment": "Комментарий (необязательно)",
+    "type": "Тип",
+    "students": "учеников"
+  },
+  "gradeType": {
+    "homework": "Домашняя",
+    "classwork": "Классная",
+    "test": "Тест",
+    "exam": "Экзамен",
+    "quarterly": "Четверть",
+    "final": "Итоговая"
+  },
+  "attendance": {
+    "present": "Был",
+    "absent": "Отсутствовал",
+    "late": "Опоздал",
+    "excused": "По уважительной",
+    "empty": "Нет записей посещаемости"
+  },
+  "grades": {
+    "empty": "Нет оценок",
+    "manual": "Вручную",
+    "homework": "Домашняя",
+    "exam": "Экзамен",
+    "import": "Импорт"
+  },
+  "schedule": {
+    "empty": "Нет расписания",
+    "monday": "Понедельник",
+    "tuesday": "Вторник",
+    "wednesday": "Среда",
+    "thursday": "Четверг",
+    "friday": "Пятница",
+    "saturday": "Суббота",
+    "sunday": "Воскресенье"
+  },
+  "payments": {
+    "empty": "Нет платежей",
+    "pending": "Ожидается",
+    "paid": "Оплачено",
+    "failed": "Неуспешно",
+    "refunded": "Возврат",
+    "overdue": "Просрочено",
+    "cancelled": "Отменено",
+    "due": "Срок"
+  },
+  "coins": {
+    "balance": "Баланс",
+    "rank": "Место",
+    "empty": "Нет транзакций",
+    "earn": "Начислено",
+    "deduct": "Списано"
+  },
+  "leave": {
+    "empty": "Нет заявок на отпуск",
+    "new": "Новая заявка",
+    "startDate": "Начало (YYYY-MM-DD)",
+    "endDate": "Конец (YYYY-MM-DD)",
+    "reason": "Причина",
+    "reasonHint": "Минимум 5 символов",
+    "created": "Заявка отправлена",
+    "pending": "Ожидается",
+    "approved": "Одобрено",
+    "rejected": "Отклонено",
+    "cancelled": "Отменено",
+    "invalidDates": "Укажите корректные даты"
+  }
+}

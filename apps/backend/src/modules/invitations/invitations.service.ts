@@ -310,26 +310,50 @@ export class InvitationsService {
   async accept(token: string, password: string): Promise<{ userId: string }> {
     const tokenHash = this.hashToken(token);
 
+    let invitationEmail = '';
+    let invitationSchoolId = '';
+
     return this.prisma.$transaction(async (tx) => {
-      const invitation = await tx.invitation.findUnique({
+      // Atomically claim the invitation — only ONE concurrent request can win
+      const claimResult = await tx.invitation.updateMany({
+        where: {
+          tokenHash,
+          status: InvitationStatus.PENDING,
+          expiresAt: { gte: new Date() },
+        },
+        data: { status: InvitationStatus.ACCEPTED, acceptedAt: new Date() },
+      });
+
+      if (claimResult.count === 0) {
+        // Invitation not claimable — figure out why for a clear error message
+        const inv = await tx.invitation.findUnique({ where: { tokenHash } });
+        if (!inv) throw new BadRequestException('Taklif havolasi noto‘g‘ri yoki muddati o‘tgan');
+        if (inv.status === InvitationStatus.ACCEPTED) throw new BadRequestException('Taklif allaqachon qabul qilingan. Tizimga kirish sahifasidan kiring.');
+        if (inv.status === InvitationStatus.REVOKED) throw new BadRequestException('Taklif administrator tomonidan bekor qilingan');
+        if (inv.status === InvitationStatus.EXPIRED || inv.expiresAt < new Date()) throw new BadRequestException('Taklif muddati o‘tgan. Administratoringizdan qayta yuborishni so‘rang.');
+        throw new BadRequestException('Taklif havolasi noto‘g‘ri yoki muddati o‘tgan');
+      }
+
+      // Invitation is now claimed — retrieve full data
+      const invitation = await tx.invitation.findUniqueOrThrow({
         where: { tokenHash },
       });
 
-      if (!invitation) {
-        throw new BadRequestException('Taklif havolasi noto‘g‘ri yoki muddati o‘tgan');
-      }
+      invitationEmail = invitation.email;
+      invitationSchoolId = invitation.schoolId;
 
-      if (invitation.status !== InvitationStatus.PENDING || invitation.expiresAt < new Date()) {
-        throw new BadRequestException('Taklif havolasi noto‘g‘ri yoki muddati o‘tgan');
-      }
-
-      // Check if user already exists (FOR UPDATE to prevent race condition)
+      // Check if user already exists (still possible if admin created user manually)
       const existing = await tx.user.findFirst({
         where: { email: invitation.email, schoolId: invitation.schoolId },
       });
 
       if (existing) {
-        throw new ConflictException('Bu email bilan foydalanuvchi allaqachon mavjud');
+        // Rollback the claim — revert invitation to PENDING
+        await tx.invitation.update({
+          where: { id: invitation.id },
+          data: { status: InvitationStatus.PENDING, acceptedAt: null },
+        });
+        throw new ConflictException('Bu email bilan foydalanuvchi allaqachon mavjud. Tizimga kirish sahifasidan kiring.');
       }
 
       const passwordHash = await bcrypt.hash(password, 12);
@@ -349,16 +373,11 @@ export class InvitationsService {
         },
       });
 
-      await tx.invitation.update({
-        where: { id: invitation.id },
-        data: { status: InvitationStatus.ACCEPTED, acceptedAt: new Date() },
-      });
-
       return { userId: user.id };
     }).then(async (result) => {
       // Audit log outside transaction (non-critical)
       await this.auditService.log({
-        schoolId: (await this.prisma.invitation.findUnique({ where: { tokenHash }, select: { schoolId: true } }))?.schoolId,
+        schoolId: invitationSchoolId,
         action: 'create',
         entity: 'User',
         entityId: result.userId,

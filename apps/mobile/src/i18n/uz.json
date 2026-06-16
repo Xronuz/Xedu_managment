@@ -1,0 +1,185 @@
+{
+  "common": {
+    "appName": "Xedu",
+    "loading": "Yuklanmoqda...",
+    "retry": "Qayta urinish",
+    "save": "Saqlash",
+    "cancel": "Bekor qilish",
+    "submit": "Yuborish",
+    "error": "Xatolik",
+    "success": "Muvaffaqiyatli",
+    "empty": "Ma'lumot yo‘q",
+    "networkError": "Serverga ulanib bo‘lmadi. Internetni tekshiring."
+  },
+  "auth": {
+    "loginTitle": "Tizimga kirish",
+    "email": "Email",
+    "password": "Parol",
+    "login": "Kirish",
+    "loggingIn": "Kirilmoqda...",
+    "forgotPassword": "Parolni unutdingizmi?",
+    "invalidCredentials": "Email yoki parol noto‘g‘ri",
+    "firstLoginTitle": "Parolni o‘zgartiring",
+    "firstLoginHint": "Birinchi kirish — yangi parol o‘rnating",
+    "currentPassword": "Joriy parol",
+    "newPassword": "Yangi parol",
+    "confirmPassword": "Parolni tasdiqlang",
+    "passwordsDontMatch": "Parollar mos kelmadi",
+    "logout": "Chiqish"
+  },
+  "tabs": {
+    "home": "Bosh sahifa",
+    "children": "Farzandlar",
+    "notifications": "Bildirishnomalar",
+    "notificationsTab": "Bildirish",
+    "profile": "Profil"
+  },
+  "home": {
+    "welcome": "Xush kelibsiz",
+    "comingSoon": "Tez orada",
+    "myChildren": "Farzandlarim",
+    "noChildren": "Farzand biriktirilmagan",
+    "noChildrenSub": "Maktab administratsiyasi sizning akkauntingizga farzandingizni biriktirgach, bu yerda ko‘rinadi.",
+    "openCard": "Ko‘rish",
+    "notImplemented": "Bu rol uchun mobil ekranlar tayyorlanmoqda."
+  },
+  "notifications": {
+    "title": "Bildirishnomalar",
+    "empty": "Bildirishnomalar yo‘q",
+    "emptySub": "Yangi e‘lon yoki xabar kelganda shu yerda ko‘rinadi.",
+    "markAllRead": "O‘qildi"
+  },
+  "profile": {
+    "account": "Akkaunt",
+    "language": "Til",
+    "appearance": "Ko‘rinish",
+    "about": "Ilova haqida",
+    "version": "Versiya",
+    "logoutConfirmTitle": "Chiqishni tasdiqlang",
+    "logoutConfirmBody": "Tizimdan chiqmoqchimisiz?"
+  },
+  "theme": {
+    "system": "Tizim",
+    "light": "Yorug‘",
+    "dark": "Tungi"
+  },
+  "child": {
+    "attendance": "Davomat",
+    "grades": "Baholar",
+    "schedule": "Dars jadvali",
+    "payments": "To‘lovlar",
+    "coins": "Tangalar",
+    "leave": "Ta'til so‘rovlari",
+    "noClass": "Sinf biriktirilmagan"
+  },
+  "me": {
+    "todaySchedule": "Bugungi darslar",
+    "homework": "Uy vazifalari",
+    "menu": "Bo‘limlar"
+  },
+  "student": {
+    "hi": "Salom",
+    "level": "Daraja",
+    "levelN": "{{n}}-daraja",
+    "toNext": "keyingi darajagacha",
+    "coins": "Tangalar",
+    "courses": "Kurslar",
+    "games": "O‘yinlar",
+    "badges": "Nishonlar",
+    "comingSoon": "Tez orada",
+    "noBadges": "Hali nishon yo‘q — o‘qib, tanga yig‘ib nishonlar oching!",
+    "progress": "Progress",
+    "heroTitle": "Bilimga sayohat",
+    "heroSubtitle": "Har kuni yangi narsa o‘rgan, tanga yig‘!"
+  },
+  "homework": {
+    "title": "Uy vazifalari",
+    "empty": "Uy vazifalari yo‘q",
+    "due": "Muddat",
+    "submit": "Topshirish",
+    "yourAnswer": "Javobingiz",
+    "answerHint": "Javob matnini yozing",
+    "submitted": "Vazifa topshirildi"
+  },
+  "teach": {
+    "todayLessons": "Bugungi darslar",
+    "myClasses": "Sinflarim",
+    "markAttendance": "Davomat belgilash",
+    "attendance": "Davomat",
+    "grade": "Baho",
+    "gradeEntry": "Baho qo‘yish",
+    "noLessons": "Bugun darslar yo‘q",
+    "noClasses": "Sinflar yo‘q",
+    "noStudents": "O‘quvchilar yo‘q",
+    "attendanceSaved": "Davomat saqlandi",
+    "gradeSaved": "Baho saqlandi",
+    "score": "Ball",
+    "maxScore": "Maksimal ball",
+    "comment": "Izoh (ixtiyoriy)",
+    "type": "Turi",
+    "students": "o‘quvchi"
+  },
+  "gradeType": {
+    "homework": "Uy vazifa",
+    "classwork": "Sinf ishi",
+    "test": "Test",
+    "exam": "Imtihon",
+    "quarterly": "Chorak",
+    "final": "Yakuniy"
+  },
+  "attendance": {
+    "present": "Bor",
+    "absent": "Yo‘q",
+    "late": "Kechikdi",
+    "excused": "Sababli",
+    "empty": "Davomat yozuvlari yo‘q"
+  },
+  "grades": {
+    "empty": "Baholar yo‘q",
+    "manual": "Qo‘lda",
+    "homework": "Uy vazifa",
+    "exam": "Imtihon",
+    "import": "Import"
+  },
+  "schedule": {
+    "empty": "Dars jadvali yo‘q",
+    "monday": "Dushanba",
+    "tuesday": "Seshanba",
+    "wednesday": "Chorshanba",
+    "thursday": "Payshanba",
+    "friday": "Juma",
+    "saturday": "Shanba",
+    "sunday": "Yakshanba"
+  },
+  "payments": {
+    "empty": "To‘lovlar yo‘q",
+    "pending": "Kutilmoqda",
+    "paid": "To‘langan",
+    "failed": "Muvaffaqiyatsiz",
+    "refunded": "Qaytarilgan",
+    "overdue": "Muddati o‘tgan",
+    "cancelled": "Bekor qilingan",
+    "due": "Muddat"
+  },
+  "coins": {
+    "balance": "Balans",
+    "rank": "O‘rin",
+    "empty": "Tranzaksiyalar yo‘q",
+    "earn": "Olindi",
+    "deduct": "Yechildi"
+  },
+  "leave": {
+    "empty": "Ta'til so‘rovlari yo‘q",
+    "new": "Yangi so‘rov",
+    "startDate": "Boshlanish (YYYY-MM-DD)",
+    "endDate": "Tugash (YYYY-MM-DD)",
+    "reason": "Sabab",
+    "reasonHint": "Kamida 5 ta belgi",
+    "created": "So‘rov yuborildi",
+    "pending": "Kutilmoqda",
+    "approved": "Tasdiqlangan",
+    "rejected": "Rad etilgan",
+    "cancelled": "Bekor qilingan",
+    "invalidDates": "Sanalarni to‘g‘ri kiriting"
+  }
+}

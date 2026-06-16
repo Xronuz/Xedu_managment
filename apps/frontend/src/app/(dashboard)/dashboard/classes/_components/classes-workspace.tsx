@@ -106,7 +106,7 @@ export function ClassesWorkspace() {
 
   // ── Data fetching ──────────────────────────────────────────────────────────
   const { data: rawClasses, isLoading } = useQuery({
-    queryKey: ['classes', debouncedSearch, filterBranch, filterTeacher, filterGrade],
+    queryKey: ['classes', debouncedSearch, filterBranch, filterTeacher, filterGrade, user?.branchId],
     queryFn: classesApi.getAll,
   });
 

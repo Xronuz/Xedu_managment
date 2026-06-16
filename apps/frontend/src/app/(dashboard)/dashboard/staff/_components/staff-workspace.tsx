@@ -726,7 +726,7 @@ function StaffPanel({
           {/* Assigned classes */}
           {staff.assignedClasses && staff.assignedClasses.length > 0 && (
             <div>
-              <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">Biiktirirlgan sinflar</p>
+              <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 mb-1.5">Biriktirilgan sinflar</p>
               <div className="flex flex-wrap gap-1">
                 {staff.assignedClasses.map((c) => (
                   <span key={c.id} className="text-2xs font-bold px-1.5 py-0.5 rounded border border-xedu-slate-100 bg-xedu-slate-50 text-xedu-slate-600">

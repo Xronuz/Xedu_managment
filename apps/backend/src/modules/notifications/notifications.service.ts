@@ -3,6 +3,7 @@ import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload } from '@eduplatform/types';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { NotificationQueueService } from './notification-queue.service';
+import { PushService } from './push.service';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 
 export class SendNotificationDto {
@@ -23,6 +24,7 @@ export class NotificationsService {
     private readonly prisma: PrismaService,
     @Optional() private readonly eventsGateway: EventsGateway,
     @Optional() private readonly notificationQueue: NotificationQueueService,
+    @Optional() private readonly pushService: PushService,
   ) {}
 
   async send(dto: SendNotificationDto, currentUser: JwtPayload) {
@@ -93,6 +95,13 @@ export class NotificationsService {
         type: dto.type ?? 'in_app',
         category: dto.category ?? 'system',
         priority: dto.priority ?? 'normal',
+      });
+
+      // Mobil push (fire-and-forget — push xizmati ishlamasa bildirishnoma baribir saqlanadi)
+      void this.pushService?.sendToUser(dto.recipientId, {
+        title: dto.title,
+        body: dto.body,
+        data: { notificationId: notification.id, category: dto.category ?? 'system' },
       });
     }
 

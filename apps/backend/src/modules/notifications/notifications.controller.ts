@@ -4,6 +4,7 @@ import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
 import { NotificationsService, SendNotificationDto } from './notifications.service';
 import { NotificationQueueService } from './notification-queue.service';
+import { PushService } from './push.service';
 import { CurrentUser } from '@/common/decorators/current-user.decorator';
 import { Roles } from '@/common/decorators/roles.decorator';
 import { AnyAuthenticated } from '@/common/decorators/any-authenticated.decorator';
@@ -17,7 +18,27 @@ export class NotificationsController {
   constructor(
     private readonly notificationsService: NotificationsService,
     private readonly queueService: NotificationQueueService,
+    private readonly pushService: PushService,
   ) {}
+
+  @Post('device-token')
+  @AnyAuthenticated()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Mobil push token ro‘yxatdan o‘tkazish' })
+  registerDeviceToken(
+    @Body() dto: { token: string; platform?: string },
+    @CurrentUser('sub') userId: string,
+  ) {
+    return this.pushService.registerToken(userId, dto.token, dto.platform);
+  }
+
+  @Delete('device-token')
+  @AnyAuthenticated()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Mobil push token o‘chirish (logout)' })
+  unregisterDeviceToken(@Body() dto: { token: string }) {
+    return this.pushService.unregisterToken(dto.token);
+  }
 
   @Post()
   @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.CLASS_TEACHER, UserRole.TEACHER)

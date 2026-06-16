@@ -5,6 +5,7 @@ import { MailService } from './mail.service';
 import { SmsService } from './sms.service';
 import { NotificationProcessor } from './notification.processor';
 import { NotificationQueueService } from './notification-queue.service';
+import { PushService } from './push.service';
 import { EventsModule } from '@/modules/gateway/events.module';
 
 @Module({
@@ -16,7 +17,8 @@ import { EventsModule } from '@/modules/gateway/events.module';
     SmsService,
     NotificationProcessor,
     NotificationQueueService,
+    PushService,
   ],
-  exports: [NotificationsService, NotificationQueueService, MailService, SmsService, EventsModule],
+  exports: [NotificationsService, NotificationQueueService, MailService, SmsService, PushService, EventsModule],
 })
 export class NotificationsModule {}

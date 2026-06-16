@@ -43,7 +43,7 @@ export interface ValidateTokenResult {
     invitedByName?: string;
     expiresAt: string;
   };
-  reason?: 'invalid' | 'expired' | 'accepted' | 'revoked';
+  reason?: 'invalid' | 'expired' | 'accepted' | 'revoked' | 'network';
 }
 
 export const invitationsApi = {

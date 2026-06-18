@@ -25,7 +25,11 @@ COPY apps/frontend ./apps/frontend
 # Guarantee public/ exists (Next.js runner expects it; project may have no static assets yet)
 RUN mkdir -p /app/apps/frontend/public
 
-# Build args (injected at build time for SSG/ISR)
+# Build args (injected at build time for SSG/ISR).
+# Defaults are for LOCAL DEV only.
+# Production: override via docker-compose build args or --build-arg.
+# ⚠️  If your site uses HTTPS (Cloudflare/Caddy), ALL three MUST use https://
+#     otherwise browsers block mixed content and RSC payloads fail.
 ARG NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
 ARG NEXT_PUBLIC_WS_URL=http://localhost:3001
 ARG NEXT_PUBLIC_APP_URL=http://localhost:3000

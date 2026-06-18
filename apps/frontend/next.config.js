@@ -2,6 +2,16 @@ const createNextIntlPlugin = require('next-intl/plugin');
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 /** @type {import('next').NextConfig} */
+// Compute API base URL WITHOUT version segment.
+// NEXT_PUBLIC_API_URL typically looks like https://xedu.uz/api/v1
+// The rewrite source /api/:path* captures the full sub-path including v1/...
+// so the destination must NOT duplicate the version prefix.
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1';
+// Strip trailing /v1 (or /v1/) so the rewrite concatenation is correct:
+//   source /api/:path*  where :path* = v1/teacher-attendance/...
+//   → destination = https://xedu.uz/api/v1/teacher-attendance/...
+const API_BASE = API_URL.replace(/\/v1\/?$/, '');
+
 const nextConfig = {
   output: 'standalone',
   typescript: {
@@ -26,7 +36,7 @@ const nextConfig = {
       afterFiles: [
         {
           source: '/api/:path*',
-          destination: `${process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1'}/:path*`,
+          destination: `${API_BASE}/:path*`,
         },
       ],
     };

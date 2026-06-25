@@ -135,7 +135,7 @@ export class UsersController {
   }
 
   @Post(':id/link-student/:studentId')
-  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
+  @Roles(UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
   @ApiOperation({ summary: 'Ota-onani o‘quvchiga bog‘lash' })
   linkParentStudent(
     @Param('id') parentId: string,

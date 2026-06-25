@@ -55,14 +55,14 @@ function useRoleGuard() {
 
   useEffect(() => {
     if (!user) return;
-    const allowed = ['director', 'vice_principal'];
+    const allowed = ['director', 'vice_principal', 'branch_admin'];
     if (!allowed.includes(user.role)) {
       router.replace('/dashboard');
     }
   }, [user, router]);
 
   if (!user) return true; // still loading
-  return !['director', 'vice_principal'].includes(user.role);
+  return !['director', 'vice_principal', 'branch_admin'].includes(user.role);
 }
 
 // ─── Debounce hook ────────────────────────────────────────────────────────────

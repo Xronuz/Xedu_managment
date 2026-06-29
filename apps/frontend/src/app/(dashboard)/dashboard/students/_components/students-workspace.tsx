@@ -102,12 +102,18 @@ export function StudentsWorkspace() {
 
   const students: StudentRow[] = useMemo(() => {
     const list = (studentsData as any)?.data ?? [];
-    return list.filter((s: any) => {
-      if (filterClass && s.class?.id !== filterClass) return false;
-      if (filterStatus === 'active' && !s.isActive) return false;
-      if (filterStatus === 'inactive' && s.isActive) return false;
-      return true;
-    });
+    return list
+      .map((s: any) => ({
+        ...s,
+        // Backend studentClasses: [{class: {id, name}}] → normalize to s.class
+        class: s.class ?? s.studentClasses?.[0]?.class ?? null,
+      }))
+      .filter((s: any) => {
+        if (filterClass && s.class?.id !== filterClass) return false;
+        if (filterStatus === 'active' && !s.isActive) return false;
+        if (filterStatus === 'inactive' && s.isActive) return false;
+        return true;
+      });
   }, [studentsData, filterClass, filterStatus]);
 
   const branches: any[] = (branchesData as any)?.data ?? (Array.isArray(branchesData) ? branchesData : []);

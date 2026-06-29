@@ -29,50 +29,56 @@ import {
 } from './shared-widgets';
 
 export function BranchAdminDashboard() {
-  const { user, activeBranchId } = useAuthStore();
+  const { user, activeBranchId, _hasHydrated } = useAuthStore();
 
   const dayLabel = new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' });
+
+  const branchReady = _hasHydrated && !!activeBranchId;
 
   const { data: usersData, isLoading: usersLoading } = useQuery({
     queryKey: ['users', 'branch', activeBranchId],
     queryFn: () => usersApi.getAll({ limit: 200 }),
-    enabled: !!activeBranchId,
+    enabled: branchReady,
   });
+
+  const isVP = user?.role === 'vice_principal';
 
   const { data: classesData, isLoading: classesLoading } = useQuery({
     queryKey: ['classes', activeBranchId],
     queryFn: classesApi.getAll,
-    enabled: !!activeBranchId,
+    enabled: branchReady,
   });
 
   const { data: attendanceSummary, isLoading: attLoading } = useQuery({
     queryKey: ['attendance', 'today-summary', activeBranchId],
     queryFn: attendanceApi.getTodaySummary,
-    enabled: !!activeBranchId,
+    enabled: branchReady,
   });
 
   const { data: paymentReport, isLoading: paymentsLoading } = useQuery({
     queryKey: ['payments', 'report', activeBranchId],
     queryFn: paymentsApi.getReport,
-    enabled: !!activeBranchId,
+    // VP has no access to /payments/report endpoint — skip to avoid 403 toast
+    enabled: branchReady && !isVP,
   });
 
   const { data: financeData } = useQuery({
     queryKey: ['finance', 'dashboard', activeBranchId],
-    queryFn: financeApi.getDashboard,
-    enabled: !!activeBranchId,
+    // Optional widget — suppress 403/404 so global toast doesn't fire
+    queryFn: () => financeApi.getDashboard().catch(() => null),
+    enabled: branchReady,
   });
 
   const { data: pendingLeaves } = useQuery({
     queryKey: ['leave-requests', 'pending', activeBranchId],
-    queryFn: () => leaveRequestsApi.getAll({ status: 'pending' }),
-    enabled: !!activeBranchId,
+    queryFn: () => leaveRequestsApi.getAll({ status: 'pending' }).catch(() => null),
+    enabled: branchReady,
   });
 
   const { data: pendingDiscipline } = useQuery({
     queryKey: ['discipline', 'unresolved', activeBranchId],
     queryFn: () => disciplineApi.getAll().catch(() => ({ data: [] })),
-    enabled: !!activeBranchId,
+    enabled: branchReady,
   });
 
   const allUsers: any[] = (usersData as any)?.data ?? [];
@@ -88,7 +94,7 @@ export function BranchAdminDashboard() {
   const pendingDisciplineList: any[] = (pendingDiscipline as any)?.data ?? [];
   const debtors: any[] = paymentReport?.debtors ?? [];
 
-  const isVP = user?.role === 'vice_principal';
+  // isVP is declared above near branchReady
 
   return (
     <div className="space-y-6">
@@ -110,7 +116,7 @@ export function BranchAdminDashboard() {
           icon={Users}
           description="Filialdagi jami"
           color="blue"
-          loading={usersLoading}
+          loading={!branchReady || usersLoading}
           href="/dashboard/students"
         />
         <StatCard
@@ -119,7 +125,7 @@ export function BranchAdminDashboard() {
           icon={School}
           description={`${teacherCount} o'qituvchi · ${staffCount} xodim`}
           color="violet"
-          loading={usersLoading}
+          loading={!branchReady || usersLoading}
           href="/dashboard/staff"
         />
         <StatCard
@@ -129,7 +135,7 @@ export function BranchAdminDashboard() {
           description={`${totalStudents} ta o'quvchidan`}
           color="emerald"
           trend={presentPct >= 90 ? 'up' : 'down'}
-          loading={attLoading}
+          loading={!branchReady || attLoading}
           href="/dashboard/attendance"
         />
         {!isVP && (

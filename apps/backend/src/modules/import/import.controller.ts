@@ -1,6 +1,6 @@
 import {
   Controller, Post, Get, Param, Body, UploadedFile, Query,
-  UseInterceptors, Res, HttpCode, HttpStatus, UseGuards,
+  UseInterceptors, Res, HttpCode, HttpStatus, UseGuards, BadRequestException,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
@@ -50,7 +50,7 @@ export class ImportController {
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: "O'quvchilar Excel faylini tekshirish (preview)" })
   parseStudents(@UploadedFile() file: Express.Multer.File) {
-    if (!file) throw new Error('Fayl yuklanmadi');
+    if (!file) throw new BadRequestException('Fayl yuklanmadi');
     return this.importService.parseStudents(file.buffer);
   }
 
@@ -70,7 +70,7 @@ export class ImportController {
   @ApiConsumes('multipart/form-data')
   @ApiOperation({ summary: 'Xodimlar Excel faylini tekshirish (preview)' })
   parseUsers(@UploadedFile() file: Express.Multer.File) {
-    if (!file) throw new Error('Fayl yuklanmadi');
+    if (!file) throw new BadRequestException('Fayl yuklanmadi');
     return this.importService.parseUsers(file.buffer);
   }
 

@@ -24,6 +24,9 @@ export interface ImportResult {
 
 export interface CommitResult {
   created: number;
+  skippedDuplicates: number;
+  failedRows: Array<{ row: number; reason: string }>;
+  totalProcessed: number;
   skipped: number;
   errors: string[];
 }
@@ -46,39 +49,68 @@ export class ImportService {
    * Excel ustunlari (namuna):
    * A: firstName | B: lastName | C: email | D: phone | E: password (ixtiyoriy) | F: classId (ixtiyoriy)
    */
+  // Expected students template header columns (A-G)
+  private static readonly STUDENTS_HEADERS = ['Ism', 'Familiya', 'Email', 'Telefon', 'Parol (ixtiyoriy)', 'Sinf ID (ixtiyoriy)', 'Filial ID (ixtiyoriy)'];
+
   async parseStudents(buffer: Buffer): Promise<ImportResult> {
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer as any);
+    if (!buffer || buffer.length === 0) {
+      throw new BadRequestException('Yuklangan fayl bo\'sh');
+    }
+    let workbook: ExcelJS.Workbook;
+    try {
+      workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer as any);
+    } catch (err: any) {
+      throw new BadRequestException(`Excel fayl o'qilmadi: ${err?.message ?? 'noto\'g\'ri format'}`);
+    }
     const sheet = workbook.worksheets[0];
     if (!sheet) throw new BadRequestException('Excel faylda varaq topilmadi');
+    if (sheet.rowCount < 2) throw new BadRequestException('Fayl bo\'sh — kamida bitta ma\'lumot qatori bo\'lishi kerak');
+
+    // Header row validation: first 3 required columns must match template
+    const headerRow = sheet.getRow(1);
+    const hCells = headerRow.values as any[];
+    const REQUIRED_HEADERS = ImportService.STUDENTS_HEADERS.slice(0, 3);
+    for (let i = 0; i < REQUIRED_HEADERS.length; i++) {
+      const actual = String(hCells[i + 1] ?? '').trim();
+      if (actual !== REQUIRED_HEADERS[i]) {
+        throw new BadRequestException(
+          `Ustun ${i + 1} noto\'g\'ri: "${actual}". Kutilgan: "${REQUIRED_HEADERS[i]}". Namuna fayldan foydalaning.`,
+        );
+      }
+    }
 
     const rows: ImportRow[] = [];
-    let rowNum = 0;
 
     sheet.eachRow({ includeEmpty: false }, (row, rowIndex) => {
       if (rowIndex === 1) return; // header
-      rowNum++;
-      const cells = row.values as any[];
-      const firstName  = String(cells[1] ?? '').trim();
-      const lastName   = String(cells[2] ?? '').trim();
-      const email      = String(cells[3] ?? '').trim().toLowerCase();
-      const phone      = String(cells[4] ?? '').trim() || undefined;
-      const password   = String(cells[5] ?? '').trim() || undefined;
-      const classId    = String(cells[6] ?? '').trim() || undefined;
-      const branchId   = String(cells[7] ?? '').trim() || undefined;
+      try {
+        const cells = row.values as any[];
+        const firstName  = String(cells[1] ?? '').trim();
+        const lastName   = String(cells[2] ?? '').trim();
+        const email      = String(cells[3] ?? '').trim().toLowerCase();
+        const phone      = String(cells[4] ?? '').trim() || undefined;
+        const password   = String(cells[5] ?? '').trim() || undefined;
+        const classId    = String(cells[6] ?? '').trim() || undefined;
+        const branchId   = String(cells[7] ?? '').trim() || undefined;
 
-      const errors: string[] = [];
-      if (!firstName) errors.push('Ism kiritilmagan');
-      if (!lastName)  errors.push('Familiya kiritilmagan');
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email noto‘g‘ri');
+        const errors: string[] = [];
+        if (!firstName) errors.push('Ism kiritilmagan');
+        if (!lastName)  errors.push('Familiya kiritilmagan');
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email noto\'g\'ri');
 
-      rows.push({
-        row: rowIndex,
-        data: { firstName, lastName, email, phone, password, classId, branchId },
-        errors,
-        valid: errors.length === 0,
-      });
+        rows.push({
+          row: rowIndex,
+          data: { firstName, lastName, email, phone, password, classId, branchId },
+          errors,
+          valid: errors.length === 0,
+        });
+      } catch {
+        rows.push({ row: rowIndex, data: {}, errors: [`Qator ${rowIndex}: o'qib bo'lmadi`], valid: false });
+      }
     });
+
+    if (rows.length === 0) throw new BadRequestException('Faylda ma\'lumot qatorlari topilmadi');
 
     return {
       total: rows.length,
@@ -93,48 +125,89 @@ export class ImportService {
     const branchId = branchIdOverride ?? currentUser.branchId ?? null;
     const validRows = rows.filter(r => r.valid);
     let created = 0;
-    let skipped = 0;
-    const errors: string[] = [];
+    let skippedDuplicates = 0;
+    const failedRows: Array<{ row: number; reason: string }> = [];
 
-    for (const row of validRows) {
-      try {
-        await this.prisma.$transaction(async (tx) => {
-          const existing = await tx.user.findFirst({ where: { email: row.data.email, schoolId } });
-          if (existing) { skipped++; return; }
+    // Pre-batch dedup: fetch all emails in one query to reduce race window
+    const emails = validRows.map(r => r.data.email as string).filter(Boolean);
+    const existingEmails = new Set(
+      (await this.prisma.user.findMany({
+        where: { email: { in: emails }, schoolId },
+        select: { email: true },
+      })).map(u => u.email),
+    );
 
-          const rowBranchId = row.data.branchId ?? branchId ?? null;
-          const passwordHash = await bcrypt.hash(row.data.password ?? 'Student@123', 10);
-          const student = await tx.user.create({
-            data: {
-              schoolId,
-              branchId: rowBranchId,
-              role: UserRole.STUDENT,
-              firstName: row.data.firstName,
-              lastName:  row.data.lastName,
-              email:     row.data.email,
-              phone:     row.data.phone,
-              passwordHash,
-            },
-          });
+    // Filter out known duplicates before entering any transaction
+    const toCreate = validRows.filter(r => {
+      if (existingEmails.has(r.data.email)) { skippedDuplicates++; return false; }
+      return true;
+    });
 
-          // Sinfga biriktirish
-          if (row.data.classId) {
-            const cls = await tx.class.findFirst({ where: { id: row.data.classId, schoolId } });
-            if (cls) {
-              await tx.classStudent.upsert({
-                where: { classId_studentId: { classId: cls.id, studentId: student.id } },
-                create: { classId: cls.id, studentId: student.id },
-                update: {},
-              });
+    // CHUNK=10: stays within typical Prisma pool limit (default 10 connections)
+    const CHUNK = 10;
+    for (let i = 0; i < toCreate.length; i += CHUNK) {
+      const chunk = toCreate.slice(i, i + CHUNK);
+
+      // Pre-compute bcrypt hashes in parallel OUTSIDE transactions (CPU-bound, ~100ms each)
+      const hashes = await Promise.all(
+        chunk.map(row => bcrypt.hash(row.data.password ?? 'Student@123', 10)),
+      );
+
+      // Run transactions sequentially within each chunk to avoid P2002 race on same-chunk duplicates
+      for (let j = 0; j < chunk.length; j++) {
+        const row = chunk[j];
+        const passwordHash = hashes[j];
+        try {
+          await this.prisma.$transaction(async (tx) => {
+            // Re-check inside transaction in case another process created the user
+            const existing = await tx.user.findFirst({ where: { email: row.data.email, schoolId }, select: { id: true } });
+            if (existing) { skippedDuplicates++; return; }
+
+            const rowBranchId = row.data.branchId ?? branchId ?? null;
+            const student = await tx.user.create({
+              data: {
+                schoolId,
+                branchId: rowBranchId,
+                role: UserRole.STUDENT,
+                firstName: row.data.firstName,
+                lastName:  row.data.lastName,
+                email:     row.data.email,
+                phone:     row.data.phone,
+                passwordHash,
+              },
+            });
+
+            if (row.data.classId) {
+              const cls = await tx.class.findFirst({ where: { id: row.data.classId, schoolId }, select: { id: true } });
+              if (cls) {
+                await tx.classStudent.upsert({
+                  where: { classId_studentId: { classId: cls.id, studentId: student.id } },
+                  create: { classId: cls.id, studentId: student.id },
+                  update: {},
+                });
+              }
             }
+            created++;
+          });
+        } catch (e: any) {
+          const isDuplicate = e?.code === 'P2002' || (e?.message ?? '').includes('Unique constraint');
+          if (isDuplicate) {
+            skippedDuplicates++;
+          } else {
+            failedRows.push({ row: row.row, reason: e?.message ?? 'Noma\'lum xato' });
           }
-          created++;
-        });
-      } catch (e: any) {
-        errors.push(`Qator ${row.row}: ${e.message}`);
+        }
       }
     }
-    return { created, skipped, errors };
+
+    return {
+      created,
+      skippedDuplicates,
+      failedRows,
+      totalProcessed: validRows.length,
+      skipped: skippedDuplicates,
+      errors: failedRows.map(f => `Qator ${f.row}: ${f.reason}`),
+    };
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -142,38 +215,68 @@ export class ImportService {
   // ─────────────────────────────────────────────────────────────────────────────
   // A: firstName | B: lastName | C: email | D: phone | E: role | F: password
 
+  private static readonly USERS_HEADERS = ['Ism', 'Familiya', 'Email', 'Telefon', 'Rol (teacher/accountant/...)', 'Parol', 'Filial ID (ixtiyoriy)'];
+
   async parseUsers(buffer: Buffer): Promise<ImportResult> {
-    const workbook = new ExcelJS.Workbook();
-    await workbook.xlsx.load(buffer as any);
+    if (!buffer || buffer.length === 0) {
+      throw new BadRequestException('Yuklangan fayl bo\'sh');
+    }
+    let workbook: ExcelJS.Workbook;
+    try {
+      workbook = new ExcelJS.Workbook();
+      await workbook.xlsx.load(buffer as any);
+    } catch (err: any) {
+      throw new BadRequestException(`Excel fayl o'qilmadi: ${err?.message ?? 'noto\'g\'ri format'}`);
+    }
     const sheet = workbook.worksheets[0];
     if (!sheet) throw new BadRequestException('Excel faylda varaq topilmadi');
+    if (sheet.rowCount < 2) throw new BadRequestException('Fayl bo\'sh — kamida bitta ma\'lumot qatori bo\'lishi kerak');
+
+    // Validate first 3 required header columns
+    const headerRow = sheet.getRow(1);
+    const hCells = headerRow.values as any[];
+    const REQUIRED_HEADERS = ImportService.USERS_HEADERS.slice(0, 3);
+    for (let i = 0; i < REQUIRED_HEADERS.length; i++) {
+      const actual = String(hCells[i + 1] ?? '').trim();
+      if (actual !== REQUIRED_HEADERS[i]) {
+        throw new BadRequestException(
+          `Ustun ${i + 1} noto\'g\'ri: "${actual}". Kutilgan: "${REQUIRED_HEADERS[i]}". Namuna fayldan foydalaning.`,
+        );
+      }
+    }
 
     const VALID_ROLES = ['teacher', 'class_teacher', 'accountant', 'librarian', 'vice_principal'];
     const rows: ImportRow[] = [];
 
     sheet.eachRow({ includeEmpty: false }, (row, rowIndex) => {
       if (rowIndex === 1) return;
-      const cells = row.values as any[];
-      const firstName = String(cells[1] ?? '').trim();
-      const lastName  = String(cells[2] ?? '').trim();
-      const email     = String(cells[3] ?? '').trim().toLowerCase();
-      const phone     = String(cells[4] ?? '').trim() || undefined;
-      const role      = String(cells[5] ?? '').trim().toLowerCase();
-      const password  = String(cells[6] ?? '').trim() || undefined;
+      try {
+        const cells = row.values as any[];
+        const firstName = String(cells[1] ?? '').trim();
+        const lastName  = String(cells[2] ?? '').trim();
+        const email     = String(cells[3] ?? '').trim().toLowerCase();
+        const phone     = String(cells[4] ?? '').trim() || undefined;
+        const role      = String(cells[5] ?? '').trim().toLowerCase();
+        const password  = String(cells[6] ?? '').trim() || undefined;
 
-      const errors: string[] = [];
-      if (!firstName) errors.push('Ism kiritilmagan');
-      if (!lastName)  errors.push('Familiya kiritilmagan');
-      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email noto‘g‘ri');
-      if (!VALID_ROLES.includes(role)) errors.push(`Rol noto'g'ri: ${role}. To'g'ri: ${VALID_ROLES.join(', ')}`);
+        const errors: string[] = [];
+        if (!firstName) errors.push('Ism kiritilmagan');
+        if (!lastName)  errors.push('Familiya kiritilmagan');
+        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Email noto\'g\'ri');
+        if (!VALID_ROLES.includes(role)) errors.push(`Rol noto\'g\'ri: "${role}". To\'g\'ri: ${VALID_ROLES.join(', ')}`);
 
-      rows.push({
-        row: rowIndex,
-        data: { firstName, lastName, email, phone, role, password },
-        errors,
-        valid: errors.length === 0,
-      });
+        rows.push({
+          row: rowIndex,
+          data: { firstName, lastName, email, phone, role, password },
+          errors,
+          valid: errors.length === 0,
+        });
+      } catch {
+        rows.push({ row: rowIndex, data: {}, errors: [`Qator ${rowIndex}: o'qib bo'lmadi`], valid: false });
+      }
     });
+
+    if (rows.length === 0) throw new BadRequestException('Faylda ma\'lumot qatorlari topilmadi');
 
     return {
       total: rows.length,
@@ -184,16 +287,30 @@ export class ImportService {
   }
 
   async commitUsers(rows: ImportRow[], currentUser: JwtPayload, branchIdOverride?: string | null): Promise<CommitResult> {
+    const schoolId = currentUser.schoolId!;
     const validRows = rows.filter(r => r.valid);
-    let created = 0; let skipped = 0; const errors: string[] = [];
+    let created = 0;
+    let skippedDuplicates = 0;
+    const failedRows: Array<{ row: number; reason: string }> = [];
 
-    for (const row of validRows) {
+    // Pre-batch dedup
+    const emails = validRows.map(r => r.data.email as string).filter(Boolean);
+    const existingEmails = new Set(
+      (await this.prisma.user.findMany({
+        where: { email: { in: emails }, schoolId },
+        select: { email: true },
+      })).map(u => u.email),
+    );
+
+    const toCreate = validRows.filter(r => {
+      if (existingEmails.has(r.data.email)) { skippedDuplicates++; return false; }
+      return true;
+    });
+
+    // Sequential processing — UsersService.create does its own internal work,
+    // parallelizing it risks connection pool exhaustion
+    for (const row of toCreate) {
       try {
-        const existing = await this.prisma.user.findFirst({ where: { email: row.data.email, schoolId: currentUser.schoolId! } });
-        if (existing) { skipped++; continue; }
-
-        // Re-use UsersService.create() so that role authorization, branchId
-        // validation, and all business rules are enforced consistently.
         await this.usersService.create(
           {
             firstName: row.data.firstName,
@@ -202,16 +319,31 @@ export class ImportService {
             phone:     row.data.phone,
             password:  row.data.password ?? 'Staff@123',
             role:      row.data.role as UserRole,
-            branchId: currentUser.branchId!,
+            branchId: branchIdOverride ?? currentUser.branchId!,
           },
           currentUser,
         );
         created++;
       } catch (e: any) {
-        errors.push(`Qator ${row.row}: ${e.message}`);
+        const isDuplicate = e?.code === 'P2002'
+          || (e?.message ?? '').includes('Unique constraint')
+          || e?.status === 409;
+        if (isDuplicate) {
+          skippedDuplicates++;
+        } else {
+          failedRows.push({ row: row.row, reason: e?.message ?? 'Noma\'lum xato' });
+        }
       }
     }
-    return { created, skipped, errors };
+
+    return {
+      created,
+      skippedDuplicates,
+      failedRows,
+      totalProcessed: validRows.length,
+      skipped: skippedDuplicates,
+      errors: failedRows.map(f => `Qator ${f.row}: ${f.reason}`),
+    };
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -297,13 +429,13 @@ export class ImportService {
       }
 
       const errors: string[] = [];
-      if (!classId)   errors.push('classId yo‘q');
-      if (!subjectId) errors.push('subjectId yo‘q');
-      if (!teacherId) errors.push('teacherId yo‘q');
+      if (!classId)   errors.push("classId yo'q");
+      if (!subjectId) errors.push("subjectId yo'q");
+      if (!teacherId) errors.push("teacherId yo'q");
       if (!DAYS.includes(dayOfWeek)) errors.push(`Kun noto'g'ri: ${dayOfWeek}`);
-      if (isNaN(timeSlot) || timeSlot < 1 || timeSlot > 20) errors.push('timeSlot 1-20 oralig‘ida bo‘lishi kerak');
-      if (startTime && !/^\d{2}:\d{2}$/.test(startTime)) errors.push('startTime HH:MM formatida bo‘lishi kerak');
-      if (endTime && !/^\d{2}:\d{2}$/.test(endTime))     errors.push('endTime HH:MM formatida bo‘lishi kerak');
+      if (isNaN(timeSlot) || timeSlot < 1 || timeSlot > 20) errors.push("timeSlot 1-20 oraligida bolishi kerak");
+      if (startTime && !/^\d{2}:\d{2}$/.test(startTime)) errors.push("startTime HH:MM formatida bolishi kerak");
+      if (endTime && !/^\d{2}:\d{2}$/.test(endTime))     errors.push("endTime HH:MM formatida bolishi kerak");
       if (!WEEK_TYPES.includes(weekType)) errors.push(`Hafta turi noto'g'ri: ${weekType}`);
 
       rawRows.push({
@@ -684,7 +816,12 @@ export class ImportService {
       }
     }
 
-    return { created, skipped, errors };
+    // Parse row number from error messages like "Qator 5: ..."
+    const failedRowsSchedule = errors.map(e => {
+      const m = e.match(/^Qator (\d+):/);
+      return { row: m ? Number(m[1]) : 0, reason: e.replace(/^Qator \d+: /, '') };
+    });
+    return { created, skippedDuplicates: skipped, failedRows: failedRowsSchedule, totalProcessed: created + skipped + errors.length, skipped, errors };
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -714,12 +851,12 @@ export class ImportService {
       const comment   = String(cells[8] ?? '').trim() || undefined;
 
       const errors: string[] = [];
-      if (!studentId) errors.push('studentId yo‘q');
-      if (!subjectId) errors.push('subjectId yo‘q');
-      if (!classId)   errors.push('classId yo‘q');
+      if (!studentId) errors.push("studentId yo'q");
+      if (!subjectId) errors.push("subjectId yo'q");
+      if (!classId)   errors.push("classId yo'q");
       if (!VALID_TYPES.includes(type)) errors.push(`Tur noto'g'ri: ${type}`);
-      if (isNaN(score) || score < 0)  errors.push('Baho noto‘g‘ri');
-      if (isNaN(Date.parse(date)))    errors.push('Sana noto‘g‘ri (YYYY-MM-DD kerak)');
+      if (isNaN(score) || score < 0)  errors.push("Baho notoGri");
+      if (isNaN(Date.parse(date)))    errors.push("Sana notoGri (YYYY-MM-DD kerak)");
 
       rows.push({
         row: rowIndex,
@@ -743,20 +880,21 @@ export class ImportService {
     let created = 0; const errors: string[] = [];
 
     // Transaction ichida batch insert
-    try {
-      await this.prisma.$transaction(async (tx) => {
-        for (const row of validRows) {
-          // Classdan branchId ni olish (agar override berilmagan bo'lsa)
-          let branchId = branchIdOverride;
+    const failedRows: Array<{ row: number; reason: string }> = [];
+
+    // Process grades row-by-row to capture individual row numbers on failure
+    for (const row of validRows) {
+      try {
+        await this.prisma.$transaction(async (tx) => {
+          let branchId: string | undefined = branchIdOverride ?? undefined;
           if (!branchId) {
             const cls = await tx.class.findUnique({ where: { id: row.data.classId }, select: { branchId: true } });
-            branchId = cls!.branchId;
+            branchId = cls?.branchId ?? undefined;
           }
-
           await tx.grade.create({
             data: {
               schoolId,
-              branchId,
+              branchId: branchId!,
               studentId: row.data.studentId,
               subjectId: row.data.subjectId,
               classId:   row.data.classId,
@@ -768,13 +906,14 @@ export class ImportService {
             },
           });
           created++;
-        }
-      });
-    } catch (e: any) {
-      errors.push(e.message);
+        });
+      } catch (e: any) {
+        failedRows.push({ row: row.row, reason: e?.message ?? 'Noma\'lum xato' });
+        errors.push(`Qator ${row.row}: ${e?.message ?? 'Noma\'lum xato'}`);
+      }
     }
 
-    return { created, skipped: 0, errors };
+    return { created, skippedDuplicates: 0, skipped: 0, failedRows, totalProcessed: validRows.length, errors };
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -800,8 +939,8 @@ export class ImportService {
       const note      = String(cells[4] ?? '').trim() || undefined;
 
       const errors: string[] = [];
-      if (!studentId)                   errors.push('studentId yo‘q');
-      if (isNaN(Date.parse(date)))      errors.push('Sana noto‘g‘ri (YYYY-MM-DD kerak)');
+      if (!studentId)                   errors.push("studentId yo'q");
+      if (isNaN(Date.parse(date)))      errors.push("Sana notoGri (YYYY-MM-DD kerak)");
       if (!VALID_STATUSES.includes(status)) errors.push(`Status noto'g'ri: ${status}. Mumkin: ${VALID_STATUSES.join(', ')}`);
 
       rows.push({
@@ -864,7 +1003,11 @@ export class ImportService {
       errors.push(e.message);
     }
 
-    return { created, skipped, errors };
+    const failedRowsAttendance = errors.map(e => {
+      const m = e.match(/^Qator (\d+):/);
+      return { row: m ? Number(m[1]) : 0, reason: e.replace(/^Qator \d+: /, '') };
+    });
+    return { created, skippedDuplicates: skipped, failedRows: failedRowsAttendance, totalProcessed: created + skipped + errors.length, skipped, errors };
   }
 
   // ─────────────────────────────────────────────────────────────────────────────
@@ -873,7 +1016,7 @@ export class ImportService {
 
   async generateTemplate(type: 'students' | 'users' | 'schedule' | 'grades' | 'attendance'): Promise<Buffer> {
     const workbook = new ExcelJS.Workbook();
-    const sheet = workbook.addWorksheet('Ma‘lumotlar');
+    const sheet = workbook.addWorksheet("Ma'lumotlar");
 
     const headerStyle: Partial<ExcelJS.Style> = {
       font: { bold: true, color: { argb: 'FFFFFFFF' } },

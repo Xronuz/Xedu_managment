@@ -39,10 +39,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   // Faqat sahifa yangilanishida ishlashi kerak, LOGOUT dan keyin EMAS.
   useEffect(() => {
     if (!_hasHydrated) return;
-    if (isAuthenticated) {
-      // Foydalanuvchi allaqachon autentifikatsiyadan o'tgan.
-      // Flagni true qilamiz: logout isAuthenticated-ni false qilganda bu effect
-      // session recovery'ni qayta ishga tushirmasin.
+    // getState() ishlatiladi — closured `isAuthenticated` selector emas.
+    // Bu React rendering race condition'dan himoya qiladi: login'dan so'ng
+    // router.replace('/dashboard') bilan dashboard mount bo'ladi, lekin
+    // closured snapshot hali eski (false) bo'lishi mumkin. getState() esa
+    // har doim Zustand store'dagi haqiqiy holatni qaytaradi.
+    if (useAuthStore.getState().isAuthenticated) {
       recoveryAttempted.current = true;
       return;
     }
@@ -59,6 +61,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           role: meData.role,
           schoolId: meData.schoolId,
           branchId: meData.branchId,
+          isFirstLogin: meData.isFirstLogin,
+          assignedBranchIds: meData.assignedBranchIds,
         });
       })
       .catch(() => {

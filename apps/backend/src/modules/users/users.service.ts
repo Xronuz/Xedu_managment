@@ -114,19 +114,28 @@ export class UsersService {
       ];
     }
 
+    const userSelect: any = {
+      ...this.userSelectFields(),
+      branch: { select: { id: true, name: true } },
+      branchAssignments: {
+        where: { isActive: true },
+        select: { branch: { select: { id: true, name: true } } },
+      },
+    };
+
+    // Include class enrollment for students so the frontend can display class name
+    if (role === 'student' || where.role === 'student') {
+      userSelect.studentClasses = {
+        include: { class: { select: { id: true, name: true, gradeLevel: true } } },
+      };
+    }
+
     const [users, total] = await this.prisma.$transaction([
       this.prisma.user.findMany({
         where,
         skip,
         take: limit,
-        select: {
-          ...this.userSelectFields(),
-          branch: { select: { id: true, name: true } },
-          branchAssignments: {
-            where: { isActive: true },
-            select: { branch: { select: { id: true, name: true } } },
-          },
-        },
+        select: userSelect,
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.user.count({ where }),
@@ -576,7 +585,7 @@ export class UsersService {
   async getMe(userId: string) {
     const user = await this.prisma.user.findFirst({
       where: { id: userId },
-      select: { ...this.userSelectFields(), schoolId: true, language: true, createdAt: true },
+      select: { ...this.userSelectFields(), schoolId: true, branchId: true, language: true, createdAt: true, isFirstLogin: true },
     });
     if (!user) throw new NotFoundException('Foydalanuvchi topilmadi');
     return user;

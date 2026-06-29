@@ -103,6 +103,8 @@ export function AttendanceWorkspace() {
   const isVP = user?.role === 'vice_principal';
   const isBranchAdmin = user?.role === 'branch_admin';
   const isParent = user?.role === 'parent';
+  const isStudent = user?.role === 'student';
+  const isStudentOrParent = isStudent || isParent;
   const canSeeAll = isDirector || isVP || isBranchAdmin;
 
   const today = format(new Date(), 'yyyy-MM-dd');
@@ -117,9 +119,11 @@ export function AttendanceWorkspace() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // ── Queries ─────────────────────────────────────────────────────────────────
+  // Student uchun /classes chaqirilmaydi — 403 toast chiqmasin
   const { data: classes, isError: classesError } = useQuery<ClassInfo[]>({
     queryKey: ['classes', activeBranchId],
     queryFn: classesApi.getAll,
+    enabled: !isStudent,
   });
 
   // Parent: faqat bolasining sinfi ko'rinadi
@@ -213,8 +217,15 @@ export function AttendanceWorkspace() {
       if (context?.snapshot !== undefined) {
         queryClient.setQueryData(context.reportKey, context.snapshot);
       }
-      const msg = err?.response?.data?.message;
-      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+      const raw = err?.response?.data?.message;
+      const rawStr = Array.isArray(raw) ? raw.join(', ') : (raw ?? '');
+      // Texnik backend xato matnlarini o'zbek tiliga o'girish
+      const friendly = rawStr.includes('ISO 8601') || rawStr.includes('date must')
+        ? "Sana formati noto'g'ri. Iltimos sanani qaytadan tanlang."
+        : rawStr.includes('must be')
+        ? "Kiritilgan ma'lumot noto'g'ri. Iltimos tekshirib qaytadan urinib ko'ring."
+        : rawStr || 'Davomat belgilashda xatolik yuz berdi';
+      toast({ variant: 'destructive', title: 'Xato', description: friendly });
     },
   });
 
@@ -330,7 +341,7 @@ export function AttendanceWorkspace() {
   // ── Summary data ────────────────────────────────────────────────────────────
   const summary = todaySummary as any;
 
-  if (classesError) {
+  if (classesError && !isStudentOrParent) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-3">
         <AlertCircle className="h-10 w-10 text-xedu-ruby-400" />
@@ -338,6 +349,11 @@ export function AttendanceWorkspace() {
         <p className="text-sm text-xedu-slate-500">Server bilan bog'lanishda xato yuz berdi.</p>
       </div>
     );
+  }
+
+  // O'quvchi uchun faqat o'z davomat tarixi ko'rinadi — admin UI yo'q
+  if (isStudent && user) {
+    return <StudentAttendanceView studentId={user.id} />;
   }
 
   return (
@@ -909,5 +925,79 @@ function StudentAttendancePanel({
       ]}
       tabs={tabs}
     />
+  );
+}
+
+// ── O'quvchi uchun read-only davomat tarixi ────────────────────────────────────
+function StudentAttendanceView({ studentId }: { studentId: string }) {
+  const { data: history = [], isLoading } = useQuery<any[]>({
+    queryKey: ['attendance', 'student-history', studentId],
+    queryFn: () => attendanceApi.getStudentHistory(studentId, 60),
+    enabled: !!studentId,
+  });
+
+  const counts = { present: 0, absent: 0, late: 0, excused: 0 };
+  const safeHistory = Array.isArray(history) ? history : [];
+  safeHistory.forEach((r: any) => { if (r.status in counts) counts[r.status as keyof typeof counts]++; });
+  const total = safeHistory.length;
+  const presentRate = total > 0 ? Math.round(((counts.present + counts.late) / total) * 100) : null;
+
+  return (
+    <div className="space-y-4 p-1">
+      <div className="flex items-center gap-3">
+        <ClipboardCheck className="h-5 w-5 text-xedu-primary" />
+        <h2 className="text-lg font-bold text-xedu-slate-900 dark:text-xedu-slate-100">Mening davomatim</h2>
+      </div>
+
+      {/* KPI */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: 'Keldi', value: counts.present, color: 'text-xedu-emerald-600' },
+          { label: 'Kelmadi', value: counts.absent, color: 'text-xedu-ruby-600' },
+          { label: 'Kechikdi', value: counts.late, color: 'text-xedu-amber-600' },
+          { label: 'Foiz', value: presentRate !== null ? `${presentRate}%` : '—', color: 'text-xedu-primary' },
+        ].map((item) => (
+          <div key={item.label} className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-4">
+            <p className="text-xs text-xedu-slate-500 mb-1">{item.label}</p>
+            <p className={`text-2xl font-black ${item.color}`}>{isLoading ? '…' : item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Tarix */}
+      <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 overflow-hidden">
+        <div className="px-4 py-3 border-b border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated">
+          <p className="text-sm font-semibold text-xedu-slate-700 dark:text-xedu-slate-200">So'nggi 60 kunlik tarix</p>
+        </div>
+        {isLoading ? (
+          <div className="p-4 space-y-2">
+            {[...Array(5)].map((_, i) => <div key={i} className="h-8 rounded-md bg-xedu-slate-100 dark:bg-xedu-slate-800 animate-pulse" />)}
+          </div>
+        ) : safeHistory.length === 0 ? (
+          <div className="flex flex-col items-center py-12 gap-2 text-xedu-slate-400">
+            <ClipboardCheck className="h-8 w-8" />
+            <p className="text-sm">Davomat ma'lumotlari yo'q</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-xedu-slate-50 dark:divide-xedu-slate-800 max-h-[400px] overflow-y-auto">
+            {safeHistory.slice(0, 60).map((r: any) => {
+              const cfg = STATUS_CONFIG[r.status as Status] ?? STATUS_CONFIG.present;
+              const Icon = cfg.icon;
+              return (
+                <div key={r.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <div className={`h-2 w-2 rounded-full ${cfg.dot}`} />
+                  <span className="text-xs text-xedu-slate-500 w-24 shrink-0">
+                    {r.date ? new Date(r.date).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' }) : '—'}
+                  </span>
+                  <Icon className={`h-4 w-4 ${cfg.color}`} />
+                  <span className={`text-xs font-medium ${cfg.color}`}>{cfg.label}</span>
+                  {r.note && <span className="text-xs text-xedu-slate-400 truncate ml-2">{r.note}</span>}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }

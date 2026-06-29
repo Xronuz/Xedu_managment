@@ -427,7 +427,11 @@ export default function HomeworkPage() {
     queryFn: () => homeworkApi.getAll({ classId: filterClass || undefined, subjectId: filterSubject || undefined }),
   });
   const { data: classes = [] } = useQuery({ queryKey: ['classes'], queryFn: () => classesApi.getAll(), enabled: open || !!editingHw });
-  const { data: subjects = [] } = useQuery({ queryKey: ['subjects'], queryFn: () => subjectsApi.getAll(), enabled: open || !!editingHw });
+  const { data: subjects = [] } = useQuery({
+    queryKey: ['subjects', form.classId || editingHw?.classId],
+    queryFn: () => subjectsApi.getAll(form.classId || editingHw?.classId || undefined),
+    enabled: open || !!editingHw,
+  });
 
   const createMutation = useMutation({
     mutationFn: homeworkApi.create,
@@ -541,10 +545,12 @@ export default function HomeworkPage() {
   };
 
   const sel = (k: string) => (v: string) => { setForm(f => ({ ...f, [k]: v })); setErrors(e => { const n = { ...e }; delete n[k]; return n; }); };
+  // When class changes, reset subject — subjects are filtered by class
+  const onClassChange = (v: string) => { setForm(f => ({ ...f, classId: v, subjectId: '' })); setErrors(e => { const n = { ...e }; delete n.classId; delete n.subjectId; return n; }); };
   const inp = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => { setForm(f => ({ ...f, [k]: e.target.value })); setErrors(er => { const n = { ...er }; delete n[k]; return n; }); };
 
   const now = new Date();
-  const hw = homeworks as any[];
+  const hw: any[] = Array.isArray(homeworks) ? homeworks : [];
   let active = hw.filter(h => new Date(h.dueDate) >= now);
   let expired = hw.filter(h => new Date(h.dueDate) < now);
   if (filterDateFrom) {
@@ -837,7 +843,7 @@ export default function HomeworkPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Sinf <span className="text-xedu-ruby">*</span></Label>
-                <Select value={form.classId} onValueChange={sel('classId')}>
+                <Select value={form.classId} onValueChange={onClassChange}>
                   <SelectTrigger><SelectValue placeholder="Sinf..." /></SelectTrigger>
                   <SelectContent>{(classes as any[]).map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>

@@ -32,16 +32,17 @@ export function BranchAdminDashboard() {
   const { user, activeBranchId, _hasHydrated } = useAuthStore();
 
   const dayLabel = new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' });
+  const isVP = user?.role === 'vice_principal';
 
-  const branchReady = _hasHydrated && !!activeBranchId;
+  // VP (vice_principal) school-wide rol — branchId yo'q, lekin queries ishlashi kerak.
+  // Branch admin uchun activeBranchId talab qilinadi.
+  const branchReady = _hasHydrated && (isVP || !!activeBranchId);
 
   const { data: usersData, isLoading: usersLoading } = useQuery({
     queryKey: ['users', 'branch', activeBranchId],
     queryFn: () => usersApi.getAll({ limit: 200 }),
     enabled: branchReady,
   });
-
-  const isVP = user?.role === 'vice_principal';
 
   const { data: classesData, isLoading: classesLoading } = useQuery({
     queryKey: ['classes', activeBranchId],
@@ -94,7 +95,6 @@ export function BranchAdminDashboard() {
   const pendingDisciplineList: any[] = (pendingDiscipline as any)?.data ?? [];
   const debtors: any[] = paymentReport?.debtors ?? [];
 
-  // isVP is declared above near branchReady
 
   return (
     <div className="space-y-6">

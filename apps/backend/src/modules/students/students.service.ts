@@ -46,12 +46,17 @@ export class StudentsService {
       currentUser,
     );
 
-    // Enroll in class if provided
+    // Enroll in class if provided — xato yashirilmaydi
     if (dto.classId) {
+      const cls = await this.prisma.class.findFirst({
+        where: { id: dto.classId, schoolId: currentUser.schoolId! },
+        select: { id: true },
+      });
+      if (!cls) {
+        throw new BadRequestException(`Sinf topilmadi yoki boshqa maktabga tegishli: ${dto.classId}`);
+      }
       await this.prisma.classStudent.create({
-        data: { classId: dto.classId, studentId: user.id },
-      }).catch(() => {
-        // Silent fail — student is created, class enrollment is best-effort
+        data: { classId: cls.id, studentId: user.id },
       });
     }
 

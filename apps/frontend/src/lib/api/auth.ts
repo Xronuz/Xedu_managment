@@ -40,6 +40,9 @@ export const authApi = {
       role: string;
       schoolId: string | null;
       branchId: string | null;
+      isFirstLogin: boolean;
+      assignedBranchIds?: string[];
+      avatarUrl?: string | null;
     }>('/users/me');
     return data;
   },

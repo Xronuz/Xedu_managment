@@ -104,7 +104,7 @@ function SidebarUserMenu({ collapsed }: { collapsed: boolean }) {
 
   const initials   = getInitials(user.firstName, user.lastName);
   const fullName   = `${user.firstName} ${user.lastName}`.trim() || user.email;
-  const branchName = activeBranchMeta?.name ?? 'Barcha filiallar';
+  const branchName = activeBranchMeta?.name ?? (user.role === 'branch_admin' ? 'Filial' : 'Barcha filiallar');
 
   const handleLogout = async () => {
     await logout();

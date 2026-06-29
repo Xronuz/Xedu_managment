@@ -23,7 +23,8 @@ export function ProfileSheet({ open, onOpenChange }: ProfileSheetProps) {
 
   const initials = getInitials(user.firstName, user.lastName);
   const fullName = `${user.firstName} ${user.lastName}`.trim() || user.email;
-  const branchName = activeBranchMeta?.name ?? 'Barcha filiallar';
+  const isBranchScoped = user.role === 'branch_admin';
+  const branchName = activeBranchMeta?.name ?? (isBranchScoped ? 'Filial' : 'Barcha filiallar');
 
   const go = (href: string) => {
     onOpenChange(false);

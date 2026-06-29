@@ -54,7 +54,7 @@ export class RolesGuard implements CanActivate {
     // Super admin endpoints (e.g. /api/super-admin/*) use @Roles(UserRole.SUPER_ADMIN) explicitly.
     if (!hasRole) {
       throw new ForbiddenException(
-        `Bu amalni bajarish uchun ruxsatingiz yo'q. Talab qilinadi: ${requiredRoles.join(', ')}`,
+        "Bu amalni bajarish uchun sizda yetarli huquq yo'q",
       );
     }
 

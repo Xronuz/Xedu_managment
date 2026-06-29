@@ -202,26 +202,27 @@ export default function UsersPage() {
     mutationFn: ({ id, restore }: { id: string; restore?: boolean }) =>
       restore ? usersApi.restore(id) : usersApi.remove(id),
     onSuccess: (_, vars) => {
-      toast({ title: vars.restore ? ' Foydalanuvchi faollashtirildi' : "Foydalanuvchi bloklandi" });
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      // Close modal BEFORE invalidate to prevent Radix animation flash with null content
       setConfirmDelete(null);
+      toast({ title: vars.restore ? "Foydalanuvchi faollashtirildi" : "Foydalanuvchi bloklandi" });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message;
-      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+      toast({ variant: "destructive", title: "Xato", description: Array.isArray(msg) ? msg.join(", ") : msg ?? "Xatolik" });
     },
   });
 
   const hardDeleteMutation = useMutation({
     mutationFn: (id: string) => usersApi.hardDelete(id),
     onSuccess: () => {
-      toast({ title: ' Foydalanuvchi butunlay o‘chirildi' });
-      queryClient.invalidateQueries({ queryKey: ['users'] });
       setConfirmHardDelete(null);
+      toast({ title: "Foydalanuvchi butunlay o'chirildi" });
+      queryClient.invalidateQueries({ queryKey: ["users"] });
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message;
-      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+      toast({ variant: "destructive", title: "Xato", description: Array.isArray(msg) ? msg.join(", ") : msg ?? "Xatolik" });
     },
   });
 
@@ -231,14 +232,24 @@ export default function UsersPage() {
       lastName:  editForm.lastName.trim(),
       phone:     editForm.phone.trim() || undefined,
     }),
-    onSuccess: () => {
-      toast({ title: 'Foydalanuvchi yangilandi' });
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+    onSuccess: (updatedUser: any) => {
       setEditUser(null);
+      toast({ title: 'Foydalanuvchi yangilandi' });
+      // Optimistic local update — immediately reflects in table without waiting for refetch
+      queryClient.setQueriesData<any>({ queryKey: ['users'] }, (old: any) => {
+        if (!old?.data) return old;
+        return {
+          ...old,
+          data: old.data.map((u: any) =>
+            u.id === updatedUser?.id ? { ...u, ...updatedUser } : u,
+          ),
+        };
+      });
+      queryClient.invalidateQueries({ queryKey: ['users'] });
     },
     onError: (err: any) => {
       const msg = err?.response?.data?.message;
-      toast({ variant: 'destructive', title: "Xato", description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
     },
   });
 
@@ -727,8 +738,8 @@ export default function UsersPage() {
             </DialogTitle>
             <DialogDescription>
               {confirmDelete?.restore
-                ? `${confirmDelete?.firstName} ${confirmDelete?.lastName} ni qayta faollashtirasizmi?`
-                : `${confirmDelete?.firstName} ${confirmDelete?.lastName} ni bloklashni tasdiqlaysizmi?`
+                ? `${confirmDelete?.firstName ?? ''} ${confirmDelete?.lastName ?? ''} ni qayta faollashtirasizmi?`
+                : `${confirmDelete?.firstName ?? ''} ${confirmDelete?.lastName ?? ''} ni bloklashni tasdiqlaysizmi?`
               }
             </DialogDescription>
           </DialogHeader>
@@ -755,9 +766,9 @@ export default function UsersPage() {
             </DialogTitle>
             <DialogDescription className="pt-1">
               <span className="font-semibold text-foreground">
-                {confirmHardDelete?.firstName} {confirmHardDelete?.lastName}
+                {confirmHardDelete?.firstName ?? ''} {confirmHardDelete?.lastName ?? ''}
               </span>{' '}
-              ({confirmHardDelete?.email}) foydalanuvchisi tizimdan <span className="font-semibold text-xedu-ruby">butunlay va qaytarib bo'lmasdan</span> o'chiriladi.
+              {confirmHardDelete?.email ? `(${confirmHardDelete.email}) ` : ''}foydalanuvchisi tizimdan <span className="font-semibold text-xedu-ruby">butunlay va qaytarib bo'lmasdan</span> o'chiriladi.
               Barcha ma'lumotlari ham o'chadi.
             </DialogDescription>
           </DialogHeader>
@@ -882,6 +893,7 @@ export default function UsersPage() {
               <Input
                 type="email"
                 placeholder="ali@maktab.uz"
+                autoComplete="new-email"
                 {...register('email')}
                 onBlur={async (e) => {
                   const email = e.target.value.trim();
@@ -905,7 +917,7 @@ export default function UsersPage() {
             <div className="space-y-1.5">
               <Label>Parol <span className="text-xedu-ruby">*</span></Label>
               <div className="relative">
-                <Input type={showPass ? 'text' : 'password'} placeholder="Kamida 8 ta belgi" className="pr-10" {...register('password')} />
+                <Input type={showPass ? 'text' : 'password'} placeholder="Kamida 8 ta belgi" className="pr-10" autoComplete="new-password" {...register('password')} />
                 <button type="button" onClick={() => setShowPass(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-xedu-slate-500 dark:text-xedu-slate-400 hover:text-foreground">
                   {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>

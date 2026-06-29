@@ -76,7 +76,7 @@ export class UsersController {
   }
 
   @Put(':id')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
   @ApiOperation({ summary: 'Foydalanuvchini yangilash' })
   update(
     @Param('id') id: string,
@@ -87,7 +87,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Foydalanuvchini bloklash (soft delete)' })
   remove(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
@@ -95,7 +95,7 @@ export class UsersController {
   }
 
   @Put(':id/restore')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.DIRECTOR, UserRole.VICE_PRINCIPAL, UserRole.BRANCH_ADMIN)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Bloklangan foydalanuvchini qayta faollashtirish' })
   restore(@Param('id') id: string, @CurrentUser() user: JwtPayload) {

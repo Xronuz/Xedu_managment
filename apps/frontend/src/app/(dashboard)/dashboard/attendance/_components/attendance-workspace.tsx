@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, subDays } from 'date-fns';
 import {
@@ -93,7 +93,18 @@ function HeatCell({ pct }: { pct: number | null }) {
   );
 }
 
+// ── Role dispatcher — hooks yo'q, faqat role asosida to'g'ri komponentga yo'naltiradi ─
+// React hook qoidasi: hook'lar unconditional chaqirilishi kerak. Shuning uchun
+// bir komponentda "agar student bo'lsa early return" pattern ishlaydi faqat agar
+// barcha hook'lar o'sha komponentda bo'lmasa. Dispatcher bu muammoni hal qiladi.
 export function AttendanceWorkspace() {
+  const { user } = useAuthStore();
+  if (user?.role === 'student') return <StudentAttendanceView studentId={user.id} />;
+  if (user?.role === 'parent')  return <ParentAttendanceView />;
+  return <StaffAttendanceWorkspace />;
+}
+
+function StaffAttendanceWorkspace() {
   const { toast } = useToast();
   const { user, activeBranchId } = useAuthStore();
   const queryClient = useQueryClient();
@@ -349,11 +360,6 @@ export function AttendanceWorkspace() {
         <p className="text-sm text-xedu-slate-500">Server bilan bog'lanishda xato yuz berdi.</p>
       </div>
     );
-  }
-
-  // O'quvchi uchun faqat o'z davomat tarixi ko'rinadi — admin UI yo'q
-  if (isStudent && user) {
-    return <StudentAttendanceView studentId={user.id} />;
   }
 
   return (
@@ -998,6 +1004,130 @@ function StudentAttendanceView({ studentId }: { studentId: string }) {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Parent uchun farzandlar davomati ko'rinishi ────────────────────────────────
+// Faqat parent rolida ko'rsatiladi — GET /parent/children va /parent/child/:id/attendance
+// Ikkala endpoint ham parent uchun ruxsat berilgan, 403 bo'lmaydi.
+function ParentAttendanceView() {
+  const { user } = useAuthStore();
+  const [selectedChildId, setSelectedChildId] = useState<string | null>(null);
+
+  const { data: childrenRaw = [], isLoading: childrenLoading } = useQuery({
+    queryKey: ['parent', 'children'],
+    queryFn: parentApi.getChildren,
+    enabled: !!user?.id,
+  });
+  const children: any[] = Array.isArray(childrenRaw) ? childrenRaw : [];
+
+  // Avtomatik birinchi bolani tanlash
+  useEffect(() => {
+    if (children.length > 0 && !selectedChildId) {
+      setSelectedChildId(children[0]?.id ?? null);
+    }
+  }, [children, selectedChildId]);
+
+  const { data: attendanceRaw = [], isLoading: attLoading } = useQuery({
+    queryKey: ['parent', 'child-attendance', selectedChildId],
+    queryFn: () => attendanceApi.getStudentHistory(selectedChildId!, 60),
+    enabled: !!selectedChildId,
+  });
+  const attendance: any[] = Array.isArray(attendanceRaw) ? attendanceRaw : [];
+
+  const counts = { present: 0, absent: 0, late: 0, excused: 0 };
+  attendance.forEach((r: any) => { if (r.status in counts) counts[r.status as keyof typeof counts]++; });
+  const total = attendance.length;
+  const presentRate = total > 0 ? Math.round(((counts.present + counts.late) / total) * 100) : null;
+
+  const selectedChild = children.find((c: any) => c.id === selectedChildId);
+
+  return (
+    <div className="space-y-4 p-1">
+      <div className="flex items-center gap-3">
+        <ClipboardCheck className="h-5 w-5 text-xedu-primary" />
+        <h2 className="text-lg font-bold text-xedu-slate-900 dark:text-xedu-slate-100">Farzand davomati</h2>
+      </div>
+
+      {/* Farzand tanlash */}
+      {childrenLoading ? (
+        <div className="h-10 w-48 rounded-xl bg-xedu-slate-100 animate-pulse" />
+      ) : children.length === 0 ? (
+        <p className="text-sm text-xedu-slate-500">Bog'langan farzand topilmadi</p>
+      ) : (
+        <div className="flex gap-2 flex-wrap">
+          {children.map((child: any) => (
+            <button
+              key={child.id}
+              onClick={() => setSelectedChildId(child.id)}
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold border transition-colors ${
+                selectedChildId === child.id
+                  ? 'bg-xedu-primary text-white border-xedu-primary'
+                  : 'bg-xedu-bg-elevated border-xedu-slate-200 text-xedu-slate-700 hover:border-xedu-primary'
+              }`}
+            >
+              {child.firstName} {child.lastName}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {selectedChild && (
+        <>
+          {/* KPI */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { label: 'Keldi', value: counts.present, color: 'text-xedu-emerald-600' },
+              { label: 'Kelmadi', value: counts.absent, color: 'text-xedu-ruby-600' },
+              { label: 'Kechikdi', value: counts.late, color: 'text-xedu-amber-600' },
+              { label: 'Davomat %', value: presentRate !== null ? `${presentRate}%` : '—', color: 'text-xedu-primary' },
+            ].map((item) => (
+              <div key={item.label} className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated p-4">
+                <p className="text-xs text-xedu-slate-500 mb-1">{item.label}</p>
+                <p className={`text-2xl font-black ${item.color}`}>{attLoading ? '…' : item.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Tarix */}
+          <div className="rounded-xl border border-xedu-slate-100 dark:border-xedu-slate-800 overflow-hidden">
+            <div className="px-4 py-3 border-b border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated">
+              <p className="text-sm font-semibold text-xedu-slate-700 dark:text-xedu-slate-200">
+                {selectedChild.firstName} {selectedChild.lastName} — so'nggi 60 kunlik tarix
+              </p>
+            </div>
+            {attLoading ? (
+              <div className="p-4 space-y-2">
+                {[...Array(5)].map((_, i) => <div key={i} className="h-8 rounded-md bg-xedu-slate-100 dark:bg-xedu-slate-800 animate-pulse" />)}
+              </div>
+            ) : attendance.length === 0 ? (
+              <div className="flex flex-col items-center py-12 gap-2 text-xedu-slate-400">
+                <ClipboardCheck className="h-8 w-8" />
+                <p className="text-sm">Davomat ma'lumotlari yo'q</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-xedu-slate-50 dark:divide-xedu-slate-800 max-h-[400px] overflow-y-auto">
+                {attendance.slice(0, 60).map((r: any) => {
+                  const cfg = STATUS_CONFIG[r.status as Status] ?? STATUS_CONFIG.present;
+                  const Icon = cfg.icon;
+                  return (
+                    <div key={r.id} className="flex items-center gap-3 px-4 py-2.5">
+                      <div className={`h-2 w-2 rounded-full ${cfg.dot}`} />
+                      <span className="text-xs text-xedu-slate-500 w-24 shrink-0">
+                        {r.date ? new Date(r.date).toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' }) : '—'}
+                      </span>
+                      <Icon className={`h-4 w-4 ${cfg.color}`} />
+                      <span className={`text-xs font-medium ${cfg.color}`}>{cfg.label}</span>
+                      {r.note && <span className="text-xs text-xedu-slate-400 truncate ml-2">{r.note}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

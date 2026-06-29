@@ -27,6 +27,11 @@ export class ClassesService {
     if (keys.length > 0) await this.redis.del(...keys);
   }
 
+  /** Boshqa modullar (StudentsService, ImportService) dan cache tozalash uchun */
+  async invalidateCache(schoolId: string): Promise<void> {
+    await this.invalidate(schoolId);
+  }
+
   /** Class teacher o'z sinfini oladi (classTeacherId === currentUser.sub) */
   async findMyClass(currentUser: JwtPayload) {
     const cls = await this.prisma.class.findFirst({

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -12,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuthStore } from '@/store/auth.store';
 import { authApi } from '@/lib/api/auth';
-import { ROLE_HOME, type UserRole } from '@/config/permissions';
 import { AuthShell } from '../_components/auth-shell';
 
 const loginSchema = z.object({
@@ -45,7 +44,6 @@ const bannerCls: Record<Banner['variant'], string> = {
 };
 
 export default function LoginPage() {
-  const router       = useRouter();
   const searchParams = useSearchParams();
   const reason       = searchParams.get('reason');
   const setAuth      = useAuthStore((s) => s.setAuth);
@@ -70,16 +68,15 @@ export default function LoginPage() {
       const result = await authApi.login(data);
       setAuth(result.user, result.tokens);
       setIsRedirecting(true);
-      if (result.user.isFirstLogin) {
-        router.replace('/first-login');
-      } else {
-        router.replace(ROLE_HOME[result.user.role as UserRole] ?? '/dashboard');
-      }
+      // router.replace CHAQIRILMAYDI — (auth)/layout.tsx effect
+      // isAuthenticated=true bo'lganda o'zi to'g'ri route'ga yo'naltiradi.
+      // Ikki raqobatchi router.replace → Next.js App Router birini bekor qiladi
+      // → URL /login?reason=logged_out da qolardi. Hozir faqat bitta navigate.
     } catch (err: any) {
       const msg = err?.response?.data?.message ?? "Tizimga kirishda xato yuz berdi";
       setLoginError(typeof msg === 'string' ? msg : "Email yoki parol noto'g'ri");
     }
-  }, [router, setAuth]);
+  }, [setAuth]);
 
   const busy = isSubmitting || isRedirecting;
 

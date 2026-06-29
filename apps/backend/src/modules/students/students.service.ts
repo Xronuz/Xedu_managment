@@ -2,6 +2,7 @@ import { Injectable, NotFoundException, ForbiddenException, BadRequestException 
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { AuditService } from '@/common/audit/audit.service';
 import { UsersService } from '@/modules/users/users.service';
+import { ClassesService } from '@/modules/classes/classes.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 import { CreateStudentDto } from './dto/create-student.dto';
@@ -14,6 +15,7 @@ export class StudentsService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly usersService: UsersService,
+    private readonly classesService: ClassesService,
   ) {}
 
   private assertBranchScope(studentBranchId: string | null, actor: JwtPayload): void {
@@ -58,6 +60,8 @@ export class StudentsService {
       await this.prisma.classStudent.create({
         data: { classId: cls.id, studentId: user.id },
       });
+      // Classes list cache'ni invalidate qil — /classes sahifasi darhol yangilanadi
+      await this.classesService.invalidateCache(currentUser.schoolId!);
     }
 
     return user;

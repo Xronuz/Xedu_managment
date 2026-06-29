@@ -4,6 +4,7 @@ import * as ExcelJS from 'exceljs';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtPayload, UserRole, WeekType, ScheduleStatus } from '@eduplatform/types';
 import { UsersService } from '@/modules/users/users.service';
+import { ClassesService } from '@/modules/classes/classes.service';
 import { ConflictDetectorService, toWeeklyUtcMin } from '@/common/utils/conflict-detector';
 
 // ─── Natija tipi ───────────────────────────────────────────────────────────────
@@ -38,6 +39,7 @@ export class ImportService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly usersService: UsersService,
+    private readonly classesService: ClassesService,
     private readonly conflictDetector: ConflictDetectorService,
   ) {}
 
@@ -198,6 +200,11 @@ export class ImportService {
           }
         }
       }
+    }
+
+    // Enrollment bo'lgan bo'lsa classes cache'ni tozala
+    if (created > 0) {
+      await this.classesService.invalidateCache(schoolId);
     }
 
     return {

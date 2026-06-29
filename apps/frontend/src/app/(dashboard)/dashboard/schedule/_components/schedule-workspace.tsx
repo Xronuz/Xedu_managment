@@ -550,7 +550,6 @@ export function ScheduleWorkspace() {
   // ── Filters ──────────────────────────────────────────────────────────────────
   const [filterClass, setFilterClass] = useState('');
   const [filterTeacher, setFilterTeacher] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
 
   // ── Data fetching ────────────────────────────────────────────────────────────
   const { data: weekSchedule, isLoading } = useQuery<ScheduleSlot[]>({
@@ -669,6 +668,12 @@ export function ScheduleWorkspace() {
     setErrors(e => { const n = { ...e }; delete n[k]; return n; });
   };
 
+  // When class changes, reset subject — subjects are filtered by class
+  const onClassChange = (v: string) => {
+    setForm(f => ({ ...f, classId: v, subjectId: '' }));
+    setErrors(e => { const n = { ...e }; delete n.classId; delete n.subjectId; return n; });
+  };
+
   const validate = () => {
     const e: Record<string, string> = {};
     if (!form.classId) e.classId = 'Sinf tanlang';
@@ -697,8 +702,8 @@ export function ScheduleWorkspace() {
   });
 
   const { data: subjects = [] } = useQuery({
-    queryKey: ['subjects', activeBranchId],
-    queryFn: () => subjectsApi.getAll(),
+    queryKey: ['subjects', form.classId, activeBranchId],
+    queryFn: () => subjectsApi.getAll(form.classId || undefined),
     enabled: modalOpen,
   });
 
@@ -822,20 +827,6 @@ export function ScheduleWorkspace() {
       deleteMutation.mutate(id);
     }
   };
-
-  // ── Active filter chips ──────────────────────────────────────────────────────
-  const activeFilters = useMemo(() => {
-    const chips: { key: string; label: string; onClear: () => void }[] = [];
-    if (filterClass) {
-      const c = classes.find((x: any) => x.id === filterClass);
-      chips.push({ key: 'class', label: c?.name ?? 'Sinf', onClear: () => setFilterClass('') });
-    }
-    if (filterTeacher) {
-      const t = teachers.find((x: any) => x.id === filterTeacher);
-      chips.push({ key: 'teacher', label: t ? `${t.firstName} ${t.lastName}` : "O'qituvchi", onClear: () => setFilterTeacher('') });
-    }
-    return chips;
-  }, [filterClass, filterTeacher, classes, teachers]);
 
   // ── Intelligence ─────────────────────────────────────────────────────────────
   const todayKey = jsDayToTimetableDay(new Date().getDay());
@@ -963,71 +954,51 @@ export function ScheduleWorkspace() {
           </div>
 
           {/* Week type toggle */}
-          <div className="flex items-center rounded-lg border p-1 gap-1">
-            {(['all', 'numerator', 'denominator'] as const).map((wt) => (
+          <div className="flex items-center rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 p-1 gap-1">
+            {([
+              { v: 'all',         label: 'Oddiy',   title: 'Har hafta bir xil jadval' },
+              { v: 'numerator',   label: 'A-hafta',  title: 'Juft-toq haftalar (1, 3, 5...)' },
+              { v: 'denominator', label: 'B-hafta',  title: 'Juft-toq haftalar (2, 4, 6...)' },
+            ] as const).map(({ v, label, title }) => (
               <Button
-                key={wt}
-                variant={activeWeekType === wt ? 'secondary' : 'ghost'}
+                key={v}
+                variant={activeWeekType === v ? 'secondary' : 'ghost'}
                 size="sm"
-                className="h-7 px-2 text-xs"
-                onClick={() => setActiveWeekType(wt)}
+                className="h-7 px-2.5 text-xs"
+                onClick={() => setActiveWeekType(v)}
+                title={title}
               >
-                {wt === 'all' ? 'Oddiy' : wt === 'numerator' ? 'Surat' : 'Maxraj'}
+                {label}
               </Button>
             ))}
           </div>
 
           {/* Manager status filters */}
           {canManage && (
-            <div className="flex items-center gap-2">
-              <label className="flex items-center gap-1 text-xs text-xedu-slate-600">
-                <input type="checkbox" checked={showDrafts} onChange={e => setShowDrafts(e.target.checked)} />
-                Qoralama
-              </label>
-              <label className="flex items-center gap-1 text-xs text-xedu-slate-600">
-                <input type="checkbox" checked={showArchived} onChange={e => setShowArchived(e.target.checked)} />
-                Arxiv
-              </label>
-            </div>
-          )}
-
-          <button
-            onClick={() => setShowFilters((v) => !v)}
-            className={cn(
-              'flex items-center gap-1.5 h-8 px-2.5 rounded-lg border text-xs font-semibold transition-colors',
-              showFilters || activeFilters.length > 0
-                ? 'border-xedu-primary bg-xedu-primary-light text-xedu-primary'
-                : 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-600 hover:bg-xedu-slate-50'
-            )}
-          >
-            <Filter className="h-3.5 w-3.5" />
-            Filterlar
-            {activeFilters.length > 0 && (
-              <span className="ml-0.5 text-2xs font-bold px-1 py-0 rounded-full bg-xedu-primary text-white">
-                {activeFilters.length}
-              </span>
-            )}
-          </button>
-
-          {activeFilters.map((f) => (
-            <span
-              key={f.key}
-              className="inline-flex items-center gap-1 h-8 px-2 rounded-lg border border-xedu-primary bg-xedu-primary-light text-xs font-semibold text-xedu-primary"
-            >
-              {f.label}
-              <button onClick={f.onClear} className="hover:text-xedu-ruby-500 transition-colors">
-                <X className="h-3 w-3" />
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setShowDrafts(v => !v)}
+                className={cn(
+                  'h-7 px-2.5 rounded-md border text-xs font-medium transition-colors',
+                  showDrafts
+                    ? 'border-yellow-300 bg-yellow-50 text-yellow-700 dark:border-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400'
+                    : 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 hover:bg-xedu-slate-50'
+                )}
+              >
+                Qoralamalar
               </button>
-            </span>
-          ))}
-
-          {activeFilters.length > 0 && (
-            <button
-              onClick={() => { setFilterClass(''); setFilterTeacher(''); }}
-              className="text-xs font-semibold text-xedu-slate-400 hover:text-xedu-ruby-500 transition-colors"
-            >
-              Tozalash
-            </button>
+              <button
+                onClick={() => setShowArchived(v => !v)}
+                className={cn(
+                  'h-7 px-2.5 rounded-md border text-xs font-medium transition-colors',
+                  showArchived
+                    ? 'border-xedu-slate-400 bg-xedu-slate-100 text-xedu-slate-600 dark:border-xedu-slate-500 dark:bg-xedu-slate-800 dark:text-xedu-slate-300'
+                    : 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-500 hover:bg-xedu-slate-50'
+                )}
+              >
+                Arxiv
+              </button>
+            </div>
           )}
 
           <button
@@ -1042,7 +1013,7 @@ export function ScheduleWorkspace() {
             Bugun
           </button>
 
-          <div className="flex items-center rounded-lg border p-1 gap-1">
+          <div className="flex items-center rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 p-1 gap-1" title="Jadval eksport">
             <button
               onClick={async () => {
                 const el = document.getElementById('schedule-grid-capture');
@@ -1052,10 +1023,10 @@ export function ScheduleWorkspace() {
                 }
               }}
               className="flex items-center gap-1 h-7 px-2 rounded text-xs font-semibold text-xedu-slate-600 hover:bg-xedu-slate-50 transition-colors"
-              title="PDF yuklab olish"
             >
               PDF
             </button>
+            <div className="w-px h-4 bg-xedu-slate-200 dark:bg-xedu-slate-700" />
             <button
               onClick={() => scheduleApi.exportExcel({
                 weekType: activeWeekType,
@@ -1063,43 +1034,117 @@ export function ScheduleWorkspace() {
                 includeArchived: canManage && showArchived,
               })}
               className="flex items-center gap-1 h-7 px-2 rounded text-xs font-semibold text-xedu-slate-600 hover:bg-xedu-slate-50 transition-colors"
-              title="Excel yuklab olish"
             >
               Excel
             </button>
           </div>
         </WorkspaceToolbar>
 
-        {showFilters && (
-          <div className="flex items-center gap-2 flex-wrap mt-2 pb-2">
-            <select
-              value={filterClass}
-              onChange={(e) => setFilterClass(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
-            >
-              <option value="">Barcha sinflar</option>
-              {classes.map((c: any) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-
-            <select
-              value={filterTeacher}
-              onChange={(e) => setFilterTeacher(e.target.value)}
-              className="h-8 px-2 rounded-lg border border-xedu-slate-200 dark:border-xedu-slate-700 bg-xedu-bg-elevated text-xs text-xedu-slate-700"
-            >
-              <option value="">Barcha o'qituvchilar</option>
-              {teachers.map((t: any) => (
-                <option key={t.id} value={t.id}>{t.firstName} {t.lastName}</option>
-              ))}
-            </select>
-          </div>
-        )}
       </div>
 
       {/* Main: Timetable surface */}
       <WorkspaceMain>
-        {isLoading ? (
+        {/* ── Class selector strip ──────────────────────────────────────── */}
+        {classes.length > 0 && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <School className="h-3.5 w-3.5 text-xedu-slate-400 shrink-0" />
+              <span className="text-xs font-semibold text-xedu-slate-500 uppercase tracking-wider">Sinf</span>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                onClick={() => setFilterClass('')}
+                className={cn(
+                  'h-7 px-3 rounded-full border text-xs font-semibold transition-all',
+                  !filterClass
+                    ? 'bg-xedu-primary text-white border-xedu-primary shadow-sm'
+                    : 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-600 dark:text-xedu-slate-300 hover:border-xedu-primary/50 hover:text-xedu-primary bg-xedu-bg-elevated'
+                )}
+              >
+                Barcha sinflar
+                {!filterClass && schedule.length > 0 && (
+                  <span className="ml-1 opacity-70">({schedule.length})</span>
+                )}
+              </button>
+              {classes.map((cls: any) => {
+                const cnt = schedule.filter(s => s.classId === cls.id).length;
+                const active = filterClass === cls.id;
+                return (
+                  <button
+                    key={cls.id}
+                    onClick={() => setFilterClass(cls.id)}
+                    className={cn(
+                      'h-7 px-3 rounded-full border text-xs font-semibold transition-all',
+                      active
+                        ? 'bg-xedu-primary text-white border-xedu-primary shadow-sm'
+                        : 'border-xedu-slate-200 dark:border-xedu-slate-700 text-xedu-slate-600 dark:text-xedu-slate-300 hover:border-xedu-primary/50 hover:text-xedu-primary bg-xedu-bg-elevated'
+                    )}
+                  >
+                    {cls.name}
+                    {cnt > 0 && (
+                      <span className={cn('ml-1', active ? 'opacity-80' : 'opacity-50')}>({cnt})</span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Teacher filter — secondary, only when a class is selected */}
+            {filterClass && teachers.length > 0 && (
+              <div className="flex items-center gap-2 flex-wrap pt-0.5">
+                <span className="text-2xs font-medium text-xedu-slate-400">O'qituvchi:</span>
+                <button
+                  onClick={() => setFilterTeacher('')}
+                  className={cn(
+                    'h-6 px-2.5 rounded-full border text-2xs font-semibold transition-all',
+                    !filterTeacher
+                      ? 'bg-xedu-slate-700 text-white border-xedu-slate-700'
+                      : 'border-xedu-slate-200 text-xedu-slate-500 hover:border-xedu-slate-400 bg-xedu-bg-elevated'
+                  )}
+                >
+                  Hammasi
+                </button>
+                {teachers.map((t: any) => {
+                  const active = filterTeacher === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setFilterTeacher(active ? '' : t.id)}
+                      className={cn(
+                        'h-6 px-2.5 rounded-full border text-2xs font-semibold transition-all',
+                        active
+                          ? 'bg-xedu-slate-700 text-white border-xedu-slate-700'
+                          : 'border-xedu-slate-200 text-xedu-slate-500 hover:border-xedu-slate-400 bg-xedu-bg-elevated'
+                      )}
+                    >
+                      {t.firstName} {t.lastName}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── No class selected guidance (when many classes exist) ──────── */}
+        {!filterClass && classes.length > 3 && schedule.length === 0 && !isLoading && (
+          <div className="rounded-xl border-2 border-dashed border-xedu-slate-200 dark:border-xedu-slate-700 py-10 px-6 text-center space-y-3">
+            <Calendar className="h-10 w-10 mx-auto text-xedu-slate-300" />
+            <div>
+              <p className="font-semibold text-xedu-slate-600 dark:text-xedu-slate-300">Dars jadvali hali tuzilmagan</p>
+              <p className="text-sm text-xedu-slate-400 mt-1">Sinf tanlang yoki yangi dars qo'shing</p>
+            </div>
+            {canManage && (
+              <Button onClick={openCreate} size="sm" className="mt-2">
+                <Plus className="h-3.5 w-3.5 mr-1.5" />
+                Birinchi darsni qo'shish
+              </Button>
+            )}
+          </div>
+        )}
+
+        {/* ── Loading ───────────────────────────────────────────────────── */}
+        {isLoading && (
           viewMode === 'grid' ? (
             <div className="space-y-2">
               {[...Array(7)].map((_, i) => <Skeleton key={i} className="h-16" />)}
@@ -1107,7 +1152,10 @@ export function ScheduleWorkspace() {
           ) : (
             <div className="space-y-3">{[...Array(5)].map((_, i) => <Skeleton key={i} className="h-20" />)}</div>
           )
-        ) : (
+        )}
+
+        {/* ── Timetable ─────────────────────────────────────────────────── */}
+        {!isLoading && (filterClass || classes.length <= 3 || schedule.length > 0) && (
           <Card>
             <CardContent className={viewMode === 'grid' ? 'pt-4' : 'pt-4 space-y-4'}>
               {viewMode === 'grid' ? (
@@ -1235,7 +1283,7 @@ export function ScheduleWorkspace() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Sinf <span className="text-xedu-ruby">*</span></Label>
-                <Select value={form.classId} onValueChange={sel('classId')}>
+                <Select value={form.classId} onValueChange={onClassChange}>
                   <SelectTrigger><SelectValue placeholder="Sinf..." /></SelectTrigger>
                   <SelectContent>{classes.map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>

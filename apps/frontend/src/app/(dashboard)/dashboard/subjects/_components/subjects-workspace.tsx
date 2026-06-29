@@ -10,13 +10,12 @@ import { subjectsApi } from '@/lib/api/subjects';
 import { classesApi } from '@/lib/api/classes';
 import { usersApi } from '@/lib/api/users';
 import { formatDate, cn, getInitials } from '@/lib/utils';
-import Link from 'next/link';
 
 import {
   BookOpen, Plus, Users, GraduationCap, Loader2, Check, Trash2,
   Search, X, Filter, Eye, Edit3, ArrowRight, School, BarChart3,
   Calendar, Clock, Trophy, FileText, TrendingUp, AlertTriangle,
-  MonitorPlay, BarChart2, MessageSquare,
+  MonitorPlay, BarChart2, MessageSquare, ChevronRight,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -36,17 +35,15 @@ import {
   WorkspaceShell, WorkspaceHeader, WorkspaceToolbar, WorkspaceMain, WorkspaceSidebar, WorkspaceSection,
   StatPill, QuickLink, InfoItem
 } from '@/components/workspace-system';
-import { OpTable } from '@/components/workspace-system/op-table';
 import {
   PrimaryAction, SecondaryAction, IconAction, ActionBar,
 } from '@/components/workspace-system/action-bar';
-import { EntityPanel, EntityPanelProps } from '@/components/workspace-system/entity-panel';
+import { EntityPanel } from '@/components/workspace-system/entity-panel';
 import { FloatingBulkToolbar } from '@/components/director-workspace/floating-bulk-toolbar';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
    SUBJECTS WORKSPACE
-   Institutional academic curriculum operations workspace.
-   Curriculum-aware, teacher-linked, class-linked, assessment-linked.
+   Catalog-grouped view: bitta fan nomi = bitta qator, sinflar badge sifatida.
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 interface Subject {
@@ -61,19 +58,35 @@ interface Subject {
   teacher?: { id: string; firstName: string; lastName: string };
 }
 
+interface CatalogItem {
+  name: string;
+  normalizedName: string;
+  count: number;
+  classes: { id: string; name: string }[];
+  teachers: { id: string; firstName: string; lastName: string }[];
+  subjectIds: string[];
+  totalHoursPerWeek: number;
+}
+
 const EMPTY_FORM = { name: '', classIds: [] as string[], teacherId: '' };
 
-// ── Subject Entity Panel ──────────────────────────────────────────────────────
+// ── Catalog Item Panel ────────────────────────────────────────────────────────
 
-function SubjectPanel({ subject, open, onClose, canManage, onEdit }: {
-  subject: Subject | null;
+function CatalogPanel({ item, open, onClose, canManage, onEdit, subjects }: {
+  item: CatalogItem | null;
   open: boolean;
   onClose: () => void;
   canManage: boolean;
-  onEdit?: (s: Subject) => void;
+  onEdit?: (item: CatalogItem) => void;
+  subjects: Subject[];
 }) {
   const router = useRouter();
-  if (!subject) return null;
+  if (!item) return null;
+
+  const perClassData = item.classes.map((cls) => {
+    const subj = subjects.find(s => s.classId === cls.id && s.name.toLowerCase() === item.normalizedName);
+    return { cls, teacher: subj?.teacher ?? null, subjectId: subj?.id };
+  });
 
   const tabs = [
     {
@@ -82,25 +95,50 @@ function SubjectPanel({ subject, open, onClose, canManage, onEdit }: {
       content: (
         <div className="p-5 space-y-4">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center text-base font-bold text-xedu-slate-500">
+            <div className="h-10 w-10 rounded-xl bg-xedu-primary/10 flex items-center justify-center shrink-0">
               <BookOpen className="h-5 w-5 text-xedu-primary" />
             </div>
             <div>
-              <p className="text-base font-bold text-xedu-slate-900 dark:text-xedu-slate-100">{subject.name}</p>
-              <p className="text-xs text-xedu-slate-500">{subject.class?.name ?? '—'}</p>
+              <p className="text-base font-bold text-xedu-slate-900 dark:text-xedu-slate-100">{item.name}</p>
+              <p className="text-xs text-xedu-slate-500">{item.count} ta sinfda o'qitiladi</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2">
-            <InfoItem icon={School} label="Sinf" value={subject.class?.name ?? '—'} />
-            <InfoItem icon={Users} label="O'qituvchi" value={subject.teacher ? `${subject.teacher.firstName} ${subject.teacher.lastName}` : '—'} />
-            <InfoItem icon={Calendar} label="Yaratildi" value={formatDate(subject.createdAt)} />
-            <InfoItem icon={Clock} label="ID" value={subject.id.slice(0, 8)} />
+          {/* Class assignments */}
+          <div className="space-y-2">
+            <p className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400">Sinflar va o'qituvchilar</p>
+            <div className="space-y-1.5">
+              {perClassData.map(({ cls, teacher }) => (
+                <div
+                  key={cls.id}
+                  className="flex items-center justify-between rounded-lg px-3 py-2 bg-xedu-bg-subtle border border-xedu-border"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-2xs font-bold bg-xedu-primary/10 text-xedu-primary">
+                      {cls.name}
+                    </span>
+                    {teacher ? (
+                      <span className="text-xs text-xedu-slate-600">
+                        {teacher.firstName} {teacher.lastName}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-xedu-amber-500">O'qituvchi yo'q</span>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => router.push(`/dashboard/classes/${cls.id}`)}
+                    className="text-xedu-slate-400 hover:text-xedu-primary transition-colors"
+                  >
+                    <ChevronRight className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-2 pt-2">
+          <div className="flex flex-wrap gap-2 pt-1">
             {canManage && onEdit && (
-              <PrimaryAction icon={<Edit3 className="h-3.5 w-3.5" />} onClick={() => onEdit(subject)}>
+              <PrimaryAction icon={<Edit3 className="h-3.5 w-3.5" />} onClick={() => onEdit(item)}>
                 Tahrirlash
               </PrimaryAction>
             )}
@@ -110,78 +148,7 @@ function SubjectPanel({ subject, open, onClose, canManage, onEdit }: {
             <SecondaryAction icon={<BarChart2 className="h-3.5 w-3.5" />} onClick={() => router.push('/dashboard/grades')}>
               Baholar
             </SecondaryAction>
-            <SecondaryAction icon={<MonitorPlay className="h-3.5 w-3.5" />} onClick={() => router.push('/dashboard/schedule')}>
-              Jadval
-            </SecondaryAction>
           </div>
-        </div>
-      ),
-    },
-    {
-      id: 'teacher',
-      label: "O'qituvchi",
-      content: (
-        <div className="p-5">
-          {subject.teacher ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-xedu-slate-100 flex items-center justify-center text-sm font-bold text-xedu-slate-500">
-                  {getInitials(subject.teacher.firstName, subject.teacher.lastName)}
-                </div>
-                <div>
-                  <p className="text-sm font-bold">{subject.teacher.firstName} {subject.teacher.lastName}</p>
-                  <p className="text-xs text-xedu-slate-500">O'qituvchi</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <SecondaryAction icon={<MessageSquare className="h-3.5 w-3.5" />} onClick={() => { window.location.href = `/dashboard/messages?userId=${subject.teacherId}`; }}>
-                  Xabar
-                </SecondaryAction>
-                <SecondaryAction icon={<Eye className="h-3.5 w-3.5" />} onClick={() => { window.location.href = `/dashboard/users/${subject.teacherId}`; }}>
-                  Profil
-                </SecondaryAction>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center py-8 gap-2">
-              <Users className="h-6 w-6 text-xedu-slate-300" />
-              <p className="text-sm text-xedu-slate-500">O'qituvchi biriktirilmagan</p>
-            </div>
-          )}
-        </div>
-      ),
-    },
-    {
-      id: 'class',
-      label: 'Sinf',
-      content: (
-        <div className="p-5">
-          {subject.class ? (
-            <div className="space-y-3">
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-xedu-slate-100 flex items-center justify-center text-sm font-bold text-xedu-slate-500">
-                  <GraduationCap className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold">{subject.class.name}</p>
-                  <p className="text-xs text-xedu-slate-500">Sinf</p>
-                </div>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <SecondaryAction icon={<Eye className="h-3.5 w-3.5" />} onClick={() => router.push(`/dashboard/classes/${subject.classId}`)}>
-                  Sinf sahifasi
-                </SecondaryAction>
-                <SecondaryAction icon={<MonitorPlay className="h-3.5 w-3.5" />} onClick={() => router.push('/dashboard/schedule')}>
-                  Jadval
-                </SecondaryAction>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center py-8 gap-2">
-              <School className="h-6 w-6 text-xedu-slate-300" />
-              <p className="text-sm text-xedu-slate-500">Sinf ma'lumoti yo'q</p>
-            </div>
-          )}
         </div>
       ),
     },
@@ -192,23 +159,17 @@ function SubjectPanel({ subject, open, onClose, canManage, onEdit }: {
       open={open}
       onClose={onClose}
       entityType="default"
-      title={subject.name}
-      subtitle={subject.class?.name ?? ''}
+      title={item.name}
+      subtitle={`${item.count} ta sinfda`}
       status="active"
       metrics={[
-        { label: 'Sinf', value: subject.class?.name ?? '—', tone: 'calm' },
-        { label: "O'qituvchi", value: subject.teacher ? `${subject.teacher.firstName} ${subject.teacher.lastName}` : '—', tone: 'calm' },
-        { label: 'Yaratildi', value: formatDate(subject.createdAt), tone: 'calm' },
+        { label: 'Sinflar', value: item.count, tone: 'calm' },
+        { label: "O'qituvchilar", value: item.teachers.length, tone: 'calm' },
       ]}
       tabs={tabs}
     />
   );
 }
-
-// ── Sub-components ────────────────────────────────────────────────────────────
-
-
-
 
 // ── Main Workspace ────────────────────────────────────────────────────────────
 
@@ -219,7 +180,7 @@ export function SubjectsWorkspace() {
   const queryClient = useQueryClient();
   const ask = useConfirm();
 
-  const canManage = ['vice_principal', 'branch_admin'].includes(user?.role ?? '');
+  const canManage = ['director', 'vice_principal', 'branch_admin'].includes(user?.role ?? '');
   const canDelete = ['director'].includes(user?.role ?? '');
   const isDirector = user?.role === 'director';
   const isTeacher = ['teacher', 'class_teacher'].includes(user?.role ?? '');
@@ -239,16 +200,15 @@ export function SubjectsWorkspace() {
     searchTimerRef.current = window.setTimeout(() => setDebouncedSearch(v), 300);
   }, []);
 
-  // Unmount'da kutilayotgan debounce timeri tozalanadi
   useEffect(() => () => window.clearTimeout(searchTimerRef.current), []);
 
-  // ── Data fetching ────────────────────────────────────────────────────────────
-  const { data: subjects = [], isLoading } = useQuery<Subject[]>({
+  // ── Data fetching ─────────────────────────────────────────────────────────────
+  const { data: subjects = [], isLoading: subjectsLoading } = useQuery<Subject[]>({
     queryKey: ['subjects', activeBranchId],
     queryFn: () => subjectsApi.getAll(undefined, activeBranchId ?? undefined),
   });
 
-  const { data: catalog = [] } = useQuery({
+  const { data: catalog = [], isLoading: catalogLoading } = useQuery({
     queryKey: ['subjects', 'catalog', activeBranchId],
     queryFn: () => subjectsApi.getCatalog(activeBranchId ?? undefined),
   });
@@ -267,68 +227,71 @@ export function SubjectsWorkspace() {
 
   const classes: any[] = Array.isArray(classesData) ? classesData : (classesData as any)?.data ?? [];
   const teachers: any[] = (usersData?.data ?? []).filter((u: any) => ['teacher', 'class_teacher'].includes(u.role));
+  const catalogItems = catalog as CatalogItem[];
+  const isLoading = subjectsLoading || catalogLoading;
 
-  // ── Filtered subjects ────────────────────────────────────────────────────────
-  const filteredSubjects = useMemo(() => {
-    return subjects.filter((s) => {
+  // ── Filtered catalog ──────────────────────────────────────────────────────────
+  const filteredCatalog = useMemo(() => {
+    return catalogItems.filter((item) => {
       if (debouncedSearch) {
         const q = debouncedSearch.toLowerCase();
-        const teacherName = s.teacher ? `${s.teacher.firstName} ${s.teacher.lastName}`.toLowerCase() : '';
-        const className = s.class?.name?.toLowerCase() ?? '';
-        if (!s.name.toLowerCase().includes(q) && !teacherName.includes(q) && !className.includes(q)) return false;
+        const teacherMatch = item.teachers.some(t => `${t.firstName} ${t.lastName}`.toLowerCase().includes(q));
+        const classMatch = item.classes.some(c => c.name.toLowerCase().includes(q));
+        if (!item.name.toLowerCase().includes(q) && !teacherMatch && !classMatch) return false;
       }
-      if (filterClass && s.classId !== filterClass) return false;
-      if (filterTeacher && s.teacherId !== filterTeacher) return false;
+      if (filterClass && !item.classes.some(c => c.id === filterClass)) return false;
+      if (filterTeacher && !item.teachers.some(t => t.id === filterTeacher)) return false;
       return true;
     });
-  }, [subjects, debouncedSearch, filterClass, filterTeacher]);
+  }, [catalogItems, debouncedSearch, filterClass, filterTeacher]);
 
-  // ── Selection + Panel ────────────────────────────────────────────────────────
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [panelSubject, setPanelSubject] = useState<Subject | null>(null);
+  // ── Selection + Panel ─────────────────────────────────────────────────────────
+  const [selectedNames, setSelectedNames] = useState<string[]>([]);
+  const [panelItem, setPanelItem] = useState<CatalogItem | null>(null);
 
-  const toggleSelect = useCallback((id: string) => {
-    setSelectedIds((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  const toggleSelect = useCallback((normalizedName: string) => {
+    setSelectedNames((prev) => prev.includes(normalizedName) ? prev.filter((x) => x !== normalizedName) : [...prev, normalizedName]);
   }, []);
 
   const selectAll = useCallback(() => {
-    if (selectedIds.length === filteredSubjects.length && filteredSubjects.length > 0) {
-      setSelectedIds([]);
+    if (selectedNames.length === filteredCatalog.length && filteredCatalog.length > 0) {
+      setSelectedNames([]);
     } else {
-      setSelectedIds(filteredSubjects.map((s) => s.id));
+      setSelectedNames(filteredCatalog.map((i) => i.normalizedName));
     }
-  }, [selectedIds.length, filteredSubjects]);
+  }, [selectedNames.length, filteredCatalog]);
 
-  const clearSelection = useCallback(() => setSelectedIds([]), []);
+  const clearSelection = useCallback(() => setSelectedNames([]), []);
 
-  // ── Create / Edit modal ──────────────────────────────────────────────────────
+  // ── Create / Edit modal ───────────────────────────────────────────────────────
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingSubject, setEditingSubject] = useState<Subject | null>(null);
+  const [editingItem, setEditingItem] = useState<CatalogItem | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
   const openCreate = () => {
-    setEditingSubject(null);
+    setEditingItem(null);
     setForm(EMPTY_FORM);
     setErrors({});
     setModalOpen(true);
   };
 
-  const openEdit = (subject: Subject) => {
-    setEditingSubject(subject);
+  const openEdit = (item: CatalogItem) => {
+    setEditingItem(item);
     setForm({
-      name: subject.name,
-      classIds: subject.classId ? [subject.classId] : [],
-      teacherId: subject.teacherId ?? '',
+      name: item.name,
+      classIds: item.classes.map(c => c.id),
+      teacherId: item.teachers[0]?.id ?? '',
     });
     setErrors({});
     setModalOpen(true);
+    setPanelItem(null);
   };
 
   const closeModal = () => {
     setModalOpen(false);
-    setEditingSubject(null);
+    setEditingItem(null);
     setForm(EMPTY_FORM);
     setErrors({});
   };
@@ -363,49 +326,35 @@ export function SubjectsWorkspace() {
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: Parameters<typeof subjectsApi.update>[1] }) =>
-      subjectsApi.update(id, payload),
-    onSuccess: () => {
-      toast({ title: "Fan yangilandi" });
-      queryClient.invalidateQueries({ queryKey: ['subjects'] });
-      closeModal();
-    },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message;
-      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
-    },
-  });
-
   const handleSubmit = async () => {
     if (!validate()) return;
     setSaving(true);
     try {
-      if (editingSubject) {
-        // Mavjud yozuv birinchi tanlangan sinfga yangilanadi; qo'shimcha sinflar
-        // uchun alohida yozuvlar yaratiladi (backend nom+sinf bo'yicha upsert qiladi)
-        const [primaryClassId, ...extraClassIds] = form.classIds;
-        await updateMutation.mutateAsync({
-          id: editingSubject.id,
-          payload: {
-            name: form.name.trim(),
-            teacherId: form.teacherId,
-            classId: primaryClassId,
-          } as any,
+      if (editingItem) {
+        const oldClassIds = editingItem.classes.map(c => c.id);
+        const newClassIds = form.classIds;
+        const removedClassIds = oldClassIds.filter(id => !newClassIds.includes(id));
+
+        // Upsert all selected classes (backend handles create/update)
+        await subjectsApi.create({
+          name: form.name.trim(),
+          classIds: newClassIds,
+          teacherId: form.teacherId,
         });
-        if (extraClassIds.length > 0) {
-          try {
-            await subjectsApi.create({
-              name: form.name.trim(),
-              classIds: extraClassIds,
-              teacherId: form.teacherId,
-            });
-          } catch (err: any) {
-            const msg = err?.response?.data?.message;
-            toast({ variant: 'destructive', title: "Qo'shimcha sinflar saqlanmadi", description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
+
+        // Delete assignments for removed classes
+        for (const classId of removedClassIds) {
+          const subj = (subjects as Subject[]).find(
+            s => s.classId === classId && s.name.toLowerCase() === editingItem.normalizedName
+          );
+          if (subj) {
+            try { await subjectsApi.remove(subj.id); } catch {}
           }
-          queryClient.invalidateQueries({ queryKey: ['subjects'] });
         }
+
+        toast({ title: 'Fan yangilandi' });
+        queryClient.invalidateQueries({ queryKey: ['subjects'] });
+        closeModal();
       } else {
         await createMutation.mutateAsync({
           name: form.name.trim(),
@@ -413,20 +362,30 @@ export function SubjectsWorkspace() {
           teacherId: form.teacherId,
         });
       }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message;
+      toast({ variant: 'destructive', title: 'Xato', description: Array.isArray(msg) ? msg.join(', ') : msg ?? 'Xatolik' });
     } finally {
       setSaving(false);
     }
   };
 
-  const deleteMutation = useMutation({
-    mutationFn: subjectsApi.remove,
-    onSuccess: () => {
-      toast({ title: "Fan o'chirildi" });
-      queryClient.invalidateQueries({ queryKey: ['subjects'] });
-    },
-  });
+  const deleteCatalogItem = async (item: CatalogItem) => {
+    const confirmed = await ask({
+      title: `"${item.name}" fanini o'chirishni tasdiqlaysizmi?`,
+      description: `Bu fan ${item.count} ta sinfdan (${item.classes.map(c => c.name).join(', ')}) o'chiriladi.`,
+      variant: 'destructive',
+      confirmText: "O'chirish",
+    });
+    if (!confirmed) return;
+    for (const id of item.subjectIds) {
+      try { await subjectsApi.remove(id); } catch {}
+    }
+    toast({ title: "Fan o'chirildi" });
+    queryClient.invalidateQueries({ queryKey: ['subjects'] });
+  };
 
-  // ── Active filter chips ──────────────────────────────────────────────────────
+  // ── Active filter chips ───────────────────────────────────────────────────────
   const activeFilters = useMemo(() => {
     const chips: { key: string; label: string; onClear: () => void }[] = [];
     if (filterClass) {
@@ -440,14 +399,14 @@ export function SubjectsWorkspace() {
     return chips;
   }, [filterClass, filterTeacher, classes, teachers]);
 
-  // ── Intelligence ─────────────────────────────────────────────────────────────
-  const totalSubjects = subjects.length;
-  const uniqueSubjects = catalog.length;
-  const subjectsWithoutTeacher = subjects.filter((s) => !s.teacherId).length;
+  // ── Intelligence ──────────────────────────────────────────────────────────────
+  const totalSubjects = (subjects as Subject[]).length;
+  const uniqueSubjects = catalogItems.length;
+  const subjectsWithoutTeacher = (subjects as Subject[]).filter((s) => !s.teacherId).length;
 
   const teacherBreakdown = useMemo(() => {
     const map = new Map<string, { teacher: any; count: number }>();
-    subjects.forEach((s) => {
+    (subjects as Subject[]).forEach((s) => {
       if (!s.teacher) return;
       const cur = map.get(s.teacherId) ?? { teacher: s.teacher, count: 0 };
       cur.count++;
@@ -458,7 +417,7 @@ export function SubjectsWorkspace() {
 
   const classBreakdown = useMemo(() => {
     const map = new Map<string, { name: string; count: number }>();
-    subjects.forEach((s) => {
+    (subjects as Subject[]).forEach((s) => {
       if (!s.class) return;
       const cur = map.get(s.classId) ?? { name: s.class.name, count: 0 };
       cur.count++;
@@ -467,54 +426,11 @@ export function SubjectsWorkspace() {
     return Array.from(map.values()).sort((a, b) => b.count - a.count).slice(0, 5);
   }, [subjects]);
 
-  const recentSubjects = useMemo(() => {
-    return [...subjects].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 5);
-  }, [subjects]);
+  const recentCatalog = useMemo(() => catalogItems.slice(0, 5), [catalogItems]);
 
-  // ── Table columns ────────────────────────────────────────────────────────────
-  const columns = useMemo(() => [
-    {
-      key: 'name',
-      header: 'Fan',
-      cell: (s: Subject) => (
-        <div className="min-w-0">
-          <p className="font-semibold text-xedu-slate-900 dark:text-xedu-slate-100 text-xs truncate">{s.name}</p>
-          <p className="text-2xs text-xedu-slate-400">{s.class?.name ?? '—'}</p>
-        </div>
-      ),
-    },
-    {
-      key: 'class',
-      header: 'Sinf',
-      width: '90px',
-      cell: (s: Subject) => (
-        <span className="text-xs text-xedu-slate-600">{s.class?.name ?? '—'}</span>
-      ),
-    },
-    {
-      key: 'teacher',
-      header: "O'qituvchi",
-      width: '120px',
-      cell: (s: Subject) => (
-        <div className="flex items-center gap-1.5 min-w-0">
-          <div className="h-5 w-5 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center text-2xs font-bold text-xedu-slate-500 shrink-0">
-            {s.teacher?.firstName?.[0]}{s.teacher?.lastName?.[0]}
-          </div>
-          <span className="text-xs text-xedu-slate-600 truncate">
-            {s.teacher ? `${s.teacher.firstName} ${s.teacher.lastName}` : <span className="text-xedu-amber-500">Biriktirilmagan</span>}
-          </span>
-        </div>
-      ),
-    },
-    {
-      key: 'created',
-      header: 'Yaratildi',
-      width: '80px',
-      cell: (s: Subject) => (
-        <span className="text-xs text-xedu-slate-400">{formatDate(s.createdAt)}</span>
-      ),
-    },
-  ], []);
+  // ── Grouped table row ─────────────────────────────────────────────────────────
+  const allSelected = filteredCatalog.length > 0 && selectedNames.length === filteredCatalog.length;
+  const someSelected = selectedNames.length > 0 && !allSelected;
 
   return (
     <WorkspaceShell layout="two-column" density="compact">
@@ -522,7 +438,7 @@ export function SubjectsWorkspace() {
       <div className="w-full lg:col-span-2">
         <WorkspaceHeader
           title="Fanlar"
-          subtitle={`${totalSubjects} ta fan · O'quv dasturi boshqaruvi`}
+          subtitle={`${uniqueSubjects} ta noyob fan · ${totalSubjects} ta biriktirish`}
           icon={<BookOpen className="h-5 w-5 text-xedu-slate-500" />}
           actions={
             canManage && (
@@ -624,81 +540,192 @@ export function SubjectsWorkspace() {
         )}
       </div>
 
-      {/* Main: Subjects table */}
+      {/* Main: Catalog table */}
       <WorkspaceMain>
-        <OpTable
-          columns={columns}
-          rows={filteredSubjects}
-          rowKey={(s) => s.id}
-          density="compact"
-          selectable
-          selectedIds={selectedIds}
-          onSelect={toggleSelect}
-          onSelectAll={selectAll}
-          rowTone={(s) => {
-            if (!s.teacherId) return 'attention';
-            return 'neutral';
-          }}
-          rowActions={(s) => (
-            <>
-              <IconAction
-                icon={<Eye className="h-3.5 w-3.5" />}
-                title="Ko'rish"
-                onClick={() => setPanelSubject(s)}
-                tone="primary"
+        <div className="rounded-xl border border-xedu-border overflow-hidden bg-xedu-bg-elevated">
+          {/* Table header */}
+          <div className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3 px-3 py-2 border-b border-xedu-border bg-xedu-bg-subtle">
+            {canManage && canDelete && (
+              <Checkbox
+                checked={allSelected}
+                onCheckedChange={selectAll}
+                className="h-3.5 w-3.5"
+                aria-label="Hammasini tanlash"
               />
-              {canManage && (
-                <IconAction
-                  icon={<Edit3 className="h-3.5 w-3.5" />}
-                  title="Tahrirlash"
-                  onClick={() => openEdit(s)}
-                />
-              )}
-              <IconAction
-                icon={<School className="h-3.5 w-3.5" />}
-                title="Sinf"
-                onClick={() => router.push(`/dashboard/classes/${s.classId}`)}
-              />
-              <IconAction
-                icon={<Trophy className="h-3.5 w-3.5" />}
-                title="Imtihonlar"
-                onClick={() => router.push('/dashboard/exams')}
-              />
-              {canDelete && (
-                <IconAction
-                  icon={<Trash2 className="h-3.5 w-3.5" />}
-                  title="O'chirish"
-                  tone="danger"
-                  onClick={async () => {
-                    if (await ask({ title: `"${s.name}" fanini o'chirishni tasdiqlaysizmi?`, variant: 'destructive', confirmText: "O'chirish" })) {
-                      deleteMutation.mutate(s.id);
-                    }
-                  }}
-                />
-              )}
-            </>
+            )}
+            <span className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400">Fan</span>
+            <span className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 min-w-[120px]">Sinflar</span>
+            <span className="text-2xs font-bold uppercase tracking-wider text-xedu-slate-400 min-w-[130px] hidden sm:block">O'qituvchi</span>
+            <span className="w-16" />
+          </div>
+
+          {/* Loading state */}
+          {isLoading && (
+            <div className="divide-y divide-xedu-border">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3 px-3 py-3">
+                  <Skeleton className="h-3.5 w-3.5 rounded" />
+                  <Skeleton className="h-4 w-28 rounded" />
+                  <div className="flex gap-1 min-w-[120px]">
+                    <Skeleton className="h-5 w-8 rounded-md" />
+                    <Skeleton className="h-5 w-8 rounded-md" />
+                  </div>
+                  <Skeleton className="h-4 w-24 rounded hidden sm:block" />
+                  <Skeleton className="h-6 w-16 rounded" />
+                </div>
+              ))}
+            </div>
           )}
-          isLoading={isLoading}
-          skeletonRows={6}
-          emptyState={
+
+          {/* Empty state */}
+          {!isLoading && filteredCatalog.length === 0 && (
             <div className="flex flex-col items-center justify-center py-12 gap-2">
               <BookOpen className="h-8 w-8 text-xedu-slate-300" />
               <p className="text-sm font-medium text-xedu-slate-500">Fanlar yo&apos;q</p>
               <p className="text-xs text-xedu-slate-400">
-                {canManage ? "Yuqoridagi '+ Yangi fan' tugmasini bosib qo'shing" : "Sizga biriktirilgan fanlar bu yerda ko'rinadi"}
+                {debouncedSearch || filterClass || filterTeacher
+                  ? 'Filterlarni tozalab ko\'ring'
+                  : canManage
+                    ? "Yuqoridagi '+ Yangi fan' tugmasini bosib qo'shing"
+                    : 'Sizga biriktirilgan fanlar bu yerda ko\'rinadi'}
+              </p>
+              {(debouncedSearch || filterClass || filterTeacher) && (
+                <Button size="sm" variant="outline" className="mt-1" onClick={() => { setSearch(''); setDebouncedSearch(''); setFilterClass(''); setFilterTeacher(''); }}>
+                  Filterlarni tozalash
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Catalog rows */}
+          {!isLoading && filteredCatalog.length > 0 && (
+            <div className="divide-y divide-xedu-border">
+              {filteredCatalog.map((item) => {
+                const isSelected = selectedNames.includes(item.normalizedName);
+                const primaryTeacher = item.teachers[0];
+                const extraTeachers = item.teachers.length - 1;
+
+                return (
+                  <div
+                    key={item.normalizedName}
+                    className={cn(
+                      'group grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-3 px-3 py-2.5 transition-colors cursor-pointer',
+                      isSelected
+                        ? 'bg-xedu-primary/5'
+                        : 'hover:bg-xedu-bg-subtle',
+                    )}
+                    onClick={() => setPanelItem(item)}
+                  >
+                    {/* Checkbox */}
+                    {canManage && canDelete ? (
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={(e) => {
+                          (e as MouseEvent | React.MouseEvent).stopPropagation?.();
+                          toggleSelect(item.normalizedName);
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="h-3.5 w-3.5"
+                      />
+                    ) : (
+                      <span className="w-3.5" />
+                    )}
+
+                    {/* Fan nomi */}
+                    <div className="min-w-0">
+                      <p className="font-semibold text-xs text-xedu-slate-900 dark:text-xedu-slate-100 truncate">
+                        {item.name}
+                      </p>
+                      <p className="text-2xs text-xedu-slate-400">{item.count} ta sinf</p>
+                    </div>
+
+                    {/* Sinflar — class badges */}
+                    <div className="flex flex-wrap gap-1 min-w-[120px] max-w-[200px]">
+                      {item.classes.slice(0, 5).map((cls) => (
+                        <span
+                          key={cls.id}
+                          className="inline-flex items-center px-1.5 py-0.5 rounded-md text-2xs font-bold bg-xedu-primary/10 text-xedu-primary border border-xedu-primary/20"
+                        >
+                          {cls.name}
+                        </span>
+                      ))}
+                      {item.classes.length > 5 && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-2xs font-semibold bg-xedu-slate-100 text-xedu-slate-500">
+                          +{item.classes.length - 5}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* O'qituvchi */}
+                    <div className="min-w-[130px] hidden sm:flex items-center gap-1.5">
+                      {item.teachers.length === 0 ? (
+                        <span className="text-xs text-xedu-amber-500">Biriktirilmagan</span>
+                      ) : (
+                        <>
+                          <div className="h-5 w-5 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 flex items-center justify-center text-2xs font-bold text-xedu-slate-500 shrink-0">
+                            {primaryTeacher?.firstName?.[0]}{primaryTeacher?.lastName?.[0]}
+                          </div>
+                          <span className="text-xs text-xedu-slate-600 truncate max-w-[100px]">
+                            {primaryTeacher?.firstName} {primaryTeacher?.lastName}
+                          </span>
+                          {extraTeachers > 0 && (
+                            <span className="text-2xs text-xedu-slate-400">+{extraTeachers}</span>
+                          )}
+                        </>
+                      )}
+                    </div>
+
+                    {/* Row actions */}
+                    <div
+                      className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <IconAction
+                        icon={<Eye className="h-3.5 w-3.5" />}
+                        title="Ko'rish"
+                        onClick={() => setPanelItem(item)}
+                        tone="primary"
+                      />
+                      {canManage && (
+                        <IconAction
+                          icon={<Edit3 className="h-3.5 w-3.5" />}
+                          title="Tahrirlash"
+                          onClick={() => openEdit(item)}
+                        />
+                      )}
+                      {canDelete && (
+                        <IconAction
+                          icon={<Trash2 className="h-3.5 w-3.5" />}
+                          title="O'chirish"
+                          tone="danger"
+                          onClick={() => deleteCatalogItem(item)}
+                        />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Footer count */}
+          {!isLoading && filteredCatalog.length > 0 && (
+            <div className="px-3 py-2 border-t border-xedu-border bg-xedu-bg-subtle">
+              <p className="text-2xs text-xedu-slate-400">
+                {filteredCatalog.length} ta fan · {filteredCatalog.reduce((sum, i) => sum + i.count, 0)} ta sinf biriktirilishi
               </p>
             </div>
-          }
-        />
+          )}
+        </div>
       </WorkspaceMain>
 
-      {/* Right sidebar: Curriculum intelligence */}
+      {/* Right sidebar */}
       <WorkspaceSidebar width="narrow">
         <WorkspaceSection title="Umumiy ko'rsatkichlar" icon={<BarChart3 className="h-4 w-4" />}>
           <div className="grid grid-cols-2 gap-2">
             <StatPill label="Jami" value={totalSubjects} />
             <StatPill label="Noyob fanlar" value={uniqueSubjects} />
-            <StatPill label="O'qituvchilar" value={new Set(subjects.map(s => s.teacherId).filter(Boolean)).size} />
+            <StatPill label="O'qituvchilar" value={new Set((subjects as Subject[]).map(s => s.teacherId).filter(Boolean)).size} />
             <StatPill label="Biriktirilmagan" value={subjectsWithoutTeacher} tone={subjectsWithoutTeacher > 0 ? 'urgent' : 'calm'} />
           </div>
         </WorkspaceSection>
@@ -740,19 +767,19 @@ export function SubjectsWorkspace() {
           </WorkspaceSection>
         )}
 
-        {recentSubjects.length > 0 && (
-          <WorkspaceSection title="So'ngi fanlar" icon={<TrendingUp className="h-4 w-4" />}>
+        {recentCatalog.length > 0 && (
+          <WorkspaceSection title="Fanlar" icon={<TrendingUp className="h-4 w-4" />}>
             <div className="space-y-1">
-              {recentSubjects.map((s) => (
+              {recentCatalog.map((item) => (
                 <button
-                  key={s.id}
-                  onClick={() => setPanelSubject(s)}
+                  key={item.normalizedName}
+                  onClick={() => setPanelItem(item)}
                   className="w-full flex items-start gap-2 rounded-md px-2 py-1.5 text-left hover:bg-xedu-slate-50 dark:hover:bg-xedu-slate-800 transition-colors"
                 >
                   <BookOpen className="h-3.5 w-3.5 text-xedu-primary shrink-0 mt-0.5" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-xedu-slate-700 truncate">{s.name}</p>
-                    <p className="text-2xs text-xedu-slate-400">{s.class?.name} · {formatDate(s.createdAt)}</p>
+                    <p className="text-xs font-medium text-xedu-slate-700 truncate">{item.name}</p>
+                    <p className="text-2xs text-xedu-slate-400">{item.classes.map(c => c.name).join(', ')}</p>
                   </div>
                 </button>
               ))}
@@ -771,19 +798,20 @@ export function SubjectsWorkspace() {
         </WorkspaceSection>
       </WorkspaceSidebar>
 
-      {/* Subject Entity Panel */}
-      <SubjectPanel
-        subject={panelSubject}
-        open={!!panelSubject}
-        onClose={() => setPanelSubject(null)}
+      {/* Catalog Item Panel */}
+      <CatalogPanel
+        item={panelItem}
+        open={!!panelItem}
+        onClose={() => setPanelItem(null)}
         canManage={canManage}
         onEdit={canManage ? openEdit : undefined}
+        subjects={subjects as Subject[]}
       />
 
       {/* Bulk toolbar */}
       <FloatingBulkToolbar
-        visible={selectedIds.length >= 1 && canManage}
-        selectedIds={selectedIds}
+        visible={selectedNames.length >= 1 && canDelete}
+        selectedIds={selectedNames}
         actions={[
           {
             id: 'delete',
@@ -791,11 +819,15 @@ export function SubjectsWorkspace() {
             icon: Trash2,
             tone: 'danger',
             onClick: async () => {
-              if (!confirm(`${selectedIds.length} ta fanni o'chirishni tasdiqlaysizmi?`)) return;
-              for (const id of selectedIds) {
-                try { await subjectsApi.remove(id); } catch {}
+              const selected = catalogItems.filter(i => selectedNames.includes(i.normalizedName));
+              const totalCount = selected.reduce((sum, i) => sum + i.count, 0);
+              if (!confirm(`${selectedNames.length} ta fan (${totalCount} ta biriktirish) o'chirilsinmi?`)) return;
+              for (const item of selected) {
+                for (const id of item.subjectIds) {
+                  try { await subjectsApi.remove(id); } catch {}
+                }
               }
-              toast({ title: `${selectedIds.length} ta fan o'chirildi` });
+              toast({ title: `${selectedNames.length} ta fan o'chirildi` });
               queryClient.invalidateQueries({ queryKey: ['subjects'] });
               clearSelection();
             },
@@ -808,7 +840,7 @@ export function SubjectsWorkspace() {
       <Dialog open={modalOpen} onOpenChange={(v) => { if (!v) closeModal(); }}>
         <DialogContent className="max-w-sm">
           <DialogHeader>
-            <DialogTitle>{editingSubject ? 'Fanni tahrirlash' : "Yangi fan qo'shish"}</DialogTitle>
+            <DialogTitle>{editingItem ? 'Fanni tahrirlash' : "Yangi fan qo'shish"}</DialogTitle>
             <DialogDescription>Fan bir yoki bir nechta sinfga biriktiriladi</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
@@ -861,9 +893,9 @@ export function SubjectsWorkspace() {
           </div>
           <DialogFooter className="gap-2">
             <Button variant="outline" onClick={closeModal}>Bekor qilish</Button>
-            <Button onClick={handleSubmit} disabled={saving || createMutation.isPending || updateMutation.isPending}>
-              {(saving || createMutation.isPending || updateMutation.isPending) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {editingSubject ? 'Saqlash' : "Qo'shish"} {form.classIds.length > 1 && !editingSubject ? `(${form.classIds.length} sinf)` : ''}
+            <Button onClick={handleSubmit} disabled={saving || createMutation.isPending}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              {editingItem ? 'Saqlash' : "Qo'shish"} {form.classIds.length > 1 ? `(${form.classIds.length} sinf)` : ''}
             </Button>
           </DialogFooter>
         </DialogContent>

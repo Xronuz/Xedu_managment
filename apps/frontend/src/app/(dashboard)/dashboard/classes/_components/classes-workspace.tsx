@@ -116,8 +116,13 @@ export function ClassesWorkspace() {
   });
 
   const { data: teachersData } = useQuery({
-    queryKey: ['teachers-for-classes'],
+    queryKey: ['teachers-for-classes', 'teacher'],
     queryFn: () => usersApi.getAll({ page: 1, limit: 200, role: 'teacher' }),
+  });
+
+  const { data: classTeachersData } = useQuery({
+    queryKey: ['teachers-for-classes', 'class_teacher'],
+    queryFn: () => usersApi.getAll({ page: 1, limit: 200, role: 'class_teacher' }),
   });
 
   const { data: subjectsData } = useQuery({
@@ -126,7 +131,10 @@ export function ClassesWorkspace() {
   });
 
   const branches: any[] = Array.isArray(branchesData) ? branchesData : (branchesData as any)?.data ?? [];
-  const teachers: any[] = (teachersData as any)?.data ?? [];
+  const teachers: any[] = [
+    ...((teachersData as any)?.data ?? []),
+    ...((classTeachersData as any)?.data ?? []),
+  ];
   const allSubjects: any[] = Array.isArray(subjectsData) ? subjectsData : (subjectsData as any)?.data ?? [];
 
   const classList: ClassRow[] = useMemo(() => {

@@ -224,7 +224,9 @@ function BulkGradeDialog({ open, onClose }: { open: boolean; onClose: () => void
     queryFn: () => subjectsApi.getAll(bulkClassId || undefined),
     enabled: !isBulkTeacher && !!bulkClassId,
   });
-  const subjectList: any[] = (isBulkTeacher ? myBulkSubjects : allBulkSubjects) as any[];
+  const subjectList: any[] = (isBulkTeacher
+    ? (myBulkSubjects as any[]).filter((s: any) => !bulkClassId || s.classId === bulkClassId)
+    : allBulkSubjects) as any[];
 
   const { data: studentsData } = useQuery({
     queryKey: ['class-students-bulk', bulkClassId, activeBranchId],
@@ -454,7 +456,10 @@ export default function GradesPage() {
     queryFn: () => subjectsApi.getAll(form.classId || selectedClass || undefined),
     enabled: !isTeacher && (open || !!selectedClass),
   });
-  const subjectList: any[] = (isTeacher ? mySubjects : allSubjects) as any[];
+  const activeClassId = form.classId || selectedClass;
+  const subjectList: any[] = (isTeacher
+    ? (mySubjects as any[]).filter((s: any) => !activeClassId || s.classId === activeClassId)
+    : allSubjects) as any[];
 
   const { data: classStudents = [] } = useQuery({
     queryKey: ['class-students-grades', form.classId, activeBranchId],

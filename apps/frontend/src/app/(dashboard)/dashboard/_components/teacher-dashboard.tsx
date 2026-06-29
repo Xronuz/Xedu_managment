@@ -17,6 +17,7 @@ import { classesApi } from '@/lib/api/classes';
 import { attendanceApi } from '@/lib/api/attendance';
 import { examsApi } from '@/lib/api/exams';
 import { gradesApi } from '@/lib/api/grades';
+import { subjectsApi } from '@/lib/api/subjects';
 
 import {
   C, ICON_CFG, StatCard, PCard, QuickActions,
@@ -35,7 +36,11 @@ export function TeacherDashboard() {
   const { data: classesData, isLoading: classesLoading } = useQuery({
     queryKey: ['classes', 'teacher', activeBranchId],
     queryFn: classesApi.getAll,
-    enabled: !!activeBranchId,
+  });
+
+  const { data: mySubjectsData } = useQuery({
+    queryKey: ['subjects', 'mine', activeBranchId],
+    queryFn: () => subjectsApi.getMine(),
   });
 
   const { data: upcomingExams } = useQuery({
@@ -45,9 +50,10 @@ export function TeacherDashboard() {
   });
 
   const classList: any[] = Array.isArray(classesData) ? classesData : (classesData as any)?.data ?? [];
+  const mySubjects: any[] = Array.isArray(mySubjectsData) ? mySubjectsData : [];
+  const mySubjectClassIds = new Set(mySubjects.map((s: any) => s.classId).filter(Boolean));
   const myClasses = classList.filter((c: any) =>
-    c.teachers?.some((t: any) => t.id === user?.id) ||
-    c.classTeacherId === user?.id
+    c.classTeacherId === user?.id || mySubjectClassIds.has(c.id)
   );
 
   const examsList: any[] = Array.isArray(upcomingExams) ? upcomingExams : (upcomingExams as any)?.data ?? [];

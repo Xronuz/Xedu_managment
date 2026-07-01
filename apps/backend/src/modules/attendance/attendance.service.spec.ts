@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AttendanceService } from './attendance.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
+import { RedisService } from '@/common/redis/redis.service';
 import { NotificationQueueService } from '@/modules/notifications/notification-queue.service';
 import { JwtPayload, UserRole } from '@eduplatform/types';
 
@@ -24,10 +25,19 @@ describe('AttendanceService', () => {
       $transaction: jest.fn((ops) => Promise.all(ops)),
     };
 
+    const redis = {
+      keys: jest.fn().mockResolvedValue([]),
+      del: jest.fn().mockResolvedValue(0),
+      set: jest.fn().mockResolvedValue('OK'),
+      getJson: jest.fn().mockResolvedValue(null),
+      setJson: jest.fn().mockResolvedValue(undefined),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AttendanceService,
         { provide: PrismaService, useValue: prisma },
+        { provide: RedisService, useValue: redis },
         { provide: NotificationQueueService, useValue: null },
       ],
     }).compile();

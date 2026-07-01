@@ -109,7 +109,8 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/$1"
+      "^@/(.*)$": "<rootDir>/$1",
+      "^expo-server-sdk$": "<rootDir>/test-mocks/expo-server-sdk.ts"
     }
   },
   "prisma": {

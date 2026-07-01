@@ -17,6 +17,13 @@ describe('DisplayService', () => {
       school: {
         findUnique: jest.fn(),
       },
+      schoolModule: {
+        findFirst: jest.fn().mockResolvedValue({ isEnabled: true }),
+      },
+      branch: {
+        findFirst: jest.fn().mockResolvedValue(null),
+        findMany: jest.fn().mockResolvedValue([]),
+      },
       schedule: {
         findMany: jest.fn().mockResolvedValue([]),
       },

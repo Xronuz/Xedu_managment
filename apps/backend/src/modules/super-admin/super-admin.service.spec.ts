@@ -47,6 +47,7 @@ const mockPrisma = {
     createMany: jest.fn(),
   },
   $transaction: jest.fn((ops: any[]) => Promise.all(ops)),
+  $executeRaw: jest.fn(() => Promise.resolve(0)),
 };
 
 const mockAudit = {
@@ -270,10 +271,10 @@ describe('SuperAdminService', () => {
       mockPrisma.school.findUnique.mockResolvedValueOnce({
         id: 'school-1',
         name: 'Test School',
+        slug: 'test-school',
         deletedAt: null,
       });
       mockPrisma.school.update.mockResolvedValueOnce({ id: 'school-1', deletedAt: new Date() });
-      mockPrisma.user.updateMany.mockResolvedValueOnce({ count: 3 });
       mockPrisma.user.findMany.mockResolvedValueOnce([
         { id: 'user-1' },
         { id: 'user-2' },
@@ -290,10 +291,8 @@ describe('SuperAdminService', () => {
           isActive: false,
         }),
       });
-      expect(mockPrisma.user.updateMany).toHaveBeenCalledWith({
-        where: { schoolId: 'school-1' },
-        data: { isActive: false },
-      });
+      // Foydalanuvchi email'lari raw SQL bilan suffikslanadi va isActive=false qilinadi
+      expect(mockPrisma.$executeRaw).toHaveBeenCalled();
       expect(mockAuth.logoutAll).toHaveBeenCalledTimes(3);
       expect(mockAudit.log).toHaveBeenCalledWith(
         expect.objectContaining({

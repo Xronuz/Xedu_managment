@@ -3,6 +3,7 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { ImportService } from './import.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { UsersService } from '@/modules/users/users.service';
+import { ClassesService } from '@/modules/classes/classes.service';
 import { ConflictDetectorService } from '@/common/utils/conflict-detector';
 import { JwtPayload, UserRole, DayOfWeek } from '@eduplatform/types';
 
@@ -40,6 +41,7 @@ describe('ImportService — Schedule', () => {
         ImportService,
         { provide: PrismaService, useValue: prisma },
         { provide: UsersService, useValue: {} },
+        { provide: ClassesService, useValue: { invalidateCache: jest.fn(() => Promise.resolve()) } },
         { provide: ConflictDetectorService, useValue: mockConflictDetector },
       ],
     }).compile();

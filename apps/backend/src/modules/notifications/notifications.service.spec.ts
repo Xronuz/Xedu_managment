@@ -14,7 +14,7 @@ const mockUser: JwtPayload = {
 
 describe('NotificationsService', () => {
   let service: NotificationsService;
-  let prisma: { notification: any; user: any };
+  let prisma: { notification: any; notificationDelivery: any; user: any };
 
   beforeEach(async () => {
     prisma = {
@@ -24,8 +24,12 @@ describe('NotificationsService', () => {
         count: jest.fn(),
         updateMany: jest.fn(),
       },
+      notificationDelivery: {
+        create: jest.fn(),
+      },
       user: {
         findUnique: jest.fn(),
+        findFirst: jest.fn(),
         update: jest.fn(),
       },
     };
@@ -86,7 +90,7 @@ describe('NotificationsService', () => {
 
       expect(prisma.notification.updateMany).toHaveBeenCalledWith({
         where: { recipientId: 'user-1', isRead: false },
-        data: { isRead: true },
+        data: { isRead: true, readAt: expect.any(Date) },
       });
     });
   });
@@ -94,7 +98,13 @@ describe('NotificationsService', () => {
   describe('send', () => {
     it('should create a notification', async () => {
       const notification = { id: 'notif-1', title: 'Test' };
+      prisma.user.findFirst.mockResolvedValue({
+        branchId: 'branch-1',
+        schoolId: 'school-1',
+        notifPreferences: null,
+      });
       prisma.notification.create.mockResolvedValue(notification);
+      prisma.notificationDelivery.create.mockResolvedValue({});
 
       const result = await service.send(
         { recipientId: 'user-2', title: 'Test', body: 'Test body' },

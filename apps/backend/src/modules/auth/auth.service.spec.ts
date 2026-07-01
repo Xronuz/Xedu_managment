@@ -29,6 +29,12 @@ const mockPrisma = {
     findUnique: jest.fn(),
     update: jest.fn(),
   },
+  school: {
+    findUnique: jest.fn(() => Promise.resolve({ deletedAt: null, isActive: true })),
+  },
+  branch: {
+    findUnique: jest.fn(),
+  },
   userBranchAssignment: {
     findMany: jest.fn(() => Promise.resolve([])),
   },

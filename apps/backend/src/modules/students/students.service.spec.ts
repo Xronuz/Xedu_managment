@@ -4,6 +4,7 @@ import { StudentsService } from './students.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { AuditService } from '@/common/audit/audit.service';
 import { UsersService } from '@/modules/users/users.service';
+import { ClassesService } from '@/modules/classes/classes.service';
 import { UserRole } from '@eduplatform/types';
 
 const mockPrisma = {
@@ -11,6 +12,9 @@ const mockPrisma = {
     findFirst: jest.fn(),
     update: jest.fn(),
     findUnique: jest.fn(),
+  },
+  class: {
+    findFirst: jest.fn(),
   },
   classStudent: {
     create: jest.fn(),
@@ -27,6 +31,10 @@ const mockUsersService = {
   linkParentStudent: jest.fn(),
 };
 
+const mockClassesService = {
+  invalidateCache: jest.fn(() => Promise.resolve()),
+};
+
 describe('StudentsService', () => {
   let service: StudentsService;
 
@@ -39,6 +47,7 @@ describe('StudentsService', () => {
         { provide: PrismaService, useValue: mockPrisma },
         { provide: AuditService, useValue: mockAudit },
         { provide: UsersService, useValue: mockUsersService },
+        { provide: ClassesService, useValue: mockClassesService },
       ],
     }).compile();
 
@@ -131,6 +140,7 @@ describe('StudentsService', () => {
         email: baseStudentDto.email,
         role: UserRole.STUDENT,
       });
+      mockPrisma.class.findFirst.mockResolvedValueOnce({ id: 'class-1' });
       mockPrisma.classStudent.create.mockResolvedValueOnce({});
 
       await service.create({ ...baseStudentDto, classId: 'class-1' }, branchAdmin);

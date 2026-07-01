@@ -5,6 +5,7 @@ import { SystemConfigService } from './system-config.service';
 import { PrismaService } from '@/common/prisma/prisma.service';
 import { JwtAuthGuard } from '@/common/guards/jwt-auth.guard';
 import { RolesGuard } from '@/common/guards/roles.guard';
+import { ModuleFlagsService } from '@/common/module-flags/module-flags.service';
 import { UserRole } from '@eduplatform/types';
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
@@ -12,6 +13,10 @@ import { UserRole } from '@eduplatform/types';
 const mockService = {
   getAll: jest.fn(),
   setBulk: jest.fn(),
+};
+
+const mockModuleFlags = {
+  getDisabledModules: jest.fn(() => Promise.resolve([])),
 };
 
 const mockPrisma = {
@@ -71,6 +76,7 @@ describe('SystemConfigController', () => {
       providers: [
         { provide: SystemConfigService, useValue: mockService },
         { provide: PrismaService, useValue: mockPrisma },
+        { provide: ModuleFlagsService, useValue: mockModuleFlags },
       ],
     })
       .overrideGuard(JwtAuthGuard)

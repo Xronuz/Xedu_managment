@@ -15,7 +15,7 @@ export function VicePrincipalWelcome() {
   const router = useRouter();
 
   const actions = [
-    { label: ‘Maktab sozlash’, desc: ‘Asosiy ma’lumotlarni kiriting’, icon: Building2, href: ‘/dashboard/setup’, color: ‘text-xedu-primary’ },
+    { label: 'Maktab sozlash', desc: 'Asosiy ma’lumotlarni kiriting', icon: Building2, href: '/dashboard/setup', color: 'text-xedu-primary' },
     { label: 'Filiallar', desc: 'Filiallarni boshqarish', icon: GraduationCap, href: '/dashboard/branches', color: 'text-xedu-sky' },
     { label: 'Xodimlar', desc: 'O‘qituvchi va administratsiya', icon: Users, href: '/dashboard/users', color: 'text-xedu-violet' },
     { label: 'Hisobotlar', desc: 'Umumiy ko‘rsatkichlar', icon: BarChart3, href: '/dashboard/reports', color: 'text-xedu-amber' },

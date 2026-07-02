@@ -8,6 +8,7 @@
  * fallback — faqat ism + sinf ko'rsatiladi.
  */
 import { RefreshControl, ScrollView, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -22,6 +23,7 @@ import { Surface } from '../dashboard-kit';
 import { ErrorBanner } from '../error-banner';
 import { radius, spacing } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
+import { useTabBarSpace } from '@/lib/tab-space';
 import { impact } from '@/lib/haptics';
 
 interface ChildPreview {
@@ -40,6 +42,8 @@ export function ParentHome({ name, avatarUrl }: { name: string; avatarUrl?: stri
   const { t } = useTranslation();
   const { theme } = useTheme();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+  const bottomSpace = useTabBarSpace();
 
   const childrenQuery = useQuery<ChildPreview[]>({
     queryKey: ['parent', 'children'],
@@ -56,7 +60,8 @@ export function ParentHome({ name, avatarUrl }: { name: string; avatarUrl?: stri
 
   return (
     <ScrollView
-      contentContainerStyle={{ padding: spacing.lg, gap: spacing.lg }}
+      style={{ flex: 1, backgroundColor: theme.bg }}
+      contentContainerStyle={{ padding: spacing.lg, paddingTop: insets.top + spacing.lg, paddingBottom: bottomSpace, gap: spacing.lg }}
       refreshControl={<RefreshControl refreshing={childrenQuery.isRefetching} onRefresh={childrenQuery.refetch} tintColor={theme.primary} />}
     >
       <HeroCard>

@@ -62,3 +62,15 @@ export function homeForRole(role: string): ComponentType<HomeProps> {
   const r = (role || '').toLowerCase().trim() as AppRole;
   return HOME_REGISTRY[r] ?? ComingSoonHome;
 }
+
+/**
+ * Ekranni o'zi boshqaradigan home'lar: o'z ScrollView'i (RefreshControl bilan)
+ * va top inset'ini o'zi render qiladi. `(app)/index.tsx` bularni SafeAreaView +
+ * ScrollView wrapper'iga O'RAMAYDI — ikkita ichma-ich vertikal ScrollView
+ * pull-to-refresh va scroll'ni buzadi.
+ */
+const OWNS_SCREEN = new Set<AppRole>(['student', 'parent']);
+
+export function homeOwnsScreen(role: string): boolean {
+  return OWNS_SCREEN.has((role || '').toLowerCase().trim() as AppRole);
+}

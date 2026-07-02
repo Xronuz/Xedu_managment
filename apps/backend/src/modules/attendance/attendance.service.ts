@@ -8,6 +8,7 @@ import { AuditService } from '@/common/audit/audit.service';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 import { assertParentOfChild } from '@/common/utils/parent-guard.util';
+import { assertTeacherOfClass } from '@/common/utils/teacher-guard.util';
 
 const ATTENDANCE_TTL = 3 * 60;   // 3 min — nisbatan tez-tez o'zgaradi
 const SUMMARY_TTL   = 2 * 60;   // 2 min — joriy kun xulosasi
@@ -35,6 +36,9 @@ export class AttendanceService {
   }
 
   async markAttendance(dto: MarkAttendanceDto, currentUser: JwtPayload) {
+    // ── Teacher scope: must be assigned to this class ──────────────────────────
+    await assertTeacherOfClass(this.prisma, currentUser, dto.classId);
+
     const schoolId = currentUser.schoolId!;
     const date = new Date(dto.date);
 

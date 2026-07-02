@@ -120,7 +120,7 @@ export default function LibraryPage() {
       <div className="grid gap-4 sm:grid-cols-4">
         {statsLoading ? [...Array(4)].map((_, i) => <Skeleton key={i} className="h-24" />) : [
           { label: 'Jami kitoblar', value: stats?.totalBooks ?? 0, icon: BookOpen, color: 'text-blue-500', bg: 'bg-blue-500/10' },
-          { label: 'Mavjud nusxalar', value: stats?.availableBooks ?? 0, icon: BookOpen, color: 'text-green-500', bg: 'bg-green-500/10' },
+          { label: 'Mavjud nusxalar', value: stats?.availableCopies ?? 0, icon: BookOpen, color: 'text-green-500', bg: 'bg-green-500/10' },
           { label: 'Berilgan kitoblar', value: stats?.activeLoans ?? 0, icon: Users, color: 'text-orange-500', bg: 'bg-orange-500/10' },
           { label: 'Muddati o‘tgan', value: stats?.overdueLoans ?? 0, icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500/10' },
         ].map(({ label, value, icon: Icon, color, bg }) => (

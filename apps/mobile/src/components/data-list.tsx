@@ -11,7 +11,7 @@ import { useTheme } from '@/theme/use-theme';
 
 interface Props<T> {
   query: UseQueryResult<T[]>;
-  renderItem: (item: T) => ReactElement;
+  renderItem: (item: T, index: number) => ReactElement;
   keyExtractor: (item: T, index: number) => string;
   ListHeader?: ReactElement | null;
   emptyTitle?: string;
@@ -61,7 +61,7 @@ export function DataList<T>({
     <FlatList
       data={data ?? []}
       keyExtractor={keyExtractor}
-      renderItem={({ item }) => renderItem(item)}
+      renderItem={({ item, index }) => renderItem(item, index)}
       ListHeaderComponent={ListHeader}
       contentContainerStyle={{ padding: spacing.lg, paddingBottom: bottomSpace, gap: spacing.md, flexGrow: 1 }}
       refreshControl={

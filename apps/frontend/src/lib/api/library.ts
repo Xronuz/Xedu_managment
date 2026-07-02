@@ -26,7 +26,8 @@ export interface LibraryLoan {
 
 export interface LibraryStats {
   totalBooks: number;
-  availableBooks: number;
+  totalCopies: number;
+  availableCopies: number;
   activeLoans: number;
   overdueLoans: number;
 }

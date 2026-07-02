@@ -555,8 +555,8 @@ export function ExamsWorkspace() {
   });
 
   const { data: subjectsData } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => subjectsApi.getAll(),
+    queryKey: ['subjects', filterClass],
+    queryFn: () => subjectsApi.getAll(filterClass || undefined),
     enabled: canManage,
   });
 
@@ -622,8 +622,8 @@ export function ExamsWorkspace() {
   });
 
   const { data: modalSubjects = [] } = useQuery({
-    queryKey: ['subjects'],
-    queryFn: () => subjectsApi.getAll(),
+    queryKey: ['subjects', sForm.classId],
+    queryFn: () => subjectsApi.getAll(sForm.classId || undefined),
     enabled: anyOpen,
   });
 
@@ -906,6 +906,9 @@ export function ExamsWorkspace() {
   ], []);
 
   const sel = (setState: any) => (k: string) => (v: string) => setState((f: any) => ({ ...f, [k]: v }));
+  // When class changes, reset subject — subjects are filtered by class
+  const onSClassChange = (v: string) => setSForm((f: any) => ({ ...f, classId: v, subjectId: '' }));
+  const onEClassChange = (v: string) => setEForm((f: any) => ({ ...f, classId: v, subjectId: '' }));
   const inp = (setState: any) => (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => setState((f: any) => ({ ...f, [k]: e.target.value }));
 
   return (
@@ -1316,7 +1319,7 @@ export function ExamsWorkspace() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="space-y-1.5">
                 <Label>Sinf <span className="text-xedu-ruby">*</span></Label>
-                <Select value={sForm.classId} onValueChange={sel(setSForm)('classId')}>
+                <Select value={sForm.classId} onValueChange={onSClassChange}>
                   <SelectTrigger><SelectValue placeholder="Sinf..." /></SelectTrigger>
                   <SelectContent>{(modalClasses as any[]).map((c: any) => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
                 </Select>

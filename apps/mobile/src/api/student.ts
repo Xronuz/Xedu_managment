@@ -8,6 +8,8 @@ import { apiClient } from './client';
 export const studentApi = {
   scheduleToday: () => apiClient.get('/schedule/today').then((r) => r.data),
 
+  scheduleWeek: () => apiClient.get('/schedule/week').then((r) => r.data),
+
   grades: (studentId: string) =>
     apiClient.get(`/grades/student/${studentId}`).then((r) => r.data),
 
@@ -22,4 +24,8 @@ export const studentApi = {
 
   submitHomework: (homeworkId: string, content: string) =>
     apiClient.post(`/homework/${homeworkId}/submit`, { content }).then((r) => r.data),
+
+  shop: () => apiClient.get('/coins/shop').then((r) => r.data),
+
+  spend: (itemId: string) => apiClient.post('/coins/spend', { itemId }).then((r) => r.data),
 };

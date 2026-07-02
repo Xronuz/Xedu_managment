@@ -21,6 +21,25 @@ export function formatDate(date: string | Date, options?: Intl.DateTimeFormatOpt
   }).format(new Date(date));
 }
 
+// Brauzerlarda uz-UZ uchun CLDR nomlari to'liq emas ("M07", "Thu" chiqadi) —
+// oy/hafta nomlari qo'lda beriladi.
+export const UZ_MONTHS = ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'];
+export const UZ_MONTHS_SHORT = ['yan', 'fev', 'mar', 'apr', 'may', 'iyn', 'iyl', 'avg', 'sen', 'okt', 'noy', 'dek'];
+export const UZ_WEEKDAYS = ['yakshanba', 'dushanba', 'seshanba', 'chorshanba', 'payshanba', 'juma', 'shanba'];
+
+export function formatUzDate(
+  date: string | Date,
+  opts: { weekday?: boolean; year?: boolean; short?: boolean } = {},
+): string {
+  const d = new Date(date);
+  if (Number.isNaN(d.getTime())) return '—';
+  const month = opts.short ? UZ_MONTHS_SHORT[d.getMonth()] : UZ_MONTHS[d.getMonth()];
+  let out = `${d.getDate()}-${month}`;
+  if (opts.year) out += ` ${d.getFullYear()}`;
+  if (opts.weekday) out += `, ${UZ_WEEKDAYS[d.getDay()]}`;
+  return out;
+}
+
 export function getInitials(firstName?: string | null, lastName?: string | null) {
   return `${firstName?.[0] ?? ''}${lastName?.[0] ?? ''}`.toUpperCase() || '—';
 }

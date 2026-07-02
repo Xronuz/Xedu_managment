@@ -22,6 +22,7 @@ export function useRealtime(): void {
 
     socket.on('notification:new', refreshNotifications);
     socket.on('notification:personal', refreshNotifications);
+    socket.on('message:new', () => qc.invalidateQueries({ queryKey: ['messaging'] }));
     socket.on('connect_error', () => {}); // jim — polling fallback bor
 
     const appStateSub = AppState.addEventListener('change', (state) => {

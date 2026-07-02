@@ -18,15 +18,19 @@ export const apiClient = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
+import { useBranchStore } from '@/store/branch.store';
+
 // ── Request: Authorization header ────────────────────────────────────────────
 apiClient.interceptors.request.use(
   (config) => {
     const token = tokenStore.getAccess();
-    if (token) {
-      config.headers = AxiosHeaders.from(config.headers);
-      if (!config.headers.has('Authorization')) {
-        config.headers.set('Authorization', `Bearer ${token}`);
-      }
+    config.headers = AxiosHeaders.from(config.headers);
+    if (token && !config.headers.has('Authorization')) {
+      config.headers.set('Authorization', `Bearer ${token}`);
+    }
+    const branchId = useBranchStore.getState().activeBranchId;
+    if (branchId && !config.headers.has('x-branch-id')) {
+      config.headers.set('x-branch-id', branchId);
     }
     return config;
   },

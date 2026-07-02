@@ -67,7 +67,7 @@ export function LibrarianDashboard() {
         const { data } = await (await import('@/lib/api/client')).apiClient.get('/library/stats');
         return data;
       } catch {
-        return { totalBooks: 0, activeLoans: 0, overdueLoans: 0, availableBooks: 0 };
+        return { totalBooks: 0, totalCopies: 0, availableCopies: 0, activeLoans: 0, overdueLoans: 0 };
       }
     },
   });
@@ -94,7 +94,7 @@ export function LibrarianDashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Jami kitoblar"    value={isLoading ? '...' : (libStats?.totalBooks ?? 0)}    icon={BookOpen}      description="Katalogdagi kitoblar" loading={isLoading} color="blue"    />
-        <StatCard title="Mavjud kitoblar"  value={isLoading ? '...' : (libStats?.availableBooks ?? 0)}icon={BookCopy}      description="Berilishi mumkin"    loading={isLoading} color="emerald" />
+        <StatCard title="Mavjud kitoblar"  value={isLoading ? '...' : (libStats?.availableCopies ?? 0)}icon={BookCopy}      description="Berilishi mumkin"    loading={isLoading} color="emerald" />
         <StatCard title="Faol ijaralar"    value={isLoading ? '...' : (libStats?.activeLoans ?? 0)}   icon={ClipboardCheck}description="Berilgan kitoblar"   loading={isLoading} color="violet"  />
         <StatCard title="Muddati o'tgan"  value={isLoading ? '...' : (libStats?.overdueLoans ?? 0)}  icon={Hourglass}     description="Qaytarilmagan"       loading={isLoading} color="red"     />
       </div>

@@ -120,7 +120,7 @@ export class ParentService {
         status: 'published',
         weekType: { in: ['all' as any, getCurrentWeekType()] },
       },
-      include: { subject: { include: { teacher: { select: { firstName: true, lastName: true } } } } },
+      include: { subject: { include: { teacher: { select: { id: true, firstName: true, lastName: true } } } } },
       orderBy: [{ dayOfWeek: 'asc' }, { timeSlot: 'asc' }],
     });
   }

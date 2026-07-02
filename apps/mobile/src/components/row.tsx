@@ -7,30 +7,35 @@ import { radius, spacing } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 import type { ThemeColors } from '@/theme/tokens';
 
+type IconSize = 'sm' | 'md' | 'lg';
+
+const ICON_SIZES: Record<IconSize, number> = { sm: 32, md: 40, lg: 48 };
+
 export function IconBadge({
   icon,
   color = 'primary',
   bg,
-  size = 40,
+  size = 'md',
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   color?: keyof ThemeColors;
   bg?: keyof ThemeColors;
-  size?: number;
+  size?: IconSize;
 }) {
   const { theme } = useTheme();
+  const s = ICON_SIZES[size];
   return (
     <View
       style={{
-        width: size,
-        height: size,
+        width: s,
+        height: s,
         borderRadius: radius.md,
         backgroundColor: theme[bg ?? 'primaryLight'],
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      <Ionicons name={icon} size={size * 0.5} color={theme[color]} />
+      <Ionicons name={icon} size={s * 0.5} color={theme[color]} />
     </View>
   );
 }

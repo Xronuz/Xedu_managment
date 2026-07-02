@@ -7,6 +7,7 @@ import { NotificationsService } from '@/modules/notifications/notifications.serv
 import { AchievementService } from '@/modules/engagement/achievement.service';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 import { assertParentOfChild } from '@/common/utils/parent-guard.util';
+import { assertTeacherOfSubject } from '@/common/utils/teacher-guard.util';
 
 @Injectable()
 export class HomeworkService {
@@ -72,14 +73,30 @@ export class HomeworkService {
       }
     }
 
-    return this.prisma.homework.findMany({
+    const homeworks = await this.prisma.homework.findMany({
       where,
       include: {
         class: { select: { id: true, name: true } },
-        subject: { select: { id: true, name: true } },
+        subject: { select: { id: true, name: true, teacher: { select: { id: true, firstName: true, lastName: true } } } },
+        // Students need to see their own submission status per homework
+        ...(currentUser.role === UserRole.STUDENT ? {
+          submissions: {
+            where: { studentId: currentUser.sub },
+            select: { id: true, submittedAt: true, score: true },
+            take: 1,
+          },
+        } : {}),
       },
       orderBy: { dueDate: 'asc' },
     });
+
+    // Map submissions[0] → submission and subject.teacher → teacher for frontend
+    return homeworks.map((hw: any) => ({
+      ...hw,
+      submission: hw.submissions?.[0] ?? null,
+      submissions: undefined,
+      teacher: hw.subject?.teacher ?? null,
+    }));
   }
 
   async findOne(id: string, currentUser: JwtPayload) {
@@ -114,6 +131,9 @@ export class HomeworkService {
   }
 
   async create(dto: CreateHomeworkDto, currentUser: JwtPayload) {
+    // ── Teacher scope: must be assigned to this class+subject ──────────────────
+    await assertTeacherOfSubject(this.prisma, currentUser, dto.classId, dto.subjectId);
+
     const cls = await this.prisma.class.findFirst({
       where: { id: dto.classId, schoolId: currentUser.schoolId! },
       select: { branchId: true },

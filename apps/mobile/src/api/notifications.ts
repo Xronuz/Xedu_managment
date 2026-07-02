@@ -7,6 +7,7 @@ export interface AppNotification {
   category: string;
   isRead: boolean;
   createdAt: string;
+  actionUrl?: string;
 }
 
 export interface NotificationsResponse {
@@ -29,4 +30,7 @@ export const notificationsApi = {
 
   unregisterDeviceToken: (token: string) =>
     apiClient.delete('/notifications/device-token', { data: { token } }).then((r) => r.data),
+
+  broadcast: (targetGroup: string, title: string, body: string) =>
+    apiClient.post('/notifications/broadcast', { targetGroup, title, body }).then((r) => r.data),
 };

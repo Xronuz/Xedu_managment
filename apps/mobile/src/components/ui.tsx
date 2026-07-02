@@ -1,155 +1,160 @@
 import { useState } from 'react';
 import {
   ActivityIndicator,
+  Animated,
+  Easing,
   Pressable,
   StyleSheet,
   TextInput,
   View,
   type TextInputProps,
+  type ViewStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Text } from './text';
-import { fonts, radius, spacing, type } from '@/theme/tokens';
+import { fonts, radius, spacing, type, anim } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
+import { impact } from '@/lib/haptics';
 
-type Variant = 'primary' | 'tonal' | 'ghost' | 'danger';
+/* ═══════════════════════════════════════════════════════════════════
+ *  Button
+ * ═══════════════════════════════════════════════════════════════════ */
+interface ButtonProps {
+  title: string;
+  onPress?: () => void;
+  variant?: 'filled' | 'tonal' | 'ghost';
+  /** 'pill' = to'liq yumaloq; 'default' = biroz yumaloq */
+  shape?: 'default' | 'pill';
+  size?: 'sm' | 'md' | 'lg';
+  icon?: keyof typeof Ionicons.glyphMap;
+  fullWidth?: boolean;
+  loading?: boolean;
+  disabled?: boolean;
+}
 
 export function Button({
   title,
   onPress,
-  loading,
-  disabled,
-  variant = 'primary',
+  variant = 'filled',
+  shape = 'default',
+  size = 'md',
   icon,
-  fullWidth = true,
-}: {
-  title: string;
-  onPress: () => void;
-  loading?: boolean;
-  disabled?: boolean;
-  variant?: Variant;
-  icon?: keyof typeof Ionicons.glyphMap;
-  fullWidth?: boolean;
-}) {
+  fullWidth = false,
+  loading = false,
+  disabled = false,
+}: ButtonProps) {
   const { theme } = useTheme();
-  const isDisabled = disabled || loading;
+  const btnRadius = shape === 'pill' ? radius.pill : radius.md;
+  const height = size === 'sm' ? 34 : size === 'lg' ? 50 : 42;
+  const fontSize = size === 'sm' ? 13 : size === 'lg' ? 16 : 14;
+  const padH = size === 'sm' ? spacing.md : size === 'lg' ? spacing.xl : spacing.lg;
 
   const bg =
-    variant === 'primary' ? theme.primary
+    variant === 'filled' ? theme.primary
     : variant === 'tonal' ? theme.primaryLight
-    : variant === 'danger' ? theme.danger
     : 'transparent';
+
   const fg =
-    variant === 'primary' ? theme.onPrimary
-    : variant === 'danger' ? '#FFFFFF'
-    : theme.primary;
-  const borderColor = variant === 'ghost' ? theme.borderStrong : 'transparent';
+    variant === 'ghost' ? theme.primary
+    : theme.onPrimary;
 
   return (
     <Pressable
-      onPress={onPress}
-      disabled={isDisabled}
+      onPress={() => { if (!disabled && !loading) { impact('light'); onPress?.(); } }}
+      disabled={disabled || loading}
       style={({ pressed }) => [
-        styles.button,
         {
-          backgroundColor: bg,
-          borderColor,
-          borderWidth: variant === 'ghost' ? 1 : 0,
-          opacity: isDisabled ? 0.5 : pressed ? 0.88 : 1,
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: spacing.sm,
+          height,
+          borderRadius: btnRadius,
+          paddingHorizontal: padH,
+          backgroundColor: pressed ? (variant === 'ghost' ? 'transparent' : bg) : bg,
+          opacity: pressed ? 0.88 : disabled ? 0.5 : 1,
+          transform: [{ scale: pressed ? 0.96 : 1 }],
           alignSelf: fullWidth ? 'stretch' : 'flex-start',
+          borderWidth: variant === 'ghost' ? 1 : 0,
+          borderColor: theme.border,
         },
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={fg} />
+        <ActivityIndicator color={fg} size={18} />
       ) : (
-        <View style={styles.buttonInner}>
+        <>
           {icon ? <Ionicons name={icon} size={18} color={fg} /> : null}
-          <Text variant="bodyStrong" style={{ color: fg }}>
-            {title}
-          </Text>
-        </View>
+          <Text style={{ color: fg, fontFamily: fonts.semibold, fontSize }}>{title}</Text>
+        </>
       )}
     </Pressable>
   );
 }
 
-export function Field({
-  label,
-  error,
-  secureTextEntry,
-  leftIcon,
-  ...props
-}: TextInputProps & {
+/* ═══════════════════════════════════════════════════════════════════
+ *  Field — matn maydoni (bog'liqliklar: useForm, i18n)
+ * ═══════════════════════════════════════════════════════════════════ */
+interface FieldProps extends TextInputProps {
   label: string;
   error?: string;
+  /** Chap ikonka (login, forma maydonlari uchun). Mavjud ekrallar ishlatadi. */
   leftIcon?: keyof typeof Ionicons.glyphMap;
-}) {
+}
+
+export function Field({ label, error, leftIcon, ...props }: FieldProps) {
   const { theme } = useTheme();
   const [focused, setFocused] = useState(false);
-  const [hidden, setHidden] = useState(!!secureTextEntry);
-
-  const borderColor = error ? theme.danger : focused ? theme.primary : theme.border;
 
   return (
-    <View style={styles.fieldWrap}>
-      <Text variant="label" color="textSecondary">
+    <Animated.View style={{ gap: spacing.xs }}>
+      <Text variant="label" color={error ? 'danger' : 'textMuted'}>
         {label}
       </Text>
-      <View
-        style={[
-          styles.inputRow,
-          { backgroundColor: theme.card, borderColor, borderWidth: focused ? 1.5 : 1 },
-        ]}
-      >
+      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         {leftIcon ? (
-          <Ionicons name={leftIcon} size={18} color={theme.textMuted} style={{ marginRight: 8 }} />
+          <Ionicons
+            name={leftIcon}
+            size={18}
+            color={error ? theme.danger : focused ? theme.primary : theme.textMuted}
+            style={{ position: 'absolute', left: spacing.md, zIndex: 1 }}
+          />
         ) : null}
         <TextInput
-          placeholderTextColor={theme.textMuted}
-          secureTextEntry={hidden}
-          onFocus={(e) => {
-            setFocused(true);
-            props.onFocus?.(e);
-          }}
-          onBlur={(e) => {
-            setFocused(false);
-            props.onBlur?.(e);
-          }}
-          style={[styles.input, { color: theme.text, fontFamily: fonts.medium }]}
           {...props}
+          onFocus={(e) => { setFocused(true); props.onFocus?.(e); }}
+          onBlur={(e) => { setFocused(false); props.onBlur?.(e); }}
+          placeholderTextColor={theme.textMuted}
+          style={[
+            {
+              flex: 1,
+              borderRadius: radius.md,
+              borderWidth: 1,
+              borderColor: error ? theme.danger : focused ? theme.primary : theme.border,
+              backgroundColor: theme.card,
+              paddingHorizontal: leftIcon ? spacing.xl + spacing.md : spacing.lg,
+              paddingVertical: spacing.md,
+              fontSize: 15,
+              fontFamily: fonts.regular,
+              color: theme.text,
+            },
+            styles.field,
+          ]}
         />
-        {secureTextEntry ? (
-          <Pressable onPress={() => setHidden((h) => !h)} hitSlop={10}>
-            <Ionicons name={hidden ? 'eye-outline' : 'eye-off-outline'} size={20} color={theme.textMuted} />
-          </Pressable>
-        ) : null}
       </View>
       {error ? (
-        <Text variant="caption" color="danger">
+        <Animated.Text
+          style={{ color: theme.danger, fontSize: 12, fontFamily: fonts.medium, marginTop: spacing.xs }}
+        >
           {error}
-        </Text>
+        </Animated.Text>
       ) : null}
-    </View>
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  button: {
-    minHeight: 52,
-    borderRadius: radius.md,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
+  field: {
+    minHeight: 46,
   },
-  buttonInner: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  fieldWrap: { gap: spacing.xs, marginBottom: spacing.lg },
-  inputRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    minHeight: 52,
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-  },
-  input: { flex: 1, ...type.body, paddingVertical: spacing.md },
 });

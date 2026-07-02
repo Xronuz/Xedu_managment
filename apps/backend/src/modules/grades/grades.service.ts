@@ -7,6 +7,7 @@ import { RedisService } from '@/common/redis/redis.service';
 import { GradeType, JwtPayload, UserRole } from '@eduplatform/types';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
 import { assertParentOfChild } from '@/common/utils/parent-guard.util';
+import { assertTeacherOfSubject } from '@/common/utils/teacher-guard.util';
 import { CoinsService, COIN_RULES } from '@/modules/coins/coins.service';
 import { AchievementService } from '@/modules/engagement/achievement.service';
 
@@ -61,6 +62,9 @@ export class GradesService {
   }
 
   async create(dto: CreateGradeDto, currentUser: JwtPayload) {
+    // ── Teacher scope: must be assigned to this class+subject ──────────────────
+    await assertTeacherOfSubject(this.prisma, currentUser, dto.classId, dto.subjectId);
+
     // ── Logic validation: score must not exceed maxScore ──────────────────────
     const effectiveMax = dto.maxScore ?? 100;
     if (dto.score > effectiveMax) {
@@ -184,6 +188,9 @@ export class GradesService {
 
   /** Bir vaqtda butun sinf uchun baho kiritish */
   async bulkCreate(dto: BulkGradesDto, currentUser: JwtPayload) {
+    // ── Teacher scope: must be assigned to this class+subject ──────────────────
+    await assertTeacherOfSubject(this.prisma, currentUser, dto.classId, dto.subjectId);
+
     // ── Logic validation: each item.score must not exceed effective maxScore ──
     for (const item of dto.items) {
       const effectiveMax = item.maxScore ?? dto.maxScore;

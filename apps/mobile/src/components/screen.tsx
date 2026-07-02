@@ -1,5 +1,5 @@
 import { type ReactNode } from 'react';
-import { ScrollView, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Text } from './text';
 import { useTabBarSpace } from '@/lib/tab-space';
@@ -25,6 +25,10 @@ export function Screen({
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: theme.bg }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
       {title ? (
         <View
           style={{
@@ -50,9 +54,11 @@ export function Screen({
       <Body
         style={{ flex: 1 }}
         contentContainerStyle={scroll ? { padding: spacing.lg, paddingBottom: bottomSpace, gap: spacing.md, flexGrow: 1 } : undefined}
+        {...(scroll ? { keyboardShouldPersistTaps: 'handled' as const, keyboardDismissMode: 'interactive' as const } : {})}
       >
         {children}
       </Body>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

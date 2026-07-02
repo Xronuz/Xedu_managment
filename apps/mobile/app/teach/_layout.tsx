@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Stack } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { fonts } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
@@ -6,7 +6,6 @@ import { useTheme } from '@/theme/use-theme';
 export default function TeachLayout() {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const { className } = useLocalSearchParams<{ className?: string }>();
   return (
     <Stack
       screenOptions={{
@@ -17,10 +16,9 @@ export default function TeachLayout() {
         contentStyle: { backgroundColor: theme.bg },
       }}
     >
-      <Stack.Screen name="today" options={{ title: t('teach.todayLessons') }} />
-      <Stack.Screen name="classes" options={{ title: t('teach.myClasses') }} />
-      <Stack.Screen name="attendance" options={{ title: className || t('teach.markAttendance') }} />
-      <Stack.Screen name="grades" options={{ title: className || t('teach.gradeEntry') }} />
+      <Stack.Screen name="attendance" options={{ title: t('teach.markAttendance') }} />
+      <Stack.Screen name="grades" options={{ title: t('teach.gradeEntry') }} />
+      <Stack.Screen name="homework" options={{ title: t('teach.hwCreate') }} />
     </Stack>
   );
 }

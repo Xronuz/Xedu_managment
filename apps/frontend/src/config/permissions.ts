@@ -97,10 +97,10 @@ export const ROUTE_PERMISSIONS: Record<string, UserRole[]> = {
   // SHARED ACADEMIC — Ko'rish uchun student/parent, boshqarish uchun staff
   // ═══════════════════════════════════════════════════════════════════════════════
   '/dashboard/schedule':       ['student', 'teacher', 'class_teacher', 'vice_principal', 'director', 'branch_admin', 'parent'],
-  '/dashboard/grades':         ['student', 'teacher', 'class_teacher', 'vice_principal', 'director', 'branch_admin', 'parent'],
-  '/dashboard/exams':          ['student', 'teacher', 'class_teacher', 'vice_principal', 'director', 'branch_admin', 'parent'],
-  '/dashboard/homework':       ['student', 'teacher', 'class_teacher', 'vice_principal', 'director', 'branch_admin', 'parent'],
-  '/dashboard/attendance':     ['student', 'teacher', 'class_teacher', 'vice_principal', 'director', 'branch_admin', 'parent'],
+  '/dashboard/grades':         ['student', 'teacher', 'class_teacher', 'vice_principal', 'director', 'branch_admin'],
+  '/dashboard/exams':          ['student', 'teacher', 'class_teacher', 'vice_principal', 'director', 'branch_admin'],
+  '/dashboard/homework':       ['student', 'teacher', 'class_teacher', 'vice_principal', 'director', 'branch_admin'],
+  '/dashboard/attendance':     ['student', 'teacher', 'class_teacher', 'vice_principal', 'director', 'branch_admin'],
   '/dashboard/attendance/bulk': ['director', 'vice_principal', 'class_teacher'],
   '/dashboard/my-class':       ['class_teacher'],
 

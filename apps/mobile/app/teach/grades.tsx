@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Alert, FlatList, Modal, Pressable, ScrollView, View } from 'react-native';
+import { Alert, FlatList, Modal, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { AxiosError } from 'axios';
 import { useTranslation } from 'react-i18next';
 import { teacherApi } from '@/api/teacher';
 import { Card } from '@/components/card';
@@ -13,9 +12,11 @@ import { Avatar } from '@/components/avatar';
 import { Button, Field } from '@/components/ui';
 import { EmptyState } from '@/components/empty-state';
 import { ListSkeleton } from '@/components/skeleton';
+import { ErrorBanner } from '@/components/error-banner';
 import { Row } from '@/components/row';
 import { radius, spacing } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
+import { impact, success as hapticSuccess, error as hapticError } from '@/lib/haptics';
 
 interface Student {
   id: string;
@@ -24,12 +25,13 @@ interface Student {
   avatarUrl?: string | null;
 }
 
+// Week 6: 4 ta fielddan oshmasin — type, score, maxScore, comment.
 const GRADE_TYPES = ['classwork', 'homework', 'test', 'exam', 'quarterly', 'final'] as const;
 
 export default function TeachGradesScreen() {
   const { t } = useTranslation();
   const { theme } = useTheme();
-  const { classId, subjectId } = useLocalSearchParams<{ classId: string; subjectId?: string; subjectName?: string; className?: string }>();
+  const { classId, subjectId, className } = useLocalSearchParams<{ classId: string; subjectId?: string; subjectName?: string; className?: string }>();
 
   const [active, setActive] = useState<Student | null>(null);
   const [score, setScore] = useState('');
@@ -56,14 +58,15 @@ export default function TeachGradesScreen() {
         comment: comment.trim() || undefined,
       }),
     onSuccess: () => {
+      hapticSuccess();
       setActive(null);
       setScore('');
       setComment('');
       Alert.alert(t('common.success'), t('teach.gradeSaved'));
     },
-    onError: (err) => {
-      const msg = (err as AxiosError<{ message?: string }>).response?.data?.message ?? t('common.networkError');
-      Alert.alert(t('common.error'), typeof msg === 'string' ? msg : t('common.error'));
+    onError: () => {
+      hapticError();
+      Alert.alert(t('common.error'), t('common.networkError'));
     },
   });
 
@@ -71,38 +74,42 @@ export default function TeachGradesScreen() {
   const maxNum = Number(maxScore) || 100;
   const canSubmit = score.length > 0 && !Number.isNaN(scoreNum) && scoreNum >= 0 && scoreNum <= maxNum && !!subjectId && !mutation.isPending;
 
-  if (query.isLoading) return <ListSkeleton />;
-  if (query.isError) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <EmptyState icon="cloud-offline-outline" tone="danger" title={t('common.error')} subtitle={t('common.networkError')} actionTitle={t('common.retry')} onAction={() => query.refetch()} />
-      </View>
-    );
-  }
-  if (!query.data || query.data.length === 0) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center' }}>
-        <EmptyState icon="people-outline" title={t('teach.noStudents')} />
-      </View>
-    );
-  }
-
   return (
     <>
-      <FlatList
-        data={query.data}
-        keyExtractor={(s) => s.id}
-        contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
-        renderItem={({ item }) => (
-          <Row
-            onPress={() => { setActive(item); setScore(''); setComment(''); setType('classwork'); setMaxScore('100'); }}
-            leading={<Avatar name={`${item.firstName ?? ''} ${item.lastName ?? ''}`} uri={item.avatarUrl} size={40} />}
-            title={`${item.firstName ?? ''} ${item.lastName ?? ''}`.trim()}
-            trailing={<Ionicons name="add-circle-outline" size={24} color={theme.primary} />}
-          />
-        )}
-      />
+      <Stack.Screen options={{ title: className || t('teach.gradeEntry') }} />
 
+      {query.isError ? (
+        <View style={{ padding: spacing.lg }}>
+          <ErrorBanner message={t('common.networkError')} onRetry={() => query.refetch()} />
+        </View>
+      ) : null}
+
+      {query.isLoading ? (
+        <ListSkeleton rows={5} />
+      ) : query.data && query.data.length > 0 ? (
+        <FlatList
+          data={query.data}
+          keyExtractor={(s) => s.id}
+          contentContainerStyle={{ padding: spacing.lg, gap: spacing.md }}
+          refreshControl={
+            <RefreshControl refreshing={query.isRefetching} onRefresh={query.refetch} tintColor={theme.primary} />
+          }
+          renderItem={({ item }) => (
+            <Row
+              onPress={() => { impact('light'); setActive(item); setScore(''); setComment(''); setType('classwork'); setMaxScore('100'); }}
+              leading={<Avatar name={`${item.firstName ?? ''} ${item.lastName ?? ''}`} uri={item.avatarUrl} size={40} />}
+              title={`${item.firstName ?? ''} ${item.lastName ?? ''}`.trim()}
+              trailing={<Ionicons name="add-circle-outline" size={24} color={theme.primary} />}
+            />
+          )}
+        />
+      ) : (
+        <View style={{ flex: 1, justifyContent: 'center' }}>
+          <EmptyState icon="people-outline" title={t('teach.noStudents')} />
+        </View>
+      )}
+
+      {/* Quick Grade Input — bottom sheet (4 fielddan oshmasin) */}
       <Modal visible={!!active} animationType="slide" transparent onRequestClose={() => setActive(null)}>
         <View style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.4)', justifyContent: 'flex-end' }}>
           <SafeAreaView edges={['bottom']} style={{ backgroundColor: theme.bg, borderTopLeftRadius: radius.xl, borderTopRightRadius: radius.xl }}>
@@ -114,7 +121,7 @@ export default function TeachGradesScreen() {
                 <Ionicons name="close" size={26} color={theme.textMuted} onPress={() => setActive(null)} />
               </View>
 
-              {/* Grade type chips */}
+              {/* Field 1: Grade type chips */}
               <Text variant="label" color="textSecondary" style={{ marginBottom: spacing.sm }}>
                 {t('teach.type').toUpperCase()}
               </Text>
@@ -142,6 +149,7 @@ export default function TeachGradesScreen() {
                 })}
               </View>
 
+              {/* Field 2 & 3: Score + MaxScore */}
               <View style={{ flexDirection: 'row', gap: spacing.md }}>
                 <View style={{ flex: 1 }}>
                   <Field label={t('teach.score')} value={score} onChangeText={setScore} keyboardType="number-pad" placeholder="0" />
@@ -150,6 +158,8 @@ export default function TeachGradesScreen() {
                   <Field label={t('teach.maxScore')} value={maxScore} onChangeText={setMaxScore} keyboardType="number-pad" placeholder="100" />
                 </View>
               </View>
+
+              {/* Field 4: Comment (optional) */}
               <Field label={t('teach.comment')} value={comment} onChangeText={setComment} multiline numberOfLines={2} style={{ height: 70, textAlignVertical: 'top' }} />
 
               <Button title={t('common.save')} icon="save-outline" onPress={() => mutation.mutate()} loading={mutation.isPending} disabled={!canSubmit} />

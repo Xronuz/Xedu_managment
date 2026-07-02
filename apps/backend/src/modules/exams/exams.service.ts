@@ -7,6 +7,7 @@ import { CreateExamDto, UpdateExamDto } from './dto/create-exam.dto';
 import { AuditService } from '@/common/audit/audit.service';
 import { EventsGateway } from '@/modules/gateway/events.gateway';
 import { buildTenantWhere } from '@/common/utils/tenant-scope.util';
+import { assertTeacherOfSubject } from '@/common/utils/teacher-guard.util';
 
 export class BulkResultItemDto {
   @IsUUID()
@@ -136,6 +137,9 @@ export class ExamsService {
   }
 
   async create(dto: CreateExamDto, currentUser: JwtPayload) {
+    // ── Teacher scope: must be assigned to this class+subject ──────────────────
+    await assertTeacherOfSubject(this.prisma, currentUser, dto.classId, dto.subjectId);
+
     // Derive branchId from the selected class
     const cls = await this.prisma.class.findFirst({
       where: { id: dto.classId, schoolId: currentUser.schoolId! },

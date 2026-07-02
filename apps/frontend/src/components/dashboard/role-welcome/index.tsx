@@ -34,6 +34,11 @@ export function RoleWelcome() {
       return <ParentWelcome />;
     case 'student':
       return <StudentWelcome />;
+    case 'accountant':
+    case 'librarian':
+      // These roles have their own role-specific dashboards;
+      // show nothing here — their page content is self-explanatory.
+      return null;
     default:
       return <DirectorWelcome />;
   }

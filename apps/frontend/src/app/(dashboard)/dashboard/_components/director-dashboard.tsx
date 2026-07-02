@@ -1,31 +1,25 @@
 'use client';
 
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useMemo, memo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, ArrowUpRight, Activity, Users, Building2,
-  Calendar, GraduationCap, TrendingUp, FileText, Bell,
-  CheckCircle2, ChevronRight, Briefcase, BarChart3, Shield,
-  Zap, Clock, AlertTriangle, BookOpen, Wallet, School,
-  UserCheck, DoorOpen, Layers, Megaphone, Info,
+  Calendar, GraduationCap, BarChart3, Zap, Clock, CalendarPlus,
 } from 'lucide-react';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { cn } from '@/lib/utils';
+import { cn, formatUzDate } from '@/lib/utils';
 import { useAuthStore } from '@/store/auth.store';
 import { useRouter } from 'next/navigation';
 
 import { usersApi } from '@/lib/api/users';
-import { classesApi } from '@/lib/api/classes';
 import { attendanceApi } from '@/lib/api/attendance';
 import { examsApi } from '@/lib/api/exams';
 import { kpiApi } from '@/lib/api/kpi';
 import { branchesApi } from '@/lib/api/branches';
 import { leaveRequestsApi } from '@/lib/api/leave-requests';
 import { disciplineApi } from '@/lib/api/discipline';
-import { financeApi } from '@/lib/api/finance';
 import { opsCommandCenterApi } from '@/lib/api/ops-command-center';
 import { academicCalendarApi } from '@/lib/api/academic-calendar';
 
@@ -36,26 +30,18 @@ import {
   WorkspaceSidebar,
   WorkspaceSection,
 } from '@/components/workspace-system';
-import {
-  SituationBar,
-  BranchHealthMap,
-  type BranchDetail,
-  type SituationBarData,
-} from '@/components/director-workspace';
 
 /* ═══════════════════════════════════════════════════════════════════════════════
-   H1 — DIRECTOR DASHBOARD REFACTOR
-   Zone A: 3 executive cards (readiness, approvals, alerts)
-   Zone B: delegation feed (hidden for now — real data later)
-   Zone C: 4 metrics (students, teachers, attendance, branches)
+   DIREKTOR DASHBOARD
+   Zone A: 3 executive kartalar (salomatlik, tasdiqlashlar, ogohlantirishlar)
+   Zone B: yaqin tadbirlar + bugungi jonli holat (ops today-summary)
+   Zone C: 4 metrika (o'quvchi, o'qituvchi, davomat, filiallar)
    ═══════════════════════════════════════════════════════════════════════════════ */
 
 export function DirectorDashboard() {
   const router = useRouter();
   const { user, activeBranchId } = useAuthStore();
   const schoolId = user?.schoolId;
-
-  const [selectedBranch, setSelectedBranch] = useState<BranchDetail | null>(null);
 
   // ── Ops Command Center APIs ───────────────────────────────────────────────────
   const { data: readinessData, isLoading: readinessLoading } = useQuery({
@@ -117,7 +103,7 @@ export function DirectorDashboard() {
   });
   const { data: kpiData } = useQuery({
     queryKey: ['kpi', 'dashboard', 'dir'],
-    queryFn: () => kpiApi.getDashboard().catch(() => ({ items: [] })),
+    queryFn: () => kpiApi.getDashboard().catch(() => ({ metrics: [], byCategory: {}, overallScore: null })),
     staleTime: 60_000,
   });
   const { data: branches, isLoading: branchesLoading } = useQuery({
@@ -154,29 +140,23 @@ export function DirectorDashboard() {
     [pendingDiscipline],
   );
   const presentPct = (attendanceSummary as any)?.presentPct ?? 0;
+  const attMarked = (attendanceSummary as any)?.marked ?? 0;
+  const attTotal = (attendanceSummary as any)?.totalStudents ?? 0;
   const upcomingExamsCount = Array.isArray(upcomingExamsData) ? upcomingExamsData.length : 0;
 
-  const dayLabel = useMemo(() =>
-    new Date().toLocaleDateString('uz-UZ', { weekday: 'long', day: 'numeric', month: 'long' }),
-  []);
+  const alertList = opsAlerts ?? [];
+  const criticalAlerts = alertList.filter((a) => a.severity === 'critical').length;
+  const warningAlerts = alertList.filter((a) => a.severity === 'warning').length;
+
+  const dayLabel = useMemo(() => formatUzDate(new Date(), { weekday: true }), []);
 
   const readinessScore = readinessData?.score ?? 0;
   const readinessStatus = readinessData?.status ?? 'not_started';
-
-  const situationData = useMemo<SituationBarData>(() => ({
-    activeBranchName: activeBranchId ? undefined : 'Barcha filiallar',
-    totalBranches: (branches as any[])?.length ?? 0,
-    alertCount: (opsAlerts ?? []).length,
-    pendingApprovals: todaySummary?.staff?.pendingLeaveRequests ?? 0,
-    riskSignals: 0,
-    attendancePct: presentPct > 0 ? presentPct : null,
-    staffTotal: teacherCount + staffCount,
-    revenueGrowth: null,
-  }), [activeBranchId, branches, opsAlerts, todaySummary, presentPct, teacherCount, staffCount]);
+  const pendingApprovals = todaySummary?.staff?.pendingLeaveRequests ?? 0;
 
   return (
     <WorkspaceShell layout="two-column" density="compact">
-      {/* ── Header + Sticky Situation Zone ─────────────────────────────────── */}
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div className="w-full lg:col-span-2 space-y-1">
         <WorkspaceHeader
           title="Direktor paneli"
@@ -186,7 +166,7 @@ export function DirectorDashboard() {
             <Button
               variant="outline"
               size="sm"
-              className="gap-1.5 hidden md:inline-flex"
+              className="gap-1.5"
               onClick={() => router.push('/dashboard/ops')}
             >
               <Zap className="h-4 w-4" />
@@ -208,32 +188,24 @@ export function DirectorDashboard() {
             <ExecCard
               title="Maktab salomatligi"
               href="/dashboard/ops"
-              owner="director"
-              isLoading={readinessLoading}
               footer={!readinessLoading && readinessScore < 80 ? (
-                <span className="text-xs font-medium text-xedu-primary cursor-pointer hover:underline">
+                <span className="text-xs font-medium text-xedu-primary group-hover:underline">
                   Sozlashni davom ettirish →
                 </span>
               ) : null}
             >
               {readinessLoading ? (
-                <Skeleton className="h-10 w-20" />
+                <Skeleton className="h-11 w-full" />
               ) : (
-                <div className="space-y-2">
-                  <div className="flex items-baseline gap-2">
-                    <span className={cn(
-                      'text-2xl font-black',
-                      readinessScore >= 80 ? 'text-emerald-600' :
-                      readinessScore >= 60 ? 'text-amber-600' : 'text-red-600'
-                    )}>
-                      {readinessScore}%
-                    </span>
+                <div className="flex items-center gap-3">
+                  <ReadinessRing score={readinessScore} />
+                  <div className="min-w-0 space-y-1">
                     <StatusBadge status={readinessStatus} />
+                    <p className="text-xs text-xedu-slate-500">
+                      {readinessScore >= 80 ? 'Maktab yaxshi holatda' :
+                       readinessScore >= 60 ? "E'tibor talab etadi" : 'Jiddiy muammo bor'}
+                    </p>
                   </div>
-                  <p className="text-xs text-xedu-slate-500">
-                    {readinessScore >= 80 ? 'Maktab yaxshi holatda' :
-                     readinessScore >= 60 ? 'E\'tibor talab etadi' : 'Jiddiy muammo bor'}
-                  </p>
                 </div>
               )}
             </ExecCard>
@@ -242,26 +214,26 @@ export function DirectorDashboard() {
             <ExecCard
               title="Tasdiqlashlar"
               href="/dashboard/approvals"
-              owner="director"
-              isLoading={todayLoading}
             >
               {todayLoading ? (
-                <Skeleton className="h-10 w-20" />
+                <Skeleton className="h-11 w-full" />
               ) : (
-                <div className="space-y-2">
-                  {(todaySummary?.staff?.pendingLeaveRequests ?? 0) > 0 ? (
+                <div className="space-y-1.5">
+                  {pendingApprovals > 0 ? (
                     <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">
-                        {todaySummary?.staff?.pendingLeaveRequests ?? 0}
+                      <span className="text-2xl font-black tabular-nums text-xedu-slate-900 dark:text-xedu-slate-100">
+                        {pendingApprovals}
                       </span>
-                      <span className={cn('text-2xs font-bold px-2 py-0.5 rounded-full bg-xedu-amber-100 text-xedu-amber-700 dark:bg-xedu-amber-900/30 dark:text-xedu-amber-400')}>
+                      <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-xedu-amber-100 text-xedu-amber-700 dark:bg-xedu-amber-900/30 dark:text-xedu-amber-400">
                         Kutilmoqda
                       </span>
                     </div>
                   ) : (
-                    <p className="text-sm font-medium text-emerald-600 dark:text-emerald-400">Hamma tasdiqlangan</p>
+                    <p className="text-sm font-medium text-xedu-emerald-600 dark:text-xedu-emerald-400">
+                      Hamma tasdiqlangan
+                    </p>
                   )}
-                  <p className="text-xs text-xedu-slate-500">Ko'rish →</p>
+                  <p className="text-xs text-xedu-slate-500">Ta&apos;til so&apos;rovlari</p>
                 </div>
               )}
             </ExecCard>
@@ -270,24 +242,32 @@ export function DirectorDashboard() {
             <ExecCard
               title="Ogohlantirishlar"
               href="/dashboard/alerts"
-              owner="director"
-              isLoading={alertsLoading}
               className="col-span-2 sm:col-span-1"
             >
               {alertsLoading ? (
-                <Skeleton className="h-10 w-20" />
+                <Skeleton className="h-11 w-full" />
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">
-                      {(opsAlerts ?? []).length}
+                    <span className={cn(
+                      'text-2xl font-black tabular-nums',
+                      criticalAlerts > 0 ? 'text-xedu-ruby-600 dark:text-xedu-ruby-400' : 'text-xedu-slate-900 dark:text-xedu-slate-100',
+                    )}>
+                      {alertList.length}
                     </span>
-                    {(opsAlerts ?? []).length > 0 && (
-                      <Badge variant="destructive" className="text-[10px]">Yangi</Badge>
+                    {alertList.length > 0 && (
+                      <span className="text-2xs font-bold px-2 py-0.5 rounded-full bg-xedu-ruby-100 text-xedu-ruby-700 dark:bg-xedu-ruby-900/30 dark:text-xedu-ruby-400">
+                        Yangi
+                      </span>
                     )}
                   </div>
                   <p className="text-xs text-xedu-slate-500">
-                    {(opsAlerts ?? []).length === 0 ? 'Hamma yaxshi' : 'Ko\'rib chiqish kerak'}
+                    {alertList.length === 0
+                      ? 'Hamma yaxshi'
+                      : [
+                          criticalAlerts > 0 ? `${criticalAlerts} jiddiy` : null,
+                          warningAlerts > 0 ? `${warningAlerts} ogohlantirish` : null,
+                        ].filter(Boolean).join(' · ') || "Ko'rib chiqish kerak"}
                   </p>
                 </div>
               )}
@@ -295,77 +275,112 @@ export function DirectorDashboard() {
           </div>
 
           {/* ═══════════════════════════════════════════════════════════════════
-             ZONE B — UPCOMING EVENTS + ACTIVITY FEED
+             ZONE B — UPCOMING EVENTS + TODAY LIVE STATUS
              ═══════════════════════════════════════════════════════════════════ */}
           <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 lg:gap-4">
             {/* Qism 1 — Academic Calendar (60%) */}
-            <div className="lg:col-span-3 rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden">
+            <div className="col-span-2 lg:col-span-3 rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden flex flex-col">
               <div className="flex items-center gap-2 px-3 md:px-4 py-3 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
                 <Calendar className="h-4 w-4 text-xedu-slate-500 shrink-0" />
                 <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 truncate">Yaqin tadbirlar</h3>
               </div>
-              <div className="px-3 md:px-4 py-3">
+              <div className="px-3 md:px-4 py-3 flex-1">
                 {eventsLoading ? (
                   <div className="space-y-2">
                     <Skeleton className="h-8 w-full" />
                     <Skeleton className="h-8 w-full" />
                     <Skeleton className="h-8 w-full" />
                   </div>
-                ) : (
+                ) : ((academicEvents as any[])?.length ?? 0) > 0 ? (
                   <div className="space-y-2">
-                    {((academicEvents as any[])?.length ?? 0) > 0 ? (
-                      (academicEvents as any[]).slice(0, 5).map((evt: any) => (
-                        <div key={evt.id} className="flex items-center gap-3 py-1.5">
-                          <div className={cn('h-2 w-2 rounded-full shrink-0', EVENT_TYPE_DOT[evt.type] ?? EVENT_TYPE_DOT.other)} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-xedu-slate-800 dark:text-xedu-slate-200 truncate">{evt.title}</p>
-                          </div>
-                          <span className="text-xs text-xedu-slate-500 shrink-0">
-                            {formatEventDate(evt.startDate)}
-                          </span>
+                    {(academicEvents as any[]).slice(0, 5).map((evt: any) => (
+                      <div key={evt.id} className="flex items-center gap-3 py-1.5">
+                        <div className={cn('h-2 w-2 rounded-full shrink-0', EVENT_TYPE_DOT[evt.type] ?? EVENT_TYPE_DOT.other)} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-xedu-slate-800 dark:text-xedu-slate-200 truncate">{evt.title}</p>
                         </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-xedu-slate-500 py-2">30 kunlik tadbirlar yo&apos;q</p>
-                    )}
+                        <span className="text-xs text-xedu-slate-500 shrink-0 tabular-nums">
+                          {formatUzDate(evt.startDate, { short: true })}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
+                    <CalendarPlus className="h-7 w-7 text-xedu-slate-300" />
+                    <p className="text-sm text-xedu-slate-500">Yaqin 30 kunda tadbirlar rejalanmagan</p>
+                    <Link
+                      href="/dashboard/academic-calendar"
+                      className="text-xs font-medium text-xedu-primary hover:underline"
+                    >
+                      Tadbir qo&apos;shish →
+                    </Link>
                   </div>
                 )}
               </div>
-              <div className="px-3 md:px-4 pb-3">
-                <Link href="/dashboard/academic-calendar" className="text-xs font-medium text-xedu-primary hover:underline">
-                  Barchasi →
-                </Link>
-              </div>
+              {((academicEvents as any[])?.length ?? 0) > 0 && (
+                <div className="px-3 md:px-4 pb-3">
+                  <Link href="/dashboard/academic-calendar" className="text-xs font-medium text-xedu-primary hover:underline">
+                    Barchasi →
+                  </Link>
+                </div>
+              )}
             </div>
 
-            {/* Qism 2 — Activity Feed (40%) */}
-            <div className="lg:col-span-2 rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden">
+            {/* Qism 2 — Today live status (40%) */}
+            <div className="col-span-2 lg:col-span-2 rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden">
               <div className="flex items-center gap-2 px-3 md:px-4 py-3 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
                 <Clock className="h-4 w-4 text-xedu-slate-500 shrink-0" />
-                <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 truncate">Faoliyat</h3>
+                <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 truncate">Bugun maktabda</h3>
               </div>
-              <div className="px-3 md:px-4 py-3 space-y-3">
-                <div className="flex items-start gap-2.5">
-                  <div className="h-2 w-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200 truncate">Jadval nashr qilindi</p>
-                    <p className="text-xs text-xedu-slate-500">Bugun</p>
+              <div className="px-3 md:px-4 py-3">
+                {todayLoading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
                   </div>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <div className="h-2 w-2 rounded-full bg-red-500 mt-1.5 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200 truncate">5 ta ogohlantirish</p>
-                    <p className="text-xs text-xedu-slate-500">Yangi</p>
+                ) : todaySummary ? (
+                  <div className="space-y-3">
+                    <TodayRow
+                      tone={todaySummary.staff.teachersAbsent > 0 ? 'attention' : 'success'}
+                      title="O'qituvchilar"
+                      detail={
+                        todaySummary.staff.teachersAbsent > 0
+                          ? `${todaySummary.staff.teachersPresent} darsda · ${todaySummary.staff.teachersAbsent} yo'q`
+                          : `${todaySummary.staff.teachersPresent} darsda, hamma joyida`
+                      }
+                    />
+                    <TodayRow
+                      tone={todaySummary.schedule.conflicts > 0 ? 'urgent' : todaySummary.schedule.publishedSlots > 0 ? 'success' : 'muted'}
+                      title="Dars jadvali"
+                      detail={
+                        todaySummary.schedule.conflicts > 0
+                          ? `${todaySummary.schedule.conflicts} ta to'qnashuv bor`
+                          : todaySummary.schedule.publishedSlots > 0
+                            ? `${todaySummary.schedule.publishedSlots} ta dars nashrda`
+                            : 'Jadval nashr qilinmagan'
+                      }
+                    />
+                    <TodayRow
+                      tone={attMarked > 0 ? 'success' : 'muted'}
+                      title="Davomat"
+                      detail={attMarked > 0 ? `${attMarked}/${attTotal} o'quvchi belgilandi` : 'Hali belgilanmagan'}
+                    />
+                    {(todaySummary.substitutions.activeToday > 0 || todaySummary.substitutions.pendingProposals > 0) && (
+                      <TodayRow
+                        tone="attention"
+                        title="O'rinbosarlik"
+                        detail={[
+                          todaySummary.substitutions.activeToday > 0 ? `${todaySummary.substitutions.activeToday} ta bugun` : null,
+                          todaySummary.substitutions.pendingProposals > 0 ? `${todaySummary.substitutions.pendingProposals} ta kutilmoqda` : null,
+                        ].filter(Boolean).join(' · ')}
+                      />
+                    )}
                   </div>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <div className="h-2 w-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-sm text-xedu-slate-800 dark:text-xedu-slate-200 truncate">Ish haqi loyihasi</p>
-                    <p className="text-xs text-xedu-slate-500">Kutilmoqda</p>
-                  </div>
-                </div>
+                ) : (
+                  <p className="text-sm text-xedu-slate-500 py-2">Ma&apos;lumot hozircha yo&apos;q</p>
+                )}
               </div>
             </div>
           </div>
@@ -375,44 +390,48 @@ export function DirectorDashboard() {
              ═══════════════════════════════════════════════════════════════════ */}
           <SectionLabel title="Asosiy ko'rsatkichlar" icon={BarChart3} />
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <Link href="/dashboard/users" className="group block rounded-xl border border-xedu-border bg-xedu-bg-panel p-4 transition-all hover:shadow-sm hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700">
-              <div className="flex items-center gap-2 mb-2">
-                <GraduationCap className="h-4 w-4 text-xedu-slate-400" />
-                <span className="text-xs text-xedu-slate-500">O'quvchilar</span>
-              </div>
-              {!usersData ? <Skeleton className="h-8 w-16" /> : (
-                <p className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">{studentCount}</p>
+            <MetricCard
+              href="/dashboard/users"
+              icon={GraduationCap}
+              label="O'quvchilar"
+              isLoading={!usersData}
+              value={String(studentCount)}
+            />
+            <MetricCard
+              href="/dashboard/staff"
+              icon={Users}
+              label="O'qituvchilar"
+              isLoading={!usersData}
+              value={String(teacherCount)}
+            />
+            <MetricCard
+              href="/dashboard/attendance"
+              icon={Activity}
+              label="Davomat"
+              isLoading={attLoading}
+              value={attMarked > 0 ? `${presentPct}%` : '—'}
+              valueClassName={attMarked > 0 && presentPct < 80 ? 'text-xedu-amber-600 dark:text-xedu-amber-400' : undefined}
+              sub={attMarked > 0 ? `${attMarked}/${attTotal} belgilandi` : 'Hali belgilanmagan'}
+            >
+              {attMarked > 0 && (
+                <div className="mt-2 h-1 rounded-full bg-xedu-slate-100 dark:bg-xedu-slate-800 overflow-hidden">
+                  <div
+                    className={cn(
+                      'h-full rounded-full transition-[width] duration-700 motion-reduce:transition-none',
+                      presentPct < 80 ? 'bg-xedu-amber-500' : 'bg-xedu-emerald-500',
+                    )}
+                    style={{ width: `${Math.min(presentPct, 100)}%` }}
+                  />
+                </div>
               )}
-            </Link>
-            <Link href="/dashboard/staff" className="group block rounded-xl border border-xedu-border bg-xedu-bg-panel p-4 transition-all hover:shadow-sm hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700">
-              <div className="flex items-center gap-2 mb-2">
-                <Users className="h-4 w-4 text-xedu-slate-400" />
-                <span className="text-xs text-xedu-slate-500">O'qituvchilar</span>
-              </div>
-              {!usersData ? <Skeleton className="h-8 w-16" /> : (
-                <p className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">{teacherCount}</p>
-              )}
-            </Link>
-            <Link href="/dashboard/attendance" className="group block rounded-xl border border-xedu-border bg-xedu-bg-panel p-4 transition-all hover:shadow-sm hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700">
-              <div className="flex items-center gap-2 mb-2">
-                <Activity className="h-4 w-4 text-xedu-slate-400" />
-                <span className="text-xs text-xedu-slate-500">Davomat</span>
-              </div>
-              {attLoading ? <Skeleton className="h-8 w-16" /> : (
-                <p className={cn('text-2xl font-black', presentPct > 0 && presentPct < 80 ? 'text-amber-600' : 'text-xedu-slate-900 dark:text-xedu-slate-100')}>
-                  {presentPct > 0 ? `${presentPct}%` : '—'}
-                </p>
-              )}
-            </Link>
-            <Link href="/dashboard/branches" className="group block rounded-xl border border-xedu-border bg-xedu-bg-panel p-4 transition-all hover:shadow-sm hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700">
-              <div className="flex items-center gap-2 mb-2">
-                <Building2 className="h-4 w-4 text-xedu-slate-400" />
-                <span className="text-xs text-xedu-slate-500">Filiallar</span>
-              </div>
-              {branchesLoading ? <Skeleton className="h-8 w-16" /> : (
-                <p className="text-2xl font-black text-xedu-slate-900 dark:text-xedu-slate-100">{(branches as any[])?.length ?? 0}</p>
-              )}
-            </Link>
+            </MetricCard>
+            <MetricCard
+              href="/dashboard/branches"
+              icon={Building2}
+              label="Filiallar"
+              isLoading={branchesLoading}
+              value={String((branches as any[])?.length ?? 0)}
+            />
           </div>
 
         </div>
@@ -468,16 +487,12 @@ function SectionLabel({ title, icon: Icon }: { title: string; icon: React.Elemen
 function ExecCard({
   title,
   href,
-  owner,
-  isLoading,
   children,
   footer,
   className,
 }: {
   title: string;
   href: string;
-  owner: 'director' | 'vice_principal' | 'branch_admin' | 'accountant';
-  isLoading?: boolean;
   children: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
@@ -486,47 +501,55 @@ function ExecCard({
     <Link
       href={href}
       className={cn(
-        "group block rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden transition-all hover:shadow-sm hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700",
-        className
+        'group block rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden transition-all duration-200',
+        'hover:shadow-sm hover:-translate-y-[1px] hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700',
+        'motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+        className,
       )}
     >
       <div className="flex items-center justify-between gap-2 px-3 md:px-4 py-2.5 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
-        <div className="flex items-center gap-2 min-w-0">
-          <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 truncate">{title}</h3>
-        </div>
+        <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 truncate">{title}</h3>
         <ArrowUpRight className="h-3.5 w-3.5 text-xedu-slate-300 group-hover:text-xedu-primary transition-colors shrink-0" />
       </div>
       <div className="px-3 md:px-4 py-3">
         {children}
       </div>
       {footer && (
-        <div className="px-3 md:px-4 pb-2">
+        <div className="px-3 md:px-4 pb-3">
           {footer}
         </div>
       )}
-      <div className="px-4 pb-3">
-        <OwnerBadge owner={owner} />
-      </div>
     </Link>
   );
 }
 
-function OwnerBadge({ owner, size = 'sm' }: { owner: 'director' | 'vice_principal' | 'branch_admin' | 'accountant'; size?: 'sm' | 'xs' }) {
-  const config = {
-    director: { label: 'Sizning vazifangiz', className: 'bg-xedu-primary-light/60 text-xedu-primary dark:bg-xedu-primary/20 dark:text-xedu-emerald-400' },
-    vice_principal: { label: "VP bajaradi", className: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
-    branch_admin: { label: 'Filial admin bajaradi', className: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
-    accountant: { label: "Moliya bo'limi", className: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
-  };
-  const cfg = config[owner];
+/** Readiness foizini ko'rsatuvchi kichik halqa (0-100). */
+function ReadinessRing({ score }: { score: number }) {
+  const r = 15.5;
+  const c = 2 * Math.PI * r;
+  const clamped = Math.max(0, Math.min(score, 100));
+  const tone =
+    clamped >= 80 ? 'text-xedu-emerald-600 dark:text-xedu-emerald-400' :
+    clamped >= 60 ? 'text-xedu-amber-600 dark:text-xedu-amber-400' :
+    'text-xedu-ruby-600 dark:text-xedu-ruby-400';
+
   return (
-    <span className={cn(
-      'inline-flex items-center rounded-full font-medium',
-      size === 'xs' ? 'text-[10px] px-1.5 py-0.5' : 'text-2xs px-2 py-0.5',
-      cfg.className
-    )}>
-      {cfg.label}
-    </span>
+    <div className="relative h-11 w-11 shrink-0" role="img" aria-label={`Tayyorlik darajasi: ${clamped}%`}>
+      <svg viewBox="0 0 36 36" className="h-11 w-11 -rotate-90">
+        <circle
+          cx="18" cy="18" r={r} fill="none" strokeWidth="3.5" stroke="currentColor"
+          className="text-xedu-slate-100 dark:text-xedu-slate-800"
+        />
+        <circle
+          cx="18" cy="18" r={r} fill="none" strokeWidth="3.5" stroke="currentColor" strokeLinecap="round"
+          strokeDasharray={`${(clamped / 100) * c} ${c}`}
+          className={cn('transition-[stroke-dasharray] duration-700 motion-reduce:transition-none', tone)}
+        />
+      </svg>
+      <span className={cn('absolute inset-0 flex items-center justify-center text-2xs font-black tabular-nums', tone)}>
+        {clamped}
+      </span>
+    </div>
   );
 }
 
@@ -539,25 +562,95 @@ function StatusBadge({ status }: { status: string }) {
   };
   const cfg = map[status] ?? map.not_started;
   return (
-    <span className={cn('text-2xs font-bold px-2 py-0.5 rounded-full', cfg.className)}>
+    <span className={cn('inline-flex text-2xs font-bold px-2 py-0.5 rounded-full', cfg.className)}>
       {cfg.label}
     </span>
   );
 }
 
 const EVENT_TYPE_DOT: Record<string, string> = {
-  holiday: 'bg-emerald-500',
-  exam_week: 'bg-red-500',
-  school_event: 'bg-blue-500',
-  quarter_start: 'bg-violet-500',
-  quarter_end: 'bg-violet-500',
-  meeting: 'bg-amber-500',
-  other: 'bg-slate-400',
+  holiday: 'bg-xedu-emerald-500',
+  exam_week: 'bg-xedu-ruby-500',
+  school_event: 'bg-xedu-sky-500',
+  quarter_start: 'bg-xedu-violet-500',
+  quarter_end: 'bg-xedu-violet-500',
+  meeting: 'bg-xedu-amber-500',
+  other: 'bg-xedu-slate-400',
 };
 
-function formatEventDate(dateStr: string) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('uz-UZ', { day: 'numeric', month: 'short' });
+const TODAY_TONE_DOT: Record<string, string> = {
+  success: 'bg-xedu-emerald-500',
+  attention: 'bg-xedu-amber-500',
+  urgent: 'bg-xedu-ruby-500',
+  muted: 'bg-xedu-slate-300 dark:bg-xedu-slate-600',
+};
+
+function TodayRow({
+  tone,
+  title,
+  detail,
+}: {
+  tone: 'success' | 'attention' | 'urgent' | 'muted';
+  title: string;
+  detail: string;
+}) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <div className={cn('h-2 w-2 rounded-full mt-1.5 shrink-0', TODAY_TONE_DOT[tone])} />
+      <div className="min-w-0">
+        <p className="text-sm font-medium text-xedu-slate-800 dark:text-xedu-slate-200 truncate">{title}</p>
+        <p className="text-xs text-xedu-slate-500">{detail}</p>
+      </div>
+    </div>
+  );
+}
+
+function MetricCard({
+  href,
+  icon: Icon,
+  label,
+  isLoading,
+  value,
+  valueClassName,
+  sub,
+  children,
+}: {
+  href: string;
+  icon: React.ElementType;
+  label: string;
+  isLoading?: boolean;
+  value: string;
+  valueClassName?: string;
+  sub?: string;
+  children?: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        'group block rounded-xl border border-xedu-border bg-xedu-bg-panel p-4 transition-all duration-200',
+        'hover:shadow-sm hover:-translate-y-[1px] hover:border-xedu-slate-200 dark:hover:border-xedu-slate-700',
+        'motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+      )}
+    >
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <Icon className="h-4 w-4 text-xedu-slate-400 shrink-0" />
+          <span className="text-xs text-xedu-slate-500 truncate">{label}</span>
+        </div>
+        <ArrowUpRight className="h-3 w-3 text-xedu-slate-200 group-hover:text-xedu-primary transition-colors shrink-0" />
+      </div>
+      {isLoading ? <Skeleton className="h-8 w-16" /> : (
+        <>
+          <p className={cn('text-2xl font-black tabular-nums text-xedu-slate-900 dark:text-xedu-slate-100', valueClassName)}>
+            {value}
+          </p>
+          {sub && <p className="text-2xs text-xedu-slate-400 mt-0.5 truncate">{sub}</p>}
+          {children}
+        </>
+      )}
+    </Link>
+  );
 }
 
 function StatRow({ label, value, href }: { label: string; value: number; href: string }) {
@@ -569,56 +662,6 @@ function StatRow({ label, value, href }: { label: string; value: number; href: s
       <span className="text-sm text-xedu-slate-700 dark:text-xedu-slate-300">{label}</span>
       <span className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100 tabular-nums">{value}</span>
     </Link>
-  );
-}
-
-// ── Quick Actions Grid ────────────────────────────────────────────────────────
-
-function QuickActionsGrid() {
-  const router = useRouter();
-
-  const actions = [
-    { label: 'Tasdiqlash inbox', href: '/dashboard/approvals', icon: FileText, color: '#DC2626', owner: 'director' as const },
-    { label: 'Filiallar', href: '/dashboard/branches', icon: Building2, color: '#2563EB', owner: 'director' as const },
-    { label: 'Xodimlar', href: '/dashboard/staff', icon: Briefcase, color: '#7C3AED', owner: 'director' as const },
-    { label: 'Foydalanuvchilar', href: '/dashboard/users', icon: Users, color: '#0891B2', owner: 'director' as const },
-    { label: 'Ish haqi', href: '/dashboard/payroll', icon: TrendingUp, color: '#0F7B53', owner: 'accountant' as const },
-    { label: 'Hisobotlar', href: '/dashboard/reports', icon: BarChart3, color: '#D97706', owner: 'director' as const },
-    { label: 'Operatsion markaz', href: '/dashboard/ops', icon: Zap, color: '#4338CA', owner: 'director' as const },
-    { label: 'Sozlamalar', href: '/dashboard/settings', icon: Shield, color: '#64748B', owner: 'director' as const },
-  ];
-
-  return (
-    <div className="rounded-xl border border-xedu-border bg-xedu-bg-panel overflow-hidden">
-      <div className="flex items-center gap-2 px-4 py-3 border-b border-xedu-border bg-gradient-to-b from-xedu-bg-subtle to-xedu-bg-rail">
-        <Zap className="h-4 w-4 text-xedu-slate-500" />
-        <h3 className="text-sm font-bold text-xedu-slate-900 dark:text-xedu-slate-100">Tezkor harakatlar</h3>
-      </div>
-      <div className="p-3 grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {actions.map(({ label, href, icon: Icon, color, owner }) => (
-          <button
-            key={href}
-            onClick={() => router.push(href)}
-            className={cn(
-              'flex flex-col items-start gap-2 rounded-xl border p-3 text-left transition-all',
-              'hover:-translate-y-[1px] hover:shadow-sm hover:border-xedu-slate-200',
-              'border-xedu-slate-100 dark:border-xedu-slate-800 bg-xedu-bg-elevated'
-            )}
-          >
-            <div className="flex items-center justify-between w-full">
-              <div
-                className="h-8 w-8 rounded-lg flex items-center justify-center shrink-0"
-                style={{ background: `${color}18` }}
-              >
-                <Icon className="h-4 w-4" style={{ color }} />
-              </div>
-              <OwnerBadge owner={owner} size="xs" />
-            </div>
-            <span className="text-sm font-semibold text-xedu-slate-800 dark:text-xedu-slate-200">{label}</span>
-          </button>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -663,8 +706,10 @@ function RecentOperationsSummary({
 // ── KPI Snapshot Card ─────────────────────────────────────────────────────────
 
 const KpiSnapshotCard = memo(function KpiSnapshotCard({ kpiData }: { kpiData: any }) {
-  const items: any[] = (kpiData as any)?.items ?? (kpiData as any)?.metrics ?? [];
-  const hasItems = items.length > 0;
+  const metrics: any[] = (kpiData as any)?.metrics ?? (kpiData as any)?.items ?? [];
+  const overallScore: number | null = (kpiData as any)?.overallScore ?? null;
+  const badCount = metrics.filter((m) => m.status === 'bad').length;
+  const hasItems = metrics.length > 0;
 
   return (
     <Link
@@ -677,10 +722,15 @@ const KpiSnapshotCard = memo(function KpiSnapshotCard({ kpiData }: { kpiData: an
       </div>
       {hasItems ? (
         <>
-          <p className="text-xl font-black leading-none tracking-tight text-xedu-slate-900 dark:text-xedu-slate-100">
-            {items.length} ta
+          <p className="text-xl font-black leading-none tracking-tight tabular-nums text-xedu-slate-900 dark:text-xedu-slate-100">
+            {overallScore !== null ? `${Math.round(overallScore)}%` : `${metrics.length} ta`}
           </p>
-          <p className="text-xs font-medium mt-0.5 text-xedu-slate-500">Aktiv metrika</p>
+          <p className="text-xs font-medium mt-0.5 text-xedu-slate-500">
+            {metrics.length} ta metrika
+            {badCount > 0 && (
+              <span className="text-xedu-ruby-600 dark:text-xedu-ruby-400"> · {badCount} qizil zonada</span>
+            )}
+          </p>
         </>
       ) : (
         <>

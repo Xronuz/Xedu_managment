@@ -5,22 +5,29 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "scheme": "xedu",
+    "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0B1220"
+      "backgroundColor": "#0F7B53"
     },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "uz.xedu.mobile"
     },
     "android": {
-      "package": "uz.xedu.mobile"
+      "package": "uz.xedu.mobile",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0F7B53"
+      }
     },
     "web": {
       "bundler": "metro",
-      "output": "static"
+      "output": "static",
+      "favicon": "./assets/icon.png"
     },
     "plugins": [
       "expo-router",
@@ -38,7 +45,10 @@
       "typedRoutes": true
     },
     "extra": {
-      "apiUrl": "http://localhost:3001/api/v1"
+      "apiUrl": "https://xedu.uz/api/v1",
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      }
     }
   }
 }

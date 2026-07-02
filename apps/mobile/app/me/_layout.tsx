@@ -18,7 +18,7 @@ export default function MeLayout() {
     >
       <Stack.Screen name="attendance" options={{ title: t('child.attendance') }} />
       <Stack.Screen name="homework" options={{ title: t('me.homework') }} />
-      <Stack.Screen name="coins" options={{ title: t('child.coins') }} />
+      <Stack.Screen name="coins" options={{ title: t('coins.treasure') }} />
     </Stack>
   );
 }

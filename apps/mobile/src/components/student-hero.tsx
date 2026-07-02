@@ -1,20 +1,32 @@
-import { View } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { Animated, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Text } from './text';
 import { HeroCard } from './hero-card';
 import { Avatar } from './avatar';
 import { levelFromCoins } from '@/lib/gamify';
-import { radius, spacing } from '@/theme/tokens';
+import { radius, spacing, anim } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
-/** Gamified o'quvchi hero — salom + tanga + daraja (progress bar). */
+/** Gamified o'quvchi hero — salom + tanga + daraja (animated progress bar). */
 export function StudentHero({ name, avatarUrl, coins }: { name: string; avatarUrl?: string | null; coins: number }) {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const { level, current, needed, progress } = levelFromCoins(coins);
 
   const chipBg = 'rgba(255,255,255,0.16)';
+  const barWidth = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.spring(barWidth, {
+      toValue: progress,
+      damping: anim.spring.gentle.damping,
+      stiffness: anim.spring.gentle.stiffness,
+      mass: anim.spring.gentle.mass,
+      useNativeDriver: false,
+    }).start();
+  }, [progress]);
 
   return (
     <HeroCard>
@@ -49,10 +61,20 @@ export function StudentHero({ name, avatarUrl, coins }: { name: string; avatarUr
         </View>
       </View>
 
-      {/* Progress to next level */}
+      {/* Animated progress to next level */}
       <View style={{ marginTop: spacing.md }}>
         <View style={{ height: 8, borderRadius: radius.pill, backgroundColor: 'rgba(255,255,255,0.2)', overflow: 'hidden' }}>
-          <View style={{ width: `${Math.round(progress * 100)}%`, height: '100%', backgroundColor: theme.accent, borderRadius: radius.pill }} />
+          <Animated.View
+            style={{
+              width: barWidth.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0%', '100%'],
+              }),
+              height: '100%',
+              backgroundColor: theme.accent,
+              borderRadius: radius.pill,
+            }}
+          />
         </View>
         <Text variant="label" style={{ color: theme.onHeroMuted, marginTop: 6 }}>
           {current}/{needed} {t('student.toNext')}

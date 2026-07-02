@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { FlatList, Pressable, RefreshControl, View } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { useRouter } from 'expo-router';
 import { notificationsApi, type AppNotification, type NotificationsResponse } from '@/api/notifications';
 import { Screen } from '@/components/screen';
 import { Card } from '@/components/card';
@@ -9,6 +11,7 @@ import { Text } from '@/components/text';
 import { EmptyState } from '@/components/empty-state';
 import { ListSkeleton } from '@/components/skeleton';
 import { IconBadge } from '@/components/row';
+import { ChipFilter } from '@/components/chip-filter';
 import { formatDateTime } from '@/lib/format';
 import { useTabBarSpace } from '@/lib/tab-space';
 import { spacing } from '@/theme/tokens';
@@ -29,6 +32,9 @@ export default function NotificationsScreen() {
   const { theme } = useTheme();
   const bottomSpace = useTabBarSpace();
   const qc = useQueryClient();
+  const router = useRouter();
+
+  const [filter, setFilter] = useState<'all' | 'unread'>('all');
 
   const { data, isLoading, isError, refetch, isRefetching } = useQuery<NotificationsResponse>({
     queryKey: ['notifications'],
@@ -46,6 +52,7 @@ export default function NotificationsScreen() {
 
   const items = data?.data ?? [];
   const unread = data?.meta?.unreadCount ?? 0;
+  const filteredItems = items.filter(n => filter === 'all' || !n.isRead);
 
   const right =
     unread > 0 ? (
@@ -61,10 +68,21 @@ export default function NotificationsScreen() {
       </Pressable>
     ) : undefined;
 
+  function handlePress(n: AppNotification) {
+    if (!n.isRead) markRead.mutate(n.id);
+    if (n.actionUrl) {
+      try {
+        router.push(n.actionUrl as any);
+      } catch (e) {
+        // Deep link failed
+      }
+    }
+  }
+
   function renderItem(n: AppNotification) {
     const cat = CAT[n.category] ?? CAT.system;
     return (
-      <Card onPress={n.isRead ? undefined : () => markRead.mutate(n.id)}>
+      <Card onPress={() => handlePress(n)}>
         <View style={{ flexDirection: 'row', gap: spacing.md }}>
           <IconBadge icon={cat.icon} color={cat.color} bg={cat.bg} />
           <View style={{ flex: 1 }}>
@@ -104,18 +122,29 @@ export default function NotificationsScreen() {
           />
         </View>
       ) : (
-        <FlatList
-          data={items}
-          keyExtractor={(n) => n.id}
-          renderItem={({ item }) => renderItem(item)}
-          contentContainerStyle={{ padding: spacing.lg, paddingBottom: bottomSpace, gap: spacing.md, flexGrow: 1 }}
-          refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.primary} />}
-          ListEmptyComponent={
-            <View style={{ flex: 1, justifyContent: 'center', minHeight: 360 }}>
-              <EmptyState icon="notifications-outline" title={t('notifications.empty')} subtitle={t('notifications.emptySub')} />
-            </View>
-          }
-        />
+        <>
+          <ChipFilter
+            selected={filter}
+            onSelect={setFilter}
+            options={[
+              { value: 'all', label: t('common.all', 'Hammasi') },
+              { value: 'unread', label: t('notifications.unread', "O'qilmagan"), count: unread, tone: 'primary' },
+            ]}
+            contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingBottom: spacing.sm }}
+          />
+          <FlatList
+            data={filteredItems}
+            keyExtractor={(n) => n.id}
+            renderItem={({ item }) => renderItem(item)}
+            contentContainerStyle={{ padding: spacing.lg, paddingBottom: bottomSpace, gap: spacing.md, flexGrow: 1 }}
+            refreshControl={<RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={theme.primary} />}
+            ListEmptyComponent={
+              <View style={{ flex: 1, justifyContent: 'center', minHeight: 360 }}>
+                <EmptyState icon="notifications-outline" title={t('notifications.empty')} subtitle={t('notifications.emptySub')} />
+              </View>
+            }
+          />
+        </>
       )}
     </Screen>
   );

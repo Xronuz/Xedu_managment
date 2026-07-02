@@ -10,6 +10,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { queryClient } from '@/lib/query';
 import { useAuthStore } from '@/store/auth.store';
 import { tokenStore } from '@/api/token-store';
+import { useBranchSync } from '@/lib/use-branch-sync';
 import { useAppFonts } from '@/theme/fonts';
 import { restoreLanguage } from '@/i18n/language';
 import { useThemeStore } from '@/theme/theme-store';
@@ -48,6 +49,8 @@ function useProtectedRoute() {
 function RootNavigator() {
   const { theme, isDark } = useTheme();
   useProtectedRoute();
+  // Branch store'ni auth holati bilan sinxronlash (MOBILE_FOUNDATION_SPEC §4.3).
+  useBranchSync();
   return (
     <View style={{ flex: 1, backgroundColor: theme.bg }}>
       <StatusBar style={isDark ? 'light' : 'dark'} />

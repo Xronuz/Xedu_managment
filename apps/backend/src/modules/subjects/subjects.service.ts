@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/common/prisma/prisma.service';
-import { JwtPayload } from '@eduplatform/types';
+import { JwtPayload, UserRole } from '@eduplatform/types';
 import { CreateSubjectDto, UpdateSubjectDto } from './dto/create-subject.dto';
 
 function normalizeSubjectName(name: string): string {
@@ -15,6 +15,12 @@ export class SubjectsService {
     const where: any = { schoolId: currentUser.schoolId! };
     if (classId) where.classId = classId;
     if (branchId) where.branchId = branchId;
+
+    // ── Teacher/class_teacher: only see subjects they are assigned to ──────────
+    if (currentUser.role === UserRole.TEACHER || currentUser.role === UserRole.CLASS_TEACHER) {
+      where.teacherId = currentUser.sub;
+    }
+
     return this.prisma.subject.findMany({
       where,
       include: {
@@ -28,6 +34,12 @@ export class SubjectsService {
   async catalog(currentUser: JwtPayload, branchId?: string) {
     const where: any = { schoolId: currentUser.schoolId! };
     if (branchId) where.branchId = branchId;
+
+    // ── Teacher/class_teacher: only see subjects they are assigned to ──────────
+    if (currentUser.role === UserRole.TEACHER || currentUser.role === UserRole.CLASS_TEACHER) {
+      where.teacherId = currentUser.sub;
+    }
+
     const subjects = await this.prisma.subject.findMany({
       where,
       include: {

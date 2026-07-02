@@ -1,30 +1,46 @@
 import { useEffect, useRef } from 'react';
-import { Animated, View, type ViewStyle } from 'react-native';
-import { radius, spacing } from '@/theme/tokens';
+import { Animated, Easing, StyleSheet, View, type ViewStyle } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { radius, spacing, anim } from '@/theme/tokens';
 import { useTheme } from '@/theme/use-theme';
 
+/** Shimmer effect bilan skeleton — zamonaviy gradient skeleton. */
 export function Skeleton({ height = 16, width = '100%', style }: { height?: number; width?: ViewStyle['width']; style?: ViewStyle }) {
   const { theme, isDark } = useTheme();
-  const opacity = useRef(new Animated.Value(0.5)).current;
+  const translateX = useRef(new Animated.Value(-200)).current;
 
   useEffect(() => {
     const loop = Animated.loop(
-      Animated.sequence([
-        Animated.timing(opacity, { toValue: 1, duration: 700, useNativeDriver: true }),
-        Animated.timing(opacity, { toValue: 0.5, duration: 700, useNativeDriver: true }),
-      ]),
+      Animated.timing(translateX, {
+        toValue: 400,
+        duration: anim.duration.slow * 3,
+        useNativeDriver: true,
+      }),
     );
     loop.start();
     return () => loop.stop();
-  }, [opacity]);
+  }, [translateX]);
+
+  const baseColor = isDark ? theme.cardElevated : theme.bgSubtle;
+  const highlightColor = isDark ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.9)';
 
   return (
-    <Animated.View
-      style={[
-        { height, width, borderRadius: radius.sm, backgroundColor: isDark ? theme.cardElevated : theme.bgSubtle, opacity },
-        style,
-      ]}
-    />
+    <View style={[{ height, width, borderRadius: radius.sm, backgroundColor: baseColor, overflow: 'hidden' }, style]}>
+      <Animated.View
+        style={{
+          width: '40%',
+          height: '100%',
+          transform: [{ translateX: translateX }],
+        }}
+      >
+        <LinearGradient
+          colors={[baseColor, highlightColor, baseColor]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={{ width: '100%', height: '100%' }}
+        />
+      </Animated.View>
+    </View>
   );
 }
 

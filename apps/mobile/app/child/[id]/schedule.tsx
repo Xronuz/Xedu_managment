@@ -1,5 +1,7 @@
-import { RefreshControl, ScrollView, View } from 'react-native';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { parentApi } from '@/api/parent';
 import { Card } from '@/components/card';
@@ -17,12 +19,13 @@ interface Lesson {
   timeSlot: number;
   startTime?: string;
   endTime?: string;
-  subject?: { name?: string; teacher?: { firstName?: string; lastName?: string } | null } | null;
+  subject?: { name?: string; teacher?: { id?: string; firstName?: string; lastName?: string } | null } | null;
 }
 
 export default function ScheduleScreen() {
   const { t } = useTranslation();
   const { theme } = useTheme();
+  const router = useRouter();
   const { id } = useChildParams();
 
   const { data, isLoading, isError, refetch, isRefetching } = useQuery<Lesson[]>({
@@ -99,6 +102,23 @@ export default function ScheduleScreen() {
                     </Text>
                   ) : null}
                 </View>
+                {lesson.subject?.teacher?.id ? (
+                  <Pressable
+                    onPress={() =>
+                      router.push({
+                        pathname: '/chat/[userId]',
+                        params: {
+                          userId: lesson.subject!.teacher!.id!,
+                          name: `${lesson.subject!.teacher!.firstName ?? ''} ${lesson.subject!.teacher!.lastName ?? ''}`.trim(),
+                        },
+                      })
+                    }
+                    hitSlop={8}
+                    style={{ width: 36, height: 36, borderRadius: radius.pill, backgroundColor: theme.primaryLight, alignItems: 'center', justifyContent: 'center' }}
+                  >
+                    <Ionicons name="chatbubble-ellipses-outline" size={18} color={theme.primary} />
+                  </Pressable>
+                ) : null}
               </View>
             ))}
           </Card>
